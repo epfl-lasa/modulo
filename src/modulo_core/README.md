@@ -1,6 +1,6 @@
 # modulo_core
 
-This is a ROS2 package that implements the communication protocol between the modules. At the moment, each module is able to send/receive states as they are implemented in the [state_representation](../../lib/state_representation) library. To implement your own modules you can inherit from the abstract classes dfined in the library:
+This is a ROS2 package that implements the communication protocol between the modules. Each module is able to send/receive states as they are implemented in the [state_representation](../../lib/state_representation) library, and also communicate with ros2 tf2 server to send/lookup tf transforms. To implement your own modules you can inherit from the abstract classes dfined in the library:
 
 ```
 class MyRobotInterface : public ModuloCore::RobotInterface
