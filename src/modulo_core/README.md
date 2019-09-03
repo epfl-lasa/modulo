@@ -2,13 +2,13 @@
 
 This is a ROS2 package that implements the communication protocol between the modules. Each module is able to send/receive states as they are implemented in the [state_representation](../../lib/state_representation) library, and also communicate with ros2 tf2 server to send/lookup tf transforms. To implement your own modules you can inherit from the abstract classes dfined in the library:
 
-```
+```cpp
 class MyRobotInterface : public ModuloCore::RobotInterface
 ```
 
 A module usually contains a set of publisher and subscriber. For example, to add a publisher to our MyRobotInterface we do:
 
-```
+```cpp
 class MyRobotInterface : public ModuloCore::RobotInterface
 {
 public:
@@ -28,21 +28,21 @@ public:
 
 As communication is asynchronous, the JointState will be published periodically at a frequency defined in the node under the `period` argument. If no modifications has been made to the state it is considered as empty and will not be published. By default, such a timeout occurs after two `period`. You can change this behavior by adding an argument to the pubisher:
 
-```
+```cpp
 // This publisher will keep publishing for 5 period if the state has not been modified before considering it empty
 this->add_publisher<sensor_msgs::msg::JointState>("/robot/position", this->current_position, 5 * period);
 ```
 
 You can also set that the publisher will never timeout by setting a period of 0
 
-```
+```cpp
 // This publisher will never timeout and send the sate even if it has not been modified
 this->add_publisher<sensor_msgs::msg::JointState>("/robot/position", this->current_position, std::chrono::milliseconds(0));
 ```
 
 The core structure of your module should be implemented in the `step` function:
 
-```
+```cpp
 class MyRobotInterface : public ModuloCore::RobotInterface
 {
 public:
