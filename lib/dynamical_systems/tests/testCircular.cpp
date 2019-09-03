@@ -1,0 +1,34 @@
+#include "dynamical_systems/Circular.hpp"
+#include <gtest/gtest.h>
+#include <zmq.hpp>
+#include <unistd.h>
+
+
+TEST(EvaluateDynamicalSystemPositionOnly, PositiveNos)
+{
+	DynamicalSystems::Circular<StateRepresentation::CartesianState> circularDS(1);
+	StateRepresentation::CartesianPose current_pose("current", 10 * Eigen::Vector3d::Random());
+	StateRepresentation::CartesianPose center("center");
+	double radius = 10;
+
+	circularDS.set_center(center);
+	circularDS.set_radius(radius);
+
+	unsigned int nb_steps = 100;
+	double dt = 0.1;
+
+	for(unsigned int i=0; i<nb_steps; ++i)
+	{
+		StateRepresentation::CartesianVelocity velocity = circularDS.evaluate(current_pose);
+		current_pose += dt * velocity;
+	}
+
+	//for(int i=0; i<3; ++i) ASSERT_NEAR(current_pose.get_position()(i), target_pose.get_position()(i), 0.001);
+	//ASSERT_NEAR(current_pose.get_orientation().w(), target_pose.get_orientation().w(), 0.001);
+	//for(int i=0; i<3; ++i) ASSERT_NEAR(current_pose.get_orientation().vec()(i), target_pose.get_orientation().vec()(i), 0.001);
+}
+
+int main(int argc, char **argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
