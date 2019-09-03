@@ -1,6 +1,6 @@
 # modulo_core
 
-This is a ROS2 package that implements the communication protocol between the modules. At the moment, each module is able to send/receive states as they are implemented in the [../../lib/state_representation](state_representation) library. To implement your own modules you can inherit from the abstract classes dfined in the library:
+This is a ROS2 package that implements the communication protocol between the modules. At the moment, each module is able to send/receive states as they are implemented in the [state_representation](../../lib/state_representation) library. To implement your own modules you can inherit from the abstract classes dfined in the library:
 
 ```
 class MyRobotInterface : public ModuloCore::RobotInterface
@@ -65,4 +65,4 @@ public:
 }
 ```
 
-The step function is called periodically at a frequency defined in the node under the `period` argument. We recommand to keep this step function short, especially if you use a small period. Otherwise, latency will occur in your control loop. Complete examples of control loop including multiple nodes are written in the [./tests/](tests) for each representation spaces.
+The step function is called periodically at a frequency defined in the node under the `period` argument. We recommand to keep this step function short, especially if you use a small period. Otherwise, latency will occur in your control loop. Complete examples of control loop including multiple nodes are written in the [tests](./tests/) for each representation spaces.
