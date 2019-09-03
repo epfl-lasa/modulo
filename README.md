@@ -2,7 +2,7 @@
 
 Modulo is a software architecture to design control loop for robotic systems. It is based on the definition of modules communicating with each other to facilitate the implementation of closed loop control architecture. Each module has a specific function such as being an interface to a robot or a sensor, or modulate an input signal. The core library [./src/modulo_core](modulo_core) implements multiple abstract classes you can inherit from to develop your own module.
 
-The communication between the modules is based on ROS2. Each module inherits from the `lifecycle` interface allowing the creation of state based control scheme. Exchanging messages has been simplified and is asynchronous (cf. [./src/modulo_core](modulo_core) documentation control loop examples).
+The communication between the modules is based on ROS2. Each module inherits from the `lifecycle` interface allowing the creation of state based control scheme. Exchanging messages has been simplified and is asynchronous (cf. [./src/modulo_core](modulo_core) documentation for control loop examples).
 
 There are a few standalone libraries developed as helpers for communication and design of control loops. For example, the [./lib/state_representation](state_representation) library provides classes to represent states (pose, velocities, ...) in cartesian, joint and dual quaternion spaces. The [./lib/dynamical_systems](dynamical_systems) library is a set of templated classes representing dynamical systems. Used in complement of the [./lib/state_representation](state_representation) library it can generate dynamical system in the previously mentioned spaces.
 
