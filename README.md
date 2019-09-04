@@ -7,3 +7,17 @@ The communication between the modules is based on ROS2. Each module inherits fro
 There are a few standalone libraries developed as helpers for communication and design of control loops. For example, the [state_representation](./lib/state_representation) library provides classes to represent states (pose, velocities, ...) in cartesian, joint and dual quaternion spaces. The [dynamical_systems](./lib/dynamical_systems) library is a set of templated classes representing dynamical systems. Used in complement of the [state_representation](./lib/state_representation) library it can generate dynamical system in the previously mentioned spaces.
 
 You can build a complete working environment using `docker`. Simply run `sh build.sh` to build an image based on `ros2:nightly` docker image. This will create an image called `modulo`. Running `sh run.sh` opens an interactive shell with a `ros2_ws` allowing you to compile and run your modules. When creating a new module, we recommend you to create a new docker image on top of the `modulo` one. This way you will have all the libraries already installed while being able to create you own packages.
+
+## Interfacing with ROS1
+
+It is possible to interface ROS2 with ROS1 in order to publish/subscribe to topics from ROS1. To do so, you need to launch a ROS2/ROS1 bridge. You can use a ready to use docker image by issuing the command:
+
+```
+docker run -it --net=host osrf/ros:dashing-ros1-bridge
+```
+
+This will pull the bridge image and open interactive shell in which you can run the bridge:
+
+```
+ros2 run ros1_bridge dynamic_bridge --bridge-all-topics
+```
