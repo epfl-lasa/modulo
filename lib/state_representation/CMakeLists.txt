@@ -48,12 +48,14 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 install(DIRECTORY include/
-  	DESTINATION include)
+  	DESTINATION include
+)
 
 install(TARGETS ${PROJECT_NAME}
   	ARCHIVE DESTINATION lib
   	LIBRARY DESTINATION lib
-  	RUNTIME DESTINATION bin)
+  	RUNTIME DESTINATION bin
+)
 
 if (runtests)
 	  if (APPLE)
