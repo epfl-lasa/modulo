@@ -1,6 +1,14 @@
 BASE_IMAGE=osrf/ros2
 BASE_TAG=nightly
 
+if [ -z "$1" ]; then
+    TAG="latest"
+else
+    TAG=$1
+    BASE_IMAGE=osrf/ros
+    BASE_TAG=$1-desktop
+fi
+
 docker pull ${BASE_IMAGE}:${BASE_TAG}
 
 REBUILD=0
@@ -15,11 +23,6 @@ done
 shift "$(( OPTIND - 1 ))"
 
 NAME=$(echo "${PWD##*/}" | tr _ -)
-TAG=$(echo "$1" | tr _/ -)
-
-if [ -z "$TAG" ]; then
-	TAG="latest"
-fi
 
 UID="$(id -u $USER)"
 GID="$(id -g $USER)"
