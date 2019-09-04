@@ -151,6 +151,16 @@ namespace ModuloCore
 		}
 
 		// extract functions
+		void extract(geometry_msgs::msg::Quaternion & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time &)
+		{
+			if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+			// orientation
+			msg.w = state.get_orientation().w();
+			msg.x = state.get_orientation().x();
+			msg.y = state.get_orientation().y();
+			msg.z = state.get_orientation().z();
+		}
+
 		void extract(geometry_msgs::msg::Pose & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time &)
 		{
 			if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");

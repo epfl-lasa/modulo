@@ -56,6 +56,8 @@ namespace ModuloCore
 		void update(StateRepresentation::DualQuaternionTwist & state, const geometry_msgs::msg::TwistStamped & msg);
 
 		//extract functions
+		void extract(geometry_msgs::msg::Quaternion & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time &);
+
 		void extract(geometry_msgs::msg::Pose & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
 
 		void extract(geometry_msgs::msg::PoseStamped & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
