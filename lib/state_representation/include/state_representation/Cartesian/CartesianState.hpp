@@ -292,8 +292,7 @@ namespace StateRepresentation
 		this->reset_timestamp();
 		this->set_empty(false);
 		this->orientation = orientation;
-		if(normalize && (this->orientation.norm() - 1 < 1e-4 || this->orientation.norm() - 1 > 1e-4)) this->orientation.normalize();
-	    if(this->orientation.w() < 0.0) this->orientation = Eigen::Quaterniond(-this->orientation.w(), -this->orientation.x(), -this->orientation.y(), -this->orientation.z());
+		if(normalize) this->orientation.normalize();
 	}
 
 	inline void CartesianState::set_linear_velocity(const Eigen::Vector3d& linear_velocity)
