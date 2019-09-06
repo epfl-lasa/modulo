@@ -152,6 +152,22 @@ namespace StateRepresentation
 		return result;
 	}
 
+	CartesianPose& CartesianPose::operator*=(double lambda)
+	{
+		// sanity check
+		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
+		// operation
+		this->set_position(lambda * this->get_position());
+		this->set_orientation(Eigen::Quaterniond(lambda * this->get_orientation().coeffs()));
+	}
+
+	const CartesianPose CartesianPose::operator*(double lambda) const
+	{
+		CartesianPose result(*this);
+		result *= lambda;
+		return result;
+	}
+
 	const CartesianPose CartesianPose::inverse() const
 	{
 		CartesianPose result(*this);
@@ -190,21 +206,11 @@ namespace StateRepresentation
   		return os;
 	}
 
-	const CartesianPose operator*(const float& lambda, const CartesianPose& pose)
+	const CartesianPose operator*(double lambda, const CartesianPose& pose)
 	{
-		if(pose.is_empty()) throw EmptyStateException(pose.get_name() + " state is empty");
-		CartesianPose result(pose);
-		result.set_position(result.get_position().array() * lambda);
-		result.set_orientation(Eigen::Quaterniond(result.get_orientation().coeffs() * lambda), false);
-		return result;
+		return pose * lambda;
 	}
 
-	const CartesianPose operator*(const Eigen::ArrayXd& lambda, const CartesianPose& pose)
-	{
-		if(pose.is_empty()) throw EmptyStateException(pose.get_name() + " state is empty");
-		CartesianPose result(pose);
-		result.set_position(result.get_position().array() * lambda.head(3));
-		result.set_orientation(Eigen::Quaterniond(result.get_orientation().coeffs() * lambda(3)), false);
-		return result;
-	}
+	Eigen::Array2d dist(const CartesianPose& p1, const CartesianPose& p2)
+	{}
 }

@@ -175,12 +175,33 @@ namespace StateRepresentation
 		void deserialize(const std::string& msg_str);
 
 		/**
+	 	 * @brief Overload the *= operator with a scalar
+	 	 * @param lambda the scalar to multiply with
+	 	 * @return the CartesianState multiply by lambda
+	     */
+		CartesianState& operator*=(double lambda);
+
+		/**
+	 	 * @brief Overload the * operator with a scalar
+	 	 * @param lambda the scalar to multiply with
+	 	 * @return the CartesianState multiply by lambda
+	     */
+		const CartesianState operator*(double lambda) const;
+
+		/**
 	 	 * @brief Overload the ostream operator for printing
 	 	 * @param os the ostream to happend the string representing the state to
 	 	 * @param state the state to print
 	 	 * @return the appended ostream
 	     */
 		friend std::ostream& operator<<(std::ostream& os, const CartesianState& state);
+		
+		/**
+	 	 * @brief Overload the * operator with a scalar
+	 	 * @param lambda the scalar to multiply with
+	 	 * @return the CartesianState provided multiply by lambda
+	     */
+		friend const CartesianState operator*(double lambda, const CartesianState& state);
 	};
 
 	inline const Eigen::Vector3d& CartesianState::get_position() const

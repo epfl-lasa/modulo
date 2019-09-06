@@ -123,6 +123,20 @@ namespace StateRepresentation
 		const CartesianPose operator-(const CartesianPose& p) const;
 
 		/**
+	 	 * @brief Overload the *= operator with a scalar
+	 	 * @param lambda the scalar to multiply with
+	 	 * @return the CartesianPose multiply by lambda
+	     */
+		CartesianPose& operator*=(double lambda);
+
+		/**
+	 	 * @brief Overload the * operator with a scalar
+	 	 * @param lambda the scalar to multiply with
+	 	 * @return the CartesianPose multiply by lambda
+	     */
+		const CartesianPose operator*(double lambda) const;
+
+		/**
 		 * @brief compute the inverse of the current CartesianPose
 		 * @return the inverse
 		 */
@@ -141,14 +155,9 @@ namespace StateRepresentation
 	 	 * @param lambda the scalar to multiply with
 	 	 * @return the CartesianPose provided multiply by lambda
 	     */
-		friend const CartesianPose operator*(const float& lambda, const CartesianPose& state);
+		friend const CartesianPose operator*(double lambda, const CartesianPose& pose);
 
-		/**
-	 	 * @brief Overload the * operator with a matrix of gains
-	 	 * @param lambda the matrix to multiply with
-	 	 * @return the CartesianPose provided multiply by lambda
-	     */
-		friend const CartesianPose operator*(const Eigen::ArrayXd& lambda, const CartesianPose& state);
+		friend Eigen::Array2d dist(const CartesianPose& p1, const CartesianPose& p2);
 	};
 }
 

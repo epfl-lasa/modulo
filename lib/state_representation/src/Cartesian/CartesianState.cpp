@@ -1,4 +1,7 @@
 #include "state_representation/Cartesian/CartesianState.hpp"
+#include "state_representation/Exceptions/EmptyStateException.hpp"
+
+using namespace StateRepresentation::Exceptions;
 
 namespace StateRepresentation 
 {
@@ -75,6 +78,29 @@ namespace StateRepresentation
 		this->set_torque(Eigen::Vector3d(message.torque(0), message.torque(1), message.torque(2)));
 	}
 
+	CartesianState& CartesianState::operator*=(double lambda)
+	{
+		// sanity check
+		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
+		// operation
+		this->set_position(lambda * this->get_position());
+		this->set_orientation(Eigen::Quaterniond(lambda * this->get_orientation().coeffs()));
+		this->set_linear_velocity(lambda * this->get_linear_velocity());
+		this->set_angular_velocity(lambda * this->get_angular_velocity());
+		this->set_linear_acceleration(lambda * this->get_linear_acceleration());
+		this->set_angular_acceleration(lambda * this->get_angular_acceleration());
+		this->set_force(lambda * this->get_force());
+		this->set_torque(lambda * this->get_torque());
+		return (*this);
+	}
+
+	const CartesianState CartesianState::operator*(double lambda) const
+	{
+		CartesianState result(*this);
+		result *= lambda;
+		return result;
+	}
+
 	std::ostream& operator<<(std::ostream& os, const CartesianState& state) 
 	{ 
 		if(state.is_empty())
@@ -116,5 +142,10 @@ namespace StateRepresentation
 	  		os << state.torque(2) << ")";
 	  	}
   		return os;
+	}
+
+	const CartesianState operator*(double lambda, const CartesianState& state)
+	{
+		return state * lambda;
 	}
 }

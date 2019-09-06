@@ -77,6 +77,20 @@ namespace StateRepresentation
 		void operator=(const CartesianState& s);
 
 		/**
+	 	 * @brief Overload the *= operator with a scalar
+	 	 * @param lambda the scalar to multiply with
+	 	 * @return the CartesianVelocity multiply by lambda
+	     */
+		CartesianVelocity& operator*=(double lambda);
+
+		/**
+	 	 * @brief Overload the * operator with a scalar
+	 	 * @param lambda the scalar to multiply with
+	 	 * @return the CartesianVelocity multiply by lambda
+	     */
+		const CartesianVelocity operator*(double lambda) const;
+
+		/**
 	 	 * @brief Overload the ostream operator for printing
 	 	 * @param os the ostream to happend the string representing the CartesianVelocity to
 	 	 * @param CartesianVelocity the CartesianVelocity to print
@@ -89,7 +103,7 @@ namespace StateRepresentation
 	 	 * @param lambda the scalar to multiply with
 	 	 * @return the CartesianVelocity provided multiply by lambda
 	     */
-		friend const CartesianVelocity operator*(const float& lambda, const CartesianVelocity& velocity);
+		friend const CartesianVelocity operator*(double lambda, const CartesianVelocity& velocity);
 	};
 }
 

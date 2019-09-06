@@ -80,6 +80,22 @@ namespace StateRepresentation
 		this->set_angular_velocity(s.get_angular_velocity());
 	}
 
+	CartesianVelocity& CartesianVelocity::operator*=(double lambda)
+	{
+		// sanity check
+		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
+		// operation
+		this->set_linear_velocity(lambda * this->get_linear_velocity());
+		this->set_angular_velocity(lambda * this->get_angular_velocity());
+	}
+
+	const CartesianVelocity CartesianVelocity::operator*(double lambda) const
+	{
+		CartesianVelocity result(*this);
+		result *= lambda;
+		return result;
+	}
+
 	std::ostream& operator<<(std::ostream& os, const CartesianVelocity& velocity) 
 	{
 		if(velocity.is_empty())
@@ -99,12 +115,8 @@ namespace StateRepresentation
   		return os;
 	}
 
-	const CartesianVelocity operator*(const float& lambda, const CartesianVelocity& velocity)
+	const CartesianVelocity operator*(double lambda, const CartesianVelocity& velocity)
 	{
-		if(velocity.is_empty()) throw EmptyStateException(velocity.get_name() + " state is empty");
-		CartesianVelocity result(velocity);
-		result.set_linear_velocity(result.get_linear_velocity().array() * lambda);
-		result.set_angular_velocity(result.get_angular_velocity().array() * lambda);
-		return result;
+		return velocity * lambda;
 	}
 }
