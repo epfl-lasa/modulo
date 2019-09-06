@@ -200,9 +200,13 @@ namespace StateRepresentation
 		// set linear velocity
 		velocity.set_linear_velocity(pose.get_position() / period);
 		// set angular velocity from the log of the quaternion error
-		Eigen::AngleAxisd axis_angle(pose.get_orientation());
-		Eigen::Vector3d rotation = (axis_angle.angle() * axis_angle.axis()) / 2;
-		velocity.set_angular_velocity(rotation / period);
+		Eigen::Quaterniond orientation = pose.get_orientation();
+		Eigen::Vector3d log_q = Eigen::Vector3d::Zero();
+		if (orientation.vec().norm() > 1e-4)
+		{	
+			log_q = orientation.vec() / orientation.vec().norm() * acos(std::min<double>(std::max<double>(orientation.w(),-1),1));	
+		}
+		velocity.set_angular_velocity(log_q / period);	
 		return velocity;
 	}
 }
