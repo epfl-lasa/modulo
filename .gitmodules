@@ -1,0 +1,9 @@
+[submodule "lib/dynamical_systems/lib/googletest"]
+	path = lib/dynamical_systems/lib/googletest
+	url = https://github.com/google/googletest.git
+[submodule "lib/protocol_buffers/lib/googletest"]
+	path = lib/protocol_buffers/lib/googletest
+	url = https://github.com/google/googletest.git
+[submodule "lib/state_representation/lib/googletest"]
+	path = lib/state_representation/lib/googletest
+	url = https://github.com/google/googletest.git
