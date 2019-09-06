@@ -180,6 +180,22 @@ TEST(TestPoseToVelocity, PositiveNos)
 	std::cout << (tf1 - tf2) / dt3 << std::endl;
 }
 
+TEST(TestImplicitConversion, PositiveNos)
+{
+	Eigen::Vector3d pos1 = Eigen::Vector3d::Zero();
+	Eigen::Quaterniond rot1 = Eigen::Quaterniond::Identity(); 
+	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
+
+	StateRepresentation::CartesianVelocity vel("t1");
+	vel.set_linear_velocity(Eigen::Vector3d(0.1,0.1,0.1));
+	vel.set_angular_velocity(Eigen::Vector3d(0.1,0.1,0));
+
+	tf1 += vel;
+
+	std::cout << tf1 << std::endl;
+
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

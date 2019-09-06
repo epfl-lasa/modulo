@@ -31,6 +31,10 @@ namespace StateRepresentation
 	CartesianState(s)
 	{}
 
+	CartesianVelocity::CartesianVelocity(const CartesianPose& p):
+	CartesianState(p / std::chrono::seconds(1))
+	{}
+
 	CartesianVelocity& CartesianVelocity::operator+=(const CartesianVelocity& v)
 	{
 		// sanity check

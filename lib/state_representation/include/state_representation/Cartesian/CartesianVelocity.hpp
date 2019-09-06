@@ -25,14 +25,19 @@ namespace StateRepresentation
 		explicit CartesianVelocity(const std::string& name, const std::string& reference="world");
 
 		/**
-	 	 * @brief Copy constructor.
+	 	 * @brief Copy constructor
 	     */
 		CartesianVelocity(const CartesianVelocity& v);
 
 		/**
-	 	 * @brief Copy constructor from a CartesianState.
+	 	 * @brief Copy constructor from a CartesianState
 	     */
 		CartesianVelocity(const CartesianState& s);
+
+		/**
+	 	 * @brief Copy constructor from a CartesianPose by considering that it is equivalent to dividing the pose by 1 second
+	     */
+		CartesianVelocity(const CartesianPose& p);
 		
 		/**
 	 	 * @brief Construct a CartesianVelocity from a linear_velocity given as a vector of coordinates.

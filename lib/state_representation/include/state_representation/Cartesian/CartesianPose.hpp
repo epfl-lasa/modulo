@@ -28,14 +28,19 @@ namespace StateRepresentation
 		explicit CartesianPose(const std::string& name, const std::string& reference="world");
 
 		/**
-	 	 * @brief Copy constructor.
+	 	 * @brief Copy constructor
 	     */
 		CartesianPose(const CartesianPose& p);
 
 		/**
-	 	 * @brief Copy constructor from a CartesianState.
+	 	 * @brief Copy constructor from a CartesianState
 	     */
 		CartesianPose(const CartesianState& s);
+
+		/**
+	 	 * @brief Copy constructor from a CartesianVelocity by considering that it is a displacement over 1 second
+	     */
+		CartesianPose(const CartesianVelocity& v);
 		
 		/**
 	 	 * @brief Construct a CartesianPose from a position given as a vector of coordinates.
@@ -93,20 +98,6 @@ namespace StateRepresentation
 	 	 * @return the current CartesianPose added the CartesianPose given in argument
 	     */
 		const CartesianPose operator+(const CartesianPose& p) const;
-
-		/**
-	 	 * @brief Overload the += operator with a CartesianVelocity
-	 	 * @param v CartesianVelocity to add
-	 	 * @return the current CartesianPose added the CartesianVelocity given in argument
-	     */
-		//CartesianPose& operator+=(const CartesianVelocity& v);
-
-		/**
-	 	 * @brief Overload the + operator with a CartesianVelocity
-	 	 * @param v CartesianVelocity to add
-	 	 * @return the current CartesianPose added the CartesianVelocity given in argument
-	     */
-		//const CartesianPose operator+(const CartesianVelocity& v) const;
 
 		/**
 	 	 * @brief Overload the -= operator
