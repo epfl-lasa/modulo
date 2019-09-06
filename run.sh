@@ -28,6 +28,6 @@ docker run \
 	--volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
 	--env="XAUTHORITY=$XAUTH" \
     --volume="$XAUTH:$XAUTH" \
-    --volume="${NAME}_lib_vol:/home/ros2/lib/:rw" \
+    --volume="${NAME}_lib_vol:/home/ros2/modulo_lib/:rw" \
 	--volume="${NAME}_src_vol:/home/ros2/ros2_ws/src/:rw" \
 	${NAME}:${TAG}
