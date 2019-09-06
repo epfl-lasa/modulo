@@ -110,6 +110,7 @@ public:
 		{
 			*this->robot_pose += dt * *this->desired_velocity;
 		}
+		this->send_transform(*this->robot_pose);
 	}
 };
 
