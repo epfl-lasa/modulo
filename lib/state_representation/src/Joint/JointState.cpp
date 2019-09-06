@@ -4,6 +4,12 @@
 
 namespace StateRepresentation 
 {
+	JointState::JointState():
+	State("JointState")
+	{
+		this->initialize();
+	}
+
 	JointState::JointState(const std::string& robot_name, unsigned int nb_joints):
 	State("JointState", robot_name), names(nb_joints)
 	{
