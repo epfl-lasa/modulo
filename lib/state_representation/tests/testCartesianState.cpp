@@ -126,25 +126,58 @@ TEST(TestMultiplyInverseNonNullOrientation, PositiveNos)
     for(int i=0; i<4; ++i) EXPECT_NEAR(tf1.get_orientation().coeffs()(i), rot_truth.coeffs()(i), 0.00001);
 }
 
-TEST(TestZMQPublishing, PositiveNos)
+TEST(TestAddTwoPoses, PositiveNos)
 {
-	GOOGLE_PROTOBUF_VERIFY_VERSION;
-	Eigen::Vector3d pos1(1,2,3);
-	Eigen::Quaterniond rot1(0.70710678, 0.70710678, 0., 0.);
+	Eigen::Vector3d pos1 = Eigen::Vector3d::Zero();
+	Eigen::Quaterniond rot1 = Eigen::Quaterniond::Identity(); 
 	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
 
-	zmq::context_t ctx(1);
-   	zmq::socket_t socket(ctx, zmq::socket_type::pub);
-   	socket.bind("tcp://*:5556");
+	Eigen::Vector3d pos2(1,0,0);
+	Eigen::Quaterniond rot2(0,1,0,0); 
+	StateRepresentation::CartesianPose tf2("t1", pos2, rot2);
 
-   	for (int i=0; i<100; ++i)
-   	{
-   		std::string msg_str;
-    	std::string text = "test" + tf1.serialize();
-		zmq::message_t message(text.size());
-		memcpy(message.data(), text.c_str(), text.size());
-		socket.send(message);
-   	}
+	std::cout << tf1 + tf2 << std::endl;
+	std::cout << tf1 - tf2 << std::endl;
+}
+
+TEST(TestAddDisplacement, PositiveNos)
+{
+	Eigen::Vector3d pos1 = Eigen::Vector3d::Zero();
+	Eigen::Quaterniond rot1 = Eigen::Quaterniond::Identity(); 
+	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
+
+	StateRepresentation::CartesianVelocity vel("t1");
+	vel.set_linear_velocity(Eigen::Vector3d(0.1,0.1,0.1));
+	vel.set_angular_velocity(Eigen::Vector3d(0.1,0.1,0));
+
+	std::chrono::milliseconds dt1(10);
+	std::cout << tf1 + dt1 * vel << std::endl;
+
+	std::chrono::milliseconds dt2(1000);
+	std::cout << tf1 + dt2 * vel << std::endl;
+
+	std::chrono::seconds dt3(1);
+	std::cout << tf1 + dt3 * vel << std::endl;
+}
+
+TEST(TestPoseToVelocity, PositiveNos)
+{
+	Eigen::Vector3d pos1 = Eigen::Vector3d::Zero();
+	Eigen::Quaterniond rot1 = Eigen::Quaterniond::Identity(); 
+	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
+
+	Eigen::Vector3d pos2(1,0,0);
+	Eigen::Quaterniond rot2(0,1,0,0); 
+	StateRepresentation::CartesianPose tf2("t1", pos2, rot2);
+
+	std::chrono::seconds dt1(1);
+	std::cout << (tf1 - tf2) / dt1 << std::endl;
+
+	std::chrono::seconds dt2(10);
+	std::cout << (tf1 - tf2) / dt2 << std::endl;
+
+	std::chrono::milliseconds dt3(100);
+	std::cout << (tf1 - tf2) / dt3 << std::endl;
 }
 
 int main(int argc, char **argv) {

@@ -99,14 +99,14 @@ namespace StateRepresentation
 	 	 * @param v CartesianVelocity to add
 	 	 * @return the current CartesianPose added the CartesianVelocity given in argument
 	     */
-		CartesianPose& operator+=(const CartesianVelocity& v);
+		//CartesianPose& operator+=(const CartesianVelocity& v);
 
 		/**
 	 	 * @brief Overload the + operator with a CartesianVelocity
 	 	 * @param v CartesianVelocity to add
 	 	 * @return the current CartesianPose added the CartesianVelocity given in argument
 	     */
-		const CartesianPose operator+(const CartesianVelocity& v) const;
+		//const CartesianPose operator+(const CartesianVelocity& v) const;
 
 		/**
 	 	 * @brief Overload the -= operator
@@ -157,7 +157,12 @@ namespace StateRepresentation
 	     */
 		friend const CartesianPose operator*(double lambda, const CartesianPose& pose);
 
-		friend Eigen::Array2d dist(const CartesianPose& p1, const CartesianPose& p2);
+		/**
+	 	 * @brief Overload the / operator with a time period
+	 	 * @param dt the time period to divise by
+	 	 * @return the corresponding CartesianVelocity
+	     */
+		friend const CartesianVelocity operator/(const CartesianPose& pose, const std::chrono::milliseconds& dt);
 	};
 }
 

@@ -105,28 +105,6 @@ namespace StateRepresentation
 		return result;
 	}
 
-
-	CartesianPose& CartesianPose::operator+=(const CartesianVelocity& v)
-	{
-		// sanity check
-		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
-		if(v.is_empty()) throw EmptyStateException(v.get_name() + " state is empty");
-		if(!this->is_compatible(v)) throw IncompatibleStatesException("The two states do not have the same name nor reference frame");
-		// operation
-		this->set_position(this->get_position() + v.get_linear_velocity());
-		Eigen::Quaterniond angular_velocity = Eigen::Quaterniond(0, v.get_angular_velocity()(0), v.get_angular_velocity()(1), v.get_angular_velocity()(2));
-		this->set_orientation(Eigen::Quaterniond(this->get_orientation().coeffs() + 0.5 * (angular_velocity * this->get_orientation()).coeffs()));
-		return (*this);
-	}
-
-
-	const CartesianPose CartesianPose::operator+(const CartesianVelocity& v) const
-	{
-		CartesianPose result(*this);
-		result += v;
-		return result;
-	}
-
 	CartesianPose& CartesianPose::operator-=(const CartesianPose& p)
 	{
 		// sanity check
@@ -135,13 +113,7 @@ namespace StateRepresentation
 		if(!this->is_compatible(p)) throw IncompatibleStatesException("The two states do not have the same name nor reference frame");
 		// operation
 		this->set_position(this->get_position() - p.get_position());
-		Eigen::Quaterniond temp = this->get_orientation() * p.get_orientation().conjugate();
-		Eigen::Vector3d log_q = Eigen::Vector3d::Zero();
-		if (temp.vec().norm() > 1e-4)
-		{
-			log_q = temp.vec() / temp.vec().norm() * acos(std::min<double>(std::max<double>(temp.w(),-1),1));
-		}
-		this->set_orientation(Eigen::Quaterniond(0, log_q(0), log_q(1), log_q(2)), false);
+		this->set_orientation(this->get_orientation() * p.get_orientation().conjugate());
 		return (*this);
 	}
 
@@ -159,6 +131,7 @@ namespace StateRepresentation
 		// operation
 		this->set_position(lambda * this->get_position());
 		this->set_orientation(Eigen::Quaterniond(lambda * this->get_orientation().coeffs()));
+		return (*this);
 	}
 
 	const CartesianPose CartesianPose::operator*(double lambda) const
@@ -211,6 +184,26 @@ namespace StateRepresentation
 		return pose * lambda;
 	}
 
-	Eigen::Array2d dist(const CartesianPose& p1, const CartesianPose& p2)
-	{}
+	const CartesianVelocity operator/(const CartesianPose& pose, const std::chrono::milliseconds& dt)
+	{
+		// sanity check
+		if(pose.is_empty()) throw EmptyStateException(pose.get_name() + " state is empty");
+		// operations
+		CartesianVelocity velocity(pose.get_name(), pose.get_reference_frame());
+		// convert the period to a double with the second as reference
+		double period = std::chrono::milliseconds(dt).count();
+		period /= 1000.;
+		// set linear velocity
+		velocity.set_linear_velocity(pose.get_position() / period);
+		// set angular velocity from the log of the quaternion error
+		Eigen::Quaterniond orientation = pose.get_orientation();
+		Eigen::Vector3d log_q = Eigen::Vector3d::Zero();
+		if (orientation.vec().norm() > 1e-4)
+		{
+			log_q = orientation.vec() / orientation.vec().norm() * acos(std::min<double>(std::max<double>(orientation.w(),-1),1));
+		}
+		log_q /= period;
+		velocity.set_angular_velocity(log_q);
+		return velocity;
+	}
 }

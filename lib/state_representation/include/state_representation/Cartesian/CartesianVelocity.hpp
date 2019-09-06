@@ -13,6 +13,8 @@
 
 namespace StateRepresentation 
 {
+	class CartesianPose;
+
 	class CartesianVelocity: public CartesianState
 	{
 	public:
@@ -104,6 +106,20 @@ namespace StateRepresentation
 	 	 * @return the CartesianVelocity provided multiply by lambda
 	     */
 		friend const CartesianVelocity operator*(double lambda, const CartesianVelocity& velocity);
+
+		/**
+	 	 * @brief Overload the * operator with a time period
+	 	 * @param dt the time period to multiply with
+	 	 * @return the CartesianPose corresponding to the displacement over the time period
+	     */
+		friend const CartesianPose operator*(const std::chrono::milliseconds& dt, const CartesianVelocity& velocity);
+
+		/**
+	 	 * @brief Overload the * operator with a time period
+	 	 * @param dt the time period to multiply with
+	 	 * @return the CartesianPose corresponding to the displacement over the time period
+	     */
+		friend const CartesianPose operator*(const CartesianVelocity& velocity, const std::chrono::milliseconds& dt);
 	};
 }
 

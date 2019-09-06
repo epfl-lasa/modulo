@@ -13,7 +13,7 @@
 #include <iostream>
 #include <chrono>
 #include <typeinfo>
-#include <assert.h> 
+#include <assert.h>
 
 namespace StateRepresentation 
 {

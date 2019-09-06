@@ -120,4 +120,28 @@ namespace StateRepresentation
 	{
 		return velocity * lambda;
 	}
+
+	const CartesianPose operator*(const std::chrono::milliseconds& dt, const CartesianVelocity& velocity)
+	{
+		// sanity check
+		if(velocity.is_empty()) throw EmptyStateException(velocity.get_name() + " state is empty");
+		// operations
+		CartesianPose displacement(velocity.get_name(), velocity.get_reference_frame());
+		// convert the period to a double with the second as reference
+		double period = std::chrono::milliseconds(dt).count();
+		period /= 1000.;
+		// multiply the velocity by this period value
+		CartesianVelocity tmp = period * velocity;
+		// convert the velocities into a displacement
+		displacement.set_position(tmp.get_linear_velocity());
+		Eigen::Quaterniond angular_velocity = Eigen::Quaterniond(0, tmp.get_angular_velocity()(0), tmp.get_angular_velocity()(1), tmp.get_angular_velocity()(2));
+		Eigen::Quaterniond origin = Eigen::Quaterniond::Identity();
+		displacement.set_orientation(Eigen::Quaterniond(origin.coeffs() + 0.5 * (angular_velocity * origin).coeffs()));
+		return displacement;
+	}
+
+	const CartesianPose operator*(const CartesianVelocity& velocity, const std::chrono::milliseconds& dt)
+	{
+		return dt * velocity;
+	}
 }
