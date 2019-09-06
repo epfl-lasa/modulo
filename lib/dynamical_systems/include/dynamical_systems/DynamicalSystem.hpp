@@ -15,6 +15,9 @@
 #include "state_representation/Cartesian/CartesianVelocity.hpp"
 #include "state_representation/Joint/JointState.hpp"
 #include "protocol_buffers/DynamicalSystemMsg.pb.h"
+#include "dynamical_systems/Exceptions/NotImplementedException.hpp"
+
+using namespace DynamicalSystems::Exceptions;
 
 namespace DynamicalSystems
 {
@@ -22,71 +25,56 @@ namespace DynamicalSystems
 	class DynamicalSystem 
 	{
 	private:
-		Eigen::ArrayXd gain_;
+		double gain_;
+		double disturbance_threshold_;
+		double max_amplitude_;
 
 	protected:
 		ProtocolBuffers::DynamicalSystemMsg message_;
 
 	public:
-		explicit DynamicalSystem();
+		explicit DynamicalSystem(double gain=1);
 
-		explicit DynamicalSystem(const Eigen::ArrayXd& gain);
+		double get_gain() const;
 
-		const Eigen::ArrayXd& get_gain() const;
-
-		void set_gain(const Eigen::ArrayXd& gain);
+		void set_gain(double gain);
 
 		virtual const S evaluate(const S& state) const;
 	};
 
 	template<class S>
-	DynamicalSystem<S>::DynamicalSystem()
+	DynamicalSystem<S>::DynamicalSystem(double gain):
+	gain_(gain)
 	{}
 
 	template<class S>
-	DynamicalSystem<S>::DynamicalSystem(const Eigen::ArrayXd& gain)
-	{
-		this->gain_ = gain;
-		for (unsigned int i=0; i< gain.size(); ++i)
-		{
-			this->message_.add_gains(gain(i));
-		}
-	}
-
-	template<class S>
-	inline const Eigen::ArrayXd& DynamicalSystem<S>::get_gain() const
+	inline double DynamicalSystem<S>::get_gain() const
 	{
 		return this->gain_;
 	}
 
 	template<class S>
-	inline void DynamicalSystem<S>::set_gain(const Eigen::ArrayXd& gain)
+	inline void DynamicalSystem<S>::set_gain(double gain)
 	{
 		this->gain_ = gain;
-		if (this->message_.gains_size() != gain.size())
-		{
-			this->message_.clear_gains();
-			for (unsigned int i=0; i< gain.size(); ++i)
-			{
-				this->message_.add_gains(gain(i));
-			}
-		}
-		else
-		{
-			for (unsigned int i=0; i< gain.size(); ++i)
-			{
-				this->message_.set_gains(i, gain(i));
-			}
-		}
-
 	}
 
 	template<class S>
 	const S DynamicalSystem<S>::evaluate(const S& state) const
 	{
-		std::cerr << "Not implemented" << std::endl;
+		throw NotImplementedException("This method is not implemented for abstract base class");
 		return state;
 	}
 
+	/*template<class S>
+	const S DynamicalSystem<S>::apply_deadzone(const S& state) const
+	{
+		throw NotImplementedException("This method is not implemented for this type of input");
+		return state;
+	}
+
+	template<>
+	const S DynamicalSystem<StateRepresentation::CartesianState>::apply_deadzone(const StateRepresentation::CartesianState& state) const
+	{}*/
 }
 #endif

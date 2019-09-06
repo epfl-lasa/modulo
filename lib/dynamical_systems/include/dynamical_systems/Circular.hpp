@@ -26,8 +26,6 @@ namespace DynamicalSystems
 	public:
 		explicit Circular(float gain=1);
 
-		explicit Circular(const Eigen::ArrayXd& gain);
-
 		const S evaluate(const S& state) const;
 
 		const S& get_center() const;
@@ -45,21 +43,8 @@ namespace DynamicalSystems
 
 	template<class S>
 	Circular<S>::Circular(float gain):
+	DynamicalSystem<S>(gain),
 	radius_(1), elevation_(M_PI/2)
-	{}
-
-	template<>
-	Circular<StateRepresentation::CartesianState>::Circular(float gain):
-	radius_(1), elevation_(M_PI/2)
-	{	
-		Eigen::ArrayXd gain_array(3);
-		gain_array << gain, gain, gain;
-		this->set_gain(gain_array);
-	}
-
-	template<class S>
-	Circular<S>::Circular(const Eigen::ArrayXd& gain):
-	DynamicalSystem<S>(gain), radius_(1), elevation_(M_PI/2)
 	{}
 
 	template<class S>

@@ -21,9 +21,7 @@ namespace DynamicalSystems
 		S attractor_;
 
 	public:
-		explicit Linear(float gain=1);
-
-		explicit Linear(const Eigen::ArrayXd& gain);
+		explicit Linear(double gain=1);
 
 		const S& get_attractor() const;
 
@@ -33,27 +31,8 @@ namespace DynamicalSystems
 	};
 
 	template<class S>
-	Linear<S>::Linear(float gain)
-	{}
-
-	template<>
-	Linear<StateRepresentation::CartesianState>::Linear(float gain)
-	{
-		Eigen::ArrayXd gain_array(4);
-		gain_array << gain, gain, gain, gain;
-		this->set_gain(gain_array);
-
-		// add a cartesian attracto to the message
-		this->message_.add_parameter_names("attractor:x");
-		this->message_.add_parameter_values(0);
-		this->message_.add_parameter_names("attractor:y");
-		this->message_.add_parameter_values(0);
-		this->message_.add_parameter_names("attractor:z");
-		this->message_.add_parameter_values(0);
-	}
-
-	template<class S>
-	Linear<S>::Linear(const Eigen::ArrayXd& gain):DynamicalSystem<S>(gain)
+	Linear<S>::Linear(double gain):
+	DynamicalSystem<S>(gain)
 	{}
 
 	template<class S>
@@ -88,7 +67,10 @@ namespace DynamicalSystems
 	template<>
 	const StateRepresentation::JointState Linear<StateRepresentation::JointState>::evaluate(const StateRepresentation::JointState& state) const
 	{
-		return state;
+		StateRepresentation::JointState positions = - this->get_gain() * (state - this->get_attractor());
+		StateRepresentation::JointState velocities(state.get_name(), state.get_names());
+		velocities.set_velocities(positions.get_positions());
+		return velocities;
 	}
 }
 #endif
