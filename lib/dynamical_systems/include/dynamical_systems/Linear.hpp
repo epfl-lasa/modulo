@@ -48,19 +48,9 @@ namespace DynamicalSystems
 	}
 
 	template<>
-	inline void Linear<StateRepresentation::CartesianState>::set_attractor(const StateRepresentation::CartesianState& attractor)
-	{
-		this->attractor_ = attractor;
-		for (unsigned int i=0; i<3; ++i) this->message_.set_parameter_values(i, this->attractor_.get_position()(i));
-	}
-
-	template<>
 	const StateRepresentation::CartesianState Linear<StateRepresentation::CartesianState>::evaluate(const StateRepresentation::CartesianState& state) const
 	{
-		StateRepresentation::CartesianPose pose = - this->get_gain() * (static_cast<const StateRepresentation::CartesianPose&>(state) - static_cast<const StateRepresentation::CartesianPose&>(this->get_attractor()));
-		StateRepresentation::CartesianVelocity velocity(state.get_name(), state.get_reference_frame());
-		velocity.set_linear_velocity(pose.get_position());
-		velocity.set_angular_velocity(pose.get_orientation().vec());
+		StateRepresentation::CartesianVelocity velocity = - this->get_gain() * (static_cast<const StateRepresentation::CartesianPose&>(state) - static_cast<const StateRepresentation::CartesianPose&>(this->get_attractor()));
 		return velocity;
 	}
 

@@ -92,9 +92,9 @@ namespace DynamicalSystems
 		double theta = acos(pose_in_center.get_position()(2) / radius);
 		double phi = atan2(pose_in_center.get_position()(1), pose_in_center.get_position()(0));
 
-		double dradius = -this->get_gain()(0) * (radius - this->get_radius());
-		double dtheta = -this->get_gain()(2) * (theta - this->get_elevation());
-		double dphi = this->get_gain()(1);
+		double dradius = -this->get_gain() * (radius - this->get_radius());
+		double dtheta = -this->get_gain() * (theta - this->get_elevation());
+		double dphi = this->get_gain();
 
 		Eigen::Vector3d linear_velocity;
 		linear_velocity(0) = dradius * sin(theta) * cos(phi) + dtheta * radius * cos(theta) * cos(phi) - dphi * radius * sin(theta) * sin(phi);
