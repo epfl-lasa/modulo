@@ -125,7 +125,7 @@ namespace StateRepresentation
 		/**
 	 	 * @brief Setter of the orientation
 	     */
-		void set_orientation(const Eigen::Quaterniond& orientation, bool normalize=true);
+		void set_orientation(const Eigen::Quaterniond& orientation);
 
 		/**
 	 	 * @brief Setter of the linear velocity attribute
@@ -287,12 +287,11 @@ namespace StateRepresentation
 		this->set_position(Eigen::Vector3d(x, y, z));
 	}
 
-	inline void CartesianState::set_orientation(const Eigen::Quaterniond& orientation, bool normalize)
+	inline void CartesianState::set_orientation(const Eigen::Quaterniond& orientation)
 	{
 		this->reset_timestamp();
 		this->set_empty(false);
-		this->orientation = orientation;
-		if(normalize) this->orientation.normalize();
+		this->orientation = (this->orientation.dot(orientation)) > 0 ? orientation.normalized() : Eigen::Quaterniond(-(orientation.normalized()).coeffs());
 	}
 
 	inline void CartesianState::set_linear_velocity(const Eigen::Vector3d& linear_velocity)
