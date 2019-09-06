@@ -87,6 +87,7 @@ namespace StateRepresentation
 		// operation
 		this->set_linear_velocity(lambda * this->get_linear_velocity());
 		this->set_angular_velocity(lambda * this->get_angular_velocity());
+		return (*this);
 	}
 
 	const CartesianVelocity CartesianVelocity::operator*(double lambda) const
