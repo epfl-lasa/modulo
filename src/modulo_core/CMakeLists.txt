@@ -39,6 +39,9 @@ target_link_libraries(${PROJECT_NAME}
 ament_auto_add_executable(${PROJECT_NAME}_utest_architecture_cartesian_space tests/testArchitectureCartesianSpace.cpp)
 target_link_libraries(${PROJECT_NAME}_utest_architecture_cartesian_space ${PROJECT_NAME} protocol_buffers ${PROTOBUF_LIBRARIES})
 
+ament_auto_add_executable(${PROJECT_NAME}_utest_architecture_joint_space tests/testArchitectureJointSpace.cpp)
+target_link_libraries(${PROJECT_NAME}_utest_architecture_joint_space ${PROJECT_NAME} protocol_buffers ${PROTOBUF_LIBRARIES})
+
 ament_auto_add_executable(${PROJECT_NAME}_utest_architecture_dual_quaternion_space tests/testArchitectureDualQuaternionSpace.cpp)
 target_link_libraries(${PROJECT_NAME}_utest_architecture_dual_quaternion_space ${PROJECT_NAME} protocol_buffers ${PROTOBUF_LIBRARIES})
 

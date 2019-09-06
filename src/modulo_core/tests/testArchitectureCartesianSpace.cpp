@@ -2,9 +2,7 @@
 #include "modulo_core/Visualizer.hpp"
 #include "state_representation/Cartesian/CartesianPose.hpp"
 #include "state_representation/Cartesian/CartesianVelocity.hpp"
-
 #include "dynamical_systems/Linear.hpp"
-
 #include "rcutils/cmdline_parser.h"
 #include <eigen3/Eigen/Core>
 #include <iostream>
@@ -17,7 +15,6 @@ private:
 	std::shared_ptr<StateRepresentation::CartesianPose> current_pose;
 	std::shared_ptr<StateRepresentation::CartesianVelocity> desired_velocity;
 	std::shared_ptr<StateRepresentation::CartesianPose> target_pose;
-	
 	DynamicalSystems::Linear<StateRepresentation::CartesianState> motion_generator;
 
 public:
@@ -30,7 +27,6 @@ public:
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot/pose", this->current_pose);
 		this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_velocity", this->desired_velocity);
-
 		this->motion_generator.set_attractor(*this->target_pose);
 	}
 
@@ -114,7 +110,6 @@ public:
 		{
 			*this->robot_pose += dt * *this->desired_velocity;
 		}
-		this->send_transform(*this->robot_pose);
 	}
 };
 

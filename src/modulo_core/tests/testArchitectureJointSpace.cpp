@@ -1,86 +1,97 @@
 #include "modulo_core/MotionGenerator.hpp"
 #include "modulo_core/Visualizer.hpp"
 #include "rcutils/cmdline_parser.h"
-#include <eigen3/Eigen/Core>
+#include "dynamical_systems/Linear.hpp"
 #include <iostream>
 
 class LinearMotionGenerator : public ModuloCore::MotionGenerator
 {
+private:
+	std::shared_ptr<StateRepresentation::JointState> current_positions;
+	std::shared_ptr<StateRepresentation::JointState> desired_velocities;
+	std::shared_ptr<StateRepresentation::JointState> target_positions;
+	DynamicalSystems::Linear<StateRepresentation::JointState> motion_generator;
+
 public:
-	std::shared_ptr<StateRepresentation::JointState> current_pose;
-	std::shared_ptr<StateRepresentation::JointState> desired_velocity;
-	std::shared_ptr<StateRepresentation::JointState> target_pose;
-
 	explicit LinearMotionGenerator(const std::string & node_name, const std::chrono::milliseconds & period) :
-	current_pose(std::make_shared<StateRepresentation::JointState>("robot")),
-	desired_velocity(std::make_shared<StateRepresentation::JointState>("robot")),
-	target_pose(std::make_shared<StateRepresentation::JointState>("target", Eigen::Vector3d(4, 5, 6), Eigen::Quaterniond(0,1,0,0))),
-	state_timeout(2 * period)
+	MotionGenerator(node_name, period, true),
+	current_positions(std::make_shared<StateRepresentation::JointState>("robot", 6)),
+	desired_velocities(std::make_shared<StateRepresentation::JointState>("robot", 6)),
+	target_positions(std::make_shared<StateRepresentation::JointState>("robot", 6)),
+	motion_generator(1)
 	{
-		this->set_in_joint_state_channel("/robot/joint_state");
-		this->set_out_joint_state_channel("/ds/desired_joint_state");
-		this->set_srv_target_joint_state_channel("/ds/target_joint_state");
-
-		this->set_target_joint_state(StateRepresentation::JointState(3));
-		Eigen::ArrayXd target_positions(3);
-		target_positions << 1,2,3;
-		this->get_target_joint_state().set_positions(target_positions);
+		this->add_subscription<sensor_msgs::msg::JointState>("/robot/joint_state", this->current_positions);
+		this->add_publisher<sensor_msgs::msg::JointState>("/ds/desired_velocities", this->desired_velocities);
+		this->target_positions->set_positions(Eigen::VectorXd::Random(6));
+		this->motion_generator.set_attractor(*this->target_positions);
 	}
 
 	void step()
 	{
-		/*StateRepresentation::JointState current_state(this->get_in_joint_state());
-		StateRepresentation::JointState target_state(this->get_target_joint_state());
-		if(current_state.is_compatible(target_state) && !current_state.is_deprecated(state_timeout))
+		if(!this->current_positions->is_empty())
 		{
-			Eigen::ArrayXd desired_velocities = -Kp * (current_state.get_positions() - target_state.get_positions());
-			current_state.set_velocities(desired_velocities);
-			this->set_out_joint_state(current_state);
-		}*/
+			*this->desired_velocities = this->motion_generator.evaluate(*this->current_positions);
+		}
+		else
+		{
+			this->desired_velocities->initialize();
+		}
 	}
 };
 
 class ConsoleVisualizer : public ModuloCore::Visualizer
 {
-public:
+private:
+	std::shared_ptr<StateRepresentation::JointState> robot_positions;
+	std::shared_ptr<StateRepresentation::JointState> desired_velocities;
 
+public:
 	explicit ConsoleVisualizer(const std::string & node_name, const std::chrono::milliseconds & period) :
-	Visualizer(node_name, period)
+	Visualizer(node_name, period, true),
+	robot_positions(std::make_shared<StateRepresentation::JointState>("robot", 6)),
+	desired_velocities(std::make_shared<StateRepresentation::JointState>("robot", 6))
 	{
-		//this->set_in_joint_state_channel("/robot/joint_state");
+		this->add_subscription<sensor_msgs::msg::JointState>("/robot/joint_state", this->robot_positions);
+		this->add_subscription<sensor_msgs::msg::JointState>("/ds/desired_velocities", this->desired_velocities);
 	}
 
 	void step()
 	{
-		/*std::ostringstream os;
-		os << this->get_in_joint_state();
-		RCUTILS_LOG_INFO_NAMED(get_name(), os.str().c_str());*/
+		std::ostringstream os;		
+		os << "##### ROBOT POSITIONS #####" << std::endl;
+		os << *this->robot_positions << std::endl;
+		os << "##### DESIRED VELOCITY #####" << std::endl;
+		os << *this->desired_velocities << std::endl;
+		RCLCPP_INFO(get_logger(), "%s", os.str().c_str());
 	}
 };
 
 class SimulatedRobotInterface : public ModuloCore::Cell
 {
-public:
-	std::chrono::milliseconds state_timeout;
-	StateRepresentation::JointState state;
+private:
+	std::shared_ptr<StateRepresentation::JointState> robot_state;
+	std::shared_ptr<StateRepresentation::JointState> desired_velocities;
 	double dt;
 
+public:
 	explicit SimulatedRobotInterface(const std::string & node_name, const std::chrono::milliseconds & period) :
-	Cell(node_name, period),
-	state_timeout(2 * period),
-	state(3),
+	Cell(node_name, period, true),
+	robot_state(std::make_shared<StateRepresentation::JointState>("robot", 6)),
+	desired_velocities(std::make_shared<StateRepresentation::JointState>("robot", 6)),
 	dt(0.001)
 	{
-	/*	this->set_in_joint_state_channel("/ds/desired_joint_state");
-		this->set_out_joint_state_channel("/robot/joint_state");
-		this->set_in_joint_state(state);
-		this->set_out_joint_state(state);*/
+		this->robot_state->set_positions(Eigen::VectorXd::Random(6));
+		this->add_subscription<sensor_msgs::msg::JointState>("/ds/desired_velocities", this->desired_velocities);
+		this->add_publisher<sensor_msgs::msg::JointState>("/robot/joint_state", this->robot_state, std::chrono::milliseconds(0));
 	}
 
 	void step()
 	{
-	/*	if(!this->get_in_joint_state().is_deprecated(state_timeout)) state.get_positions() += dt * this->get_in_joint_state().get_velocities();
-		this->set_out_joint_state(state);*/
+		if(!this->desired_velocities->is_empty())
+		{
+			this->robot_state->set_positions((dt * *this->desired_velocities).get_velocities());
+			this->robot_state->set_velocities(this->desired_velocities->get_velocities());
+		}
 	}
 };
 
