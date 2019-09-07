@@ -140,7 +140,7 @@ namespace StateRepresentation
 		displacement.set_position(tmp.get_linear_velocity());
 		Eigen::Quaterniond angular_velocity = Eigen::Quaterniond(0, tmp.get_angular_velocity()(0), tmp.get_angular_velocity()(1), tmp.get_angular_velocity()(2));
 		Eigen::Quaterniond origin = Eigen::Quaterniond::Identity();
-		displacement.set_orientation(Eigen::Quaterniond(origin.coeffs() + 0.5 * (angular_velocity * origin).coeffs()));
+		displacement.set_orientation(Eigen::Quaterniond(origin.coeffs() + 0.5 * (origin * angular_velocity).coeffs()));
 		return displacement;
 	}
 

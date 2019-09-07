@@ -98,7 +98,7 @@ namespace StateRepresentation
 		if(!this->is_compatible(p)) throw IncompatibleStatesException("The two states do not have the same name nor reference frame");
 		// operation
 		this->set_position(this->get_position() + p.get_position());
-		this->set_orientation(this->get_orientation() * p.get_orientation());
+		this->set_orientation(p.get_orientation() * this->get_orientation());
 		return (*this);
 	}
 
@@ -206,7 +206,7 @@ namespace StateRepresentation
 		{	
 			log_q = orientation.vec() / orientation.vec().norm() * acos(std::min<double>(std::max<double>(orientation.w(),-1),1));	
 		}
-		velocity.set_angular_velocity(log_q / period);	
+		velocity.set_angular_velocity(log_q / period);
 		return velocity;
 	}
 }
