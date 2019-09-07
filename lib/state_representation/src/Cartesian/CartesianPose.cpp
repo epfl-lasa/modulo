@@ -98,7 +98,7 @@ namespace StateRepresentation
 		if(!this->is_compatible(p)) throw IncompatibleStatesException("The two states do not have the same name nor reference frame");
 		// operation
 		this->set_position(this->get_position() + p.get_position());
-		this->set_orientation(p.get_orientation() * this->get_orientation());
+		this->set_orientation(this->get_orientation() * p.get_orientation());
 		return (*this);
 	}
 
@@ -117,7 +117,7 @@ namespace StateRepresentation
 		if(!this->is_compatible(p)) throw IncompatibleStatesException("The two states do not have the same name nor reference frame");
 		// operation
 		this->set_position(this->get_position() - p.get_position());
-		this->set_orientation(this->get_orientation() * p.get_orientation().conjugate());
+		this->set_orientation(this->get_orientation().conjugate() * p.get_orientation());
 		return (*this);
 	}
 
