@@ -61,7 +61,7 @@ TEST(MultiplyTransformsDifferentOrientation, PositiveNos)
 	std::cerr << tf1.get_orientation().coeffs() << std::endl;
 
 	for(int i=0; i<pos_truth.size(); ++i) EXPECT_NEAR(tf1.get_position()(i), pos_truth(i), 0.00001);
-    for(int i=0; i<4; ++i) EXPECT_NEAR(tf1.get_orientation().coeffs()(i), rot_truth.coeffs()(i), 0.00001);
+    EXPECT_TRUE(abs(tf1.get_orientation().dot(rot_truth)) > 1-10E-4);
 }
 
 TEST(TestInverseNullOrientation, PositiveNos)
@@ -83,7 +83,7 @@ TEST(TestInverseNullOrientation, PositiveNos)
 	EXPECT_EQ(tf1.get_name(), "world");
 	EXPECT_EQ(tf1.get_reference_frame(), "t1");
 	for(int i=0; i<pos_truth.size(); ++i) EXPECT_NEAR(tf1.get_position()(i), pos_truth(i), 0.00001);
-    for(int i=0; i<4; ++i) EXPECT_NEAR(tf1.get_orientation().coeffs()(i), rot_truth.coeffs()(i), 0.00001);
+    EXPECT_TRUE(abs(tf1.get_orientation().dot(rot_truth)) > 1-10E-4);
 }
 
 TEST(TestInverseNonNullOrientation, PositiveNos)
@@ -103,7 +103,7 @@ TEST(TestInverseNonNullOrientation, PositiveNos)
 	std::cerr << tf1.get_orientation().coeffs() << std::endl;
 
 	for(int i=0; i<pos_truth.size(); ++i) EXPECT_NEAR(tf1.get_position()(i), pos_truth(i), 0.00001);
-    for(int i=0; i<4; ++i) EXPECT_NEAR(tf1.get_orientation().coeffs()(i), rot_truth.coeffs()(i), 0.00001);
+    EXPECT_TRUE(abs(tf1.get_orientation().dot(rot_truth)) > 1-10E-4);
 }
 
 TEST(TestMultiplyInverseNonNullOrientation, PositiveNos)
@@ -123,7 +123,7 @@ TEST(TestMultiplyInverseNonNullOrientation, PositiveNos)
 	std::cerr << tf1.get_orientation().coeffs() << std::endl;
 
 	for(int i=0; i<pos_truth.size(); ++i) EXPECT_NEAR(tf1.get_position()(i), pos_truth(i), 0.00001);
-    for(int i=0; i<4; ++i) EXPECT_NEAR(tf1.get_orientation().coeffs()(i), rot_truth.coeffs()(i), 0.00001);
+    EXPECT_TRUE(abs(tf1.get_orientation().dot(rot_truth)) > 1-10E-4);
 }
 
 TEST(TestAddTwoPoses, PositiveNos)

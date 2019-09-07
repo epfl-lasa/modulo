@@ -20,6 +20,10 @@ TEST(EvaluateDynamicalSystemPositionOnly, PositiveNos)
 		current_pose += dt * velocity;
 	}
 
+	std::cout << current_pose << std::endl;
+	std::cout << target_pose << std::endl;
+	std::cout << abs(current_pose.get_orientation().dot(target_pose.get_orientation())) << std::endl;
+
 	for(int i=0; i<3; ++i) EXPECT_NEAR(current_pose.get_position()(i), target_pose.get_position()(i), 0.001);
 	EXPECT_TRUE(abs(current_pose.get_orientation().dot(target_pose.get_orientation())) > 1-10E-4);	
 
@@ -27,6 +31,8 @@ TEST(EvaluateDynamicalSystemPositionOnly, PositiveNos)
 
 TEST(EvaluateDynamicalSystemOrientationOnly, PositiveNos)
 {
+	srand (time(NULL));
+
 	DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(1);
 
 	StateRepresentation::CartesianPose current_pose("robot", Eigen::Vector3d(0,0,0));
@@ -54,6 +60,8 @@ TEST(EvaluateDynamicalSystemOrientationOnly, PositiveNos)
 
 TEST(EvaluateDynamicalSystem, PositiveNos)
 {
+	srand (time(NULL));
+
 	DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(1);
 
 	StateRepresentation::CartesianPose current_pose("robot", 10 * Eigen::Vector3d::Random());
@@ -62,7 +70,7 @@ TEST(EvaluateDynamicalSystem, PositiveNos)
 
 	linearDS.set_attractor(target_pose);
 
-	unsigned int nb_steps = 100;
+	unsigned int nb_steps = 500;
 	double dt = 0.1;
 
 	for(unsigned int i=0; i<nb_steps; ++i)
