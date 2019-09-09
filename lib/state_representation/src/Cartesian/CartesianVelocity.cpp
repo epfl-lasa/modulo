@@ -101,6 +101,19 @@ namespace StateRepresentation
 		return result;
 	}
 
+	void CartesianVelocity::clamp(double max_linear, double max_angular)
+	{
+		if(this->get_linear_velocity().norm() > max_linear) this->set_linear_velocity(max_linear * this->get_linear_velocity().normalized());
+		if(this->get_angular_velocity().norm() > max_angular) this->set_angular_velocity(max_angular * this->get_angular_velocity().normalized());
+	}
+
+	const CartesianVelocity CartesianVelocity::clamped(double max_linear, double max_angular) const
+	{
+		CartesianVelocity result(*this);
+		result.clamp(max_linear, max_angular);
+		return result;
+	}
+
 	std::ostream& operator<<(std::ostream& os, const CartesianVelocity& velocity) 
 	{
 		if(velocity.is_empty())
