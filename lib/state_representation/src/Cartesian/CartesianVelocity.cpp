@@ -6,6 +6,9 @@ using namespace StateRepresentation::Exceptions;
 
 namespace StateRepresentation 
 {
+	CartesianVelocity::CartesianVelocity()
+	{}
+
 	CartesianVelocity::CartesianVelocity(const std::string& name, const std::string& reference):
 	CartesianState(name, reference)
 	{}
@@ -23,8 +26,8 @@ namespace StateRepresentation
 		this->set_angular_velocity(angular_velocity);
 	}
 
-	CartesianVelocity::CartesianVelocity(const CartesianVelocity& p):
-	CartesianState(p)
+	CartesianVelocity::CartesianVelocity(const CartesianVelocity& v):
+	CartesianState(v)
 	{}
 
 	CartesianVelocity::CartesianVelocity(const CartesianState& s):

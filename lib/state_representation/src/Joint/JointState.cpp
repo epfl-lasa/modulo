@@ -24,7 +24,7 @@ namespace StateRepresentation
 
 	JointState::JointState(const JointState& state):
 	State(state), names(state.names), positions(state.positions), velocities(state.velocities),
-	accelerations(state.accelerations), torques(state.torques), jacobian(state.jacobian)
+	accelerations(state.accelerations), torques(state.torques)
 	{}
 
 	void JointState::initialize()
@@ -36,54 +36,52 @@ namespace StateRepresentation
 		this->velocities.resize(size);
 		this->accelerations.resize(size);
 		this->torques.resize(size);
-		this->jacobian.resize(6, size);
 		// set to zeros
 		this->positions.setZero();
 		this->velocities.setZero();
 		this->accelerations.setZero();
 		this->torques.setZero();
-		this->jacobian.setZero();
 	}
 
-	JointState& JointState::operator+=(const JointState& js)
+	JointState& JointState::operator+=(const JointState& state)
 	{
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
-		if(js.is_empty()) throw EmptyStateException(js.get_name() + " state is empty");
-		if(!this->is_compatible(js)) throw IncompatibleStatesException("The two joint states incompatible");
+		if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+		if(!this->is_compatible(state)) throw IncompatibleStatesException("The two joint states incompatible");
 		// operation
-		this->set_positions(this->get_positions() + js.get_positions());
-		this->set_velocities(this->get_velocities() + js.get_velocities());
-		this->set_accelerations(this->get_accelerations() + js.get_accelerations());
-		this->set_torques(this->get_torques() + js.get_torques());
+		this->set_positions(this->get_positions() + state.get_positions());
+		this->set_velocities(this->get_velocities() + state.get_velocities());
+		this->set_accelerations(this->get_accelerations() + state.get_accelerations());
+		this->set_torques(this->get_torques() + state.get_torques());
 		return (*this);
 	}
 
-	const JointState JointState::operator+(const JointState& js) const
+	const JointState JointState::operator+(const JointState& state) const
 	{
 		JointState result(*this);
-		result += js;
+		result += state;
 		return result;
 	}
 
-	JointState& JointState::operator-=(const JointState& js)
+	JointState& JointState::operator-=(const JointState& state)
 	{
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
-		if(js.is_empty()) throw EmptyStateException(js.get_name() + " state is empty");
-		if(!this->is_compatible(js)) throw IncompatibleStatesException("The two joint states incompatible");
+		if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+		if(!this->is_compatible(state)) throw IncompatibleStatesException("The two joint states incompatible");
 		// operation
-		this->set_positions(this->get_positions() - js.get_positions());
-		this->set_velocities(this->get_velocities() - js.get_velocities());
-		this->set_accelerations(this->get_accelerations() - js.get_accelerations());
-		this->set_torques(this->get_torques() - js.get_torques());
+		this->set_positions(this->get_positions() - state.get_positions());
+		this->set_velocities(this->get_velocities() - state.get_velocities());
+		this->set_accelerations(this->get_accelerations() - state.get_accelerations());
+		this->set_torques(this->get_torques() - state.get_torques());
 		return (*this);
 	}
 
-	const JointState JointState::operator-(const JointState& js) const
+	const JointState JointState::operator-(const JointState& state) const
 	{
 		JointState result(*this);
-		result -= js;
+		result -= state;
 		return result;
 	}
 
@@ -91,10 +89,11 @@ namespace StateRepresentation
 	{
 		if(state.is_empty())
 		{
-			os << "empty state";
+			os << "Empty JointState";
 		}
 		else
 		{
+			os << state.get_name() << " JointState" << std::endl;
 	  		os << "names: [";
 			for(auto& n:state.names) os << n << ", ";
 			os << "]" << std::endl;
@@ -109,19 +108,12 @@ namespace StateRepresentation
 			os << "]" << std::endl;
 			os << "torques: [";
 			for(unsigned int i=0; i<state.torques.size(); ++i) os << state.torques(i) << ", ";
-			os << "]" << std::endl;
-			os << "jacobian:";
-			for(unsigned int i=0; i<state.jacobian.rows(); ++i)
-			{
-				os << std::endl << "[";
-				for(unsigned int j=0; j<state.jacobian.cols(); ++j) os << state.jacobian(i,j) << ", ";
-				os << "]";
-			}
+			os << "]";
 		}
   		return os;
 	}
 
-	const JointState operator*(const float& lambda, const JointState& state)
+	const JointState operator*(double lambda, const JointState& state)
 	{
 		if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
 		JointState result(state);

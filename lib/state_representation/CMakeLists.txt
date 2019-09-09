@@ -34,6 +34,8 @@ set(CORE_SOURCES
   src/Cartesian/CartesianVelocity.cpp
 	src/Cartesian/CartesianState.cpp
   src/Joint/JointState.cpp
+  src/Joint/JointPositions.cpp
+  src/Joint/JointVelocities.cpp
   src/DualQuaternion/DualQuaternionState.cpp
   src/DualQuaternion/DualQuaternionPose.cpp
   src/DualQuaternion/DualQuaternionTwist.cpp

@@ -19,6 +19,11 @@ namespace StateRepresentation
 	{
 	public:
 		/**
+		 * Empty constructor
+		 */
+		explicit CartesianVelocity();
+
+		/**
 	 	 * @brief Empty constructor for a CartesianVelocity. Initialize linear_velocity to zero 
 	 	 * and rotation to unit quaternion.
 	     */

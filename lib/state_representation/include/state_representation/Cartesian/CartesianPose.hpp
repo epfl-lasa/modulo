@@ -18,6 +18,9 @@ namespace StateRepresentation
 	class CartesianPose: public CartesianState
 	{
 	public:
+		/**
+		 * Empty constructor
+		 */
 		explicit CartesianPose();
 
 		/**

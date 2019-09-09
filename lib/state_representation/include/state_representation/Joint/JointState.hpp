@@ -5,8 +5,8 @@
  * @date 2019/04/16
  */
 
-#ifndef STATEREPRESENTATION_JOINTSTATE_H_
-#define STATEREPRESENTATION_JOINTSTATE_H_
+#ifndef STATEREPRESENTATION_JOINT_JOINTSTATE_H_
+#define STATEREPRESENTATION_JOINT_JOINTSTATE_H_
 
 #include <eigen3/Eigen/Core>
 #include <vector>
@@ -58,7 +58,7 @@ namespace StateRepresentation
 		/**
 	 	 * @brief Getter of the size from the attributes
 	     */
-		int get_size() const;
+		unsigned int get_size() const;
 
 		/**
 	 	 * @brief Getter of the names attribute
@@ -116,16 +116,6 @@ namespace StateRepresentation
 		void set_torques(const Eigen::VectorXd& torques);
 
 		/**
-	 	 * @brief Getter of the jacobian attribute
-	     */
-		const Eigen::MatrixXd& get_jacobian() const;
-
-		/**
-	 	 * @brief Setter of the jacobian attribute
-	     */
-		void set_jacobian(const Eigen::MatrixXd& jacobian);
-
-		/**
 	 	 * @brief Check if the state is compatible for operations with the state given as argument
 	 	 * @param state the state to check compatibility with
 	     */
@@ -166,7 +156,7 @@ namespace StateRepresentation
 
 		/**
 	 	 * @brief Overload the ostream operator for printing
-	 	 * @param os the ostream to happend the string representing the state to
+	 	 * @param os the ostream to append the string representing the state
 	 	 * @param state the state to print
 	 	 * @return the appended ostream
 	     */
@@ -177,7 +167,7 @@ namespace StateRepresentation
 	 	 * @param lambda the scalar to multiply with
 	 	 * @return the JointState provided multiply by lambda
 	     */
-		friend const JointState operator*(const float& lambda, const JointState& state);
+		friend const JointState operator*(double lambda, const JointState& state);
 
 		/**
 	 	 * @brief Overload the * operator with an array of gains
@@ -198,7 +188,7 @@ namespace StateRepresentation
 		return compatible;
 	}
 
-	inline int JointState::get_size() const
+	inline unsigned int JointState::get_size() const
 	{
 		return this->names.size();
 	}
@@ -275,19 +265,6 @@ namespace StateRepresentation
 		this->reset_timestamp();
 		this->set_empty(false);
 		this->torques = torques;
-	}
-
-	inline const Eigen::MatrixXd& JointState::get_jacobian() const
-	{
-		return this->jacobian;
-	}
-
-	inline void JointState::set_jacobian(const Eigen::MatrixXd& jacobian)
-	{
-		if(jacobian.cols() != this->get_size()) throw IncompatibleSizeException("Input matrix is of incorrect size");
-		this->reset_timestamp();
-		this->set_empty(false);
-		this->jacobian = jacobian;
 	}
 }
 
