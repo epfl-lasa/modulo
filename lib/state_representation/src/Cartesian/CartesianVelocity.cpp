@@ -101,16 +101,26 @@ namespace StateRepresentation
 		return result;
 	}
 
-	void CartesianVelocity::clamp(double max_linear, double max_angular)
-	{
+	void CartesianVelocity::clamp(double max_linear, double max_angular, double noise_ratio)
+	{	
+		if(noise_ratio != 0)
+		{	
+			// substract the noise ratio to both velocities
+			this->set_linear_velocity(this->get_linear_velocity() - noise_ratio * this->get_linear_velocity().normalized());
+			this->set_angular_velocity(this->get_angular_velocity() - noise_ratio * this->get_angular_velocity().normalized());
+			// apply a deadzone
+			if(this->get_linear_velocity().norm() < noise_ratio) this->set_linear_velocity(Eigen::Vector3d::Zero());
+			if(this->get_angular_velocity().norm() < noise_ratio) this->set_angular_velocity(Eigen::Vector3d::Zero()); 	
+		} 
+		// clamp the velocities to their maximum amplitude provided
 		if(this->get_linear_velocity().norm() > max_linear) this->set_linear_velocity(max_linear * this->get_linear_velocity().normalized());
 		if(this->get_angular_velocity().norm() > max_angular) this->set_angular_velocity(max_angular * this->get_angular_velocity().normalized());
 	}
 
-	const CartesianVelocity CartesianVelocity::clamped(double max_linear, double max_angular) const
+	const CartesianVelocity CartesianVelocity::clamped(double max_linear, double max_angular, double noise_ratio) const
 	{
 		CartesianVelocity result(*this);
-		result.clamp(max_linear, max_angular);
+		result.clamp(max_linear, max_angular, noise_ratio);
 		return result;
 	}
 

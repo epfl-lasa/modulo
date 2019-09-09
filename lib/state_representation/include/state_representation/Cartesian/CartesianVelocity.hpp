@@ -100,17 +100,21 @@ namespace StateRepresentation
 		/**
 		 * @brief Clamp inplace the magnitude of the velocity to the values in argument
 		 * @param max_linear the maximum magnitude of the linear velocity
-		 * @param max_angular the maximum magnitude of the angular velocity 
+		 * @param max_angular the maximum magnitude of the angular velocity
+		 * @param noise_ratio if provided, this value will be used to apply a deadzone under which
+		 * the velocity will be set to 0
 		 */
-		void clamp(double max_linear, double max_angular);
+		void clamp(double max_linear, double max_angular, double noise_ratio=0);
 
 		/**
 		 * @brief Return the clamped velocity
 		 * @param max_linear the maximum magnitude of the linear velocity
 		 * @param max_angular the maximum magnitude of the angular velocity
+		 * @param noise_ratio if provided, this value will be used to apply a deadzone under which
+		 * the velocity will be set to 0
 		 * @return the clamped velocity
 		 */
-		const CartesianVelocity clamped(double max_linear, double max_angular) const;
+		const CartesianVelocity clamped(double max_linear, double max_angular, double noise_ratio=0) const;
 
 		/**
 	 	 * @brief Overload the ostream operator for printing

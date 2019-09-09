@@ -197,13 +197,21 @@ TEST(TestImplicitConversion, PositiveNos)
 
 TEST(TestVelocityClamping, PositiveNos)
 {
-	StateRepresentation::CartesianVelocity vel("test", Eigen::Vector3d(1,2,3), Eigen::Vector3d(1,2,3));
+	StateRepresentation::CartesianVelocity vel("test", Eigen::Vector3d(1,-2,3), Eigen::Vector3d(1,2,-3));
 	vel.clamp(1, 0.5);
 
 	std::cout << vel << std::endl;
-
 	EXPECT_TRUE(vel.get_linear_velocity().norm() <= 1);
 	EXPECT_TRUE(vel.get_angular_velocity().norm() <= 0.5);
+
+	vel *= 0.01;
+
+	std::cout << vel.clamped(1, 0.5, 0.1) << std::endl;
+	for(int i=0; i<3; ++i)
+	{
+		EXPECT_TRUE(vel.clamped(1, 0.5, 0.1).get_linear_velocity()(i) == 0);
+		EXPECT_TRUE(vel.clamped(1, 0.5, 0.1).get_angular_velocity()(i) == 0);
+	}
 }
 
 int main(int argc, char **argv) {
