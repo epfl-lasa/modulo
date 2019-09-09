@@ -214,6 +214,23 @@ TEST(TestVelocityClamping, PositiveNos)
 	}
 }
 
+TEST(TestPoseDistance, PositiveNos)
+{
+	StateRepresentation::CartesianPose p1("test", Eigen::Vector3d::Zero());
+	StateRepresentation::CartesianPose p2("test", Eigen::Vector3d(1,0,0));
+	StateRepresentation::CartesianPose p3("test", Eigen::Vector3d(1,0,0), Eigen::Quaterniond(0,1,0,0));
+
+	Eigen::Array2d d1 = dist(p1, p2);
+	Eigen::Array2d d2 = p1.dist(p2);
+
+	EXPECT_TRUE(d1.isApprox(d2));
+	EXPECT_TRUE(d1(0) == 1);
+	EXPECT_TRUE(d1(1) == 0);
+
+	Eigen::Array2d d3 = dist(p1, p3);
+	EXPECT_TRUE(abs(d3(1) - 3.14159) < 1e10-3);	
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

@@ -134,6 +134,13 @@ namespace StateRepresentation
 		const CartesianPose inverse() const;
 
 		/**
+		 * @brief compute the distance between current CartesianPose and the one given in argument
+		 * @param the second CartesianPose
+		 * @return the distance beteen the two poses both in position and orientation
+		 */
+		const Eigen::Array2d dist(const CartesianPose& pose) const;
+
+		/**
 	 	 * @brief Overload the ostream operator for printing
 	 	 * @param os the ostream to happend the string representing the CartesianPose to
 	 	 * @param CartesianPose the CartesianPose to print
@@ -154,6 +161,14 @@ namespace StateRepresentation
 	 	 * @return the corresponding CartesianVelocity
 	     */
 		friend const CartesianVelocity operator/(const CartesianPose& pose, const std::chrono::milliseconds& dt);
+
+		/**
+		 * @brief compute the distance between two CartesianPose
+		 * @brief the second CartesianPose
+		 * @param the second CartesianPose
+		 * @return the distance beteen the two poses both in position and orientation
+		 */
+		friend const Eigen::Array2d dist(const CartesianPose& p1, const CartesianPose& p2);
 	};
 }
 
