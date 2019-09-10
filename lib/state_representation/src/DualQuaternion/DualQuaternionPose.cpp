@@ -89,10 +89,8 @@ namespace StateRepresentation
 
 	void DualQuaternionPose::initialize()
 	{
-		this->set_primary(Eigen::Quaterniond(1,0,0,0));
-		this->set_dual(Eigen::Quaterniond(0,0,0,0));
+		this->DualQuaternionState::initialize();
 		this->position = Eigen::Vector3d(0,0,0);
-		this->set_empty(true);
 	}
 
 	const DualQuaternionState log(const DualQuaternionPose& state)

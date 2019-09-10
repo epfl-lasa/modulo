@@ -222,8 +222,7 @@ namespace StateRepresentation
 	inline void JointState::set_positions(const Eigen::VectorXd& positions)
 	{
 		if(positions.size() != this->get_size()) throw IncompatibleSizeException("Input vector is of incorrect size");
-		this->reset_timestamp();
-		this->set_empty(false);
+		this->set_filled();
 		// positions are angles between -pi and pi
 		this->positions = positions.unaryExpr([](double x){return atan2(sin(x), cos(x));});
 	}
@@ -236,8 +235,7 @@ namespace StateRepresentation
 	inline void JointState::set_velocities(const Eigen::VectorXd& velocities)
 	{
 		if(velocities.size() != this->get_size()) throw IncompatibleSizeException("Input vector is of incorrect size");
-		this->reset_timestamp();
-		this->set_empty(false);
+		this->set_filled();
 		this->velocities = velocities;
 	}
 
@@ -249,8 +247,7 @@ namespace StateRepresentation
 	inline void JointState::set_accelerations(const Eigen::VectorXd& accelerations)
 	{
 		if(accelerations.size() != this->get_size()) throw IncompatibleSizeException("Input vector is of incorrect size");
-		this->reset_timestamp();
-		this->set_empty(false);
+		this->set_filled();
 		this->accelerations = accelerations;
 	}
 
@@ -262,8 +259,7 @@ namespace StateRepresentation
 	inline void JointState::set_torques(const Eigen::VectorXd& torques)
 	{
 		if(torques.size() != this->get_size()) throw IncompatibleSizeException("Input vector is of incorrect size");
-		this->reset_timestamp();
-		this->set_empty(false);
+		this->set_filled();
 		this->torques = torques;
 	}
 }

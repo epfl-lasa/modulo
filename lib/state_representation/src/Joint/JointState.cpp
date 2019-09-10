@@ -29,9 +29,9 @@ namespace StateRepresentation
 
 	void JointState::initialize()
 	{
-		unsigned int size = this->names.size();
-		this->set_empty(true);
+		this->State::initialize();
 		// resize
+		unsigned int size = this->names.size();
 		this->positions.resize(size);
 		this->velocities.resize(size);
 		this->accelerations.resize(size);

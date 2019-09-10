@@ -52,8 +52,8 @@ namespace StateRepresentation
 
 	void DualQuaternionState::initialize()
 	{
-		this->set_empty(true);
-		this->primary = Eigen::Quaterniond(1,0,0,0);
+		this->State::initialize();
+		this->primary = Eigen::Quaterniond::Identity();
 		this->dual = Eigen::Quaterniond(0,0,0,0);
 	}
 
@@ -77,7 +77,7 @@ namespace StateRepresentation
 		}
 		else 
 		{
-			pexps = Eigen::Quaterniond(1,0,0,0);
+			pexps = Eigen::Quaterniond::Identity();
 		}
 		result.set_primary(pexps);
 		result.set_dual(state.get_dual() * pexps);

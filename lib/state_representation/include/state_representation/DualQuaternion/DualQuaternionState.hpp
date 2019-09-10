@@ -124,15 +124,13 @@ namespace StateRepresentation
 
 	inline void DualQuaternionState::set_primary(const Eigen::Quaterniond& primary)
 	{
-		this->reset_timestamp();
-		this->set_empty(false);
+		this->set_filled();
 		this->primary = primary;
 	}
 
 	inline void DualQuaternionState::set_dual(const Eigen::Quaterniond& dual)
 	{
-		this->reset_timestamp();
-		this->set_empty(false);
+		this->set_filled();
 		this->dual = dual;
 	}
 }

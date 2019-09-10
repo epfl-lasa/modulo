@@ -62,9 +62,14 @@ namespace StateRepresentation
 		bool is_empty() const;
 
 		/**
-	 	 * @brief Setter of the empty frame
+	 	 * @brief Setter of the empty attribute to true
 	     */
-		void set_empty(const bool& empty);
+		void set_empty();
+
+		/**
+	 	 * @brief Setter of the empty attribute to false and also reset the timestamp
+	     */
+		void set_filled();
 
 		/**
 	 	 * @brief Getter of the timestamp attribute
@@ -111,7 +116,7 @@ namespace StateRepresentation
 		/**
 	 	 * @brief Initialize the State to a zero value
 	     */
-		virtual void initialize()=0;
+		virtual void initialize();
 
 		/**
 	 	 * @brief Overload the ostream operator for printing
@@ -137,9 +142,15 @@ namespace StateRepresentation
 		return this->empty;
 	}
 
-	inline void State::set_empty(const bool& empty)
+	inline void State::set_empty()
 	{
-		this->empty = empty;
+		this->empty = true;
+	}
+
+	inline void State::set_filled()
+	{
+		this->empty = false;
+		this->reset_timestamp();
 	}
 
 	inline const std::chrono::time_point<std::chrono::steady_clock>& State::get_timestamp() const
@@ -181,6 +192,11 @@ namespace StateRepresentation
 	{
 		bool compatible = (this->name == state.name) && (this->reference_frame == state.reference_frame);
 		return compatible;
+	}
+
+	inline void State::initialize()
+	{
+		this->empty = true;
 	}
 }
 
