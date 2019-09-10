@@ -26,6 +26,12 @@ namespace StateRepresentation
 		this->set_angular_velocity(angular_velocity);
 	}
 
+	CartesianVelocity::CartesianVelocity(const std::string& name, const Eigen::Matrix<double, 6, 1>& twist, const std::string& reference):
+	CartesianState(name, reference)
+	{
+		this->set_twist(twist);
+	}
+
 	CartesianVelocity::CartesianVelocity(const CartesianVelocity& v):
 	CartesianState(v)
 	{}

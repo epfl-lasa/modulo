@@ -55,6 +55,11 @@ namespace StateRepresentation
 		explicit CartesianVelocity(const std::string& name, const Eigen::Vector3d& linear_velocity, const Eigen::Vector3d& angular_velocity, const std::string& reference="world");
 
 		/**
+	 	 * @brief Construct a CartesianVelocity from a single 6d twist vector
+	     */
+		explicit CartesianVelocity(const std::string& name, const Eigen::Matrix<double, 6, 1>& twist, const std::string& reference="world");
+
+		/**
 	 	 * @brief Overload the += operator
 	 	 * @param v CartesianVelocity to add
 	 	 * @return the current CartesianVelocity added the CartesianVelocity given in argument

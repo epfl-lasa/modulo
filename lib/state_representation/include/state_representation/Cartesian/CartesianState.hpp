@@ -158,6 +158,11 @@ namespace StateRepresentation
 		void set_torque(const Eigen::Vector3d& torque);
 
 		/**
+	 	 * @brief Setter of the linear and angular velocities from a single twist vector
+	     */
+		void set_twist(const Eigen::Matrix<double, 6, 1>& twist);
+
+		/**
 	 	 * @brief Initialize the CartesianState to a zero value
 	     */
 		void initialize();
@@ -277,63 +282,63 @@ namespace StateRepresentation
 
 	inline void CartesianState::set_position(const Eigen::Vector3d& position)
 	{
-		this->reset_timestamp();
-		this->set_empty(false);
+		this->set_filled();
 		this->position = position;
 	}
 
 	inline void CartesianState::set_position(const double& x, const double& y, const double& z)
 	{
+		this->set_filled();
 		this->set_position(Eigen::Vector3d(x, y, z));
 	}
 
 	inline void CartesianState::set_orientation(const Eigen::Quaterniond& orientation)
 	{
-		this->reset_timestamp();
-		this->set_empty(false);
+		this->set_filled();
 		this->orientation = (this->orientation.dot(orientation)) > 0 ? orientation.normalized() : Eigen::Quaterniond(-(orientation.normalized()).coeffs());
 	}
 
 	inline void CartesianState::set_linear_velocity(const Eigen::Vector3d& linear_velocity)
 	{
-		this->reset_timestamp();
-		this->set_empty(false);
+		this->set_filled();
 		this->linear_velocity = linear_velocity;
 	}
 
 	inline void CartesianState::set_angular_velocity(const Eigen::Vector3d& angular_velocity)
 	{
-		this->reset_timestamp();
-		this->set_empty(false);
+		this->set_filled();
 		this->angular_velocity = angular_velocity;
 	}
 
 	inline void CartesianState::set_linear_acceleration(const Eigen::Vector3d& linear_acceleration)
 	{
-		this->reset_timestamp();
-		this->set_empty(false);
+		this->set_filled();
 		this->linear_acceleration = linear_acceleration;
 	}
 
 	inline void CartesianState::set_angular_acceleration(const Eigen::Vector3d& angular_acceleration)
 	{
-		this->reset_timestamp();
-		this->set_empty(false);
+		this->set_filled();
 		this->angular_acceleration = angular_acceleration;
 	}
 
 	inline void CartesianState::set_force(const Eigen::Vector3d& force)
 	{
-		this->reset_timestamp();
-		this->set_empty(false);
+		this->set_filled();
 		this->force = force;
 	}
 
 	inline void CartesianState::set_torque(const Eigen::Vector3d& torque)
 	{
-		this->reset_timestamp();
-		this->set_empty(false);
+		this->set_filled();
 		this->torque = torque;
+	}
+
+	inline void CartesianState::set_twist(const Eigen::Matrix<double, 6, 1>& twist)
+	{
+		this->set_filled();
+		this->linear_velocity = twist.head(3);
+		this->angular_velocity = twist.tail(3);
 	}
 }
 
