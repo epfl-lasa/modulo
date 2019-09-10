@@ -39,6 +39,7 @@ set(CORE_SOURCES
   src/DualQuaternion/DualQuaternionState.cpp
   src/DualQuaternion/DualQuaternionPose.cpp
   src/DualQuaternion/DualQuaternionTwist.cpp
+  src/Robot/JacobianMatrix.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED 
