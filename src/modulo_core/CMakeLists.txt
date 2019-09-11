@@ -36,13 +36,16 @@ target_link_libraries(${PROJECT_NAME}
   state_representation
 )
 
-ament_auto_add_executable(${PROJECT_NAME}_utest_architecture_cartesian_space tests/testArchitectureCartesianSpace.cpp)
-target_link_libraries(${PROJECT_NAME}_utest_architecture_cartesian_space ${PROJECT_NAME} protocol_buffers ${PROTOBUF_LIBRARIES})
+ament_auto_add_executable(${PROJECT_NAME}_test_cartesian tests/testCartesian.cpp)
+target_link_libraries(${PROJECT_NAME}_test_cartesian ${PROJECT_NAME} protocol_buffers ${PROTOBUF_LIBRARIES})
 
-ament_auto_add_executable(${PROJECT_NAME}_utest_architecture_joint_space tests/testArchitectureJointSpace.cpp)
-target_link_libraries(${PROJECT_NAME}_utest_architecture_joint_space ${PROJECT_NAME} protocol_buffers ${PROTOBUF_LIBRARIES})
+ament_auto_add_executable(${PROJECT_NAME}_test_joints tests/testJoints.cpp)
+target_link_libraries(${PROJECT_NAME}_test_joints ${PROJECT_NAME} protocol_buffers ${PROTOBUF_LIBRARIES})
 
-ament_auto_add_executable(${PROJECT_NAME}_utest_architecture_dual_quaternion_space tests/testArchitectureDualQuaternionSpace.cpp)
-target_link_libraries(${PROJECT_NAME}_utest_architecture_dual_quaternion_space ${PROJECT_NAME} protocol_buffers ${PROTOBUF_LIBRARIES})
+ament_auto_add_executable(${PROJECT_NAME}_test_dual_quaternions tests/testDualQuaternions.cpp)
+target_link_libraries(${PROJECT_NAME}_test_dual_quaternions ${PROJECT_NAME} protocol_buffers ${PROTOBUF_LIBRARIES})
+
+ament_auto_add_executable(${PROJECT_NAME}_test_mixed tests/testMixed.cpp)
+target_link_libraries(${PROJECT_NAME}_test_mixed ${PROJECT_NAME} protocol_buffers ${PROTOBUF_LIBRARIES})
 
 ament_auto_package()
