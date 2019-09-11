@@ -115,10 +115,12 @@ namespace Modulo
 				state.set_torques(Eigen::VectorXd::Map(msg.effort.data(), msg.effort.size()));
 			}
 
-			/*void update(StateRepresentation::JointState & state, const modulo_msgs::msg::JacobianMatrix & msg)
+			void update(StateRepresentation::JacobianMatrix & state, const modulo_msgs::msg::JacobianMatrix & msg)
 			{
-				state.set_jacobian(Eigen::MatrixXd::Map(msg.data.data(), msg.nb_dimensions, msg.nb_joints)); 
-			}*/
+				state.set_nb_rows(msg.nb_dimensions);
+				state.set_nb_cols(msg.nb_joints);
+				state.set_data(Eigen::MatrixXd::Map(msg.data.data(), msg.nb_dimensions, msg.nb_joints)); 
+			}
 
 			void update(StateRepresentation::DualQuaternionPose & state, const geometry_msgs::msg::Pose & msg)
 			{
@@ -276,14 +278,14 @@ namespace Modulo
 				msg.effort = std::vector<double>(state.get_torques().data(), state.get_torques().data() + state.get_torques().size());
 			}
 
-			/*void extract(modulo_msgs::msg::JacobianMatrix & msg, const StateRepresentation::JointState & state, const rclcpp::Time & time)
+			void extract(modulo_msgs::msg::JacobianMatrix & msg, const StateRepresentation::JacobianMatrix & state, const rclcpp::Time & time)
 			{
 				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
 				msg.header.stamp = time;
-				msg.nb_dimensions = state.get_jacobian().rows();
-				msg.nb_joints = state.get_jacobian().cols();
-				msg.data = std::vector<double>(state.get_jacobian().data(), state.get_jacobian().data() + state.get_jacobian().cols() + state.get_jacobian().rows());		
-			}*/
+				msg.nb_dimensions = state.get_nb_rows();
+				msg.nb_joints = state.get_nb_cols();
+				msg.data = std::vector<double>(state.get_data().data(), state.get_data().data() + state.get_data().size());
+			}
 
 			void extract(geometry_msgs::msg::Pose & msg, const StateRepresentation::DualQuaternionPose & state, const rclcpp::Time &)
 			{

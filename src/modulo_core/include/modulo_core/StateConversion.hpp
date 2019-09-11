@@ -5,6 +5,7 @@
 
 #include "state_representation/Cartesian/CartesianState.hpp"
 #include "state_representation/Joint/JointState.hpp"
+#include "state_representation/Robot/JacobianMatrix.hpp"
 #include "state_representation/DualQuaternion/DualQuaternionPose.hpp"
 #include "state_representation/DualQuaternion/DualQuaternionTwist.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
@@ -47,7 +48,7 @@ namespace Modulo
 
 			void update(StateRepresentation::JointState & state, const sensor_msgs::msg::JointState & msg);
 
-			//void update(StateRepresentation::JointState & state, const modulo_msgs::msg::JacobianMatrix & msg);
+			void update(StateRepresentation::JacobianMatrix & state, const modulo_msgs::msg::JacobianMatrix & msg);
 
 			void update(StateRepresentation::DualQuaternionPose & state, const geometry_msgs::msg::Pose & msg);
 
@@ -82,7 +83,7 @@ namespace Modulo
 
 			void extract(sensor_msgs::msg::JointState & msg, const StateRepresentation::JointState & state, const rclcpp::Time & time);
 
-			//void extract(modulo_msgs::msg::JacobianMatrix & msg, const StateRepresentation::JointState & state, const rclcpp::Time & time);
+			void extract(modulo_msgs::msg::JacobianMatrix & msg, const StateRepresentation::JacobianMatrix & state, const rclcpp::Time & time);
 
 			void extract(geometry_msgs::msg::Pose & msg, const StateRepresentation::DualQuaternionPose & state, const rclcpp::Time & time);
 
