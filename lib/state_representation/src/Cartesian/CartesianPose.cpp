@@ -222,7 +222,7 @@ namespace StateRepresentation
 		{	
 			log_q = orientation.vec() / orientation.vec().norm() * acos(std::min<double>(std::max<double>(orientation.w(),-1),1));	
 		}
-		velocity.set_angular_velocity(log_q / period);
+		velocity.set_angular_velocity(2 * log_q / period);
 		return velocity;
 	}
 
