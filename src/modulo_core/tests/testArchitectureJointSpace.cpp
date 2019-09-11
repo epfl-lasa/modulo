@@ -4,7 +4,7 @@
 #include "dynamical_systems/Linear.hpp"
 #include <iostream>
 
-class LinearMotionGenerator : public ModuloCore::MotionGenerator
+class LinearMotionGenerator : public Modulo::MotionGenerators::MotionGenerator
 {
 private:
 	std::shared_ptr<StateRepresentation::JointState> current_positions;
@@ -39,7 +39,7 @@ public:
 	}
 };
 
-class ConsoleVisualizer : public ModuloCore::Visualizer
+class ConsoleVisualizer : public Modulo::Visualizers::Visualizer
 {
 private:
 	std::shared_ptr<StateRepresentation::JointState> robot_positions;
@@ -66,7 +66,7 @@ public:
 	}
 };
 
-class SimulatedRobotInterface : public ModuloCore::Cell
+class SimulatedRobotInterface : public Modulo::Core::Cell
 {
 private:
 	std::shared_ptr<StateRepresentation::JointState> robot_state;
@@ -94,7 +94,6 @@ public:
 		}
 	}
 };
-
 
 
 /**

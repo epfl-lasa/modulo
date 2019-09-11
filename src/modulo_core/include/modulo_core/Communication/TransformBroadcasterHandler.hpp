@@ -13,26 +13,29 @@
 #include "state_representation/Cartesian/CartesianPose.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
 
-namespace ModuloCore
+namespace Modulo
 {
-	namespace Communication
+	namespace Core
 	{
-		class TransformBroadcasterHandler: public PublisherHandler<StateRepresentation::CartesianPose, tf2_msgs::msg::TFMessage>
+		namespace Communication
 		{
-		public:
-			explicit TransformBroadcasterHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
-			PublisherHandler<StateRepresentation::CartesianPose, tf2_msgs::msg::TFMessage>("tf", recipient, timeout, clock, mutex)
-			{}
-
-			explicit TransformBroadcasterHandler(const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
-			PublisherHandler<StateRepresentation::CartesianPose, tf2_msgs::msg::TFMessage>("tf", std::make_shared<StateRepresentation::CartesianPose>(), timeout, clock, mutex)
-			{}
-
-			inline void send_transform(const StateRepresentation::CartesianPose& transform)
+			class TransformBroadcasterHandler: public PublisherHandler<StateRepresentation::CartesianPose, tf2_msgs::msg::TFMessage>
 			{
-				static_cast<StateRepresentation::CartesianPose&>(this->get_recipient()) = transform;
-			}
-	    };
+			public:
+				explicit TransformBroadcasterHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
+				PublisherHandler<StateRepresentation::CartesianPose, tf2_msgs::msg::TFMessage>("tf", recipient, timeout, clock, mutex)
+				{}
+
+				explicit TransformBroadcasterHandler(const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
+				PublisherHandler<StateRepresentation::CartesianPose, tf2_msgs::msg::TFMessage>("tf", std::make_shared<StateRepresentation::CartesianPose>(), timeout, clock, mutex)
+				{}
+
+				inline void send_transform(const StateRepresentation::CartesianPose& transform)
+				{
+					static_cast<StateRepresentation::CartesianPose&>(this->get_recipient()) = transform;
+				}
+		    };
+		}
 	}
 }
 #endif

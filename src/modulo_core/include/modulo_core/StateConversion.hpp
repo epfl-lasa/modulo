@@ -18,79 +18,82 @@
 #include "rcutils/logging_macros.h"
 #include "rclcpp/time.hpp"
 
-namespace ModuloCore
+namespace Modulo
 {
-	namespace StateConversion
+	namespace Core
 	{
-		// update functions
-		void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::Pose & msg);
+		namespace StateConversion
+		{
+			// update functions
+			void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::Pose & msg);
 
-		void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::PoseStamped & msg);
+			void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::PoseStamped & msg);
 
-		void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::Transform & msg);
+			void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::Transform & msg);
 
-		void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::TransformStamped & msg);
+			void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::TransformStamped & msg);
 
-		void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::Twist & msg);
+			void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::Twist & msg);
 
-		void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::TwistStamped & msg);
+			void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::TwistStamped & msg);
 
-		void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::Accel & msg);
+			void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::Accel & msg);
 
-		void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::AccelStamped & msg);
+			void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::AccelStamped & msg);
 
-		void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::Wrench & msg);
+			void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::Wrench & msg);
 
-		void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::WrenchStamped & msg);
+			void update(StateRepresentation::CartesianState & state, const geometry_msgs::msg::WrenchStamped & msg);
 
-		void update(StateRepresentation::JointState & state, const sensor_msgs::msg::JointState & msg);
+			void update(StateRepresentation::JointState & state, const sensor_msgs::msg::JointState & msg);
 
-		//void update(StateRepresentation::JointState & state, const modulo_msgs::msg::JacobianMatrix & msg);
+			//void update(StateRepresentation::JointState & state, const modulo_msgs::msg::JacobianMatrix & msg);
 
-		void update(StateRepresentation::DualQuaternionPose & state, const geometry_msgs::msg::Pose & msg);
+			void update(StateRepresentation::DualQuaternionPose & state, const geometry_msgs::msg::Pose & msg);
 
-		void update(StateRepresentation::DualQuaternionPose & state, const geometry_msgs::msg::PoseStamped & msg);
+			void update(StateRepresentation::DualQuaternionPose & state, const geometry_msgs::msg::PoseStamped & msg);
 
-		void update(StateRepresentation::DualQuaternionTwist & state, const geometry_msgs::msg::Twist & msg);
+			void update(StateRepresentation::DualQuaternionTwist & state, const geometry_msgs::msg::Twist & msg);
 
-		void update(StateRepresentation::DualQuaternionTwist & state, const geometry_msgs::msg::TwistStamped & msg);
+			void update(StateRepresentation::DualQuaternionTwist & state, const geometry_msgs::msg::TwistStamped & msg);
 
-		//extract functions
-		void extract(geometry_msgs::msg::Quaternion & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time &);
+			//extract functions
+			void extract(geometry_msgs::msg::Quaternion & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time &);
 
-		void extract(geometry_msgs::msg::Pose & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
+			void extract(geometry_msgs::msg::Pose & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
 
-		void extract(geometry_msgs::msg::PoseStamped & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
+			void extract(geometry_msgs::msg::PoseStamped & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
 
-		void extract(geometry_msgs::msg::Transform & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
+			void extract(geometry_msgs::msg::Transform & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
 
-		void extract(geometry_msgs::msg::TransformStamped & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
+			void extract(geometry_msgs::msg::TransformStamped & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
 
-		void extract(geometry_msgs::msg::Twist & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
+			void extract(geometry_msgs::msg::Twist & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
 
-		void extract(geometry_msgs::msg::TwistStamped & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
+			void extract(geometry_msgs::msg::TwistStamped & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
 
-		void extract(geometry_msgs::msg::Accel & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
+			void extract(geometry_msgs::msg::Accel & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
 
-		void extract(geometry_msgs::msg::AccelStamped & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
+			void extract(geometry_msgs::msg::AccelStamped & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
 
-		void extract(geometry_msgs::msg::Wrench & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
+			void extract(geometry_msgs::msg::Wrench & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
 
-		void extract(geometry_msgs::msg::WrenchStamped & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
+			void extract(geometry_msgs::msg::WrenchStamped & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
 
-		void extract(sensor_msgs::msg::JointState & msg, const StateRepresentation::JointState & state, const rclcpp::Time & time);
+			void extract(sensor_msgs::msg::JointState & msg, const StateRepresentation::JointState & state, const rclcpp::Time & time);
 
-		//void extract(modulo_msgs::msg::JacobianMatrix & msg, const StateRepresentation::JointState & state, const rclcpp::Time & time);
+			//void extract(modulo_msgs::msg::JacobianMatrix & msg, const StateRepresentation::JointState & state, const rclcpp::Time & time);
 
-		void extract(geometry_msgs::msg::Pose & msg, const StateRepresentation::DualQuaternionPose & state, const rclcpp::Time & time);
+			void extract(geometry_msgs::msg::Pose & msg, const StateRepresentation::DualQuaternionPose & state, const rclcpp::Time & time);
 
-		void extract(geometry_msgs::msg::PoseStamped & msg, const StateRepresentation::DualQuaternionPose & state, const rclcpp::Time & time);
+			void extract(geometry_msgs::msg::PoseStamped & msg, const StateRepresentation::DualQuaternionPose & state, const rclcpp::Time & time);
 
-		void extract(geometry_msgs::msg::Twist & msg, const StateRepresentation::DualQuaternionTwist & state, const rclcpp::Time & time);
+			void extract(geometry_msgs::msg::Twist & msg, const StateRepresentation::DualQuaternionTwist & state, const rclcpp::Time & time);
 
-		void extract(geometry_msgs::msg::TwistStamped & msg, const StateRepresentation::DualQuaternionTwist & state, const rclcpp::Time & time);
+			void extract(geometry_msgs::msg::TwistStamped & msg, const StateRepresentation::DualQuaternionTwist & state, const rclcpp::Time & time);
 
-		void extract(tf2_msgs::msg::TFMessage & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
+			void extract(tf2_msgs::msg::TFMessage & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
+		}
 	}
 }
 

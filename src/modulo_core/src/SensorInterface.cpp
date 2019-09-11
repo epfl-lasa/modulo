@@ -1,14 +1,31 @@
 #include "modulo_core/SensorInterface.hpp"
 
-namespace ModuloCore
+namespace Modulo
 {
-	SensorInterface::SensorInterface(const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms) : 
-	Cell(node_name, period, intra_process_comms)
-	{}
-
-	rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn SensorInterface::on_configure(const rclcpp_lifecycle::State & state)
+	namespace SensorInterfaces
 	{
-		Cell::on_configure(state);
-		return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+		SensorInterface::SensorInterface(const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms) : 
+		Cell(node_name, period, intra_process_comms)
+		{}
+
+		SensorInterface::~SensorInterface()
+		{
+			this->on_shutdown();
+		}
+
+		void SensorInterface::on_configure()
+		{}
+
+		void SensorInterface::on_activate()
+		{}
+
+		void SensorInterface::on_deactivate()
+		{}
+
+		void SensorInterface::on_cleanup()
+		{}
+
+		void SensorInterface::on_shutdown()
+		{}
 	}
 }

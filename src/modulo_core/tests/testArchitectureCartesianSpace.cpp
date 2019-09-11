@@ -8,8 +8,7 @@
 #include <iostream>
 #include <exception>
 
-
-class LinearMotionGenerator : public ModuloCore::MotionGenerator
+class LinearMotionGenerator : public Modulo::MotionGenerators::MotionGenerator
 {
 private:
 	std::shared_ptr<StateRepresentation::CartesianPose> current_pose;
@@ -43,7 +42,7 @@ public:
 	}
 };
 
-class ConsoleVisualizer : public ModuloCore::Visualizer
+class ConsoleVisualizer : public Modulo::Visualizers::Visualizer
 {
 private:
 	std::shared_ptr<StateRepresentation::CartesianPose> robot_pose;
@@ -83,7 +82,7 @@ public:
 	}
 };
 
-class SimulatedRobotInterface : public ModuloCore::Cell
+class SimulatedRobotInterface : public Modulo::Core::Cell
 {
 private:
 	std::shared_ptr<StateRepresentation::CartesianPose> robot_pose;
@@ -113,7 +112,6 @@ public:
 		this->send_transform(*this->robot_pose);
 	}
 };
-
 
 
 /**

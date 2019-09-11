@@ -12,87 +12,72 @@
 
 #include "modulo_core/Cell.hpp"
 
-namespace ModuloCore
+namespace Modulo
 {
-	class MotionGenerator: public Cell 
+	namespace MotionGenerators
 	{
-	public:
-		/**
-		 * @brief Constructor for the MotionGenerator class
-		 * @param node_name name of the ROS node
-		 * @param period rate used by each publisher of the class
-		 */
-		explicit MotionGenerator(const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms = false);
+		class MotionGenerator: public Core::Cell 
+		{
+		public:
+			/**
+			 * @brief Constructor for the MotionGenerator class
+			 * @param node_name name of the ROS node
+			 * @param period rate used by each publisher of the class
+			 */
+			explicit MotionGenerator(const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms = false);
 
-		/** 
-		 * @brief Abrtract function from the lifecycle interface
-		 *
-		 * This function is used each time the configure call 
-		 * is made from the lifecycle server. It defines all 
-		 * the publishers and subscriptions of the node.
-		 */
-		virtual rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(const rclcpp_lifecycle::State & state);
+			/**
+			 * @brief Destructor
+			 */
+			~MotionGenerator();
 
-		/**
-		 * @brief Transition callback for state activating
-		 *
-		 * on_activate callback is being called when the lifecycle node
-		 * enters the "activating" state.
-		 * Depending on the return value of this function, the state machine
-		 * either invokes a transition to the "active" state or stays
-		 * in "inactive".
-		 * TRANSITION_CALLBACK_SUCCESS transitions to "active"
-		 * TRANSITION_CALLBACK_FAILURE transitions to "inactive"
-		 * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
-		 */
-		virtual rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(const rclcpp_lifecycle::State & state);
+			/**
+			 * @brief This function is called time the configure call 
+			 * is made from the lifecycle server. It is used to
+			 * define behavior such as connecting to a database 
+			 * or resetting an history buffer. After being 
+			 * configured the node can be activated.
+			 */
+			virtual void on_configure();
 
-		/**
-		 * @brief Transition callback for state deactivating
-		 *
-		 * on_deactivate callback is being called when the lifecycle node
-		 * enters the "deactivating" state.
-		 * Depending on the return value of this function, the state machine
-		 * either invokes a transition to the "inactive" state or stays
-		 * in "active".
-		 * TRANSITION_CALLBACK_SUCCESS transitions to "inactive"
-		 * TRANSITION_CALLBACK_FAILURE transitions to "active"
-		 * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
-		 */
-		virtual rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(const rclcpp_lifecycle::State & state);
+			/**
+			 * @brief This function is called time the activate call 
+			 * is made from the lifecycle server. It activates publishing
+			 * and subsciptions and can be extended to start a recording
+			 * or replay.
+			 */
+			virtual void on_activate();
 
-		/**
-		 * @brief Transition callback for state cleaningup
-		 *
-		 * on_cleanup callback is being called when the lifecycle node
-		 * enters the "cleaningup" state.
-		 * Depending on the return value of this function, the state machine
-		 * either invokes a transition to the "unconfigured" state or stays
-		 * in "inactive".
-		 * TRANSITION_CALLBACK_SUCCESS transitions to "unconfigured"
-		 * TRANSITION_CALLBACK_FAILURE transitions to "inactive"
-		 * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
-		 */
-		virtual rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_cleanup(const rclcpp_lifecycle::State & state);
+			/**
+			 * @brief This function is called time the deactivate call 
+			 * is made from the lifecycle server. It deactivates publishing
+			 * and subsciptions and can be extended to stop a recording
+			 * or a replay.
+			 */
+			virtual void on_deactivate();
 
-		/**
-		 * @brief Transition callback for state shutting down
-		 *
-		 * on_shutdown callback is being called when the lifecycle node
-		 * enters the "shuttingdown" state.
-		 * Depending on the return value of this function, the state machine
-		 * either invokes a transition to the "finalized" state or stays
-		 * in its current state.
-		 * TRANSITION_CALLBACK_SUCCESS transitions to "finalized"
-		 * TRANSITION_CALLBACK_FAILURE transitions to current state
-		 * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
-		 */
-		virtual rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_shutdown(const rclcpp_lifecycle::State & state);
+			/**
+			 * @brief This function is called time the cleanup call 
+			 * is made from the lifecycle server. It cleans the node
+			 * and can be extended to close connections to a database
+			 * or delete pointers. After cleanup a new configure call
+			 * can be made.
+			 */
+			virtual void on_cleanup();
 
-		/**
-		 * @brief Function computing one step of calculation. It is called periodically in the run function.
-		 */
-		virtual void step()=0;
-	};
+			/**
+			 * @brief This function is called time the shutdown call 
+			 * is made from the lifecycle server. It terminates the node.
+			 * Each elements needed to be cleaned before termination should
+			 * be here.
+			 */
+			virtual void on_shutdown();
+
+			/**
+			 * @brief Function computing one step of calculation. It is called periodically in the run function.
+			 */
+			virtual void step() = 0;
+		};
+	}
 }
 #endif

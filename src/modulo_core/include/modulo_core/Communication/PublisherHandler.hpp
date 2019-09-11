@@ -11,67 +11,70 @@
 
 #include "modulo_core/Communication/CommunicationHandler.hpp"
 
-namespace ModuloCore
+namespace Modulo
 {
-	namespace Communication
+	namespace Core
 	{
-		template <class RecT, typename MsgT>
-		class PublisherHandler: public CommunicationHandler
+		namespace Communication
 		{
-		private:
-			bool activated_;
-			std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<MsgT> > publisher_;
-			std::shared_ptr<rclcpp::TimerBase> timer_;
-
-		public:
-			explicit PublisherHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
-			CommunicationHandler(channel, recipient, timeout, clock, mutex), activated_(false)
-			{}
-			
-			void publish_callback()
+			template <class RecT, typename MsgT>
+			class PublisherHandler: public CommunicationHandler
 			{
-				if(!this->get_recipient().is_empty() && this->activated_)
-				{	
-					auto out_msg = std::make_unique<MsgT>();
-					std::lock_guard<std::mutex> guard(this->get_mutex());
-					StateConversion::extract(*out_msg, static_cast<RecT&>(this->get_recipient()), this->get_clock().now());
-					this->publisher_->publish(std::move(out_msg));
-				}
-			}
+			private:
+				bool activated_;
+				std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<MsgT> > publisher_;
+				std::shared_ptr<rclcpp::TimerBase> timer_;
 
-			inline void set_publisher(const std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<MsgT> > & publisher)
-			{
-				this->publisher_ = std::move(publisher);
-			}
-
-			inline void set_timer(const std::shared_ptr<rclcpp::TimerBase> & timer)
-			{
-				this->timer_ = std::move(timer);
-			}
-
-			inline void activate()
-			{
-				this->activated_ = true;
-				this->publisher_->on_activate();
-			}
-
-			inline void deactivate()
-			{
-				this->activated_ = false;
-				this->publisher_->on_deactivate();
-			}
-
-			virtual inline void check_timeout()
-			{
-				if(this->get_timeout() != std::chrono::milliseconds(0))
+			public:
+				explicit PublisherHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
+				CommunicationHandler(channel, recipient, timeout, clock, mutex), activated_(false)
+				{}
+				
+				void publish_callback()
 				{
-					if(this->get_recipient().is_deprecated(this->get_timeout()))
-					{
-						this->get_recipient().initialize();
+					if(!this->get_recipient().is_empty() && this->activated_)
+					{	
+						auto out_msg = std::make_unique<MsgT>();
+						std::lock_guard<std::mutex> guard(this->get_mutex());
+						StateConversion::extract(*out_msg, static_cast<RecT&>(this->get_recipient()), this->get_clock().now());
+						this->publisher_->publish(std::move(out_msg));
 					}
 				}
-			}
-		};
+
+				inline void set_publisher(const std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<MsgT> > & publisher)
+				{
+					this->publisher_ = std::move(publisher);
+				}
+
+				inline void set_timer(const std::shared_ptr<rclcpp::TimerBase> & timer)
+				{
+					this->timer_ = std::move(timer);
+				}
+
+				inline void activate()
+				{
+					this->activated_ = true;
+					this->publisher_->on_activate();
+				}
+
+				inline void deactivate()
+				{
+					this->activated_ = false;
+					this->publisher_->on_deactivate();
+				}
+
+				virtual inline void check_timeout()
+				{
+					if(this->get_timeout() != std::chrono::milliseconds(0))
+					{
+						if(this->get_recipient().is_deprecated(this->get_timeout()))
+						{
+							this->get_recipient().initialize();
+						}
+					}
+				}
+			};
+		}
 	}
 }
 #endif

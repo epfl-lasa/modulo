@@ -11,46 +11,49 @@
 
 #include "modulo_core/Communication/CommunicationHandler.hpp"
 
-namespace ModuloCore
+namespace Modulo
 {
-	namespace Communication
+	namespace Core
 	{
-		template <class RecT, typename MsgT>
-		class SubscriptionHandler: public CommunicationHandler
+		namespace Communication
 		{
-		private:
-			std::shared_ptr<rclcpp::Subscription<MsgT> > subscription_;
-
-		public:
-			explicit SubscriptionHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
-			CommunicationHandler(channel, recipient, timeout, clock, mutex)
-			{}
-			
-			void subscription_callback(const std::shared_ptr<MsgT> msg)
+			template <class RecT, typename MsgT>
+			class SubscriptionHandler: public CommunicationHandler
 			{
-				std::lock_guard<std::mutex> guard(this->get_mutex());
-				StateConversion::update(static_cast<RecT&>(this->get_recipient()), *msg);
-			}
+			private:
+				std::shared_ptr<rclcpp::Subscription<MsgT> > subscription_;
 
-			inline void set_subscription(const std::shared_ptr<rclcpp::Subscription<MsgT> > & subscription)
-			{
-				this->subscription_ = std::move(subscription);
-			}
-			
-			inline void activate()
-			{}
-
-			inline void deactivate()
-			{}
-
-			inline void check_timeout()
-			{
-				if(this->get_recipient().is_deprecated(this->get_timeout()))
+			public:
+				explicit SubscriptionHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
+				CommunicationHandler(channel, recipient, timeout, clock, mutex)
+				{}
+				
+				void subscription_callback(const std::shared_ptr<MsgT> msg)
 				{
-					this->get_recipient().initialize();
+					std::lock_guard<std::mutex> guard(this->get_mutex());
+					StateConversion::update(static_cast<RecT&>(this->get_recipient()), *msg);
 				}
-			}
-		};
+
+				inline void set_subscription(const std::shared_ptr<rclcpp::Subscription<MsgT> > & subscription)
+				{
+					this->subscription_ = std::move(subscription);
+				}
+				
+				inline void activate()
+				{}
+
+				inline void deactivate()
+				{}
+
+				inline void check_timeout()
+				{
+					if(this->get_recipient().is_deprecated(this->get_timeout()))
+					{
+						this->get_recipient().initialize();
+					}
+				}
+			};
+		}
 	}
 }
 #endif

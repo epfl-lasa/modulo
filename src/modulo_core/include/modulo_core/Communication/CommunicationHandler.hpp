@@ -18,81 +18,84 @@
 #include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "modulo_core/StateConversion.hpp"
 
-namespace ModuloCore
+namespace Modulo
 {
-	namespace Communication
+	namespace Core
 	{
-		class CommunicationHandler
+		namespace Communication
 		{
-		private:
-			std::string channel_;
-			std::shared_ptr<StateRepresentation::State> recipient_;
-			std::chrono::milliseconds timeout_;
-			std::shared_ptr<rclcpp::Clock> clock_;
-			std::shared_ptr<std::mutex> mutex_;
-			std::unique_lock<std::mutex> lock_;
-
-		public:
-			explicit CommunicationHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
-			channel_(channel), recipient_(recipient), timeout_(timeout), clock_(clock), mutex_(mutex), lock_(*mutex)
+			class CommunicationHandler
 			{
-				this->lock_.unlock();
-			}
+			private:
+				std::string channel_;
+				std::shared_ptr<StateRepresentation::State> recipient_;
+				std::chrono::milliseconds timeout_;
+				std::shared_ptr<rclcpp::Clock> clock_;
+				std::shared_ptr<std::mutex> mutex_;
+				std::unique_lock<std::mutex> lock_;
 
-			inline const StateRepresentation::State& get_recipient() const
-			{
-				return *this->recipient_;
-			}
+			public:
+				explicit CommunicationHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
+				channel_(channel), recipient_(recipient), timeout_(timeout), clock_(clock), mutex_(mutex), lock_(*mutex)
+				{
+					this->lock_.unlock();
+				}
 
-			inline StateRepresentation::State& get_recipient()
-			{
-				return *this->recipient_;
-			}
+				inline const StateRepresentation::State& get_recipient() const
+				{
+					return *this->recipient_;
+				}
 
-			inline const std::string& get_channel() const
-			{
-				return this->channel_;
-			}
+				inline StateRepresentation::State& get_recipient()
+				{
+					return *this->recipient_;
+				}
 
-			inline const std::chrono::milliseconds& get_timeout() const
-			{
-				return this->timeout_;
-			}
+				inline const std::string& get_channel() const
+				{
+					return this->channel_;
+				}
 
-			inline const rclcpp::Clock& get_clock() const
-			{
-				return *this->clock_;
-			}
+				inline const std::chrono::milliseconds& get_timeout() const
+				{
+					return this->timeout_;
+				}
 
-			inline rclcpp::Clock& get_clock()
-			{
-				return *this->clock_;
-			}
+				inline const rclcpp::Clock& get_clock() const
+				{
+					return *this->clock_;
+				}
 
-			inline std::mutex& get_mutex()
-			{
-				return *this->mutex_;
-			}
+				inline rclcpp::Clock& get_clock()
+				{
+					return *this->clock_;
+				}
 
-			inline void lock()
-			{
-				this->lock_.lock();
-			}
+				inline std::mutex& get_mutex()
+				{
+					return *this->mutex_;
+				}
 
-			inline void unlock()
-			{
-				this->lock_.unlock();
-			}
+				inline void lock()
+				{
+					this->lock_.lock();
+				}
 
-			inline virtual void activate()
-			{}
+				inline void unlock()
+				{
+					this->lock_.unlock();
+				}
 
-			inline virtual void deactivate()
-			{}
+				inline virtual void activate()
+				{}
 
-			inline virtual void check_timeout()
-			{}
-		};
+				inline virtual void deactivate()
+				{}
+
+				inline virtual void check_timeout()
+				{}
+			};
+		}
 	}
 }
 #endif

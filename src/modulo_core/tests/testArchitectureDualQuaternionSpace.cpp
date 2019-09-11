@@ -5,7 +5,8 @@
 #include <eigen3/Eigen/Core>
 #include <iostream>
 
-class LinearMotionGenerator : public ModuloCore::MotionGenerator
+
+class LinearMotionGenerator : public Modulo::MotionGenerators::MotionGenerator
 {
 public:
 	std::shared_ptr<StateRepresentation::DualQuaternionPose> current_pose;
@@ -38,7 +39,7 @@ public:
 	}
 };
 
-class ConsoleVisualizer : public ModuloCore::Visualizer
+class ConsoleVisualizer : public Modulo::Visualizers::Visualizer
 {
 public:
 	std::shared_ptr<StateRepresentation::DualQuaternionPose> robot_pose;
@@ -65,7 +66,7 @@ public:
 	}
 };
 
-class SimulatedRobotInterface : public ModuloCore::Cell
+class SimulatedRobotInterface : public Modulo::Core::Cell
 {
 public:
 	std::shared_ptr<StateRepresentation::DualQuaternionPose> robot_pose;
@@ -92,7 +93,6 @@ public:
 		this->robot_pose->set_position(this->robot_pose->get_position() + Eigen::Vector3d::Random()*0.001);
 	}
 };
-
 
 
 /**
