@@ -88,7 +88,7 @@ private:
 	std::shared_ptr<StateRepresentation::CartesianPose> robot_pose;
 	std::shared_ptr<StateRepresentation::CartesianVelocity> desired_velocity;
 	std::shared_ptr<StateRepresentation::CartesianPose> fixed_transform;
-	double dt;
+	std::chrono::milliseconds dt;
 
 public:
 	explicit SimulatedRobotInterface(const std::string & node_name, const std::chrono::milliseconds & period):
@@ -96,7 +96,7 @@ public:
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot", 0, 0, 0)),
 	desired_velocity(std::make_shared<StateRepresentation::CartesianVelocity>("robot")),
 	fixed_transform(std::make_shared<StateRepresentation::CartesianPose>("robot_base", 4, 5, 3, "robot")),
-	dt(0.001)
+	dt(period)
 	{
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_velocity", this->desired_velocity);
 		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot/pose", this->robot_pose, std::chrono::milliseconds(0));
