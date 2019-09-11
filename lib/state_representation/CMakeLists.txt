@@ -102,4 +102,12 @@ if (runtests)
     )
     add_test(NAME runTestDualQuaternionState COMMAND runTestDualQuaternionState)
 
+    add_executable(runTestJacobianMatrix tests/testJacobianMatrix.cpp)
+    target_link_libraries(runTestJacobianMatrix
+      gtest 
+      gtest_main
+      ${PROJECT_NAME}
+    )
+    add_test(NAME runTestJacobianMatrix COMMAND runTestJacobianMatrix)
+
 endif()

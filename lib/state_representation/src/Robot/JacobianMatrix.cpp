@@ -53,30 +53,34 @@ namespace StateRepresentation
 	const Eigen::MatrixXd JacobianMatrix::operator*(const Eigen::MatrixXd& matrix) const
 	{
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
-		if(matrix.cols() != this->get_nb_cols()) throw IncompatibleSizeException("Input matrix is of incorrect size");
-		Eigen::MatrixXd result = this->get_data() * matrix;
-		return result;
+		if(matrix.rows() != this->get_nb_cols()) throw IncompatibleSizeException("Input matrix is of incorrect size");
+		return this->get_data() * matrix;
 	}
 
 	const CartesianVelocity JacobianMatrix::operator*(const JointVelocities& dq) const
 	{
-		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
 		if(dq.is_empty()) throw EmptyStateException(dq.get_name() + " state is empty");
 		if(!this->is_compatible(dq)) throw IncompatibleStatesException("The JacobianMatrix and the input JointVelocities are incompatible");
-		Eigen::Matrix<double, 6, 1> twist = this->get_data() * dq.get_velocities();
+		Eigen::Matrix<double, 6, 1> twist = (*this) * dq.get_velocities();
 		// crate a CartesianVelocity with name "robot"_end_effector and reference frame "robot"_base
 		CartesianVelocity result(this->get_name() + "_end_effector", twist, this->get_name() + "_base");
 		return result;
 	}
 
-	const JointVelocities JacobianMatrix::solve(const CartesianVelocity& dX) const
+	const Eigen::MatrixXd JacobianMatrix::solve(const Eigen::MatrixXd& matrix) const
 	{
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
+		if(this->get_nb_rows() != matrix.rows()) throw IncompatibleSizeException("Input matrix is of incorrect size");
+		return this->get_data().colPivHouseholderQr().solve(matrix);
+	}
+
+	const JointVelocities JacobianMatrix::solve(const CartesianVelocity& dX) const
+	{
 		if(dX.is_empty()) throw EmptyStateException(dX.get_name() + " state is empty");
 		// extract the velocity as a 6d vector
 		auto twist = dX.get_twist();
 		// this use the solve operation instead of using the inverse or pseudo-inverse of the jacobian
-		Eigen::VectorXd joint_velocities = this->get_data().colPivHouseholderQr().solve(twist);
+		Eigen::VectorXd joint_velocities = (*this).solve(twist);
 		// return a JointVelocities state
 		JointVelocities result(this->get_name(), this->get_joint_names(), joint_velocities);
 		return result;

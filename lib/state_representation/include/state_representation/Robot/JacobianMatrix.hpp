@@ -144,6 +144,13 @@ namespace StateRepresentation
 		const CartesianVelocity operator*(const JointVelocities& dq) const;
 
 		/**
+	 	 * @brief Solve the system X = inv(J)*M to obtain X which is more efficient than multiplying with the pseudo-inverse
+	 	 * @param matrix the matrix to solve the system with
+	 	 * @return result of X = J.solve(M) from Eigne decomposition
+	     */
+		const Eigen::MatrixXd solve(const Eigen::MatrixXd& matrix) const;
+
+		/**
 	 	 * @brief Solve the system dX = J*dq to obtain dq which is more efficient than multiplying with the pseudo-inverse
 	 	 * @param dX the cartesian velocity to multiply with
 	 	 * @return this result into a JointVelocities
