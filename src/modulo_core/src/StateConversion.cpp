@@ -157,7 +157,7 @@ namespace Modulo
 			// extract functions
 			void extract(geometry_msgs::msg::Quaternion & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time &)
 			{
-				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 				// orientation
 				msg.w = state.get_orientation().w();
 				msg.x = state.get_orientation().x();
@@ -167,7 +167,7 @@ namespace Modulo
 
 			void extract(geometry_msgs::msg::Pose & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time &)
 			{
-				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 				// position
 				msg.position.x = state.get_position()(0);
 				msg.position.y = state.get_position()(1);
@@ -188,7 +188,7 @@ namespace Modulo
 
 			void extract(geometry_msgs::msg::Transform & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time &)
 			{
-				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 				// position 
 				msg.translation.x = state.get_position()(0);
 				msg.translation.y = state.get_position()(1);
@@ -210,7 +210,7 @@ namespace Modulo
 
 			void extract(geometry_msgs::msg::Twist & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time &)
 			{
-				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 				// linear velocity
 				msg.linear.x = state.get_linear_velocity()(0);
 				msg.linear.y = state.get_linear_velocity()(1);
@@ -230,7 +230,7 @@ namespace Modulo
 
 			void extract(geometry_msgs::msg::Accel & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time &)
 			{
-				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 				// linear acceleration
 				msg.linear.x = state.get_linear_acceleration()(0);
 				msg.linear.y = state.get_linear_acceleration()(1);
@@ -250,7 +250,7 @@ namespace Modulo
 
 			void extract(geometry_msgs::msg::Wrench & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time &)
 			{
-				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 				// force
 				msg.force.x = state.get_force()(0);
 				msg.force.y = state.get_force()(1);
@@ -270,7 +270,7 @@ namespace Modulo
 
 			void extract(sensor_msgs::msg::JointState & msg, const StateRepresentation::JointState & state, const rclcpp::Time & time)
 			{
-				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 				msg.header.stamp = time;
 				msg.name = state.get_names();
 				msg.position = std::vector<double>(state.get_positions().data(), state.get_positions().data() + state.get_positions().size());
@@ -280,7 +280,7 @@ namespace Modulo
 
 			void extract(modulo_msgs::msg::JacobianMatrix & msg, const StateRepresentation::JacobianMatrix & state, const rclcpp::Time & time)
 			{
-				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 				msg.header.stamp = time;
 				msg.nb_dimensions = state.get_nb_rows();
 				msg.nb_joints = state.get_nb_cols();
@@ -289,7 +289,7 @@ namespace Modulo
 
 			void extract(geometry_msgs::msg::Pose & msg, const StateRepresentation::DualQuaternionPose & state, const rclcpp::Time &)
 			{
-				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 				// position
 				msg.position.x = state.get_position()(0);
 				msg.position.y = state.get_position()(1);
@@ -310,7 +310,7 @@ namespace Modulo
 
 			void extract(geometry_msgs::msg::Twist & msg, const StateRepresentation::DualQuaternionTwist & state, const rclcpp::Time &)
 			{
-				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 				Eigen::Vector3d linear = state.get_linear_velocity();
 				Eigen::Vector3d angular = state.get_angular_velocity();
 
@@ -332,7 +332,7 @@ namespace Modulo
 
 			void extract(tf2_msgs::msg::TFMessage & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time)
 			{
-				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+				if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 				geometry_msgs::msg::TransformStamped transform;
 				extract(transform, state, time);
 				msg.transforms.push_back(transform);

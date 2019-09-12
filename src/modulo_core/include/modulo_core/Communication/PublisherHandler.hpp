@@ -32,10 +32,10 @@ namespace Modulo
 				
 				void publish_callback()
 				{
+					std::lock_guard<std::mutex> guard(this->get_mutex());
 					if(!this->get_recipient().is_empty() && this->activated_)
 					{	
 						auto out_msg = std::make_unique<MsgT>();
-						std::lock_guard<std::mutex> guard(this->get_mutex());
 						StateConversion::extract(*out_msg, static_cast<RecT&>(this->get_recipient()), this->get_clock().now());
 						this->publisher_->publish(std::move(out_msg));
 					}

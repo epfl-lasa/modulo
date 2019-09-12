@@ -93,14 +93,15 @@ public:
 	dt(period)
 	{
 		this->add_subscription<sensor_msgs::msg::JointState>("/ds/joint_velocities", this->desired_velocities);
-		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot/eef_pose", this->robot_pose, std::chrono::milliseconds(0));
-		this->add_publisher<modulo_msgs::msg::JacobianMatrix>("/robot/jacobian", this->jacobian, std::chrono::milliseconds(0));
+		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot/eef_pose", this->robot_pose);
+		this->add_publisher<modulo_msgs::msg::JacobianMatrix>("/robot/jacobian", this->jacobian);
 	}
 
 	void step()
 	{
-		// read the jacobian
+		// read the jacobian and robot_pose
 		this->jacobian->set_data(Eigen::Matrix<double,6,6>::Identity() + 0.001*Eigen::Matrix<double,6,6>::Random());
+		this->robot_pose->set_position(this->robot_pose->get_position() + 0.001*Eigen::Vector3d::Random());
 		if(!this->desired_velocities->is_empty())
 		{
 			*this->robot_pose = dt * ((*this->jacobian) * (*this->desired_velocities));
@@ -124,7 +125,7 @@ int main(int argc, char * argv[])
 	rclcpp::init(argc, argv);
 
 	rclcpp::executors::SingleThreadedExecutor exe;
-	const std::chrono::milliseconds period(5);
+	const std::chrono::milliseconds period(1);
 	std::shared_ptr<LinearMotionGenerator> lmg = std::make_shared<LinearMotionGenerator>("motion_generator", period);
 	std::shared_ptr<ConsoleVisualizer> cv = std::make_shared<ConsoleVisualizer>("visualizer", period);
 	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", period);

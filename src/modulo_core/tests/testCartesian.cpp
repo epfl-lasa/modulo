@@ -129,7 +129,7 @@ int main(int argc, char * argv[])
 	rclcpp::init(argc, argv);
 
 	rclcpp::executors::SingleThreadedExecutor exe;
-	const std::chrono::milliseconds period(100);
+	const std::chrono::milliseconds period(1);
 	std::shared_ptr<LinearMotionGenerator> lmg = std::make_shared<LinearMotionGenerator>("motion_generator", period);
 	std::shared_ptr<ConsoleVisualizer> cv = std::make_shared<ConsoleVisualizer>("visualizer", period);
 	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", period);
