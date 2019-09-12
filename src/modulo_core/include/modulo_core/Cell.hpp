@@ -152,11 +152,12 @@ namespace Modulo
 			 * @brief Template function to add a generic publisher to the map of handlers
 			 * @param channel unique name of the publish channel that is used as key to the map
 			 * @param recipient the state that contain the data to be published
+			 * @param nb_period_to_timeout the number of period before considering that the publisher has timeout 
 			 */
 			template <typename MsgT, class RecT>
-			void add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, int queue_size=10)
+			void add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10)
 			{
-				this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, 2*this->period_, queue_size);
+				this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, nb_period_to_timeout*this->period_, queue_size);
 			}
 
 			/**
@@ -186,10 +187,11 @@ namespace Modulo
 			/**
 			 * @brief Function to add a generic transform broadcaster to the map of handlers
 			 * @param recipient the state that contain the data to be published
+			 * @param nb_period_to_timeout the number of period before considering that the broadcaster has timeout 
 			 */
-			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, int queue_size=10)
+			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10)
 			{
-				this->add_asynchronous_transform_broadcaster(recipient, this->period_, 2*this->period_, queue_size);
+				this->add_asynchronous_transform_broadcaster(recipient, this->period_, nb_period_to_timeout*this->period_, queue_size);
 			}
 
 			/**
@@ -229,11 +231,12 @@ namespace Modulo
 			 * @brief Template function to add a generic subscription to the map of handlers
 			 * @param channel unique name of the subscription channel that is used as key to the map
 			 * @param recipient the state that will contain the received data
+			 * @param nb_period_to_timeout the number of period before considering that the subscription has timeout 
 			 */
 			template <typename MsgT, class RecT>
-			void add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, int queue_size=10)
+			void add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10)
 			{
-				this->add_subscription<MsgT, RecT>(channel, recipient, 2*this->period_, queue_size);
+				this->add_subscription<MsgT, RecT>(channel, recipient, nb_period_to_timeout*this->period_, queue_size);
 			}
 
 			/**

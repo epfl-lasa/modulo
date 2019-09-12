@@ -15,8 +15,8 @@ namespace Modulo
 			std::function<void(void)> run_fnc = std::bind(&Cell::run, this);
 			this->run_thread = std::thread(run_fnc);
 			// add default transform broadcaster and transform listener
-			this->add_transform_broadcaster(this->period_, 2*this->period_);
-			this->add_transform_listener(2*this->period_);
+			this->add_transform_broadcaster(this->period_, 10*this->period_);
+			this->add_transform_listener(10*this->period_);
 		}
 
 		Cell::~Cell()
