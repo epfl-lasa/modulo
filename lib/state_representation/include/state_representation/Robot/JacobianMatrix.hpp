@@ -181,6 +181,12 @@ namespace StateRepresentation
 		const double& operator()(unsigned int row, unsigned int col) const;
 
 		/**
+		 * @brief Return a copy of the JointPositions
+		 * @return the copy
+		 */
+		const JacobianMatrix copy() const;
+
+		/**
 	 	 * @brief Overload the ostream operator for printing
 	 	 * @param os the ostream to append the string representing the matrix to
 	 	 * @param matrix the matrix to print

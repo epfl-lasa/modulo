@@ -168,6 +168,12 @@ namespace StateRepresentation
 		void initialize();
 
 		/**
+		 * @brief Return a copy of the CartesianState
+		 * @return the copy
+		 */
+		const CartesianState copy() const;
+
+		/**
 	 	 * @brief Serialize the state to a string using protobuf
 	 	 * @return the serialized object
 	     */

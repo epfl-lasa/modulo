@@ -96,6 +96,12 @@ namespace StateRepresentation
 		const JointVelocities operator-(const JointVelocities& velocities) const;
 
 		/**
+		 * @brief Return a copy of the JointVelocities
+		 * @return the copy
+		 */
+		const JointVelocities copy() const;
+
+		/**
 	 	 * @brief Overload the ostream operator for printing
 	 	 * @param os the ostream to append the string representing the state
 	 	 * @param state the state to print

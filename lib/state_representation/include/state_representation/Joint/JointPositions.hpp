@@ -96,6 +96,12 @@ namespace StateRepresentation
 		const JointPositions operator-(const JointPositions& positions) const;
 
 		/**
+		 * @brief Return a copy of the JointPositions
+		 * @return the copy
+		 */
+		const JointPositions copy() const;
+
+		/**
 	 	 * @brief Overload the ostream operator for printing
 	 	 * @param os the ostream to append the string representing the state
 	 	 * @param state the state to print

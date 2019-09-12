@@ -90,6 +90,12 @@ namespace StateRepresentation
 		virtual void initialize();
 
 		/**
+		 * @brief Return a copy of the DualQuaternionState
+		 * @return the copy
+		 */
+		const DualQuaternionState copy() const;
+
+		/**
 	 	 * @brief Overload the * operator with a scalar
 	 	 * @param lambda the scalar to multiply with
 	 	 * @return the DualQuaternionState provided multiply by lambda

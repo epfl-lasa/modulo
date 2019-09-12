@@ -127,6 +127,12 @@ namespace StateRepresentation
 		const CartesianVelocity clamped(double max_linear, double max_angular, double noise_ratio=0) const;
 
 		/**
+		 * @brief Return a copy of the CartesianVelocity
+		 * @return the copy
+		 */
+		const CartesianVelocity copy() const;
+
+		/**
 	 	 * @brief Overload the ostream operator for printing
 	 	 * @param os the ostream to happend the string representing the CartesianVelocity to
 	 	 * @param CartesianVelocity the CartesianVelocity to print

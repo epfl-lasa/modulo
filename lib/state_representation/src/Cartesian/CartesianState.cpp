@@ -101,6 +101,12 @@ namespace StateRepresentation
 		return result;
 	}
 
+	const CartesianState CartesianState::copy() const
+	{
+		CartesianState result(*this);
+		return result;
+	}
+
 	std::ostream& operator<<(std::ostream& os, const CartesianState& state) 
 	{ 
 		if(state.is_empty())

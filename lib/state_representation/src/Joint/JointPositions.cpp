@@ -77,6 +77,12 @@ namespace StateRepresentation
 		return result;
 	}
 
+	const JointPositions JointPositions::copy() const
+	{
+		JointPositions result(*this);
+		return result;
+	}
+
 	std::ostream& operator<<(std::ostream& os, const JointPositions& positions)
 	{
 		if(positions.is_empty())

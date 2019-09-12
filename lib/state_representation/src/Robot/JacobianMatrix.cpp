@@ -91,6 +91,12 @@ namespace StateRepresentation
 		return this->solve(dX);
 	}
 
+	const JacobianMatrix JacobianMatrix::copy() const
+	{
+		JacobianMatrix result(*this);
+		return result;
+	}
+
 	std::ostream& operator<<(std::ostream& os, const JacobianMatrix& matrix)
 	{
 		if(matrix.is_empty())

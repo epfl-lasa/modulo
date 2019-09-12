@@ -35,6 +35,12 @@ namespace StateRepresentation
 		this->linear_velocity = Eigen::Vector3d(0,0,0);
 	}
 
+	const DualQuaternionTwist DualQuaternionTwist::copy() const
+	{
+		DualQuaternionTwist result(*this);
+		return result;
+	}
+
 	std::ostream& operator<<(std::ostream& os, const DualQuaternionTwist& state) 
 	{ 
 		if(state.is_empty())

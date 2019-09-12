@@ -133,6 +133,12 @@ namespace StateRepresentation
 		return result;
 	}
 
+	const CartesianVelocity CartesianVelocity::copy() const
+	{
+		CartesianVelocity result(*this);
+		return result;
+	}
+
 	std::ostream& operator<<(std::ostream& os, const CartesianVelocity& velocity) 
 	{
 		if(velocity.is_empty())

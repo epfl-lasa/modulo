@@ -116,6 +116,12 @@ namespace StateRepresentation
 	     */
 		void initialize();
 
+		/**
+		 * @brief Return a copy of the DualQuaternionPose
+		 * @return the copy
+		 */
+		const DualQuaternionPose copy() const;
+
 		friend const DualQuaternionState log(const DualQuaternionPose& state);
 
 		/**

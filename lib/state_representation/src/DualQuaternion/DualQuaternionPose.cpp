@@ -93,6 +93,12 @@ namespace StateRepresentation
 		this->position = Eigen::Vector3d(0,0,0);
 	}
 
+	const DualQuaternionPose DualQuaternionPose::copy() const
+	{
+		DualQuaternionPose result(*this);
+		return result;
+	}
+
 	const DualQuaternionState log(const DualQuaternionPose& state)
 	{
 		DualQuaternionState result(state.get_name(), state.get_reference_frame());

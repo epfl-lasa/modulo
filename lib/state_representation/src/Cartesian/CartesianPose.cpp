@@ -158,6 +158,12 @@ namespace StateRepresentation
 		return result;
 	}
 
+	const CartesianPose CartesianPose::copy() const
+	{
+		CartesianPose result(*this);
+		return result;
+	}
+
 	const Eigen::Array2d CartesianPose::dist(const CartesianPose& pose) const
 	{
 		// sanity check

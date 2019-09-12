@@ -84,6 +84,12 @@ namespace StateRepresentation
 		return result;
 	}
 
+	const DualQuaternionState DualQuaternionState::copy() const
+	{
+		DualQuaternionState result(*this);
+		return result;
+	}
+
 	std::ostream& operator<<(std::ostream& os, const DualQuaternionState& state) 
 	{ 
 		if(state.is_empty())

@@ -127,6 +127,12 @@ namespace StateRepresentation
 		void initialize();
 
 		/**
+		 * @brief Return a copy of the JointState
+		 * @return the copy
+		 */
+		const JointState copy() const;
+
+		/**
 	 	 * @brief Overload the += operator
 	 	 * @param js JointState to add
 	 	 * @return the current JointState added the JointState given in argument

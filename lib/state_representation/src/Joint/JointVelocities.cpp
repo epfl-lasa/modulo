@@ -77,6 +77,12 @@ namespace StateRepresentation
 		return result;
 	}
 
+	const JointVelocities JointVelocities::copy() const
+	{
+		JointVelocities result(*this);
+		return result;
+	}
+
 	std::ostream& operator<<(std::ostream& os, const JointVelocities& velocities)
 	{
 		if(velocities.is_empty())

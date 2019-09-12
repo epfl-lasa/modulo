@@ -85,6 +85,12 @@ namespace StateRepresentation
 		return result;
 	}
 
+	const JointState JointState::copy() const
+	{
+		JointState result(*this);
+		return result;
+	}
+
 	std::ostream& operator<<(std::ostream& os, const JointState& state) 
 	{
 		if(state.is_empty())

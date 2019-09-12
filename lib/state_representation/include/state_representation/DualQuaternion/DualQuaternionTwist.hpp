@@ -78,6 +78,12 @@ namespace StateRepresentation
 		void initialize();
 
 		/**
+		 * @brief Return a copy of the DualQuaternionTwist
+		 * @return the copy
+		 */
+		const DualQuaternionTwist copy() const;
+
+		/**
 	 	 * @brief Overload the ostream operator for printing
 	 	 * @param os the ostream to happend the string representing the state to
 	 	 * @param state the state to print

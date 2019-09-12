@@ -137,6 +137,12 @@ namespace StateRepresentation
 		const CartesianPose inverse() const;
 
 		/**
+		 * @brief Return a copy of the CartesianPose
+		 * @return the copy
+		 */
+		const CartesianPose copy() const;
+
+		/**
 		 * @brief compute the distance between current CartesianPose and the one given in argument
 		 * @param the second CartesianPose
 		 * @return the distance beteen the two poses both in position and orientation
