@@ -89,6 +89,10 @@ namespace Modulo
 				return this->handlers_;
 			}
 
+			inline std::mutex& get_mutex()
+			{
+				return (*this->mutex_);
+			}
 
 		public:
 			/**
