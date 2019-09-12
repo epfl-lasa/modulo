@@ -25,7 +25,7 @@ namespace Modulo
 				std::unique_ptr<tf2_ros::TransformListener> tf_listener_;
 
 			public:
-				explicit TransformListenerHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
+				explicit TransformListenerHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
 				CommunicationHandler("tf_listener", recipient, timeout, clock, mutex), buffer_(clock) 
 				{
 					this->tf_listener_ = std::make_unique<tf2_ros::TransformListener>(buffer_);

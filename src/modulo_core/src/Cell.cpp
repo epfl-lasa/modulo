@@ -31,12 +31,11 @@ namespace Modulo
 
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_configure(const rclcpp_lifecycle::State &) 
 		{
-			std::unique_lock<std::mutex> lck(*this->mutex_);
+			std::lock_guard<std::mutex> lock(*this->mutex_);
 			this->active_ = false;
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_configure() is called.");
 			// call the proxy on_configure function
 			this->on_configure();
-			lck.unlock();
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
@@ -45,7 +44,7 @@ namespace Modulo
 
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_activate(const rclcpp_lifecycle::State &)
 		{
-			std::unique_lock<std::mutex> lck(*this->mutex_);
+			std::lock_guard<std::mutex> lock(*this->mutex_);
 			this->active_ = true;
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
 			for (auto &h : this->handlers_)
@@ -54,7 +53,6 @@ namespace Modulo
 			}
 			// call the proxy on_activate function
 			this->on_activate();
-			lck.unlock();
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
@@ -63,7 +61,7 @@ namespace Modulo
 
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_deactivate(const rclcpp_lifecycle::State &)
 		{
-			std::unique_lock<std::mutex> lck(*this->mutex_);
+			std::lock_guard<std::mutex> lock(*this->mutex_);
 			this->active_ = false;
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_deactivate() is called.");
 			for (auto &h : this->handlers_)
@@ -72,7 +70,6 @@ namespace Modulo
 			}
 			// call the proxy on_deactivate function
 			this->on_deactivate();
-			lck.unlock();
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
@@ -81,12 +78,11 @@ namespace Modulo
 
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_cleanup(const rclcpp_lifecycle::State &) 
 		{
-			std::unique_lock<std::mutex> lck(*this->mutex_);
+			std::lock_guard<std::mutex> lock(*this->mutex_);
 			this->active_ = false;
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_cleanup() is called.");
 			// call the proxy on_cleanup function
 			this->on_cleanup();
-			lck.unlock();
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
@@ -95,14 +91,13 @@ namespace Modulo
 
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_shutdown(const rclcpp_lifecycle::State & state) 
 		{
-			std::unique_lock<std::mutex> lck(*this->mutex_);
+			std::lock_guard<std::mutex> lock(*this->mutex_);
 			this->running_ = false;
 			this->active_ = false;
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_shutdown() is called from state %s.", state.label().c_str());
 			this->reset();
 			// call the proxy on_shutdown function
 			this->on_shutdown();
-			lck.unlock();
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 

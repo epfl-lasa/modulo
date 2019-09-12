@@ -22,7 +22,7 @@ namespace Modulo
 			class TransformBroadcasterHandler: public PublisherHandler<StateRepresentation::CartesianPose, tf2_msgs::msg::TFMessage>
 			{
 			public:
-				explicit TransformBroadcasterHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
+				explicit TransformBroadcasterHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
 				PublisherHandler<StateRepresentation::CartesianPose, tf2_msgs::msg::TFMessage>("tf", recipient, timeout, clock, mutex)
 				{}
 

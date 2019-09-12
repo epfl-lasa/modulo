@@ -32,14 +32,11 @@ namespace Modulo
 				std::chrono::milliseconds timeout_;
 				std::shared_ptr<rclcpp::Clock> clock_;
 				std::shared_ptr<std::mutex> mutex_;
-				std::unique_lock<std::mutex> lock_;
 
 			public:
-				explicit CommunicationHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
-				channel_(channel), recipient_(recipient), timeout_(timeout), clock_(clock), mutex_(mutex), lock_(*mutex)
-				{
-					this->lock_.unlock();
-				}
+				explicit CommunicationHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
+				channel_(channel), recipient_(recipient), timeout_(timeout), clock_(clock), mutex_(mutex)
+				{}
 
 				inline const StateRepresentation::State& get_recipient() const
 				{
@@ -74,16 +71,6 @@ namespace Modulo
 				inline std::mutex& get_mutex()
 				{
 					return *this->mutex_;
-				}
-
-				inline void lock()
-				{
-					this->lock_.lock();
-				}
-
-				inline void unlock()
-				{
-					this->lock_.unlock();
 				}
 
 				inline virtual void activate()
