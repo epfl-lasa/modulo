@@ -21,12 +21,13 @@ namespace Modulo
 		class RobotInterface: public Core::Cell 
 		{
 		protected:
-			std::string robot_name_;
+			std::string robot_name_; ///< name of the robot to control
 			std::string robot_ip_; ///< ip adress of the robot to control
-			std::shared_ptr<StateRepresentation::CartesianState> current_cartesian_state;
-			std::shared_ptr<StateRepresentation::JointState> current_joint_state;
-			std::shared_ptr<StateRepresentation::CartesianState> desired_cartesian_state;
-			std::shared_ptr<StateRepresentation::JointState> desired_joint_state;
+			std::shared_ptr<StateRepresentation::CartesianState> current_cartesian_state; ///< pointer to the current cartesian state
+			std::shared_ptr<StateRepresentation::JointState> current_joint_state; ///< pointer to the current joint state
+			std::shared_ptr<StateRepresentation::JacobianMatrix> jacobian; ///< pointer to the jacobian
+			std::shared_ptr<StateRepresentation::CartesianState> desired_cartesian_state; ///< pointer to the desired cartesian state
+			std::shared_ptr<StateRepresentation::JointState> desired_joint_state; ///< pointer to the desired joint state
 
 		public:
 			/**
