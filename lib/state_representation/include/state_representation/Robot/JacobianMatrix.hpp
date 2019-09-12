@@ -36,7 +36,7 @@ namespace StateRepresentation
 	 	 * @brief name the name of the robot associated to
 	 	 * @brief nb_joints the number of joints
 	     */
-		explicit JacobianMatrix(const std::string& robot_name, unsigned int nb_joints);
+		explicit JacobianMatrix(const std::string& robot_name, unsigned int nb_joints=0);
 
 		/**
 	 	 * @brief Constructor with name and list of joint names provided
