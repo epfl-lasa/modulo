@@ -50,8 +50,8 @@ namespace DynamicalSystems
 	template<>
 	const StateRepresentation::CartesianState Linear<StateRepresentation::CartesianState>::evaluate(const StateRepresentation::CartesianState& state) const
 	{
-		StateRepresentation::CartesianVelocity velocity = - this->get_gain() * (static_cast<const StateRepresentation::CartesianPose&>(state) - static_cast<const StateRepresentation::CartesianPose&>(this->get_attractor()));
-		return velocity;
+		StateRepresentation::CartesianTwist twist = - this->get_gain() * (static_cast<const StateRepresentation::CartesianPose&>(state) - static_cast<const StateRepresentation::CartesianPose&>(this->get_attractor()));
+		return twist;
 	}
 
 	template<>

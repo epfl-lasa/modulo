@@ -1,7 +1,7 @@
 #include "modulo_core/MotionGenerator.hpp"
 #include "modulo_core/Visualizer.hpp"
 #include "state_representation/Cartesian/CartesianPose.hpp"
-#include "state_representation/Cartesian/CartesianVelocity.hpp"
+#include "state_representation/Cartesian/CartesianTwist.hpp"
 #include "dynamical_systems/Linear.hpp"
 #include "rcutils/cmdline_parser.h"
 #include <eigen3/Eigen/Core>
@@ -12,7 +12,7 @@ class LinearMotionGenerator : public Modulo::MotionGenerators::MotionGenerator
 {
 private:
 	std::shared_ptr<StateRepresentation::CartesianPose> current_pose;
-	std::shared_ptr<StateRepresentation::CartesianVelocity> desired_velocity;
+	std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
 	std::shared_ptr<StateRepresentation::CartesianPose> target_pose;
 	DynamicalSystems::Linear<StateRepresentation::CartesianState> motion_generator;
 
@@ -20,12 +20,12 @@ public:
 	explicit LinearMotionGenerator(const std::string & node_name, const std::chrono::milliseconds & period) :
 	MotionGenerator(node_name, period, true),
 	current_pose(std::make_shared<StateRepresentation::CartesianPose>("robot")),
-	desired_velocity(std::make_shared<StateRepresentation::CartesianVelocity>("robot")),
+	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot")),
 	target_pose(std::make_shared<StateRepresentation::CartesianPose>("robot", Eigen::Vector3d(4, 5, 6), Eigen::Quaterniond(0,1,0,0))),
 	motion_generator(1)
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot/pose", this->current_pose);
-		this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_velocity", this->desired_velocity);
+		this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
 		this->motion_generator.set_attractor(*this->target_pose);
 	}
 
@@ -33,11 +33,11 @@ public:
 	{
 		if(!this->current_pose->is_empty())
 		{
-			*this->desired_velocity = this->motion_generator.evaluate(*this->current_pose);
+			*this->desired_twist = this->motion_generator.evaluate(*this->current_pose);
 		}
 		else
 		{
-			this->desired_velocity->initialize();
+			this->desired_twist->initialize();
 		}
 	}
 };
@@ -46,16 +46,16 @@ class ConsoleVisualizer : public Modulo::Visualizers::Visualizer
 {
 private:
 	std::shared_ptr<StateRepresentation::CartesianPose> robot_pose;
-	std::shared_ptr<StateRepresentation::CartesianVelocity> desired_velocity;
+	std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
 
 public:
 	explicit ConsoleVisualizer(const std::string & node_name, const std::chrono::milliseconds & period) :
 	Visualizer(node_name, period, true),
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot")),
-	desired_velocity(std::make_shared<StateRepresentation::CartesianVelocity>("robot"))
+	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot"))
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot/pose", this->robot_pose);
-		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_velocity", this->desired_velocity);
+		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
 	}
 
 	void step()
@@ -65,7 +65,7 @@ public:
 		os << "##### ROBOT POSE #####" << std::endl;
 		os << *this->robot_pose << std::endl;
 		os << "##### DESIRED VELOCITY #####" << std::endl;
-		os << *this->desired_velocity << std::endl;
+		os << *this->desired_twist << std::endl;
 
 		// look up the robot_base transform
 		try
@@ -86,7 +86,7 @@ class SimulatedRobotInterface : public Modulo::Core::Cell
 {
 private:
 	std::shared_ptr<StateRepresentation::CartesianPose> robot_pose;
-	std::shared_ptr<StateRepresentation::CartesianVelocity> desired_velocity;
+	std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
 	std::shared_ptr<StateRepresentation::CartesianPose> fixed_transform;
 	std::chrono::milliseconds dt;
 
@@ -94,20 +94,20 @@ public:
 	explicit SimulatedRobotInterface(const std::string & node_name, const std::chrono::milliseconds & period):
 	Cell(node_name, period, true),
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot", 0, 0, 0)),
-	desired_velocity(std::make_shared<StateRepresentation::CartesianVelocity>("robot")),
+	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot")),
 	fixed_transform(std::make_shared<StateRepresentation::CartesianPose>("robot_base", 4, 5, 3, "robot")),
 	dt(period)
 	{
-		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_velocity", this->desired_velocity);
+		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
 		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot/pose", this->robot_pose, std::chrono::milliseconds(0));
 		this->add_fixed_transform_broadcaster(fixed_transform);
 	}
 
 	void step()
 	{
-		if(!this->desired_velocity->is_empty())
+		if(!this->desired_twist->is_empty())
 		{
-			*this->robot_pose += dt * *this->desired_velocity;
+			*this->robot_pose += dt * *this->desired_twist;
 		}
 		this->send_transform(*this->robot_pose);
 	}

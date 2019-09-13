@@ -98,7 +98,7 @@ TEST(TestJointToCartesian, PositiveNos)
 	bool except_thrown = false;
 	try
 	{
-		StateRepresentation::CartesianVelocity cvel = jac * jvel;
+		StateRepresentation::CartesianTwist cvel = jac * jvel;
 	}
 	catch(IncompatibleSizeException e)
 	{
@@ -111,7 +111,7 @@ TEST(TestCartesianToJoint, PositiveNos)
 {
 	StateRepresentation::JacobianMatrix jac("robot", Eigen::MatrixXd::Random(6,7));
 	Eigen::Matrix<double, 6, 1> vec = Eigen::Matrix<double, 6, 1>::Random();
-	StateRepresentation::CartesianVelocity cvel("robot", vec);
+	StateRepresentation::CartesianTwist cvel("robot", vec);
 
 	StateRepresentation::JointVelocities jvel1;
 	bool except_thrown1 = false;

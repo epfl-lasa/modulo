@@ -16,8 +16,8 @@ TEST(EvaluateDynamicalSystemPositionOnly, PositiveNos)
 
 	for(unsigned int i=0; i<nb_steps; ++i)
 	{
-		StateRepresentation::CartesianVelocity velocity = linearDS.evaluate(current_pose);
-		current_pose += dt * velocity;
+		StateRepresentation::CartesianTwist twist = linearDS.evaluate(current_pose);
+		current_pose += dt * twist;
 	}
 
 	std::cout << current_pose << std::endl;
@@ -46,8 +46,8 @@ TEST(EvaluateDynamicalSystemOrientationOnly, PositiveNos)
 
 	for(unsigned int i=0; i<nb_steps; ++i)
 	{
-		StateRepresentation::CartesianVelocity velocity = linearDS.evaluate(current_pose);
-		current_pose += dt * velocity;
+		StateRepresentation::CartesianTwist twist = linearDS.evaluate(current_pose);
+		current_pose += dt * twist;
 	}
 
 	std::cout << current_pose << std::endl;
@@ -75,8 +75,8 @@ TEST(EvaluateDynamicalSystem, PositiveNos)
 
 	for(unsigned int i=0; i<nb_steps; ++i)
 	{
-		StateRepresentation::CartesianVelocity velocity = linearDS.evaluate(current_pose);
-		current_pose += dt * velocity;
+		StateRepresentation::CartesianTwist twist = linearDS.evaluate(current_pose);
+		current_pose += dt * twist;
 	}
 
 	std::cout << current_pose << std::endl;

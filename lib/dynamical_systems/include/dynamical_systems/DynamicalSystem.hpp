@@ -12,7 +12,7 @@
 
 #include "state_representation/Cartesian/CartesianState.hpp"
 #include "state_representation/Cartesian/CartesianPose.hpp"
-#include "state_representation/Cartesian/CartesianVelocity.hpp"
+#include "state_representation/Cartesian/CartesianTwist.hpp"
 #include "state_representation/Joint/JointState.hpp"
 #include "protocol_buffers/DynamicalSystemMsg.pb.h"
 #include "dynamical_systems/Exceptions/NotImplementedException.hpp"

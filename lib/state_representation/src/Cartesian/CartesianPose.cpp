@@ -33,98 +33,98 @@ namespace StateRepresentation
 		this->set_orientation(orientation);
 	}
 
-	CartesianPose::CartesianPose(const CartesianPose& p):
-	CartesianState(p)
+	CartesianPose::CartesianPose(const CartesianPose& pose):
+	CartesianState(pose)
 	{}
 
-	CartesianPose::CartesianPose(const CartesianState& s):
-	CartesianState(s)
+	CartesianPose::CartesianPose(const CartesianState& state):
+	CartesianState(state)
 	{}
 
-	CartesianPose::CartesianPose(const CartesianVelocity& v):
-	CartesianState(std::chrono::seconds(1) * v)
+	CartesianPose::CartesianPose(const CartesianTwist& twist):
+	CartesianState(std::chrono::seconds(1) * twist)
 	{}
 
-	CartesianPose& CartesianPose::operator*=(const CartesianPose& p)
+	CartesianPose& CartesianPose::operator*=(const CartesianPose& pose)
 	{
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
-		if(p.is_empty()) throw EmptyStateException(p.get_name() + " state is empty");
-		if(this->get_name() != p.get_reference_frame()) throw IncompatibleReferenceFramesException("Expected " + this->get_name() + ", got " + p.get_reference_frame());
+		if(pose.is_empty()) throw EmptyStateException(pose.get_name() + " state is empty");
+		if(this->get_name() != pose.get_reference_frame()) throw IncompatibleReferenceFramesException("Expected " + this->get_name() + ", got " + pose.get_reference_frame());
 		// operation
-		this->set_position(this->get_position() + this->get_orientation() * p.get_position());
-		this->set_orientation(this->get_orientation() * p.get_orientation());
-		this->set_name(p.get_name());
+		this->set_position(this->get_position() + this->get_orientation() * pose.get_position());
+		this->set_orientation(this->get_orientation() * pose.get_orientation());
+		this->set_name(pose.get_name());
 		return (*this);
 	}
 
-	const CartesianPose CartesianPose::operator*(const CartesianPose& p) const
+	const CartesianPose CartesianPose::operator*(const CartesianPose& pose) const
 	{
 		CartesianPose result(*this);
-		result *= p;
+		result *= pose;
 		return result;
 	}
 
-	const CartesianState CartesianPose::operator*(const CartesianState& s) const
+	const CartesianState CartesianPose::operator*(const CartesianState& state) const
 	{
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
-		if(s.is_empty()) throw EmptyStateException(s.get_name() + " state is empty");
-		if(this->get_name() != s.get_reference_frame()) throw IncompatibleReferenceFramesException("Expected " + this->get_name() + ", got " + s.get_reference_frame());
+		if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+		if(this->get_name() != state.get_reference_frame()) throw IncompatibleReferenceFramesException("Expected " + this->get_name() + ", got " + state.get_reference_frame());
 		// operation
 		CartesianState result(*this);
-		result.set_position(this->get_position() + this->get_orientation() * s.get_position());
-		result.set_orientation(this->get_orientation() * s.get_orientation());
-		result.set_linear_velocity(*this * s.get_linear_velocity());
-		result.set_angular_velocity(*this * s.get_angular_velocity());
-		result.set_linear_acceleration(*this * s.get_linear_acceleration());
-		result.set_angular_acceleration(*this * s.get_angular_acceleration());
-		result.set_force(*this * s.get_force());
-		result.set_torque(*this * s.get_torque());
-		result.set_name(s.get_name());
+		result.set_position(this->get_position() + this->get_orientation() * state.get_position());
+		result.set_orientation(this->get_orientation() * state.get_orientation());
+		result.set_linear_velocity(*this * state.get_linear_velocity());
+		result.set_angular_velocity(*this * state.get_angular_velocity());
+		result.set_linear_acceleration(*this * state.get_linear_acceleration());
+		result.set_angular_acceleration(*this * state.get_angular_acceleration());
+		result.set_force(*this * state.get_force());
+		result.set_torque(*this * state.get_torque());
+		result.set_name(state.get_name());
 		return result;
 	}
 
-	const Eigen::Vector3d CartesianPose::operator*(const Eigen::Vector3d& v) const
+	const Eigen::Vector3d CartesianPose::operator*(const Eigen::Vector3d& vector) const
 	{
-		return this->get_orientation() * v + this->get_position();
+		return this->get_orientation() * vector + this->get_position();
 	}
 
-	CartesianPose& CartesianPose::operator+=(const CartesianPose& p)
+	CartesianPose& CartesianPose::operator+=(const CartesianPose& pose)
 	{
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
-		if(p.is_empty()) throw EmptyStateException(p.get_name() + " state is empty");
-		if(!this->is_compatible(p)) throw IncompatibleStatesException("The two states do not have the same name nor reference frame");
+		if(pose.is_empty()) throw EmptyStateException(pose.get_name() + " state is empty");
+		if(!this->is_compatible(pose)) throw IncompatibleStatesException("The two states do not have the same name nor reference frame");
 		// operation
-		this->set_position(this->get_position() + p.get_position());
-		this->set_orientation(this->get_orientation() * p.get_orientation());
+		this->set_position(this->get_position() + pose.get_position());
+		this->set_orientation(this->get_orientation() * pose.get_orientation());
 		return (*this);
 	}
 
-	const CartesianPose CartesianPose::operator+(const CartesianPose& p) const
+	const CartesianPose CartesianPose::operator+(const CartesianPose& pose) const
 	{
 		CartesianPose result(*this);
-		result += p;
+		result += pose;
 		return result;
 	}
 
-	CartesianPose& CartesianPose::operator-=(const CartesianPose& p)
+	CartesianPose& CartesianPose::operator-=(const CartesianPose& pose)
 	{
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
-		if(p.is_empty()) throw EmptyStateException(p.get_name() + " state is empty");
-		if(!this->is_compatible(p)) throw IncompatibleStatesException("The two states do not have the same name nor reference frame");
+		if(pose.is_empty()) throw EmptyStateException(pose.get_name() + " state is empty");
+		if(!this->is_compatible(pose)) throw IncompatibleStatesException("The two states do not have the same name nor reference frame");
 		// operation
-		this->set_position(this->get_position() - p.get_position());
-		this->set_orientation(this->get_orientation().conjugate() * p.get_orientation());
+		this->set_position(this->get_position() - pose.get_position());
+		this->set_orientation(this->get_orientation().conjugate() * pose.get_orientation());
 		return (*this);
 	}
 
-	const CartesianPose CartesianPose::operator-(const CartesianPose& p) const
+	const CartesianPose CartesianPose::operator-(const CartesianPose& pose) const
 	{
 		CartesianPose result(*this);
-		result -= p;
+		result -= pose;
 		return result;
 	}
 
@@ -210,17 +210,17 @@ namespace StateRepresentation
 		return pose * lambda;
 	}
 
-	const CartesianVelocity operator/(const CartesianPose& pose, const std::chrono::milliseconds& dt)
+	const CartesianTwist operator/(const CartesianPose& pose, const std::chrono::milliseconds& dt)
 	{
 		// sanity check
 		if(pose.is_empty()) throw EmptyStateException(pose.get_name() + " state is empty");
 		// operations
-		CartesianVelocity velocity(pose.get_name(), pose.get_reference_frame());
+		CartesianTwist twist(pose.get_name(), pose.get_reference_frame());
 		// convert the period to a double with the second as reference
 		double period = std::chrono::milliseconds(dt).count();
 		period /= 1000.;
 		// set linear velocity
-		velocity.set_linear_velocity(pose.get_position() / period);
+		twist.set_linear_velocity(pose.get_position() / period);
 		// set angular velocity from the log of the quaternion error
 		Eigen::Quaterniond orientation = pose.get_orientation();
 		Eigen::Vector3d log_q = Eigen::Vector3d::Zero();
@@ -228,8 +228,8 @@ namespace StateRepresentation
 		{	
 			log_q = orientation.vec() / orientation.vec().norm() * acos(std::min<double>(std::max<double>(orientation.w(),-1),1));	
 		}
-		velocity.set_angular_velocity(2 * log_q / period);
-		return velocity;
+		twist.set_angular_velocity(2 * log_q / period);
+		return twist;
 	}
 
 	const Eigen::Array2d dist(const CartesianPose& p1, const CartesianPose& p2)

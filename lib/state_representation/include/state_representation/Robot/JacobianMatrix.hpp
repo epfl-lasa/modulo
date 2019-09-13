@@ -10,7 +10,7 @@
 
 #include <eigen3/Eigen/Core>
 #include "state_representation/State.hpp"
-#include "state_representation/Cartesian/CartesianVelocity.hpp"
+#include "state_representation/Cartesian/CartesianTwist.hpp"
 #include "state_representation/Joint/JointVelocities.hpp"
 #include "state_representation/Exceptions/IncompatibleSizeException.hpp"
 
@@ -18,7 +18,7 @@ using namespace StateRepresentation::Exceptions;
 
 namespace StateRepresentation 
 {
-	class CartesianVelocity;
+	class CartesianTwist;
 
 	class JointVelocities;
 
@@ -137,11 +137,11 @@ namespace StateRepresentation
 		/**
 	 	 * @brief Overload the * operator with a JointVelocities
 	 	 * @param dq the joint velocity to multiply with
-	 	 * @return this result into the CartesianVelocity of the end effector
-	 	 * the name of the output CartesianVelocity will be "robot"_end_effector and
+	 	 * @return this result into the CartesianTwist of the end effector
+	 	 * the name of the output CartesianTwist will be "robot"_end_effector and
 	 	 * the reference frame will be "robot"_base 
 	     */
-		const CartesianVelocity operator*(const JointVelocities& dq) const;
+		const CartesianTwist operator*(const JointVelocities& dq) const;
 
 		/**
 	 	 * @brief Solve the system X = inv(J)*M to obtain X which is more efficient than multiplying with the pseudo-inverse
@@ -155,14 +155,14 @@ namespace StateRepresentation
 	 	 * @param dX the cartesian velocity to multiply with
 	 	 * @return this result into a JointVelocities
 	     */
-		const JointVelocities solve(const CartesianVelocity& dX) const;
+		const JointVelocities solve(const CartesianTwist& dX) const;
 
 		/**
-	 	 * @brief Overload the * operator with a CartesianVelocity. This is equivalent to using the solve function
+	 	 * @brief Overload the * operator with a CartesianTwist. This is equivalent to using the solve function
 	 	 * @param dX the cartesian velocity to multiply with
 	 	 * @return this result into a JointVelocities
 	     */
-		const JointVelocities operator*(const CartesianVelocity& dX) const;
+		const JointVelocities operator*(const CartesianTwist& dX) const;
 
 		/**
 		 * @brief Overload the () operator in a non const fashion to modify the value at given (row, col)

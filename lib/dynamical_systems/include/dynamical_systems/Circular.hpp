@@ -101,7 +101,7 @@ namespace DynamicalSystems
 		linear_velocity(1) = dradius * sin(theta) * sin(phi) + dtheta * radius * cos(theta) * sin(phi) + dphi * radius * sin(theta) * cos(phi);
 		linear_velocity(2) = dradius * cos(theta) - dtheta * radius * sin(theta);
 
-		StateRepresentation::CartesianVelocity velocity(state.get_name(), state.get_reference_frame());
+		StateRepresentation::CartesianTwist velocity(state.get_name(), state.get_reference_frame());
 		velocity.set_linear_velocity(pose_in_center.inverse() * linear_velocity);
 
 		return velocity;

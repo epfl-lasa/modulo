@@ -17,8 +17,8 @@ public:
 	explicit LinearMotionGenerator(const std::string & node_name, const std::chrono::milliseconds & period) :
 	MotionGenerator(node_name, period, true),
 	current_pose(std::make_shared<StateRepresentation::DualQuaternionPose>("robot")),
-	desired_twist(std::make_shared<StateRepresentation::DualQuaternionTwist>("desired")),
-	target_pose(std::make_shared<StateRepresentation::DualQuaternionPose>("target", Eigen::Vector3d(4,5,6), Eigen::Quaterniond(0,0,0,1))),
+	desired_twist(std::make_shared<StateRepresentation::DualQuaternionTwist>("robot")),
+	target_pose(std::make_shared<StateRepresentation::DualQuaternionPose>("robot", Eigen::Vector3d(4,5,6), Eigen::Quaterniond(0,0,0,1))),
 	Kp(1)
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot/pose", this->current_pose);
@@ -30,7 +30,7 @@ public:
 		if(this->target_pose->is_compatible(*this->current_pose))
 		{
 			this->desired_twist->set_position(this->current_pose->get_position());
-			*this->desired_twist = -Kp * log(*(this->current_pose) * this->target_pose->conjugate());
+			*this->desired_twist = -Kp * log((*this->current_pose) * this->target_pose->conjugate());
 		}
 		else
 		{
@@ -48,7 +48,7 @@ public:
 	explicit ConsoleVisualizer(const std::string & node_name, const std::chrono::milliseconds & period) :
 	Visualizer(node_name, period, true),
 	robot_pose(std::make_shared<StateRepresentation::DualQuaternionPose>("robot")),
-	desired_velocity(std::make_shared<StateRepresentation::DualQuaternionTwist>("desired"))
+	desired_velocity(std::make_shared<StateRepresentation::DualQuaternionTwist>("robot"))
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot/pose", this->robot_pose);
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_velocity", this->desired_velocity);
@@ -76,7 +76,7 @@ public:
 	explicit SimulatedRobotInterface(const std::string & node_name, const std::chrono::milliseconds & period):
 	Cell(node_name, period, true),
 	robot_pose(std::make_shared<StateRepresentation::DualQuaternionPose>("robot")),
-	desired_twist(std::make_shared<StateRepresentation::DualQuaternionTwist>("desired")),
+	desired_twist(std::make_shared<StateRepresentation::DualQuaternionTwist>("robot")),
 	dt(0.1)
 	{
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_velocity", this->desired_twist);
@@ -111,9 +111,9 @@ int main(int argc, char * argv[])
 
 	rclcpp::executors::SingleThreadedExecutor exe;
 	const std::chrono::milliseconds period(100);
-	std::shared_ptr<LinearMotionGenerator> lmg = std::make_shared<LinearMotionGenerator>("linear_motion_generator", period);
-	std::shared_ptr<ConsoleVisualizer> cv = std::make_shared<ConsoleVisualizer>("console_visualizer", period);
-	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("simulated_robot_interface", period);
+	std::shared_ptr<LinearMotionGenerator> lmg = std::make_shared<LinearMotionGenerator>("motion_generator", period);
+	std::shared_ptr<ConsoleVisualizer> cv = std::make_shared<ConsoleVisualizer>("visualizer", period);
+	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", period);
 
 	exe.add_node(lmg->get_node_base_interface());
 	exe.add_node(cv->get_node_base_interface());

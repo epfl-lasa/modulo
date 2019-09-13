@@ -1,5 +1,5 @@
 #include "state_representation/Cartesian/CartesianPose.hpp"
-#include "state_representation/Cartesian/CartesianVelocity.hpp"
+#include "state_representation/Cartesian/CartesianTwist.hpp"
 #include <gtest/gtest.h>
 #include <fstream>
 #include <zmq.hpp>
@@ -146,7 +146,7 @@ TEST(TestAddDisplacement, PositiveNos)
 	Eigen::Quaterniond rot1 = Eigen::Quaterniond::Identity(); 
 	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
 
-	StateRepresentation::CartesianVelocity vel("t1");
+	StateRepresentation::CartesianTwist vel("t1");
 	vel.set_linear_velocity(Eigen::Vector3d(0.1,0.1,0.1));
 	vel.set_angular_velocity(Eigen::Vector3d(0.1,0.1,0));
 
@@ -186,7 +186,7 @@ TEST(TestImplicitConversion, PositiveNos)
 	Eigen::Quaterniond rot1 = Eigen::Quaterniond::Identity(); 
 	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
 
-	StateRepresentation::CartesianVelocity vel("t1");
+	StateRepresentation::CartesianTwist vel("t1");
 	vel.set_linear_velocity(Eigen::Vector3d(0.1,0.1,0.1));
 	vel.set_angular_velocity(Eigen::Vector3d(0.1,0.1,0));
 
@@ -197,7 +197,7 @@ TEST(TestImplicitConversion, PositiveNos)
 
 TEST(TestVelocityClamping, PositiveNos)
 {
-	StateRepresentation::CartesianVelocity vel("test", Eigen::Vector3d(1,-2,3), Eigen::Vector3d(1,2,-3));
+	StateRepresentation::CartesianTwist vel("test", Eigen::Vector3d(1,-2,3), Eigen::Vector3d(1,2,-3));
 	vel.clamp(1, 0.5);
 
 	std::cout << vel << std::endl;

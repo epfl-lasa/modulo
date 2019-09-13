@@ -9,11 +9,11 @@
 #define STATEREPRESENTATION_CARTESIANPOSE_H_
 
 #include "state_representation/Cartesian/CartesianState.hpp"
-#include "state_representation/Cartesian/CartesianVelocity.hpp"
+#include "state_representation/Cartesian/CartesianTwist.hpp"
 
 namespace StateRepresentation 
 {
-	class CartesianVelocity;
+	class CartesianTwist;
 	
 	class CartesianPose: public CartesianState
 	{
@@ -33,17 +33,17 @@ namespace StateRepresentation
 		/**
 	 	 * @brief Copy constructor
 	     */
-		CartesianPose(const CartesianPose& p);
+		CartesianPose(const CartesianPose& pose);
 
 		/**
 	 	 * @brief Copy constructor from a CartesianState
 	     */
-		CartesianPose(const CartesianState& s);
+		CartesianPose(const CartesianState& state);
 
 		/**
-	 	 * @brief Copy constructor from a CartesianVelocity by considering that it is a displacement over 1 second
+	 	 * @brief Copy constructor from a CartesianTwist by considering that it is a displacement over 1 second
 	     */
-		CartesianPose(const CartesianVelocity& v);
+		CartesianPose(const CartesianTwist& twist);
 		
 		/**
 	 	 * @brief Construct a CartesianPose from a position given as a vector of coordinates.
@@ -62,59 +62,59 @@ namespace StateRepresentation
 
 		/**
 	 	 * @brief Overload the *= operator
-	 	 * @param p CartesianPose to multiply with
+	 	 * @param pose CartesianPose to multiply with
 	 	 * @return the current CartesianPose multiply by the CartesianPose given in argument
 	     */
-		CartesianPose& operator*=(const CartesianPose& p);
+		CartesianPose& operator*=(const CartesianPose& pose);
 
 		/**
 	 	 * @brief Overload the * operator
-	 	 * @param p CartesianPose to multiply with
+	 	 * @param pose CartesianPose to multiply with
 	 	 * @return the current CartesianPose multiply by the CartesianPose given in argument
 	     */
-		const CartesianPose operator*(const CartesianPose& p) const;
+		const CartesianPose operator*(const CartesianPose& pose) const;
 
 		/**
 	 	 * @brief Overload the *= operator with a CartesianState
-	 	 * @param p CartesianState to multiply with
+	 	 * @param state CartesianState to multiply with
 	 	 * @return the current CartesianPose multiply by the CartesianState given in argument
 	     */
-		const CartesianState operator*(const CartesianState& s) const;
+		const CartesianState operator*(const CartesianState& state) const;
 
 		/**
 	 	 * @brief Overload the * operator for a vector input
-	 	 * @param v vector to multiply with, representing either a position, velocity or acceleration
+	 	 * @param vector vector to multiply with, representing either a position, velocity or acceleration
 	 	 * @return the vector multiplied by the current CartesianPose
 	     */
-		const Eigen::Vector3d operator*(const Eigen::Vector3d& v) const;
+		const Eigen::Vector3d operator*(const Eigen::Vector3d& vector) const;
 
 		/**
 	 	 * @brief Overload the += operator
-	 	 * @param p CartesianPose to add
+	 	 * @param pose CartesianPose to add
 	 	 * @return the current CartesianPose added the CartesianPose given in argument
 	     */
-		CartesianPose& operator+=(const CartesianPose& p);
+		CartesianPose& operator+=(const CartesianPose& pose);
 
 		/**
 	 	 * @brief Overload the + operator
-	 	 * @param p CartesianPose to add
+	 	 * @param pose CartesianPose to add
 	 	 * @return the current CartesianPose added the CartesianPose given in argument
 	     */
-		const CartesianPose operator+(const CartesianPose& p) const;
+		const CartesianPose operator+(const CartesianPose& pose) const;
 
 		/**
 	 	 * @brief Overload the -= operator
-	 	 * @param p CartesianPose to substract
+	 	 * @param pose CartesianPose to substract
 	 	 * @return the current CartesianPose minus the CartesianPose given in argument
 	     */
-		CartesianPose& operator-=(const CartesianPose& p);
+		CartesianPose& operator-=(const CartesianPose& pose);
 
 		/**
 	 	 * @brief Overload the - operator
-	 	 * @param p CartesianPose to substract
+	 	 * @param pose CartesianPose to substract
 	 	 * @return the current CartesianPose minus the CartesianPose given in argument
 	     */
-		const CartesianPose operator-(const CartesianPose& p) const;
+		const CartesianPose operator-(const CartesianPose& pose) const;
 
 		/**
 	 	 * @brief Overload the *= operator with a scalar
@@ -167,9 +167,9 @@ namespace StateRepresentation
 		/**
 	 	 * @brief Overload the / operator with a time period
 	 	 * @param dt the time period to divise by
-	 	 * @return the corresponding CartesianVelocity
+	 	 * @return the corresponding CartesianTwist
 	     */
-		friend const CartesianVelocity operator/(const CartesianPose& pose, const std::chrono::milliseconds& dt);
+		friend const CartesianTwist operator/(const CartesianPose& pose, const std::chrono::milliseconds& dt);
 
 		/**
 		 * @brief compute the distance between two CartesianPose

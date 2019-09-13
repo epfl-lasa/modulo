@@ -19,8 +19,8 @@ TEST(EvaluateDynamicalSystemPositionOnly, PositiveNos)
 
 	for(unsigned int i=0; i<nb_steps; ++i)
 	{
-		StateRepresentation::CartesianVelocity velocity = circularDS.evaluate(current_pose);
-		current_pose += dt * velocity;
+		StateRepresentation::CartesianTwist twist = circularDS.evaluate(current_pose);
+		current_pose += dt * twist;
 	}
 
 	//for(int i=0; i<3; ++i) ASSERT_NEAR(current_pose.get_position()(i), target_pose.get_position()(i), 0.001);

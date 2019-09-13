@@ -32,9 +32,9 @@ public:
 	{
 		if(!this->current_pose->is_empty() && !this->jacobian->is_empty())
 		{
-			StateRepresentation::CartesianVelocity desired_velocity = this->motion_generator.evaluate(*this->current_pose);
+			StateRepresentation::CartesianTwist desired_twist = this->motion_generator.evaluate(*this->current_pose);
 			// transform it into JointVelocities from the jacobian
-			*this->desired_velocities = (*this->jacobian) * desired_velocity; 
+			*this->desired_velocities = (*this->jacobian) * desired_twist; 
 		}
 		else
 		{
