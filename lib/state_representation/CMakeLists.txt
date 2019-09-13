@@ -30,12 +30,14 @@ include_directories(
 
 set(CORE_SOURCES
   src/State.cpp
+  src/Cartesian/CartesianState.cpp
 	src/Cartesian/CartesianPose.cpp
   src/Cartesian/CartesianTwist.cpp
-	src/Cartesian/CartesianState.cpp
+  src/Cartesian/CartesianWrench.cpp
   src/Joint/JointState.cpp
   src/Joint/JointPositions.cpp
   src/Joint/JointVelocities.cpp
+  src/Joint/JointTorques.cpp
   src/DualQuaternion/DualQuaternionState.cpp
   src/DualQuaternion/DualQuaternionPose.cpp
   src/DualQuaternion/DualQuaternionTwist.cpp
