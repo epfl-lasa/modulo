@@ -119,6 +119,7 @@ namespace Modulo
 			{
 				state.set_nb_rows(msg.nb_dimensions);
 				state.set_nb_cols(msg.nb_joints);
+				state.set_joint_names(msg.joint_names);
 				state.set_data(Eigen::MatrixXd::Map(msg.data.data(), msg.nb_dimensions, msg.nb_joints)); 
 			}
 
@@ -284,6 +285,7 @@ namespace Modulo
 				msg.header.stamp = time;
 				msg.nb_dimensions = state.get_nb_rows();
 				msg.nb_joints = state.get_nb_cols();
+				msg.joint_names = state.get_joint_names(); 
 				msg.data = std::vector<double>(state.get_data().data(), state.get_data().data() + state.get_data().size());
 			}
 

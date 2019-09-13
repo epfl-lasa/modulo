@@ -223,6 +223,7 @@ namespace StateRepresentation
 	inline void JacobianMatrix::set_joint_names(unsigned int nb_joints)
 	{
 		this->joint_names.resize(nb_joints);
+		this->nb_cols = nb_joints;
 		for(unsigned int i=0; i<nb_joints; ++i)
 		{
 			this->joint_names[i] = "joint" + std::to_string(i);
@@ -233,6 +234,7 @@ namespace StateRepresentation
 	inline void JacobianMatrix::set_joint_names(const std::vector<std::string>& joint_names)
 	{
 		this->joint_names = joint_names;
+		this->nb_cols = joint_names.size();
 		this->initialize();
 	}
 
