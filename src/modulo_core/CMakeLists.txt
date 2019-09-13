@@ -29,6 +29,7 @@ set(CORE_SOURCES
     src/Visualizer.cpp
     src/SensorInterface.cpp
     src/RobotInterface.cpp
+    src/Modulator.cpp
 )
 
 ament_auto_add_library(${PROJECT_NAME} SHARED ${CORE_SOURCES})
