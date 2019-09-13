@@ -68,11 +68,31 @@ namespace StateRepresentation
 		JointPositions(const JointVelocities& positions);
 
 		/**
+		 * @brief Set the values of the  positions from an Eigen Vector
+		 * @param positions the positions as an Eigen Vector
+		 */
+		JointPositions& operator=(const Eigen::VectorXd& positions);
+
+		/**
+	 	 * @brief Overload the += operator with an Eigen Vector
+	 	 * @param vector Eigen Vector to add
+	 	 * @return the JointPositions added the vector given in argument
+	     */
+		JointPositions& operator+=(const Eigen::VectorXd& vector);
+
+		/**
 	 	 * @brief Overload the += operator
 	 	 * @param positions JointPositions to add
 	 	 * @return the current JointPositions added the JointPositions given in argument
 	     */
 		JointPositions& operator+=(const JointPositions& positions);
+
+		/**
+	 	 * @brief Overload the + operator with a  Eigen Vector
+	 	 * @param vector Eigen Vector to add
+	 	 * @return the JointPositions added the vector given in argument
+	     */
+		const JointPositions operator+(const Eigen::VectorXd& vector) const;
 
 		/**
 	 	 * @brief Overload the + operator
@@ -82,11 +102,25 @@ namespace StateRepresentation
 		const JointPositions operator+(const JointPositions& positions) const;
 
 		/**
+	 	 * @brief Overload the -= operator with a  Eigen Vector
+	 	 * @param vector Eigen Vector to substract
+	 	 * @return the JointPositions substracted the vector given in argument
+	     */
+		JointPositions& operator-=(const Eigen::VectorXd& vector);
+
+		/**
 	 	 * @brief Overload the -= operator
 	 	 * @param positions JointPositions to substract
 	 	 * @return the current JointPositions substracted the JointPositions given in argument
 	     */
 		JointPositions& operator-=(const JointPositions& positions);
+
+		/**
+	 	 * @brief Overload the - operator with an Eigen Vector
+	 	 * @param vector Eigen Vector to substract
+	 	 * @return the JointPositions substracted the vector given in argument
+	     */
+		const JointPositions operator-(const Eigen::VectorXd& vector) const;
 
 		/**
 	 	 * @brief Overload the - operator
@@ -102,12 +136,34 @@ namespace StateRepresentation
 		const JointPositions copy() const;
 
 		/**
+		 * @brief Return the value of the positions as Eigen array
+		 * @retrun the Eigen array representing the positions
+		 */
+		const Eigen::ArrayXd array() const;
+
+		/**
 	 	 * @brief Overload the ostream operator for printing
 	 	 * @param os the ostream to append the string representing the state
 	 	 * @param state the state to print
 	 	 * @return the appended ostream
 	     */
 		friend std::ostream& operator<<(std::ostream& os, const JointPositions& positions);
+
+		/**
+	 	 * @brief Overload the + operator with an Eigen Vector
+	 	 * @param vector Eigen Vector to add
+	 	 * @param positions JointPositions to add
+	 	 * @return the Eigen Vector plus the JointPositions represented as a JointPositions
+	     */
+		friend const JointPositions operator+(const Eigen::VectorXd& vector, const JointPositions& positions);
+
+		/**
+	 	 * @brief Overload the - operator with a  Eigen Vector
+	 	 * @param vector Eigen Vector
+	 	 * @param positions JointPositions to substract
+	 	 * @return the Eigen Vector minus the JointPositions represented as a JointPositions
+	     */
+		friend const JointPositions operator-(const Eigen::VectorXd& vector, const JointPositions& positions);
 
 		/**
 	 	 * @brief Overload the * operator with a scalar

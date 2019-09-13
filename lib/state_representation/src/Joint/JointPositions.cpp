@@ -41,15 +41,36 @@ namespace StateRepresentation
 	JointState(std::chrono::seconds(1) * velocities)
 	{}
 
+	JointPositions& JointPositions::operator=(const Eigen::VectorXd& positions)
+	{
+		this->set_positions(positions);
+		return (*this);
+	}
+
+	JointPositions& JointPositions::operator+=(const Eigen::VectorXd& vector)
+	{
+		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
+		if(this->get_size() != vector.size()) throw IncompatibleSizeException("Input vector is of incorrect size: expected " + std::to_string(this->get_size()) + ", given " + std::to_string(vector.size()));
+		this->set_positions(this->get_positions() + vector);
+		return (*this);
+	}
+
 	JointPositions& JointPositions::operator+=(const JointPositions& positions)
 	{
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
 		if(positions.is_empty()) throw EmptyStateException(positions.get_name() + " state is empty");
-		if(!this->is_compatible(positions)) throw IncompatibleStatesException("The two joint states are incompatible");
+		if(!this->is_compatible(positions)) throw IncompatibleStatesException("The two joint states are incompatible, check name, joint names and order or size");
 		// operation
 		this->set_positions(this->get_positions() + positions.get_positions());
 		return (*this);
+	}
+
+	const JointPositions JointPositions::operator+(const Eigen::VectorXd& vector) const
+	{
+		JointPositions result(*this);
+		result += vector;
+		return result;
 	}
 
 	const JointPositions JointPositions::operator+(const JointPositions& positions) const
@@ -59,15 +80,30 @@ namespace StateRepresentation
 		return result;
 	}
 
+	JointPositions& JointPositions::operator-=(const Eigen::VectorXd& vector)
+	{
+		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
+		if(this->get_size() != vector.size()) throw IncompatibleSizeException("Input vector is of incorrect size: expected " + std::to_string(this->get_size()) + ", given " + std::to_string(vector.size()));
+		this->set_positions(this->get_positions() - vector);
+		return (*this);
+	}
+
 	JointPositions& JointPositions::operator-=(const JointPositions& positions)
 	{
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
 		if(positions.is_empty()) throw EmptyStateException(positions.get_name() + " state is empty");
-		if(!this->is_compatible(positions)) throw IncompatibleStatesException("The two joint states are incompatible");
+		if(!this->is_compatible(positions)) throw IncompatibleStatesException("The two joint states are incompatible, check name, joint names and order or size");
 		// operation
 		this->set_positions(this->get_positions() - positions.get_positions());
 		return (*this);
+	}
+
+	const JointPositions JointPositions::operator-(const Eigen::VectorXd& vector) const
+	{
+		JointPositions result(*this);
+		result -= vector;
+		return result;
 	}
 
 	const JointPositions JointPositions::operator-(const JointPositions& positions) const
@@ -81,6 +117,11 @@ namespace StateRepresentation
 	{
 		JointPositions result(*this);
 		return result;
+	}
+
+	const Eigen::ArrayXd JointPositions::array() const
+	{
+		return this->get_positions().array();
 	}
 
 	std::ostream& operator<<(std::ostream& os, const JointPositions& positions)
@@ -102,6 +143,16 @@ namespace StateRepresentation
   		return os;
 	}
 
+	const JointPositions operator+(const Eigen::VectorXd& vector, const JointPositions& positions)
+	{
+		return positions + vector;
+	}
+
+	const JointPositions operator-(const Eigen::VectorXd& vector, const JointPositions& positions)
+	{
+		return vector + (-1) * positions;
+	}
+
 	const JointPositions operator*(double lambda, const JointPositions& positions)
 	{
 		if(positions.is_empty()) throw EmptyStateException(positions.get_name() + " state is empty");
@@ -114,7 +165,7 @@ namespace StateRepresentation
 	const JointPositions operator*(const Eigen::ArrayXd& lambda, const JointPositions& positions)
 	{
 		if(positions.is_empty()) throw EmptyStateException(positions.get_name() + " state is empty");
-		if(lambda.size() != positions.get_size()) throw IncompatibleSizeException("Gain vector is of incorrect size");
+		if(lambda.size() != positions.get_size()) throw IncompatibleSizeException("Gain vector is of incorrect size: expected " + std::to_string(positions.get_size()) + ", given " + std::to_string(lambda.size()));
 		JointPositions result(positions);
 		result.set_positions(lambda * positions.get_positions().array());
 		return result;
@@ -131,7 +182,7 @@ namespace StateRepresentation
 	const JointPositions operator/(const JointPositions& positions, const Eigen::ArrayXd& lambda)
 	{
 		if(positions.is_empty()) throw EmptyStateException(positions.get_name() + " state is empty");
-		if(lambda.size() != positions.get_size()) throw IncompatibleSizeException("Gain vector is of incorrect size");
+		if(lambda.size() != positions.get_size()) throw IncompatibleSizeException("Gain vector is of incorrect size: expected " + std::to_string(positions.get_size()) + + ", given " + std::to_string(lambda.size()));
 		JointPositions result(positions);
 		result.set_positions(positions.get_positions().array() / lambda);
 		return result;

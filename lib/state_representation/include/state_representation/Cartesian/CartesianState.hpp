@@ -5,8 +5,8 @@
  * @date 2019/04/16
  */
 
-#ifndef STATEREPRESENTATION_CARTESIANSTATE_H_
-#define STATEREPRESENTATION_CARTESIANSTATE_H_
+#ifndef STATEREPRESENTATION_CARTESIAN_CARTESIANSTATE_H_
+#define STATEREPRESENTATION_CARTESIAN_CARTESIANSTATE_H_
 
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
@@ -163,6 +163,11 @@ namespace StateRepresentation
 		void set_twist(const Eigen::Matrix<double, 6, 1>& twist);
 
 		/**
+	 	 * @brief Setter of the force and torque from a single wrench vector
+	     */
+		void set_wrench(const Eigen::Matrix<double, 6, 1>& wrench);
+
+		/**
 	 	 * @brief Initialize the CartesianState to a zero value
 	     */
 		void initialize();
@@ -265,7 +270,7 @@ namespace StateRepresentation
 	inline const Eigen::Matrix<double, 6, 1> CartesianState::get_twist() const
 	{
 		Eigen::Matrix<double, 6, 1> twist;
-		twist << this->linear_velocity, this->linear_acceleration;
+		twist << this->linear_velocity, this->angular_velocity;
 		return twist;
 	}
 
@@ -345,6 +350,13 @@ namespace StateRepresentation
 		this->set_filled();
 		this->linear_velocity = twist.head(3);
 		this->angular_velocity = twist.tail(3);
+	}
+
+	inline void CartesianState::set_wrench(const Eigen::Matrix<double, 6, 1>& wrench)
+	{
+		this->set_filled();
+		this->force = wrench.head(3);
+		this->torque = wrench.tail(3);
 	}
 }
 

@@ -5,8 +5,8 @@
  * @date 2019/06/07
  */
 
-#ifndef STATEREPRESENTATION_CARTESIANPOSE_H_
-#define STATEREPRESENTATION_CARTESIANPOSE_H_
+#ifndef STATEREPRESENTATION_CARTESIAN_CARTESIANPOSE_H_
+#define STATEREPRESENTATION_CARTESIAN_CARTESIANPOSE_H_
 
 #include "state_representation/Cartesian/CartesianState.hpp"
 #include "state_representation/Cartesian/CartesianTwist.hpp"

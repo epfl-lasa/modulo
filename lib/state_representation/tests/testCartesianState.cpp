@@ -1,5 +1,6 @@
 #include "state_representation/Cartesian/CartesianPose.hpp"
 #include "state_representation/Cartesian/CartesianTwist.hpp"
+#include "state_representation/Cartesian/CartesianWrench.hpp"
 #include <gtest/gtest.h>
 #include <fstream>
 #include <zmq.hpp>
@@ -229,6 +230,66 @@ TEST(TestPoseDistance, PositiveNos)
 
 	Eigen::Array2d d3 = dist(p1, p3);
 	EXPECT_TRUE(abs(d3(1) - 3.14159) < 1e10-3);	
+}
+
+TEST(TestTwistOperatorsWithEigen, PositiveNos)
+{
+	Eigen::Matrix<double, 6, 1> vec = Eigen::Matrix<double, 6, 1>::Random();
+	StateRepresentation::CartesianTwist twist("test");
+	twist = vec;
+	EXPECT_TRUE((vec-twist.get_twist()).norm() < 1e-4);
+	twist = vec.array();
+	EXPECT_TRUE((vec-twist.get_twist()).norm() < 1e-4);
+
+	twist += vec;
+	EXPECT_TRUE((2 * vec-twist.get_twist()).norm() < 1e-4);
+
+	Eigen::Matrix<double, 6, 1> arr = Eigen::Matrix<double, 6, 1>::Random();
+	twist = twist + arr;
+
+	EXPECT_TRUE(((2 * vec + arr)-twist.get_twist()).norm() < 1e-4);
+
+	twist = arr + twist;
+	EXPECT_TRUE(((2 * vec + 2 * arr)-twist.get_twist()).norm() < 1e-4);
+
+	twist -= arr;
+	EXPECT_TRUE(((2 * vec + arr)-twist.get_twist()).norm() < 1e-4);
+
+	twist = twist - vec;
+	EXPECT_TRUE(((vec + arr)-twist.get_twist()).norm() < 1e-4);
+
+	twist = vec - twist;
+	EXPECT_TRUE((arr+twist.get_twist()).norm() < 1e-4);
+}
+
+TEST(TestWrenchOperatorsWithEigen, PositiveNos)
+{
+	Eigen::Matrix<double, 6, 1> vec = Eigen::Matrix<double, 6, 1>::Random();
+	StateRepresentation::CartesianWrench wrench("test");
+	wrench = vec;
+	EXPECT_TRUE((vec-wrench.get_wrench()).norm() < 1e-4);
+	wrench = vec.array();
+	EXPECT_TRUE((vec-wrench.get_wrench()).norm() < 1e-4);
+
+	wrench += vec;
+	EXPECT_TRUE((2 * vec-wrench.get_wrench()).norm() < 1e-4);
+
+	Eigen::Matrix<double, 6, 1> arr = Eigen::Matrix<double, 6, 1>::Random();
+	wrench = wrench + arr;
+
+	EXPECT_TRUE(((2 * vec + arr)-wrench.get_wrench()).norm() < 1e-4);
+
+	wrench = arr + wrench;
+	EXPECT_TRUE(((2 * vec + 2 * arr)-wrench.get_wrench()).norm() < 1e-4);
+
+	wrench -= arr;
+	EXPECT_TRUE(((2 * vec + arr)-wrench.get_wrench()).norm() < 1e-4);
+
+	wrench = wrench - vec;
+	EXPECT_TRUE(((vec + arr)-wrench.get_wrench()).norm() < 1e-4);
+
+	wrench = vec - wrench;
+	EXPECT_TRUE((arr+wrench.get_wrench()).norm() < 1e-4);
 }
 
 int main(int argc, char **argv) {

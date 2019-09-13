@@ -44,6 +44,31 @@ namespace StateRepresentation
 	CartesianState(pose / std::chrono::seconds(1))
 	{}
 
+	CartesianTwist& CartesianTwist::operator=(const CartesianState& state)
+	{
+		// sanity check
+		if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+		// operation
+		this->set_name(state.get_name());
+		this->set_reference_frame(state.get_reference_frame());
+		this->set_linear_velocity(state.get_linear_velocity());
+		this->set_angular_velocity(state.get_angular_velocity());
+		return (*this);
+	}
+
+	CartesianTwist& CartesianTwist::operator=(const Eigen::Matrix<double, 6, 1>& twist)
+	{
+		this->set_twist(twist);
+		return (*this);
+	}
+
+	CartesianTwist& CartesianTwist::operator+=(const Eigen::Matrix<double, 6, 1>& vector)
+	{
+		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
+		this->set_twist(this->get_twist() + vector);
+		return (*this);
+	}
+
 	CartesianTwist& CartesianTwist::operator+=(const CartesianTwist& twist)
 	{
 		// sanity check
@@ -56,11 +81,25 @@ namespace StateRepresentation
 		return (*this);
 	}
 
+	const CartesianTwist CartesianTwist::operator+(const Eigen::Matrix<double, 6, 1>& vector) const
+	{
+		CartesianTwist result(*this);
+		result += vector;
+		return result;
+	}
+
 	const CartesianTwist CartesianTwist::operator+(const CartesianTwist& twist) const
 	{
 		CartesianTwist result(*this);
 		result += twist;
 		return result;
+	}
+
+	CartesianTwist& CartesianTwist::operator-=(const Eigen::Matrix<double, 6, 1>& vector)
+	{
+		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
+		this->set_twist(this->get_twist() - vector);
+		return (*this);
 	}
 
 	CartesianTwist& CartesianTwist::operator-=(const CartesianTwist& twist)
@@ -75,22 +114,18 @@ namespace StateRepresentation
 		return (*this);
 	}
 
+	const CartesianTwist CartesianTwist::operator-(const Eigen::Matrix<double, 6, 1>& vector) const
+	{
+		CartesianTwist result(*this);
+		result -= vector;
+		return result;
+	}
+
 	const CartesianTwist CartesianTwist::operator-(const CartesianTwist& twist) const
 	{
 		CartesianTwist result(*this);
 		result -= twist;
 		return result;
-	}
-
-	void CartesianTwist::operator=(const CartesianState& state)
-	{
-		// sanity check
-		if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
-		// operation
-		this->set_name(state.get_name());
-		this->set_reference_frame(state.get_reference_frame());
-		this->set_linear_velocity(state.get_linear_velocity());
-		this->set_angular_velocity(state.get_angular_velocity());
 	}
 
 	CartesianTwist& CartesianTwist::operator*=(double lambda)
@@ -139,6 +174,11 @@ namespace StateRepresentation
 		return result;
 	}
 
+	const Eigen::Array<double, 6, 1> CartesianTwist::array() const
+	{
+		return this->get_twist().array();
+	}
+
 	std::ostream& operator<<(std::ostream& os, const CartesianTwist& twist) 
 	{
 		if(twist.is_empty())
@@ -156,6 +196,16 @@ namespace StateRepresentation
 	  		os << twist.get_angular_velocity()(2) << ")";
 	  	}
   		return os;
+	}
+
+	const CartesianTwist operator+(const Eigen::Matrix<double, 6, 1>& vector, const CartesianTwist& twist)
+	{
+		return twist + vector;
+	}
+
+	const CartesianTwist operator-(const Eigen::Matrix<double, 6, 1>& vector, const CartesianTwist& twist)
+	{
+		return vector + (-1) * twist;
 	}
 
 	const CartesianTwist operator*(double lambda, const CartesianTwist& twist)

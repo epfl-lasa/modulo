@@ -48,7 +48,7 @@ namespace StateRepresentation
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
 		if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
-		if(!this->is_compatible(state)) throw IncompatibleStatesException("The two joint states incompatible");
+		if(!this->is_compatible(state)) throw IncompatibleStatesException("The two joint states are incompatible, check name, joint names and order or size");
 		// operation
 		this->set_positions(this->get_positions() + state.get_positions());
 		this->set_velocities(this->get_velocities() + state.get_velocities());
@@ -69,7 +69,7 @@ namespace StateRepresentation
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
 		if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
-		if(!this->is_compatible(state)) throw IncompatibleStatesException("The two joint states incompatible");
+		if(!this->is_compatible(state)) throw IncompatibleStatesException("The two joint states are incompatible, check name, joint names and order or size");
 		// operation
 		this->set_positions(this->get_positions() - state.get_positions());
 		this->set_velocities(this->get_velocities() - state.get_velocities());
@@ -133,7 +133,7 @@ namespace StateRepresentation
 	const JointState operator*(const Eigen::ArrayXd& lambda, const JointState& state)
 	{
 		if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
-		if(lambda.size() != state.get_size()) throw IncompatibleSizeException("Gain vector is of incorrect size");
+		if(lambda.size() != state.get_size()) throw IncompatibleSizeException("Gain vector is of incorrect size: expected " + std::to_string(state.get_size()) + + ", given " + std::to_string(lambda.size()));
 		JointState result(state);
 		result.set_positions(lambda * state.get_positions().array());
 		result.set_velocities(lambda * state.get_velocities().array());
