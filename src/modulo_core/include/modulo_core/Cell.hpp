@@ -46,6 +46,7 @@ namespace Modulo
 		private:
 			bool running_; ///< boolean that start or stop the main loop of the cell
 			bool active_; ///< boolean that start computation only if the cell is in the active state
+			bool shutdown_;
 			std::thread run_thread; ///< thread object to start the main loop, i.e. the run function, in parallel of the rest
 			std::shared_ptr<std::mutex> mutex_; /// A mutex to use when modifying messages between functions
 			std::chrono::milliseconds period_;  ///< rate of the publisher functions in milliseconds

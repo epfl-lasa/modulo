@@ -23,6 +23,9 @@ public:
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot")),
 	target_pose(std::make_shared<StateRepresentation::CartesianPose>("robot", Eigen::Vector3d(4, 5, 6), Eigen::Quaterniond(0,1,0,0))),
 	motion_generator(1)
+	{}
+
+	void on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot/pose", this->current_pose);
 		this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
@@ -53,6 +56,9 @@ public:
 	Visualizer(node_name, period, true),
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot")),
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot"))
+	{}
+
+	void on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot/pose", this->robot_pose);
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
@@ -97,6 +103,9 @@ public:
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot")),
 	fixed_transform(std::make_shared<StateRepresentation::CartesianPose>("robot_base", 4, 5, 3, "robot")),
 	dt(period)
+	{}
+
+	void on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
 		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot/pose", this->robot_pose, std::chrono::milliseconds(0));
