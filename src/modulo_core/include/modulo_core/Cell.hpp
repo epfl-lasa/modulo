@@ -51,7 +51,9 @@ namespace Modulo
 			std::shared_ptr<std::mutex> mutex_; /// A mutex to use when modifying messages between functions
 			std::chrono::milliseconds period_;  ///< rate of the publisher functions in milliseconds
 			std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > handlers_; ///< maps for storing publishers, subscriptions and tf 
-			
+			std::shared_ptr<rclcpp::SyncParametersClient> parameters_client_; ///< shared pointer to the parameter client that handles request to the parameter server
+			std::map<std::string, bool> configure_on_parameters_change_; ///< map of bools to store the configure_on_change value of each parameters
+
 			/**
 			 * @brief Function to clear all publishers, subscriptions and services
 			 */
@@ -146,6 +148,30 @@ namespace Modulo
 			 */
 			template <typename MsgT, class RecT>
 			void add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10);
+
+			/**
+			 * @brief Add a parameter on the node parameter server
+			 * @param name the name of the parameter
+			 * @param default_value the default value of the parameter
+			 * @param configure_on_change if true deactivate the node and call 
+			 * the on_configure state e.g. to change the topics of publisher/subcriptions
+			 */
+			template <typename T>
+			void add_parameter(const std::string & name, const T & default_value, bool configure_on_change=false);
+
+			/**
+			 * @brief Set the value of the parameter on the node parameter server
+			 * @param name the name of the parameter
+			 */
+			template <typename T>
+			void set_parameter(const std::string & name, const T & value);
+
+			/**
+			 * @brief Get the value of the parameter on the node parameter server
+			 * @param name the name of the parameter
+			 */
+			template <typename T>
+			decltype(auto) get_parameter(const std::string & name) const;
 
 			/**
 			 * @brief Function to add a generic transform broadcaster to the map of handlers
@@ -360,7 +386,31 @@ namespace Modulo
 		void Cell::add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout, int queue_size)
 		{
 			this->add_subscription<MsgT, RecT>(channel, recipient, nb_period_to_timeout*this->period_, queue_size);
-		} 
+		}
+
+		template <typename T>
+		void Cell::add_parameter(const std::string & name, const T & default_value, bool configure_on_change)
+		{
+			this->configure_on_parameters_change_.insert(std::make_pair(name, configure_on_change));
+			this->declare_parameter(name, rclcpp::ParameterValue(default_value));
+		}
+
+		template <typename T>
+		void Cell::set_parameter(const std::string & name, const T & value)
+		{
+			auto result = this->parameters_client_->set_parameters({rclcpp::Parameter(name, value)});
+			if (!result[0].successful) 
+			{
+        		RCLCPP_ERROR(this->get_logger(), "Failed to set parameter: %s", result[0].reason.c_str());
+      		}
+		}
+
+		template <typename T>
+		decltype(auto) Cell::get_parameter(const std::string & name) const
+		{
+			auto parameter = this->parameters_client_->get_parameters({name});
+			return parameter[0].get_value<T>();
+		}
 	}
 }
 #endif
