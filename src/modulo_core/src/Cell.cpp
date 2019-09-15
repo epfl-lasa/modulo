@@ -29,6 +29,60 @@ namespace Modulo
 			this->handlers_.clear();
 		}
 
+		void Cell::add_transform_broadcaster(const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size)
+		{
+			auto handler = std::make_shared<Communication::TransformBroadcasterHandler>(timeout, this->get_clock(), this->mutex_);
+			handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
+			handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::TransformBroadcasterHandler::publish_callback, handler)));
+			this->handlers_.insert(std::make_pair("tf_broadcaster", handler));
+		}
+
+		void Cell::add_transform_listener(const std::chrono::milliseconds& timeout)
+		{
+			auto handler = std::make_shared<Communication::TransformListenerHandler>(timeout, this->get_clock(), this->mutex_);
+			this->handlers_.insert(std::make_pair("tf_listener", handler));
+		}
+
+		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size)
+		{
+			auto handler = std::make_shared<Communication::TransformBroadcasterHandler>(recipient, timeout, this->get_clock(), this->mutex_);
+			handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
+			handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::TransformBroadcasterHandler::publish_callback, handler)));
+			this->handlers_.insert(std::make_pair(recipient->get_name() + "_in_" + recipient->get_reference_frame() + "_broadcaster", handler));
+		}
+
+		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, int queue_size)
+		{
+			this->add_asynchronous_transform_broadcaster(recipient, this->period_, timeout, queue_size);
+		}
+
+		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, unsigned int nb_period_to_timeout, int queue_size)
+		{
+			this->add_asynchronous_transform_broadcaster(recipient, this->period_, nb_period_to_timeout*this->period_, queue_size);
+		}
+
+		void Cell::add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, int queue_size)
+		{
+			this->add_asynchronous_transform_broadcaster(recipient, period, std::chrono::milliseconds(0), queue_size);
+		}
+
+		void Cell::add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, int queue_size)
+		{
+			this->add_asynchronous_transform_broadcaster(recipient, this->period_, std::chrono::milliseconds(0), queue_size);
+		}
+
+		void Cell::send_transform(const StateRepresentation::CartesianPose& transform)
+		{
+			if (!this->running_) throw UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
+			static_cast<Communication::TransformBroadcasterHandler&>(*this->handlers_["tf_broadcaster"]).send_transform(transform);
+		}
+
+		const StateRepresentation::CartesianPose Cell::lookup_transform(const std::string& frame_name, const std::string& reference_frame)
+		{
+			if (!this->running_) throw UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
+			return static_cast<Communication::TransformListenerHandler&>(*this->handlers_["tf_listener"]).lookup_transform(frame_name, reference_frame);
+		}
+
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_configure(const rclcpp_lifecycle::State &) 
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_configure() is called.");
@@ -151,18 +205,6 @@ namespace Modulo
 		        	std::this_thread::sleep_for(timeToWait);
 		    	}
 		    }
-		}
-
-		void Cell::send_transform(const StateRepresentation::CartesianPose& transform)
-		{
-			if (!this->running_) throw UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
-			static_cast<Communication::TransformBroadcasterHandler&>(*this->handlers_["tf_broadcaster"]).send_transform(transform);
-		}
-
-		const StateRepresentation::CartesianPose Cell::lookup_transform(const std::string& frame_name, const std::string& reference_frame)
-		{
-			if (!this->running_) throw UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
-			return static_cast<Communication::TransformListenerHandler&>(*this->handlers_["tf_listener"]).lookup_transform(frame_name, reference_frame);
 		}
 	}
 }

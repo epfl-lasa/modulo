@@ -62,38 +62,26 @@ namespace Modulo
 			 * @param period the period to wait between two publishing
 			 * @param timeout the period after wich to consider that the publisher has timeout
 			 */
-			void add_transform_broadcaster(const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size=10)
-			{
-				auto handler = std::make_shared<Communication::TransformBroadcasterHandler>(timeout, this->get_clock(), this->mutex_);
-				handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
-				handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::TransformBroadcasterHandler::publish_callback, handler)));
-				this->handlers_.insert(std::make_pair("tf_broadcaster", handler));
-			}
+			void add_transform_broadcaster(const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size=10);
 
 			/**
 			 * @brief Function to add a default transform listener to the map of handlers
 			 * @param timeout the period after wich to consider that the handler has timeout
 			 */
-			void add_transform_listener(const std::chrono::milliseconds& timeout)
-			{
-				auto handler = std::make_shared<Communication::TransformListenerHandler>(timeout, this->get_clock(), this->mutex_);
-				this->handlers_.insert(std::make_pair("tf_listener", handler));
-			}
+			void add_transform_listener(const std::chrono::milliseconds& timeout);
 
 		protected:
 			/**
-			 * @brief Getter of the handlers variable
-			 * @return Reference to the handlers variable
+			 * @brief Getter of the handlers attribute
+			 * @return Reference to the handlers attribute
 			 */
-			inline const std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > & get_handlers() const
-			{
-				return this->handlers_;
-			}
+			const std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > & get_handlers() const;
 
-			inline std::mutex& get_mutex()
-			{
-				return (*this->mutex_);
-			}
+			/**
+			 * @brief Getter of the mutex attribute
+			 * @return Reference to the mutex attribute
+			 */
+			std::mutex & get_mutex();
 
 		public:
 			/**
@@ -108,22 +96,10 @@ namespace Modulo
 			~Cell();
 
 			/**
-			 * @brief Getter of the period variable
-			 * @return Reference to the period variable
+			 * @brief Getter of the period attribute
+			 * @return Reference to the period attribute
 			 */
-			inline std::chrono::milliseconds & get_period()
-			{
-				return this->period_;
-			}
-
-			/**
-			 * @brief Getter of the period variable
-			 * @return Reference to the period variable as a const reference
-			 */
-			inline const std::chrono::milliseconds & get_period() const
-			{
-				return this->period_;
-			}
+			const std::chrono::milliseconds & get_period() const;
 
 			/**
 			 * @brief Template function to add a generic publisher to the map of handlers
@@ -133,13 +109,7 @@ namespace Modulo
 			 * @param timeout the period after wich to consider that the publisher has timeout
 			 */
 			template <typename MsgT, class RecT>
-			void add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size=10)
-			{
-				auto handler = std::make_shared<Communication::PublisherHandler<RecT, MsgT> >(channel, recipient, timeout, this->get_clock(), this->mutex_);
-				handler->set_publisher(this->create_publisher<MsgT>(channel, queue_size));
-				handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::PublisherHandler<RecT, MsgT>::publish_callback, handler)));
-				this->handlers_.insert(std::make_pair(channel, handler));
-			}
+			void add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size=10);
 
 			/**
 			 * @brief Template function to add a generic publisher to the map of handlers
@@ -148,10 +118,7 @@ namespace Modulo
 			 * @param timeout the period after wich to consider that the publisher has timeout
 			 */
 			template <typename MsgT, class RecT>
-			void add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size=10)
-			{
-				this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, timeout, queue_size);
-			}
+			void add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size=10);
 
 			/**
 			 * @brief Template function to add a generic publisher to the map of handlers
@@ -160,63 +127,7 @@ namespace Modulo
 			 * @param nb_period_to_timeout the number of period before considering that the publisher has timeout 
 			 */
 			template <typename MsgT, class RecT>
-			void add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10)
-			{
-				this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, nb_period_to_timeout*this->period_, queue_size);
-			}
-
-			/**
-			 * @brief Function to add a generic transform broadcaster to the map of handlers
-			 * @param recipient the state that contain the data to be published
-			 * @param period the period to wait between two publishing
-			 * @param timeout the period after wich to consider that the publisher has timeout
-			 */
-			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size=10)
-			{
-				auto handler = std::make_shared<Communication::TransformBroadcasterHandler>(recipient, timeout, this->get_clock(), this->mutex_);
-				handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
-				handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::TransformBroadcasterHandler::publish_callback, handler)));
-				this->handlers_.insert(std::make_pair(recipient->get_name() + "_in_" + recipient->get_reference_frame() + "_broadcaster", handler));
-			}
-
-			/**
-			 * @brief Function to add a generic transform broadcaster to the map of handlers
-			 * @param recipient the state that contain the data to be published
-			 * @param timeout the period after wich to consider that the publisher has timeout
-			 */
-			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, int queue_size=10)
-			{
-				this->add_asynchronous_transform_broadcaster(recipient, this->period_, timeout, queue_size);
-			}
-
-			/**
-			 * @brief Function to add a generic transform broadcaster to the map of handlers
-			 * @param recipient the state that contain the data to be published
-			 * @param nb_period_to_timeout the number of period before considering that the broadcaster has timeout 
-			 */
-			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10)
-			{
-				this->add_asynchronous_transform_broadcaster(recipient, this->period_, nb_period_to_timeout*this->period_, queue_size);
-			}
-
-			/**
-			 * @brief Function to add a fixed transform broadcaster to the map of handlers. A fixed transform broadcaster never times out as opposded to a normal broadcaster.
-			 * @param recipient the state that contain the data to be published
-			 * @param period the period to wait between two publishing
-			 */
-			void add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, int queue_size=10)
-			{
-				this->add_asynchronous_transform_broadcaster(recipient, period, std::chrono::milliseconds(0), queue_size);
-			}
-
-			/**
-			 * @brief Function to add a fixed transform broadcaster to the map of handlers. A fixed transform broadcaster never times out as opposded to a normal broadcaster.
-			 * @param recipient the state that contain the data to be published
-			 */
-			void add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, int queue_size=10)
-			{
-				this->add_asynchronous_transform_broadcaster(recipient, this->period_, std::chrono::milliseconds(0), queue_size);
-			}
+			void add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10);
 
 			/**
 			 * @brief Template function to add a generic subscription to the map of handlers
@@ -225,12 +136,7 @@ namespace Modulo
 			 * @param timeout the period after wich to consider that the subscriber has timeout
 			 */
 			template <typename MsgT, class RecT>
-			void add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size=10)
-			{
-				auto handler = std::make_shared<Communication::SubscriptionHandler<RecT, MsgT> >(channel, recipient, timeout, this->get_clock(), this->mutex_);
-				handler->set_subscription(this->create_subscription<MsgT>(channel, queue_size, std::bind(&Communication::SubscriptionHandler<RecT, MsgT>::subscription_callback, handler, std::placeholders::_1)));
-				this->handlers_.insert(std::make_pair(channel, handler));
-			}
+			void add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size=10);
 
 			/**
 			 * @brief Template function to add a generic subscription to the map of handlers
@@ -239,10 +145,42 @@ namespace Modulo
 			 * @param nb_period_to_timeout the number of period before considering that the subscription has timeout 
 			 */
 			template <typename MsgT, class RecT>
-			void add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10)
-			{
-				this->add_subscription<MsgT, RecT>(channel, recipient, nb_period_to_timeout*this->period_, queue_size);
-			}
+			void add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10);
+
+			/**
+			 * @brief Function to add a generic transform broadcaster to the map of handlers
+			 * @param recipient the state that contain the data to be published
+			 * @param period the period to wait between two publishing
+			 * @param timeout the period after wich to consider that the publisher has timeout
+			 */
+			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size=10);
+
+			/**
+			 * @brief Function to add a generic transform broadcaster to the map of handlers
+			 * @param recipient the state that contain the data to be published
+			 * @param timeout the period after wich to consider that the publisher has timeout
+			 */
+			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, int queue_size=10);
+
+			/**
+			 * @brief Function to add a generic transform broadcaster to the map of handlers
+			 * @param recipient the state that contain the data to be published
+			 * @param nb_period_to_timeout the number of period before considering that the broadcaster has timeout 
+			 */
+			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10);
+
+			/**
+			 * @brief Function to add a fixed transform broadcaster to the map of handlers. A fixed transform broadcaster never times out as opposded to a normal broadcaster.
+			 * @param recipient the state that contain the data to be published
+			 * @param period the period to wait between two publishing
+			 */
+			void add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, int queue_size=10);
+	
+			/**
+			 * @brief Function to add a fixed transform broadcaster to the map of handlers. A fixed transform broadcaster never times out as opposded to a normal broadcaster.
+			 * @param recipient the state that contain the data to be published
+			 */
+			void add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, int queue_size=10);
 
 			/**
 			 * @brief Function to send a transform using the generic transform broadcaster
@@ -373,6 +311,56 @@ namespace Modulo
 			 */
 			void run();
 		};
+
+		inline const std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > & Cell::get_handlers() const
+		{
+			return this->handlers_;
+		}
+
+		inline std::mutex & Cell::get_mutex()
+		{
+			return (*this->mutex_);
+		}
+
+		inline const std::chrono::milliseconds & Cell::get_period() const
+		{
+			return this->period_;
+		}
+
+		template <typename MsgT, class RecT>
+		void Cell::add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size)
+		{
+			auto handler = std::make_shared<Communication::PublisherHandler<RecT, MsgT> >(channel, recipient, timeout, this->get_clock(), this->mutex_);
+			handler->set_publisher(this->create_publisher<MsgT>(channel, queue_size));
+			handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::PublisherHandler<RecT, MsgT>::publish_callback, handler)));
+			this->handlers_.insert(std::make_pair(channel, handler));
+		}
+
+		template <typename MsgT, class RecT>
+		void Cell::add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size)
+		{
+			this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, timeout, queue_size);
+		}
+
+		template <typename MsgT, class RecT>
+		void Cell::add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout, int queue_size)
+		{
+			this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, nb_period_to_timeout*this->period_, queue_size);
+		}
+
+		template <typename MsgT, class RecT>
+		void Cell::add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size)
+		{
+			auto handler = std::make_shared<Communication::SubscriptionHandler<RecT, MsgT> >(channel, recipient, timeout, this->get_clock(), this->mutex_);
+			handler->set_subscription(this->create_subscription<MsgT>(channel, queue_size, std::bind(&Communication::SubscriptionHandler<RecT, MsgT>::subscription_callback, handler, std::placeholders::_1)));
+			this->handlers_.insert(std::make_pair(channel, handler));
+		}
+
+		template <typename MsgT, class RecT>
+		void Cell::add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout, int queue_size)
+		{
+			this->add_subscription<MsgT, RecT>(channel, recipient, nb_period_to_timeout*this->period_, queue_size);
+		} 
 	}
 }
 #endif
