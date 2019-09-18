@@ -98,6 +98,7 @@ namespace StateRepresentation
 		if(!this->is_compatible(pose)) throw IncompatibleStatesException("The two states do not have the same name nor reference frame");
 		// operation
 		this->set_position(this->get_position() + pose.get_position());
+		if(this->get_orientation().dot(pose.get_orientation()) < 0) this->set_orientation(Eigen::Quaterniond(-this->get_orientation().coeffs()));
 		this->set_orientation(this->get_orientation() * pose.get_orientation());
 		return (*this);
 	}
@@ -117,7 +118,8 @@ namespace StateRepresentation
 		if(!this->is_compatible(pose)) throw IncompatibleStatesException("The two states do not have the same name nor reference frame");
 		// operation
 		this->set_position(this->get_position() - pose.get_position());
-		this->set_orientation(this->get_orientation().conjugate() * pose.get_orientation());
+		if(this->get_orientation().dot(pose.get_orientation()) < 0) this->set_orientation(Eigen::Quaterniond(-this->get_orientation().coeffs()));
+		this->set_orientation(this->get_orientation() * pose.get_orientation().conjugate());
 		return (*this);
 	}
 
