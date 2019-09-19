@@ -24,6 +24,7 @@ docker run \
     --privileged \
 	--net=host \
 	-it \
+    --rm \
 	--env DISPLAY=${DISPLAY} \
 	--volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
 	--env="XAUTHORITY=$XAUTH" \
