@@ -222,13 +222,16 @@ namespace StateRepresentation
 		// convert the period to a double with the second as reference
 		double period = std::chrono::milliseconds(dt).count();
 		period /= 1000.;
-		// multiply the twist by this period value
-		CartesianTwist tmp = period * twist;
 		// convert the velocities into a displacement
-		displacement.set_position(tmp.get_linear_velocity());
-		Eigen::Quaterniond angular_velocity = Eigen::Quaterniond(0, tmp.get_angular_velocity()(0), tmp.get_angular_velocity()(1), tmp.get_angular_velocity()(2));
-		Eigen::Quaterniond origin = Eigen::Quaterniond::Identity();
-		displacement.set_orientation(Eigen::Quaterniond(origin.coeffs() + 0.5 * (origin * angular_velocity).coeffs()));
+		displacement.set_position(period * twist.get_linear_velocity());
+		Eigen::Quaterniond angular_displacement = Eigen::Quaterniond::Identity();
+		double angular_norm = twist.get_angular_velocity().norm();
+		if (angular_norm > 1e-4)
+		{
+			angular_displacement.w() = cos(angular_norm * period / 2.);
+			angular_displacement.vec() = twist.get_angular_velocity() / angular_norm * sin(angular_norm * period / 2.);
+		}
+		displacement.set_orientation(angular_displacement);
 		return displacement;
 	}
 
