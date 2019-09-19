@@ -145,26 +145,26 @@ namespace StateRepresentation
 		return result;
 	}
 
-	void CartesianTwist::clamp(double max_linear, double max_angular, double noise_ratio)
+	void CartesianTwist::clamp(double max_linear, double max_angular, double linear_noise_ratio, double angular_noise_ratio)
 	{	
-		if(noise_ratio != 0)
+		if(linear_noise_ratio != 0 || angular_noise_ratio != 0)
 		{	
 			// substract the noise ratio to both velocities
-			this->set_linear_velocity(this->get_linear_velocity() - noise_ratio * this->get_linear_velocity().normalized());
-			this->set_angular_velocity(this->get_angular_velocity() - noise_ratio * this->get_angular_velocity().normalized());
+			this->set_linear_velocity(this->get_linear_velocity() - linear_noise_ratio * this->get_linear_velocity().normalized());
+			this->set_angular_velocity(this->get_angular_velocity() - angular_noise_ratio * this->get_angular_velocity().normalized());
 			// apply a deadzone
-			if(this->get_linear_velocity().norm() < noise_ratio) this->set_linear_velocity(Eigen::Vector3d::Zero());
-			if(this->get_angular_velocity().norm() < noise_ratio) this->set_angular_velocity(Eigen::Vector3d::Zero()); 	
+			if(this->get_linear_velocity().norm() < linear_noise_ratio) this->set_linear_velocity(Eigen::Vector3d::Zero());
+			if(this->get_angular_velocity().norm() < angular_noise_ratio) this->set_angular_velocity(Eigen::Vector3d::Zero()); 	
 		} 
 		// clamp the velocities to their maximum amplitude provided
 		if(this->get_linear_velocity().norm() > max_linear) this->set_linear_velocity(max_linear * this->get_linear_velocity().normalized());
 		if(this->get_angular_velocity().norm() > max_angular) this->set_angular_velocity(max_angular * this->get_angular_velocity().normalized());
 	}
 
-	const CartesianTwist CartesianTwist::clamped(double max_linear, double max_angular, double noise_ratio) const
+	const CartesianTwist CartesianTwist::clamped(double max_linear, double max_angular, double linear_noise_ratio, double angular_noise_ratio) const
 	{
 		CartesianTwist result(*this);
-		result.clamp(max_linear, max_angular, noise_ratio);
+		result.clamp(max_linear, max_angular, linear_noise_ratio, angular_noise_ratio);
 		return result;
 	}
 
