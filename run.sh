@@ -32,4 +32,4 @@ docker run \
     --volume="$XAUTH:$XAUTH" \
     --volume="${NAME}_lib_vol:/home/ros2/modulo_lib/:rw" \
 	--volume="${NAME}_src_vol:/home/ros2/ros2_ws/src/:rw" \
-	${NAME}:${TAG}
+	"${NAME}:${TAG}"
