@@ -1,3 +1,4 @@
+#!/bin/bash
 NAME=$(echo "${PWD##*/}" | tr _ -)
 TAG=$(echo "$1" | tr _/ -)
 

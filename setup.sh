@@ -1,3 +1,4 @@
+#!/bin/bash
 CURRPATH=${PWD}
 git submodule update --init --recursive
 cd ${CURRPATH}/lib/dynamical_systems && git checkout master && git pull 

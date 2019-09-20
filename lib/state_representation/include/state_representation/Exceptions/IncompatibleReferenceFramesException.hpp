@@ -13,7 +13,7 @@ namespace StateRepresentation
 		class IncompatibleReferenceFramesException: public std::logic_error
 		{
 		public:
-			IncompatibleReferenceFramesException(const std::string& msg) : logic_error(msg)
+			explicit IncompatibleReferenceFramesException(const std::string& msg) : logic_error(msg)
 			{};
 		};
 	}

@@ -13,7 +13,7 @@ namespace StateRepresentation
 		class EmptyStateException: public std::runtime_error
 		{
 		public:
-			EmptyStateException(const std::string& msg) : runtime_error(msg)
+			explicit EmptyStateException(const std::string& msg) : runtime_error(msg)
 			{};
 		};
 	}

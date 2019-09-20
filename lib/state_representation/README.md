@@ -2,7 +2,7 @@
 
 This library provides a set of classes to represent states in cartesian, joint and dual quaternion spaces. A state is made of the name of the frame it is associated to and it is expressed in a reference frame (by default `world`). Basic operations such as addition, multiplication, scaling, ... are defined (if they have a physical meaning).
 
-```
+```cpp
 StateRepresentation::CartesianPose p1("a"); // reference frame is world by default
 StateRepresentation::CartesianPose p2("a");
 
@@ -12,7 +12,7 @@ StateRepresentation::CartesianPose psum = p1 + p2;
 
 States in each spaces can represent pose (position and orientation), twist (linear velocity and angular velocity), acceleration (linear and angular) and wrench (force and torque). Operations representing transformations are implemented. For example the multiplication between two poses allows to express the resulting pose in a different reference frame.
 
-```
+```cpp
 StateRepresentation::CartesianPose p1("a"); 
 StateRepresentation::CartesianPose p2("b", "a");
 

@@ -13,7 +13,7 @@ namespace Modulo
 		class UnconfiguredNodeException: public std::runtime_error
 		{
 		public:
-			UnconfiguredNodeException(const std::string& msg) : runtime_error(msg)
+			explicit UnconfiguredNodeException(const std::string& msg) : runtime_error(msg)
 			{};
 		};
 	}

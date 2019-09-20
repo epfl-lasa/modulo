@@ -1,3 +1,4 @@
+#!/bin/bash
 BASE_IMAGE=osrf/ros2
 BASE_TAG=nightly
 
