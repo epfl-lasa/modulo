@@ -1,3 +1,5 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a89a7401d0aa479db3db959625cdfd65)](https://www.codacy.com/manual/buschbapti/modulo?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=epfl-lasa/modulo&amp;utm_campaign=Badge_Grade)
+
 # Modulo
 
 Modulo is a software architecture to design control loop for robotic systems. It is based on the definition of modules communicating with each other to facilitate the implementation of closed loop control architecture. Each module has a specific function such as being an interface to a robot or a sensor, or modulate an input signal. The core library [modulo_core](./src/modulo_core) implements multiple abstract classes you can inherit from to develop your own module.
