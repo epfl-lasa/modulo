@@ -15,7 +15,7 @@ TEST(TestCreate, PositiveNos)
 	{
 		jac.set_data(Eigen::MatrixXd::Random(7,6));
 	}
-	catch(IncompatibleSizeException e)
+	catch(const IncompatibleSizeException& e)
 	{
 		except_thrown = true;
 	}
@@ -35,7 +35,7 @@ TEST(TestTranspose, PositiveNos)
 	{
 		jac.set_data(Eigen::MatrixXd::Random(7,6));
 	}
-	catch(IncompatibleSizeException e)
+	catch(const IncompatibleSizeException& e)
 	{
 		except_thrown = true;
 	}
@@ -57,7 +57,7 @@ TEST(TestMutltiplyWithEigen, PositiveNos)
 	{
 		Eigen::MatrixXd res2 = jac * mat2;
 	}
-	catch(IncompatibleSizeException e)
+	catch(const IncompatibleSizeException& e)
 	{
 		except_thrown = true;
 	}
@@ -77,7 +77,7 @@ TEST(TestSolve, PositiveNos)
 	{
 		Eigen::MatrixXd res1 = jac.solve(mat1);
 	}
-	catch(IncompatibleSizeException e)
+	catch(const IncompatibleSizeException& e)
 	{
 		except_thrown = true;
 	}
@@ -100,7 +100,7 @@ TEST(TestJointToCartesian, PositiveNos)
 	{
 		StateRepresentation::CartesianTwist cvel = jac * jvel;
 	}
-	catch(IncompatibleSizeException e)
+	catch(const IncompatibleSizeException& e)
 	{
 		except_thrown = true;
 	}
@@ -119,7 +119,7 @@ TEST(TestCartesianToJoint, PositiveNos)
 	{
 		jvel1 = jac.solve(cvel);
 	}
-	catch(IncompatibleSizeException e)
+	catch(const IncompatibleSizeException& e)
 	{
 		except_thrown1 = true;
 	}
