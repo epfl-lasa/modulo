@@ -1,7 +1,7 @@
 ARG BASE_IMAGE=osrf/ros2
 ARG BASE_TAG=nightly
 
-FROM alpine:latest as builder
+FROM alpine:3.10.2 as builder
 RUN apk add --no-cache git && \
     apk add --no-cache openssh
 RUN git clone https://github.com/protocolbuffers/protobuf.git
@@ -27,7 +27,8 @@ RUN apt update && apt install -y \
 ENV QT_X11_NO_MITSHM 1
 
 COPY --from=builder /protobuf /lib/protobuf
-RUN cd /lib/protobuf && ./autogen.sh && ./configure && make -j8 && make install && ldconfig
+WORKDIR  /lib/protobuf
+RUN ./autogen.sh && ./configure && make -j8 && make install && ldconfig
 
 # Now create the same user as the host itself
 ARG UID=1000

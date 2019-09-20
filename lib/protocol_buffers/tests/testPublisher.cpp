@@ -34,7 +34,7 @@ TEST(PublishCircular, PositiveNos)
 
 		current_pose += dt * velocity;
 		current_pose2 += dt * velocity2;
-		usleep(100000);
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 
 		publisher.send(current_pose);
 		publisher.send(current_pose2);

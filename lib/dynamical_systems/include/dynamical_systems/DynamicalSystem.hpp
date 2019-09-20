@@ -26,8 +26,6 @@ namespace DynamicalSystems
 	{
 	private:
 		double gain_;
-		double disturbance_threshold_;
-		double max_amplitude_;
 
 	protected:
 		ProtocolBuffers::DynamicalSystemMsg message_;
@@ -65,16 +63,5 @@ namespace DynamicalSystems
 		throw NotImplementedException("This method is not implemented for abstract base class");
 		return state;
 	}
-
-	/*template<class S>
-	const S DynamicalSystem<S>::apply_deadzone(const S& state) const
-	{
-		throw NotImplementedException("This method is not implemented for this type of input");
-		return state;
-	}
-
-	template<>
-	const S DynamicalSystem<StateRepresentation::CartesianState>::apply_deadzone(const StateRepresentation::CartesianState& state) const
-	{}*/
 }
 #endif
