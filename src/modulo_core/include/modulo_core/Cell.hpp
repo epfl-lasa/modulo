@@ -28,6 +28,7 @@
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "rclcpp/function_traits.hpp"
+#include "rclcpp_components/register_node_macro.hpp"
 #include "rcutils/logging_macros.h"
 #include "modulo_core/Communication/SubscriptionHandler.hpp"
 #include "modulo_core/Communication/PublisherHandler.hpp"
@@ -44,14 +45,14 @@ namespace Modulo
 		class Cell : public rclcpp_lifecycle::LifecycleNode
 		{
 		private:
-			bool running_; ///< boolean that start or stop the main loop of the cell
-			bool active_; ///< boolean that start computation only if the cell is in the active state
-			bool shutdown_;
+			bool configured_; ///< boolean that informs that the node has been configured, i.e passed by the on_configure state
+			bool active_; ///< boolean that informs that the node has been activated, i.e passed by the on_activate state
+			bool shutdown_; ///< boolean that informs that the node has been shutdown, i.e passed by the on_shutdown state
 			std::thread run_thread; ///< thread object to start the main loop, i.e. the run function, in parallel of the rest
-			std::shared_ptr<std::mutex> mutex_; /// A mutex to use when modifying messages between functions
+			std::shared_ptr<std::mutex> mutex_; ///< a mutex to use when modifying messages between functions
 			std::chrono::milliseconds period_;  ///< rate of the publisher functions in milliseconds
 			std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > handlers_; ///< maps for storing publishers, subscriptions and tf 
-			std::shared_ptr<rclcpp::SyncParametersClient> parameters_client_; ///< shared pointer to the parameter client that handles request to the parameter server
+		
 			std::map<std::string, bool> configure_on_parameters_change_; ///< map of bools to store the configure_on_change value of each parameters
 
 			/**
@@ -85,7 +86,28 @@ namespace Modulo
 			 */
 			std::mutex & get_mutex();
 
+			/**
+			 * @brief Getter of the configured boolean attribute
+			 * @return true if configured
+			 */
+			bool is_configured() const;
+
+			/**
+			 * @brief Getter of the active boolean attribute
+			 * @return true if active
+			 */
+			bool is_active() const;
+
+			/**
+			 * @brief Getter of the shutdown boolean attribute
+			 * @return true if shutdown
+			 */
+			bool is_shutdown() const;
+
 		public:
+
+			std::shared_ptr<rclcpp::SyncParametersClient> parameters_client_; ///< shared pointer to the parameter client that handles request to the parameter server
+			
 			/**
 			 * @brief Cell constructor with arguments needed from ROS2 node
 			 * @param node_name name of the ROS node
@@ -328,6 +350,13 @@ namespace Modulo
 			virtual void on_shutdown();
 
 			/**
+			 * @brief Function called each time a a parameter is modified on the paramter server of the node
+			 * @param event the type of event in parameter added, parameter changed or deleted
+			 * @param logger logger of the node for printing
+			 */
+			void on_parameter_event(const rcl_interfaces::msg::ParameterEvent::SharedPtr event, rclcpp::Logger logger);
+
+			/**
 			 * @brief Function computing one step of calculation. It is called periodically in the run function.
 			 */
 			virtual void step() = 0;
@@ -341,6 +370,21 @@ namespace Modulo
 		inline const std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > & Cell::get_handlers() const
 		{
 			return this->handlers_;
+		}
+
+		inline bool Cell::is_configured() const
+		{
+			return this->configured_;
+		}
+
+		inline bool Cell::is_active() const
+		{
+			return this->active_;
+		}
+
+		inline bool Cell::is_shutdown() const
+		{
+			return this->shutdown_;
 		}
 
 		inline std::mutex & Cell::get_mutex()

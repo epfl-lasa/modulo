@@ -4,14 +4,6 @@ ARG BASE_TAG=nightly
 FROM ubuntu as builder
 
 RUN apt update && apt install -y git && rm -rf /var/lib/apt/lists/*
-
-# In case there are private repositories uncomment the following
-#RUN mkdir /root/.ssh/
-
-#COPY config/ssh_key /root/.ssh/id_rsa
-#RUN touch /root/.ssh/known_hosts
-#RUN ssh-keyscan bitbucket.org >> /root/.ssh/known_hosts
-
 RUN git clone https://github.com/protocolbuffers/protobuf.git
 
 FROM ${BASE_IMAGE}:${BASE_TAG}
