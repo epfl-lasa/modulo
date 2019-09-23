@@ -18,6 +18,17 @@ namespace Modulo
 {
 	namespace RobotInterfaces
 	{
+		/// Enumeration of the possible controllers
+		enum class Controller 
+		{
+			CARTESIAN_POSE, /// Caresian pose controller
+			CARTESIAN_TWIST, /// Caresian twist controller
+			CARTESIAN_WRENCH, /// Caresian wrench controller
+			JOINT_POSITIONS, /// Joint positions controller
+			JOINT_VELOCITIES, /// Joint velocities controller
+			JOINT_TORQUES /// Joint torques controller
+		};
+
 		class RobotInterface: public Core::Cell 
 		{
 		protected:
@@ -28,6 +39,7 @@ namespace Modulo
 			std::shared_ptr<StateRepresentation::JacobianMatrix> jacobian; ///< pointer to the jacobian
 			std::shared_ptr<StateRepresentation::CartesianState> desired_cartesian_state; ///< pointer to the desired cartesian state
 			std::shared_ptr<StateRepresentation::JointState> desired_joint_state; ///< pointer to the desired joint state
+			Controller active_controller; ///< the current active controller type 
 
 		public:
 			/**

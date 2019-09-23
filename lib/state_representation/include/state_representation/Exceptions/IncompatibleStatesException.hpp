@@ -13,7 +13,7 @@ namespace StateRepresentation
 		class IncompatibleStatesException: public std::logic_error
 		{
 		public:
-			IncompatibleStatesException(const std::string& msg) : logic_error(msg)
+			explicit IncompatibleStatesException(const std::string& msg) : logic_error(msg)
 			{};
 		};
 	}

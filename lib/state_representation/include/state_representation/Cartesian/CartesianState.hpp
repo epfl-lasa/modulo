@@ -306,7 +306,7 @@ namespace StateRepresentation
 	inline void CartesianState::set_orientation(const Eigen::Quaterniond& orientation)
 	{
 		this->set_filled();
-		this->orientation = (this->orientation.dot(orientation)) > 0 ? orientation.normalized() : Eigen::Quaterniond(-(orientation.normalized()).coeffs());
+		this->orientation = orientation.normalized();
 	}
 
 	inline void CartesianState::set_linear_velocity(const Eigen::Vector3d& linear_velocity)

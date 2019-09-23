@@ -131,7 +131,7 @@ TEST(TestCartesianToJoint, PositiveNos)
 	{
 		jvel2 = jac * cvel;
 	}
-	catch(IncompatibleSizeException e)
+	catch(const IncompatibleSizeException& e)
 	{
 		except_thrown2 = true;
 	}

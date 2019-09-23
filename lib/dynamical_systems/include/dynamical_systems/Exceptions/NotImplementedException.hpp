@@ -13,7 +13,7 @@ namespace DynamicalSystems
 		class NotImplementedException : public std::logic_error
 		{
 		public:
-			NotImplementedException(const std::string& msg) : logic_error(msg)
+			explicit NotImplementedException(const std::string& msg) : logic_error(msg)
 			{};
 		};
 	}

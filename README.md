@@ -1,3 +1,5 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a89a7401d0aa479db3db959625cdfd65)](https://www.codacy.com/manual/buschbapti/modulo?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=epfl-lasa/modulo&amp;utm_campaign=Badge_Grade)
+
 # Modulo
 
 Modulo is a software architecture to design control loop for robotic systems. It is based on the definition of modules communicating with each other to facilitate the implementation of closed loop control architecture. Each module has a specific function such as being an interface to a robot or a sensor, or modulate an input signal. The core library [modulo_core](./src/modulo_core) implements multiple abstract classes you can inherit from to develop your own module.
@@ -12,12 +14,12 @@ You can build a complete working environment using `docker`. Simply run `sh buil
 
 It is possible to interface ROS2 with ROS1 in order to publish/subscribe to topics from ROS1. To do so, you need to launch a ROS2/ROS1 bridge. You can use a ready to use docker image by issuing the command:
 
-```
+```bash
 docker run -it --net=host osrf/ros:dashing-ros1-bridge
 ```
 
 This will pull the bridge image and open interactive shell in which you can run the bridge:
 
-```
+```bash
 ros2 run ros1_bridge dynamic_bridge --bridge-all-topics
 ```

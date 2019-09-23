@@ -13,7 +13,7 @@ namespace StateRepresentation
 		class IncompatibleSizeException: public std::logic_error
 		{
 		public:
-			IncompatibleSizeException(const std::string& msg) : logic_error(msg)
+			explicit IncompatibleSizeException(const std::string& msg) : logic_error(msg)
 			{};
 		};
 	}
