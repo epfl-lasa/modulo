@@ -21,8 +21,8 @@ namespace Modulo
 		class Recorder: public Core::Cell 
 		{
 		private:
-			std::chrono::time_point<std::chrono::system_clock> start_time;
-			std::chrono::time_point<std::chrono::system_clock> end_time;
+			std::chrono::time_point<std::chrono::system_clock> start_time; ///< start time of current recording session, reset on activate
+			std::chrono::time_point<std::chrono::system_clock> end_time; ///< end time of current recording session, reset on deactivate
 
 		public:
 			/**
@@ -111,6 +111,14 @@ namespace Modulo
 			 * @return true if the state was successfully recorded
 			 */
 			virtual bool record(const StateRepresentation::CartesianState& state) const;
+
+			/**
+			 * @brief Abstract function to record a JointState. This function needs to be
+			 * implemeted in the derived class.
+			 * @param state the state to be recorded
+			 * @return true if the state was successfully recorded
+			 */
+			virtual bool record(const StateRepresentation::JointState& state) const;
 		};
 
 		inline const auto& Recorder::get_start_time() const

@@ -56,5 +56,11 @@ namespace Modulo
 			RCLCPP_WARN(this->get_logger(), "Trying to record " + state.get_name() + " from the base class");
 			return false;
 		}
+
+		bool Recorder::record(const StateRepresentation::JointState& state) const
+		{
+			RCLCPP_WARN(this->get_logger(), "Trying to record " + state.get_name() + " from the base class");
+			return false;
+		}
 	}
 }
