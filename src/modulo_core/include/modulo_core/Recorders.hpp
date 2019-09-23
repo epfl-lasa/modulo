@@ -87,7 +87,7 @@ namespace Modulo
 			/**
 			 * @brief Function computing one step of calculation. It is called periodically in the run function.
 			 */
-			virtual void step() = 0;
+			void step();
 
 			bool record(const StateRepresentation::State& state) const;
 
