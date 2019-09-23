@@ -8,8 +8,8 @@
  * the received data.
  */
 
-#ifndef MODULORECORDER_RECORDER_H_
-#define MODULORECORDER_RECORDER_H_
+#ifndef MODULO_RECORDER_H_
+#define MODULO_RECORDER_H_
 
 #include "modulo_core/Cell.hpp"
 #include <typeinfo>
@@ -32,15 +32,22 @@ namespace Modulo
 			 */
 			explicit Recorder(const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms = false);
 
-			inline const auto& get_start_time() const
-			{
-				return start_time;
-			}
+			/**
+			 * @brief Destructor
+			 */
+			~Recorder();
 
-			inline const auto& get_end_time() const
-			{
-				return end_time;
-			}
+			/**
+			 * @brief Getter of the start_time attribute
+			 * @return start_time
+			 */
+			const auto& get_start_time() const;
+
+			/**
+			 * @brief Getter of the end_time attribute
+			 * @return end_time
+			 */
+			const auto& get_end_time() const;
 
 			/**
 			 * @brief This function is called time the configure call 
@@ -57,7 +64,7 @@ namespace Modulo
 			 * and subsciptions and can be extended to start a recording
 			 * or replay.
 			 */
-			virtual void on_activate();
+			void on_activate();
 
 			/**
 			 * @brief This function is called time the deactivate call 
@@ -65,7 +72,7 @@ namespace Modulo
 			 * and subsciptions and can be extended to stop a recording
 			 * or a replay.
 			 */
-			virtual void on_deactivate();
+			void on_deactivate();
 
 			/**
 			 * @brief This function is called time the cleanup call 
@@ -89,10 +96,32 @@ namespace Modulo
 			 */
 			void step();
 
+			/**
+			 * @brief Generic function to record a state. This function is called in the step
+			 * function for each subscription the recorder has
+			 * @param state the state to be recorded
+			 * @return true if the state was successfully recorded
+			 */
 			bool record(const StateRepresentation::State& state) const;
 
-			virtual bool record(const StateRepresentation::CartesianState& state) const=0;
+			/**
+			 * @brief Abstract function to record a CartesianState. This function needs to be
+			 * implemeted in the derived class.
+			 * @param state the state to be recorded
+			 * @return true if the state was successfully recorded
+			 */
+			virtual bool record(const StateRepresentation::CartesianState& state) const;
 		};
+
+		inline const auto& Recorder::get_start_time() const
+		{
+			return start_time;
+		}
+
+		inline const auto& Recorder::get_end_time() const
+		{
+			return end_time;
+		}
 	}
 }
 #endif

@@ -27,6 +27,7 @@ namespace Modulo
 			class CommunicationHandler
 			{
 			private:
+				const std::string type_;
 				std::string channel_;
 				std::shared_ptr<StateRepresentation::State> recipient_;
 				std::chrono::milliseconds timeout_;
@@ -34,9 +35,14 @@ namespace Modulo
 				std::shared_ptr<std::mutex> mutex_;
 
 			public:
-				explicit CommunicationHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-				channel_(channel), recipient_(recipient), timeout_(timeout), clock_(clock), mutex_(mutex)
+				explicit CommunicationHandler(const std::string& type, const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
+				type_(type), channel_(channel), recipient_(recipient), timeout_(timeout), clock_(clock), mutex_(mutex)
 				{}
+
+				inline const std::string& get_type()
+				{
+					return this->type_;
+				}
 
 				inline const StateRepresentation::State& get_recipient() const
 				{
