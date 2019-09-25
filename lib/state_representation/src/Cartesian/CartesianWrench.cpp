@@ -1,5 +1,6 @@
 #include "state_representation/Cartesian/CartesianWrench.hpp"
 #include "state_representation/Exceptions/IncompatibleStatesException.hpp"
+#include "state_representation/Exceptions/IncompatibleReferenceFramesException.hpp"
 #include "state_representation/Exceptions/EmptyStateException.hpp"
 
 using namespace StateRepresentation::Exceptions;
@@ -58,7 +59,7 @@ namespace StateRepresentation
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
 		if(wrench.is_empty()) throw EmptyStateException(wrench.get_name() + " state is empty");
-		if(!(this->get_reference_frame() == pose.get_refererence_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
+		if(!(this->get_reference_frame() == wrench.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
 		// operation
 		this->set_force(this->get_force() + wrench.get_force());
 		this->set_torque(this->get_torque() + wrench.get_torque());
@@ -91,7 +92,7 @@ namespace StateRepresentation
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
 		if(wrench.is_empty()) throw EmptyStateException(wrench.get_name() + " state is empty");
-		if(!(this->get_reference_frame() == pose.get_refererence_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
+		if(!(this->get_reference_frame() == wrench.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
 		// operation
 		this->set_force(this->get_force() - wrench.get_force());
 		this->set_torque(this->get_torque() - wrench.get_torque());

@@ -95,7 +95,7 @@ namespace StateRepresentation
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
 		if(pose.is_empty()) throw EmptyStateException(pose.get_name() + " state is empty");
-		if(!(this->get_reference_frame() == pose.get_refererence_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
+		if(!(this->get_reference_frame() == pose.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
 		// operation
 		this->set_position(this->get_position() + pose.get_position());
 		if(this->get_orientation().dot(pose.get_orientation()) < 0) this->set_orientation(Eigen::Quaterniond(-this->get_orientation().coeffs()));
@@ -115,7 +115,7 @@ namespace StateRepresentation
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
 		if(pose.is_empty()) throw EmptyStateException(pose.get_name() + " state is empty");
-		if(!(this->get_reference_frame() == pose.get_refererence_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
+		if(!(this->get_reference_frame() == pose.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
 		// operation
 		this->set_position(this->get_position() - pose.get_position());
 		if(this->get_orientation().dot(pose.get_orientation()) < 0) this->set_orientation(Eigen::Quaterniond(-this->get_orientation().coeffs()));
@@ -171,7 +171,7 @@ namespace StateRepresentation
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
 		if(pose.is_empty()) throw EmptyStateException(pose.get_name() + " state is empty");
-		if(!(this->get_reference_frame() == pose.get_refererence_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
+		if(!(this->get_reference_frame() == pose.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
 		// calculation
 		Eigen::Array2d result;
 		// euclidean distance for position

@@ -1,5 +1,6 @@
 #include "state_representation/Cartesian/CartesianTwist.hpp"
 #include "state_representation/Exceptions/IncompatibleStatesException.hpp"
+#include "state_representation/Exceptions/IncompatibleReferenceFramesException.hpp"
 #include "state_representation/Exceptions/EmptyStateException.hpp"
 
 using namespace StateRepresentation::Exceptions;
@@ -74,7 +75,7 @@ namespace StateRepresentation
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
 		if(twist.is_empty()) throw EmptyStateException(twist.get_name() + " state is empty");
-		if(!(this->get_reference_frame() == pose.get_refererence_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
+		if(!(this->get_reference_frame() == twist.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
 		// operation
 		this->set_linear_velocity(this->get_linear_velocity() + twist.get_linear_velocity());
 		this->set_angular_velocity(this->get_angular_velocity() + twist.get_angular_velocity());
@@ -107,7 +108,7 @@ namespace StateRepresentation
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
 		if(twist.is_empty()) throw EmptyStateException(twist.get_name() + " state is empty");
-		if(!(this->get_reference_frame() == pose.get_refererence_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
+		if(!(this->get_reference_frame() == twist.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
 		// operation
 		this->set_linear_velocity(this->get_linear_velocity() - twist.get_linear_velocity());
 		this->set_angular_velocity(this->get_angular_velocity() - twist.get_angular_velocity());

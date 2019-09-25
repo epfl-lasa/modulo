@@ -207,11 +207,11 @@ TEST(TestVelocityClamping, PositiveNos)
 
 	vel *= 0.01;
 
-	std::cout << vel.clamped(1, 0.5, 0.1) << std::endl;
+	std::cout << vel.clamped(1, 0.5, 0.1, 0.1) << std::endl;
 	for(int i=0; i<3; ++i)
 	{
-		EXPECT_TRUE(vel.clamped(1, 0.5, 0.1).get_linear_velocity()(i) == 0);
-		EXPECT_TRUE(vel.clamped(1, 0.5, 0.1).get_angular_velocity()(i) == 0);
+		EXPECT_TRUE(vel.clamped(1, 0.5, 0.1, 0.1).get_linear_velocity()(i) == 0);
+		EXPECT_TRUE(vel.clamped(1, 0.5, 0.1, 0.1).get_angular_velocity()(i) == 0);
 	}
 }
 
@@ -290,6 +290,23 @@ TEST(TestWrenchOperatorsWithEigen, PositiveNos)
 
 	wrench = vec - wrench;
 	EXPECT_TRUE((arr+wrench.get_wrench()).norm() < 1e-4);
+}
+
+TEST(TestFilter, PositiveNos)
+{
+	StateRepresentation::CartesianPose tf1("t1", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom());
+	StateRepresentation::CartesianPose tf2("t1", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom());
+
+	for (int i = 0; i <1000; ++i)
+	{
+		StateRepresentation::CartesianPose temp = tf1;
+
+		double alpha = 0.1;
+		tf1 = (1-alpha) * tf1 + alpha * tf2;
+		EXPECT_TRUE((tf1.get_position() - ((1-alpha) * temp.get_position() + alpha * tf2.get_position())).norm() < 1e-4);
+	}
+
+	EXPECT_TRUE(dist(tf1, tf2)(0) < 1e-4);
 }
 
 int main(int argc, char **argv) {
