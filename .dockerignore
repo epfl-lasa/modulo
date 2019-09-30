@@ -3,6 +3,6 @@
 *.md
 LICENSE
 *.sh
-lib/dynamical_systems/build
-lib/protocol_buffers/build
-lib/state_representation/build
+source/lib/dynamical_systems/build
+source/lib/protocol_buffers/build
+source/lib/state_representation/build
