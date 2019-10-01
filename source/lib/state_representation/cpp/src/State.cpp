@@ -18,12 +18,9 @@ namespace StateRepresentation
 	{
 		if(state.is_empty())
 		{
-			os << "Empty State";
+			os << "Empty ";
 		}
-		else
-		{
-			os << state.get_name() << " State expressed in " << state.get_reference_frame() << " frame" << std::endl;
-	  	}
+		os << " State: " << state.get_name() << " expressed in " << state.get_reference_frame() << " frame" << std::endl;
   		return os;
 	}
 }
