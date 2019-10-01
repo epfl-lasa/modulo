@@ -12,7 +12,6 @@
 #include <eigen3/Eigen/Dense>
 #include <iostream>
 #include "state_representation/State.hpp"
-#include "protocol_buffers/CartesianStateMsg.pb.h"
 
 namespace StateRepresentation 
 {
@@ -177,18 +176,6 @@ namespace StateRepresentation
 		 * @return the copy
 		 */
 		const CartesianState copy() const;
-
-		/**
-	 	 * @brief Serialize the state to a string using protobuf
-	 	 * @return the serialized object
-	     */
-		const std::string serialize() const;
-
-		/**
-	 	 * @brief Deserialize the object from a string
-	 	 * @param msg_str the serialized string
-	     */
-		void deserialize(const std::string& msg_str);
 
 		/**
 	 	 * @brief Overload the *= operator with a scalar

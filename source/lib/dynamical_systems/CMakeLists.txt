@@ -20,7 +20,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(Eigen3 REQUIRED)
-find_package(Protobuf REQUIRED)
 
 include_directories(
   	include
@@ -58,9 +57,6 @@ if (runtests)
   		gtest_main
   		${PROJECT_NAME}
       state_representation
-      protocol_buffers
-      ${PROTOBUF_LIBRARIES}
-      zmq
   	)
 	  add_test(NAME runTestLinear COMMAND runTestLinear)
 
@@ -70,9 +66,6 @@ if (runtests)
       gtest_main
       ${PROJECT_NAME}
       state_representation
-      protocol_buffers
-      ${PROTOBUF_LIBRARIES}
-      zmq
     )
     add_test(NAME runTestCircular COMMAND runTestCircular)
 

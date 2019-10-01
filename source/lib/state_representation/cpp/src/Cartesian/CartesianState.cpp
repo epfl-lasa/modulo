@@ -38,46 +38,6 @@ namespace StateRepresentation
 		this->torque.setZero();
 	}
 
-	const std::string CartesianState::serialize() const
-	{
-		ProtocolBuffers::CartesianStateMsg message;
-		message.set_name(this->get_name());
-		message.set_reference_frame(this->get_reference_frame());
-		for (int i=0; i<3; ++i)
-		{
-			message.add_position(this->position(i));
-			message.add_linear_velocity(this->linear_velocity(i));
-			message.add_angular_velocity(this->angular_velocity(i));
-			message.add_linear_acceleration(this->linear_acceleration(i));
-			message.add_angular_acceleration(this->angular_acceleration(i));
-			message.add_force(this->force(i));
-			message.add_torque(this->torque(i));
-		}
-		message.add_orientation(this->orientation.w());
-	    message.add_orientation(this->orientation.x());
-	    message.add_orientation(this->orientation.y());
-	    message.add_orientation(this->orientation.z());
-	    std::string msg_str;
-		message.SerializeToString(&msg_str);
-		return msg_str;
-	}
-
-	void CartesianState::deserialize(const std::string& msg_str)
-	{
-		ProtocolBuffers::CartesianStateMsg message;
-		message.ParseFromString(msg_str);
-		this->set_name(message.name());
-		this->set_reference_frame(message.reference_frame());
-		this->set_position(Eigen::Vector3d(message.position(0), message.position(1), message.position(2)));
-		this->set_orientation(Eigen::Quaterniond(message.orientation(0), message.orientation(1), message.orientation(2), message.orientation(3)));	
-		this->set_linear_velocity(Eigen::Vector3d(message.linear_velocity(0), message.linear_velocity(1), message.linear_velocity(2)));
-		this->set_angular_velocity(Eigen::Vector3d(message.angular_velocity(0), message.angular_velocity(1), message.angular_velocity(2)));
-		this->set_linear_acceleration(Eigen::Vector3d(message.linear_acceleration(0), message.linear_acceleration(1), message.linear_acceleration(2)));
-		this->set_angular_acceleration(Eigen::Vector3d(message.angular_acceleration(0), message.angular_acceleration(1), message.angular_acceleration(2)));
-		this->set_force(Eigen::Vector3d(message.force(0), message.force(1), message.force(2)));
-		this->set_torque(Eigen::Vector3d(message.torque(0), message.torque(1), message.torque(2)));
-	}
-
 	CartesianState& CartesianState::operator*=(double lambda)
 	{
 		// sanity check

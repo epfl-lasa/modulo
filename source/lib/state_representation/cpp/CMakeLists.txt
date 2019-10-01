@@ -20,12 +20,10 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(Eigen3 REQUIRED)
-find_package(Protobuf REQUIRED)
 
 include_directories(
  	include
  	${Eigen3_INCLUDE_DIRS}
-  ${PROTOBUF_INCLUDE_DIRS}
 )
 
 set(CORE_SOURCES
@@ -46,10 +44,6 @@ set(CORE_SOURCES
 
 add_library(${PROJECT_NAME} SHARED 
   ${CORE_SOURCES}
-)
-
-target_link_libraries(${PROJECT_NAME}
-  protocol_buffers
 )
 
 install(DIRECTORY include/
@@ -81,8 +75,6 @@ if (runtests)
   		gtest 
   		gtest_main
   		${PROJECT_NAME}
-      zmq
-      ${PROTOBUF_LIBRARIES}
   	)
 	  add_test(NAME runTestCartesianState COMMAND runTestCartesianState)
 
@@ -91,8 +83,6 @@ if (runtests)
       gtest 
       gtest_main
       ${PROJECT_NAME}
-      zmq
-      ${PROTOBUF_LIBRARIES}
     )
     add_test(NAME runTestJointState COMMAND runTestJointState)
 
