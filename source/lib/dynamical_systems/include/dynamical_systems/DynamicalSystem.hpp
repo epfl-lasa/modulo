@@ -26,9 +26,6 @@ namespace DynamicalSystems
 	private:
 		double gain_;
 
-	protected:
-		ProtocolBuffers::DynamicalSystemMsg message_;
-
 	public:
 		explicit DynamicalSystem(double gain=1);
 
