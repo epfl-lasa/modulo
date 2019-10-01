@@ -46,8 +46,7 @@ RUN sh build.sh
 
 # build ROS workspace
 WORKDIR /home/${USER}/ros2_ws/
-COPY ./source/modulo_core ./src/modulo_core
-COPY ./source/modulo_msgs ./src/modulo_msgs
+COPY ./source/packages/ ./src/
 RUN sudo chown -R ${USER}:${USER} .
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build --symlink-install"
