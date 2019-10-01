@@ -16,7 +16,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/publisher.hpp"
 #include "rclcpp_lifecycle/lifecycle_publisher.hpp"
-#include "modulo_core/StateConversion.hpp"
+#include "modulo_core/Communication/StateConversion.hpp"
 
 namespace Modulo
 {

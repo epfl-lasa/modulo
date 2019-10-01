@@ -36,7 +36,7 @@ namespace Modulo
 					if(!this->get_recipient().is_empty() && this->activated_)
 					{	
 						auto out_msg = std::make_unique<MsgT>();
-						StateConversion::extract(*out_msg, static_cast<RecT&>(this->get_recipient()), this->get_clock().now());
+						StateConversion::write_msg(*out_msg, static_cast<RecT&>(this->get_recipient()), this->get_clock().now());
 						this->publisher_->publish(std::move(out_msg));
 					}
 				}

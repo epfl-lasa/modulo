@@ -34,7 +34,6 @@
 #include "modulo_core/Communication/PublisherHandler.hpp"
 #include "modulo_core/Communication/TransformBroadcasterHandler.hpp"
 #include "modulo_core/Communication/TransformListenerHandler.hpp"
-#include "modulo_core/StateConversion.hpp"
 
 using namespace std::chrono_literals;
 

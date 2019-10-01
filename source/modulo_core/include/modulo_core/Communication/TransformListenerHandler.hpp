@@ -41,7 +41,7 @@ namespace Modulo
 					geometry_msgs::msg::TransformStamped transformStamped;
 					StateRepresentation::CartesianPose result(frame_name, reference_frame);
 					transformStamped = this->buffer_.lookupTransform(reference_frame, frame_name, tf2::TimePoint(std::chrono::milliseconds(0)), tf2::Duration(this->get_timeout()));
-	    			StateConversion::update(result, transformStamped);
+	    			StateConversion::read_msg(result, transformStamped);
 	      			return result;
 				}
 		    };

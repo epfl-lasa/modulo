@@ -31,7 +31,7 @@ namespace Modulo
 				void subscription_callback(const std::shared_ptr<MsgT> msg)
 				{
 					std::lock_guard<std::mutex> guard(this->get_mutex());
-					StateConversion::update(static_cast<RecT&>(this->get_recipient()), *msg);
+					StateConversion::read_msg(static_cast<RecT&>(this->get_recipient()), *msg);
 				}
 
 				inline void set_subscription(const std::shared_ptr<rclcpp::Subscription<MsgT> > & subscription)

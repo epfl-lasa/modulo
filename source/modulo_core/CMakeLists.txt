@@ -21,10 +21,10 @@ find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
 set(CORE_SOURCES
+    src/Communication/StateConversion.cpp
     src/Cell.cpp
     src/MotionGenerator.cpp
     src/Controller.cpp
-    src/StateConversion.cpp
     src/Visualizer.cpp
     src/SensorInterface.cpp
     src/RobotInterface.cpp
