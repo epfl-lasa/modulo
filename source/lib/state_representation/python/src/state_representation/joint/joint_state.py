@@ -127,9 +127,9 @@ class JointState(State):
             res = "Empty " + self.name + " JointState"
         else:
             res = self.name + " JointState\n"
-            res += "names: " + self.names + "\n"
-            res += "positions: " + self.positions + "\n"
-            res += "velocities: " + self.velocities + "\n"
-            res += "accelerations: " + self.accelerations + "\n"
-            res += "torques: " + self.torques + "\n"
+            res += "names: [" + " ".join(self.names) + "]\n"
+            res += "positions: [" + " ".join([str(x) for x in self.positions]) + "]\n"
+            res += "velocities: [" + " ".join([str(x) for x in self.velocities]) + "]\n"
+            res += "accelerations: [" + " ".join([str(x) for x in self.accelerations]) + "]\n"
+            res += "torques: [" + " ".join([str(x) for x in self.torques]) + "]"
         return res
