@@ -9,14 +9,14 @@ fi
 #create a shared volume to store the lib folder
 docker volume create --driver local \
     --opt type="none" \
-    --opt device="${PWD}/lib/" \
+    --opt device="${PWD}/source/lib/" \
     --opt o="bind" \
     "${NAME}_lib_vol"
 
 # create a shared volume to store the ros_ws
 docker volume create --driver local \
     --opt type="none" \
-    --opt device="${PWD}/src/" \
+    --opt device="${PWD}/source/packages/" \
     --opt o="bind" \
     "${NAME}_src_vol"
 
