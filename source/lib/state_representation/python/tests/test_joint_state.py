@@ -23,7 +23,7 @@ def test_add_two_state():
 	pos1 = np.random.rand(4,1)
 	pos2 = np.random.rand(4,1)
 
-	js1 = JointState("test_robot", 4, positions=pos1) 
+	js1 = JointState("test_robot", 4, positions=pos1)
 	js2 = JointState("test_robot", 4, positions=pos2)
 
 	jsum = js1 + js2
@@ -53,7 +53,7 @@ def test_multiply_with_scalar():
 def test_multiply_with_array():
 	pos1 = np.random.rand(4,1)
 	js1 = JointState("test_robot", 4, positions=pos1)
-	
+
 	k = np.random.rand(4,1)
 	jres = js1 * k
 	for i, q in enumerate(jres.positions):
