@@ -95,7 +95,7 @@ namespace StateRepresentation
 	{
 		if(state.is_empty())
 		{
-			os << "Empty JointState";
+			os << "Empty " << state.get_name() << " JointState";
 		}
 		else
 		{
