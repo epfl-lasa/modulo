@@ -28,7 +28,6 @@ namespace StateRepresentation
 		Eigen::VectorXd velocities; ///< joints velocities
 		Eigen::VectorXd accelerations; ///< joints accelerations
 		Eigen::VectorXd torques; ///< joints torques
-		Eigen::MatrixXd jacobian; ///< jacobian matrix
 
 	public:
 		/**
