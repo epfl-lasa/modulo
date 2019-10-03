@@ -131,7 +131,24 @@ namespace StateRepresentation
 		 * @brief Return the value of the torques vector as Eigen array
 		 * @retrun the Eigen array representing the torques
 		 */
-		const Eigen::ArrayXd array() const; 
+		const Eigen::ArrayXd array() const;
+
+		/**
+		 * @brief Clamp inplace the magnitude of the velocity to the values in argument
+		 * @param max_absolute the maximum magnitude of torque for each joint 
+		 * @param noise_ratio if provided, this value will be used to apply a deadzone under which
+		 * the torque will be set to 0
+		 */
+		void clamp(const Eigen::ArrayXd& max_absolute, const Eigen::ArrayXd& noise_ratio);
+
+		/**
+		 * @brief Clamp inplace the magnitude of the velocity to the values in argument
+		 * @param max_absolute the maximum magnitude of torque for each joint 
+		 * @param noise_ratio if provided, this value will be used to apply a deadzone under which
+		 * the torque will be set to 0
+		 * @return the clamped JointTorques
+		 */
+		const JointTorques clamped(const Eigen::ArrayXd& max_absolute, const Eigen::ArrayXd& noise_ratio) const;
 
 		/**
 	 	 * @brief Overload the ostream operator for printing

@@ -120,6 +120,34 @@ namespace StateRepresentation
 		return this->get_torques().array();
 	}
 
+	void JointTorques::clamp(const Eigen::ArrayXd& max_absolute, const Eigen::ArrayXd& noise_ratio)
+	{
+		Eigen::VectorXd torques = this->get_torques();
+		for (int i = 0; i < torques.size(); ++i)
+		{
+			if (torques(i) > 0)
+			{
+    			torques(i) -= noise_ratio(i);
+    			torques(i) = (torques(i) < 0) ? 0 : torques(i);
+    			torques(i) = (torques(i) > max_absolute(i)) ? max_absolute(i) : torques(i);
+			}
+			else
+			{
+    			torques(i) += noise_ratio(i);
+    			torques(i) = (torques(i) > 0) ? 0 : torques(i);
+    			torques(i) = (torques(i) < -max_absolute(i)) ? -max_absolute(i) : torques(i);
+			}
+		}
+		this->set_torques(torques);
+	}
+
+	const JointTorques JointTorques::clamped(const Eigen::ArrayXd& max_absolute, const Eigen::ArrayXd& noise_ratio) const
+	{
+		JointTorques result(*this);
+		result.clamp(max_absolute, noise_ratio);
+		return result;
+	}
+
 	std::ostream& operator<<(std::ostream& os, const JointTorques& torques)
 	{
 		if(torques.is_empty())
