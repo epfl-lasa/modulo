@@ -230,7 +230,7 @@ namespace StateRepresentation
 		if (angular_norm > 1e-4)
 		{
 			angular_displacement.w() = cos(angular_norm * period / 2.);
-			angular_displacement.vec() = twist.get_angular_velocity() / angular_norm * sin(angular_norm * period / 2.);
+			angular_displacement.vec() = (twist.get_angular_velocity() / angular_norm) * sin(angular_norm * period / 2.);
 		}
 		displacement.set_orientation(angular_displacement);
 		return displacement;
