@@ -19,15 +19,15 @@ private:
 public:
 	explicit LinearMotionGenerator(const std::string & node_name, const std::chrono::milliseconds & period) :
 	MotionGenerator(node_name, period, true),
-	current_pose(std::make_shared<StateRepresentation::CartesianPose>("robot")),
-	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot")),
-	target_pose(std::make_shared<StateRepresentation::CartesianPose>("robot", Eigen::Vector3d(4, 5, 6), Eigen::Quaterniond(0,1,0,0))),
+	current_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
+	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
+	target_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d(-0.419, -0.0468, 0.15059), Eigen::Quaterniond(-0.04616,-0.124,0.991007,-0.018758))),
 	motion_generator(1)
 	{}
 
 	void on_configure()
 	{
-		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot/pose", this->current_pose);
+		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->current_pose);
 		this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
 		this->motion_generator.set_attractor(*this->target_pose);
 	}
@@ -36,7 +36,7 @@ public:
 	{
 		if(!this->current_pose->is_empty())
 		{
-			*this->desired_twist = this->motion_generator.evaluate(*this->current_pose);
+			*this->desired_twist = this->motion_generator.evaluate(this->current_pose);
 		}
 		else
 		{
@@ -54,13 +54,13 @@ private:
 public:
 	explicit ConsoleVisualizer(const std::string & node_name, const std::chrono::milliseconds & period) :
 	Visualizer(node_name, period, true),
-	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot")),
-	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot"))
+	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
+	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test"))
 	{}
 
 	void on_configure()
 	{
-		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot/pose", this->robot_pose);
+		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose);
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
 	}
 
@@ -70,21 +70,22 @@ public:
 		os << std::endl;
 		os << "##### ROBOT POSE #####" << std::endl;
 		os << *this->robot_pose << std::endl;
-		os << "##### DESIRED VELOCITY #####" << std::endl;
-		os << *this->desired_twist << std::endl;
+		//os << "##### DESIRED VELOCITY #####" << std::endl;
+		//os << *this->desired_twist << std::endl;
 
 		// look up the robot_base transform
-		try
+		/*try
 		{
 			StateRepresentation::CartesianPose robot_base_pose = this->lookup_transform("robot_base");
 			os << "##### ROBOT BASE POSE #####" << std::endl;
 			os << robot_base_pose;
-			RCLCPP_INFO(get_logger(), "%s", os.str().c_str());
 		}
 		catch (const std::exception& e)
 		{
 			RCLCPP_ERROR(get_logger(), e.what());
-		}
+		}*/
+
+		RCLCPP_INFO(get_logger(), "%s", os.str().c_str());
 	}
 };
 
@@ -99,26 +100,27 @@ private:
 public:
 	explicit SimulatedRobotInterface(const std::string & node_name, const std::chrono::milliseconds & period):
 	Cell(node_name, period, true),
-	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot", 0, 0, 0)),
-	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot")),
-	fixed_transform(std::make_shared<StateRepresentation::CartesianPose>("robot_base", 4, 5, 3, "robot")),
+	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom())),
+	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
+	fixed_transform(std::make_shared<StateRepresentation::CartesianPose>("robot_base", 4, 5, 3, "robot_test")),
 	dt(period)
 	{}
 
 	void on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
-		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot/pose", this->robot_pose, std::chrono::milliseconds(0));
-		this->add_fixed_transform_broadcaster(fixed_transform);
+		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose, std::chrono::milliseconds(0));
+		//this->add_fixed_transform_broadcaster(fixed_transform);
 	}
 
 	void step()
 	{
 		if(!this->desired_twist->is_empty())
 		{
-			*this->robot_pose += dt * *this->desired_twist;
+			*this->robot_pose = dt * *this->desired_twist + *this->robot_pose;
 		}
-		this->send_transform(*this->robot_pose);
+		this->send_transform(this->robot_pose);
+		this->send_transform(this->fixed_transform);
 	}
 };
 

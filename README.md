@@ -15,7 +15,7 @@ You can build a complete working environment using `docker`. Simply run `sh buil
 It is possible to interface ROS2 with ROS1 in order to publish/subscribe to topics from ROS1. To do so, you need to launch a ROS2/ROS1 bridge. You can use a ready to use docker image by issuing the command:
 
 ```bash
-docker run -it --net=host osrf/ros:dashing-ros1-bridge
+docker run --rm -it --net=host osrf/ros:dashing-ros1-bridge
 ```
 
 This will pull the bridge image and open interactive shell in which you can run the bridge:

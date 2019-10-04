@@ -98,8 +98,9 @@ namespace StateRepresentation
 		if(!(this->get_reference_frame() == pose.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
 		// operation
 		this->set_position(this->get_position() + pose.get_position());
-		if(this->get_orientation().dot(pose.get_orientation()) < 0) this->set_orientation(Eigen::Quaterniond(-this->get_orientation().coeffs()));
-		this->set_orientation(this->get_orientation() * pose.get_orientation());
+		Eigen::Quaterniond qres = this->get_orientation() * pose.get_orientation();
+		if(this->get_orientation().dot(qres) < 0) qres = Eigen::Quaterniond(-qres.coeffs());
+		this->set_orientation(qres);
 		return (*this);
 	}
 
@@ -118,8 +119,9 @@ namespace StateRepresentation
 		if(!(this->get_reference_frame() == pose.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
 		// operation
 		this->set_position(this->get_position() - pose.get_position());
-		if(this->get_orientation().dot(pose.get_orientation()) < 0) this->set_orientation(Eigen::Quaterniond(-this->get_orientation().coeffs()));
-		this->set_orientation(this->get_orientation() * pose.get_orientation().conjugate());
+		Eigen::Quaterniond qres = this->get_orientation() * pose.get_orientation().conjugate();
+		if(this->get_orientation().dot(qres) < 0) qres = Eigen::Quaterniond(-qres.coeffs());
+		this->set_orientation(qres);
 		return (*this);
 	}
 
@@ -228,7 +230,7 @@ namespace StateRepresentation
 		Eigen::Vector3d log_q = Eigen::Vector3d::Zero();
 		if (orientation.vec().norm() > 1e-4)
 		{	
-			log_q = orientation.vec() / orientation.vec().norm() * acos(std::min<double>(std::max<double>(orientation.w(),-1),1));	
+			log_q = (orientation.vec() / orientation.vec().norm()) * acos(std::min<double>(std::max<double>(orientation.w(),-1),1));	
 		}
 		twist.set_angular_velocity(2 * log_q / period);
 		return twist;

@@ -236,6 +236,12 @@ namespace Modulo
 			void send_transform(const StateRepresentation::CartesianPose& transform);
 
 			/**
+			 * @brief Function to send a transform using the generic transform broadcaster
+			 * @param transform the shared pointer to the transformation to send
+			 */
+			void send_transform(const std::shared_ptr<StateRepresentation::CartesianPose>& transform);
+
+			/**
 			 * @brief Function to get a transform from the generic transform listener
 			 * @param frame_name name of the frame to look for
 			 * @param the frame in wich to express the transform
