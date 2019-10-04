@@ -29,6 +29,14 @@ class State(object):
     def reference_frame(self, value):
         self._reference_frame = value
 
+    @property
+    def reference_frame(self):
+        return self._reference_frame
+
+    @reference_frame.setter
+    def reference_frame(self, value):
+        self._reference_frame = value
+
     def is_empty(self):
         return self._empty
 
@@ -56,3 +64,4 @@ class State(object):
             res = "Empty "
         res += "State: " + self._name + " expressed in " + self._reference_frame + " frame"
         return res
+    
