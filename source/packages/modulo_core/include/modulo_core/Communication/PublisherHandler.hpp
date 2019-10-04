@@ -29,15 +29,20 @@ namespace Modulo
 				explicit PublisherHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
 				CommunicationHandler("publisher", channel, recipient, timeout, clock, mutex), activated_(false)
 				{}
+
+				void publish(const RecT& recipient)
+				{
+					auto out_msg = std::make_unique<MsgT>();
+					StateConversion::write_msg(*out_msg, recipient, this->get_clock().now());
+					this->publisher_->publish(std::move(out_msg));
+				}
 				
 				void publish_callback()
 				{
 					std::lock_guard<std::mutex> guard(this->get_mutex());
 					if(!this->get_recipient().is_empty() && this->activated_)
 					{	
-						auto out_msg = std::make_unique<MsgT>();
-						StateConversion::write_msg(*out_msg, static_cast<RecT&>(this->get_recipient()), this->get_clock().now());
-						this->publisher_->publish(std::move(out_msg));
+						this->publish(static_cast<RecT&>(this->get_recipient()));
 					}
 				}
 

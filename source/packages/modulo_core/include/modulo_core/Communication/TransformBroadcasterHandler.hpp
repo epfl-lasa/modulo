@@ -32,7 +32,7 @@ namespace Modulo
 
 				inline void send_transform(const StateRepresentation::CartesianPose& transform)
 				{
-					static_cast<StateRepresentation::CartesianPose&>(this->get_recipient()) = transform;
+					this->publish(transform);
 				}
 		    };
 		}
