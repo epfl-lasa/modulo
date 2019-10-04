@@ -87,7 +87,7 @@ namespace StateRepresentation
 
 	const Eigen::Vector3d CartesianPose::operator*(const Eigen::Vector3d& vector) const
 	{
-		return this->get_orientation() * vector + this->get_position();
+          return this->get_orientation() * vector + this->get_position();
 	}
 
 	CartesianPose& CartesianPose::operator+=(const CartesianPose& pose)
