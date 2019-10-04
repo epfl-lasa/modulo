@@ -77,6 +77,11 @@ namespace Modulo
 			static_cast<Communication::TransformBroadcasterHandler&>(*this->handlers_["tf_broadcaster"]).send_transform(transform);
 		}
 
+		void Cell::send_transform(const std::shared_ptr<StateRepresentation::CartesianPose>& transform)
+		{
+			this->send_transform(*transform);
+		}
+
 		const StateRepresentation::CartesianPose Cell::lookup_transform(const std::string& frame_name, const std::string& reference_frame)
 		{
 			if (!this->configured_) throw UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");

@@ -36,7 +36,7 @@ public:
 	{
 		if(!this->current_pose->is_empty())
 		{
-			*this->desired_twist = this->motion_generator.evaluate(*this->current_pose);
+			*this->desired_twist = this->motion_generator.evaluate(this->current_pose);
 		}
 		else
 		{
@@ -110,7 +110,7 @@ public:
 	{
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
 		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose, std::chrono::milliseconds(0));
-		this->add_fixed_transform_broadcaster(fixed_transform);
+		//this->add_fixed_transform_broadcaster(fixed_transform);
 	}
 
 	void step()
@@ -119,7 +119,8 @@ public:
 		{
 			*this->robot_pose = dt * *this->desired_twist + *this->robot_pose;
 		}
-		this->send_transform(*this->robot_pose);
+		this->send_transform(this->robot_pose);
+		this->send_transform(this->fixed_transform);
 	}
 };
 
