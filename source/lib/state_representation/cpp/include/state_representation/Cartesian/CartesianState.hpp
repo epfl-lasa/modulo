@@ -12,6 +12,7 @@
 #include <eigen3/Eigen/Dense>
 #include <iostream>
 #include "state_representation/State.hpp"
+#include "state_representation/MathTools.hpp"
 
 namespace StateRepresentation 
 {

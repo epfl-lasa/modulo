@@ -138,7 +138,10 @@ namespace StateRepresentation
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
 		// operation
 		this->set_position(lambda * this->get_position());
-		this->set_orientation(Eigen::Quaterniond(lambda * this->get_orientation().coeffs()));
+		// calculate the scaled rotation as a displacement from identity
+		Eigen::Quaterniond w = MathTools::log(this->get_orientation());
+		// calculate the orientation corresponding to the scaled velocity
+		this->set_orientation(MathTools::exp(w, lambda / 2.));
 		return (*this);
 	}
 
@@ -226,13 +229,8 @@ namespace StateRepresentation
 		// set linear velocity
 		twist.set_linear_velocity(pose.get_position() / period);
 		// set angular velocity from the log of the quaternion error
-		Eigen::Quaterniond orientation = pose.get_orientation();
-		Eigen::Vector3d log_q = Eigen::Vector3d::Zero();
-		if (orientation.vec().norm() > 1e-4)
-		{	
-			log_q = (orientation.vec() / orientation.vec().norm()) * acos(std::min<double>(std::max<double>(orientation.w(),-1),1));	
-		}
-		twist.set_angular_velocity(2 * log_q / period);
+		Eigen::Quaterniond log_q = MathTools::log(pose.get_orientation());
+		twist.set_angular_velocity(2 * log_q.vec() / period);
 		return twist;
 	}
 

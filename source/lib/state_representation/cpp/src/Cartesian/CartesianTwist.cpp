@@ -225,13 +225,9 @@ namespace StateRepresentation
 		period /= 1000.;
 		// convert the velocities into a displacement
 		displacement.set_position(period * twist.get_linear_velocity());
-		Eigen::Quaterniond angular_displacement = Eigen::Quaterniond::Identity();
-		double angular_norm = twist.get_angular_velocity().norm();
-		if (angular_norm > 1e-4)
-		{
-			angular_displacement.w() = cos(angular_norm * period / 2.);
-			angular_displacement.vec() = (twist.get_angular_velocity() / angular_norm) * sin(angular_norm * period / 2.);
-		}
+		Eigen::Quaterniond angular_velocity = Eigen::Quaterniond(0,0,0,0);
+		angular_velocity.vec() = twist.get_angular_velocity();
+		Eigen::Quaterniond angular_displacement = MathTools::exp(angular_velocity, period / 2.);
 		displacement.set_orientation(angular_displacement);
 		return displacement;
 	}
