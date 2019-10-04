@@ -34,6 +34,8 @@ namespace DynamicalSystems
 		void set_gain(double gain);
 
 		virtual const S evaluate(const S& state) const;
+
+		virtual const S evaluate(const std::shared_ptr<S>& state) const;
 	};
 
 	template<class S>
@@ -58,6 +60,13 @@ namespace DynamicalSystems
 	{
 		throw NotImplementedException("This method is not implemented for abstract base class");
 		return state;
+	}
+
+	template<class S>
+	const S DynamicalSystem<S>::evaluate(const std::shared_ptr<S>& state) const
+	{
+		throw NotImplementedException("This method is not implemented for abstract base class");
+		return *state;
 	}
 }
 #endif

@@ -28,6 +28,8 @@ namespace DynamicalSystems
 		void set_attractor(const S& attractor);
 
 		const S evaluate(const S& state) const;
+
+		const S evaluate(const std::shared_ptr<S>& state) const;
 	};
 
 	template<class S>
@@ -56,12 +58,24 @@ namespace DynamicalSystems
 	}
 
 	template<>
+	const StateRepresentation::CartesianState Linear<StateRepresentation::CartesianState>::evaluate(const std::shared_ptr<StateRepresentation::CartesianState>& state) const
+	{
+		return this->evaluate(*state);
+	}
+
+	template<>
 	const StateRepresentation::JointState Linear<StateRepresentation::JointState>::evaluate(const StateRepresentation::JointState& state) const
 	{
 		StateRepresentation::JointState positions = - this->get_gain() * (state - this->get_attractor());
 		StateRepresentation::JointState velocities(state.get_name(), state.get_names());
 		velocities.set_velocities(positions.get_positions());
 		return velocities;
+	}
+
+	template<>
+	const StateRepresentation::JointState Linear<StateRepresentation::JointState>::evaluate(const std::shared_ptr<StateRepresentation::JointState>& state) const
+	{
+		return this->evaluate(*state);
 	}
 }
 #endif
