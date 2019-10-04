@@ -15,6 +15,7 @@
 #include "state_representation/Cartesian/CartesianTwist.hpp"
 #include "state_representation/Joint/JointState.hpp"
 #include "dynamical_systems/Exceptions/NotImplementedException.hpp"
+#include <memory>
 
 using namespace DynamicalSystems::Exceptions;
 
