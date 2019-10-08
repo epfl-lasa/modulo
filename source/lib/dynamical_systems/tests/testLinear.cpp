@@ -47,7 +47,7 @@ TEST(EvaluateDynamicalSystemOrientationOnly, PositiveNos)
 	for(unsigned int i=0; i<nb_steps; ++i)
 	{
 		StateRepresentation::CartesianTwist twist = linearDS.evaluate(current_pose);
-		current_pose += dt * twist;
+		current_pose = dt * twist + current_pose;
 	}
 
 	std::cout << current_pose << std::endl;
@@ -76,7 +76,7 @@ TEST(EvaluateDynamicalSystem, PositiveNos)
 	for(unsigned int i=0; i<nb_steps; ++i)
 	{
 		StateRepresentation::CartesianTwist twist = linearDS.evaluate(current_pose);
-		current_pose += dt * twist;
+		current_pose = dt * twist + current_pose;
 	}
 
 	std::cout << current_pose << std::endl;

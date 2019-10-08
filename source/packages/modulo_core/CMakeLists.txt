@@ -50,3 +50,9 @@ ament_auto_add_executable(${PROJECT_NAME}_test_mixed tests/testMixed.cpp)
 target_link_libraries(${PROJECT_NAME}_test_mixed ${PROJECT_NAME})
 
 ament_auto_package()
+
+# Install launch files.
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
+)

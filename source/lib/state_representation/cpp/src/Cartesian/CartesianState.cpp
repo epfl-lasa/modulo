@@ -44,7 +44,11 @@ namespace StateRepresentation
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
 		// operation
 		this->set_position(lambda * this->get_position());
-		this->set_orientation(Eigen::Quaterniond(lambda * this->get_orientation().coeffs()));
+		// calculate the scaled rotation as a displacement from identity
+		Eigen::Quaterniond w = MathTools::log(this->get_orientation());
+		// calculate the orientation corresponding to the scaled velocity
+		this->set_orientation(MathTools::exp(w, lambda / 2.));
+		// calculate the other vectors normally
 		this->set_linear_velocity(lambda * this->get_linear_velocity());
 		this->set_angular_velocity(lambda * this->get_angular_velocity());
 		this->set_linear_acceleration(lambda * this->get_linear_acceleration());

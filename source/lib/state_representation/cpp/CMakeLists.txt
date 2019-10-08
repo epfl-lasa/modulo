@@ -27,6 +27,7 @@ include_directories(
 )
 
 set(CORE_SOURCES
+  src/MathTools.cpp
   src/State.cpp
   src/Cartesian/CartesianState.cpp
 	src/Cartesian/CartesianPose.cpp
