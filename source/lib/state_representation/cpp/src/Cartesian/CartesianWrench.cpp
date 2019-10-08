@@ -204,7 +204,7 @@ namespace StateRepresentation
 		return vector + (-1) * wrench;
 	}
 
-o	const CartesianWrench operator*(double lambda, const CartesianWrench& wrench)
+	const CartesianWrench operator*(double lambda, const CartesianWrench& wrench)
 	{
 		return wrench * lambda;
 	}
