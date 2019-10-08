@@ -5,6 +5,7 @@
 
 using namespace StateRepresentation::Exceptions;
 
+
 namespace StateRepresentation 
 {
 	CartesianPose::CartesianPose()

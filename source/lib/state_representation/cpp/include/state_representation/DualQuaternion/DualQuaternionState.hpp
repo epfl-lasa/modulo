@@ -52,7 +52,7 @@ namespace StateRepresentation
 		/**
 	 	 * @brief Getter of the dual attribute
 	     */
-		const Eigen::Quaterniond& get_dual() const;
+o		const Eigen::Quaterniond& get_dual() const;
 
 		/**
 	 	 * @brief Setter of the primary attribute

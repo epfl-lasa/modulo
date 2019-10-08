@@ -62,6 +62,7 @@ namespace StateRepresentation
 
 	DualQuaternionPose& DualQuaternionPose::operator*=(const DualQuaternionState& s)
 	{
+        // Why two functions DualQuaternionState/DualQuaternionPose and referenced via base-pointer?
 		Eigen::Quaterniond primary = this->get_primary() * s.get_primary();
 		Eigen::Quaterniond dual = Eigen::Quaterniond((this->get_primary() * s.get_dual()).coeffs() + (this->get_dual() * s.get_primary()).coeffs());
 		this->set_primary(primary);

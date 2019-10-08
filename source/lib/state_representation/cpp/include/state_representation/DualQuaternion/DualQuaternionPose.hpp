@@ -114,7 +114,7 @@ namespace StateRepresentation
 		/**
 	 	 * @brief Initialize the DualQuaternionPose to a zero value
 	     */
-		void initialize();
+		void initiaolize();
 
 		/**
 		 * @brief Return a copy of the DualQuaternionPose
@@ -160,7 +160,9 @@ namespace StateRepresentation
 
 	inline void DualQuaternionPose::set_position(const Eigen::Quaterniond& dual)
 	{
+        // WARNING - position is updated, but not dual. This might lead to conficts / different result between position and get_position
 		this->position = 2 * (dual * this->get_primary().conjugate()).vec();
+        this->set_dual(dual)
 	}
 }
 

@@ -1,3 +1,5 @@
 pytest
-numpy 
+numpy
 numpy-quaternion
+numba
+scipy

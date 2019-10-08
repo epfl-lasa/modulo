@@ -13,7 +13,7 @@ StateRepresentation::CartesianPose psum = p1 + p2;
 States in each spaces can represent pose (position and orientation), twist (linear velocity and angular velocity), acceleration (linear and angular) and wrench (force and torque). Operations representing transformations are implemented. For example the multiplication between two poses allows to express the resulting pose in a different reference frame.
 
 ```cpp
-StateRepresentation::CartesianPose p1("a"); 
+StateRepresentation::CartesianPose p1("a");
 StateRepresentation::CartesianPose p2("b", "a");
 
 // for this operation to be valid p2 reference frame should be equal to p1 name. The resultant will be "b" expressed in world
@@ -27,3 +27,38 @@ $ world
 ```
 
 Joint space also includes additional verification such as joint ordering and names to ensure valid operations.
+
+
+
+### Compile cpp library (for testing)
+```
+cd ~/modulo_lib/state_representation/cpp/
+mkdir build && cd build
+cmake -Druntests=ON
+make
+sudo make install
+```
+
+### Run Test Library (CPP)
+Run extensive tests
+```
+ctest --verbose
+```
+
+Run specific test (here Cartesian).
+List other executables (in the build folder)
+```
+./runTestCartesianState
+```
+
+
+### Run Test Libraries (python)
+Go to the python repository
+```
+cd ~/modulo_lib/state_representation/python/tests/
+```
+
+Go to the desired testing folder
+```
+pytest
+```

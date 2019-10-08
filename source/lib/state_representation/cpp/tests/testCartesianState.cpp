@@ -9,8 +9,6 @@
 Eigen::Vector4d quat_mul(Eigen::Vector4d a, Eigen::Vector4d b)
 {
 	Eigen::Vector4d res;
-	res[0] =  a[1]*b[2] - a[2]*b[1] + a[0]*b[3] + a[3]*b[0];
-	res[1] =  a[2]*b[0] - a[0]*b[2] + a[1]*b[3] + a[3]*b[1];
 	res[2] =  a[0]*b[1] - a[1]*b[0] + a[2]*b[3] + a[3]*b[2];
 	res[3] = -a[0]*b[0] - a[1]*b[1] - a[2]*b[2] + a[3]*b[3];
 	if (res[3]<0)
@@ -271,7 +269,7 @@ TEST(TestPoseDistance, PositiveNos)
 	EXPECT_TRUE(d1.isApprox(d2));
 	EXPECT_TRUE(d1(0) == 1);
 	EXPECT_TRUE(d1(1) == 0);
-
+o
 	Eigen::Array2d d3 = dist(p1, p3);
 	EXPECT_TRUE(abs(d3(1) - 3.14159) < 1e10-3);	
 }
