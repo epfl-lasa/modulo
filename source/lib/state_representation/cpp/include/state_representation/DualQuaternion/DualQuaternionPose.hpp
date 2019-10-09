@@ -114,7 +114,7 @@ namespace StateRepresentation
 		/**
 	 	 * @brief Initialize the DualQuaternionPose to a zero value
 	     */
-		void initiaolize();
+		void initialize();
 
 		/**
 		 * @brief Return a copy of the DualQuaternionPose
@@ -122,6 +122,11 @@ namespace StateRepresentation
 		 */
 		const DualQuaternionPose copy() const;
 
+		/**
+		 * @brief Calculate the log of a dual quaternion
+		 * @param state the dual quaternion to calcualte the log on
+		 * @return the log of the dual quaternion
+		 */
 		friend const DualQuaternionState log(const DualQuaternionPose& state);
 
 		/**
@@ -162,7 +167,7 @@ namespace StateRepresentation
 	{
         // WARNING - position is updated, but not dual. This might lead to conficts / different result between position and get_position
 		this->position = 2 * (dual * this->get_primary().conjugate()).vec();
-        this->set_dual(dual)
+        this->set_dual(dual);
 	}
 }
 

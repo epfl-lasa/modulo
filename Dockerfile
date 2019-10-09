@@ -17,6 +17,7 @@ RUN apt update && apt install -y \
   libzmq3-dev \
   python3-setuptools \
   iputils-ping \
+  mesa-utils \
   && rm -rf /var/lib/apt/lists/*
 
 ENV QT_X11_NO_MITSHM 1
