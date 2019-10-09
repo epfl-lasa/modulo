@@ -129,7 +129,7 @@ namespace StateRepresentation
 
 	inline const std::string& State::get_type() const
 	{
-o		return this->type;
+		return this->type;
 	}
 
 	inline std::string& State::get_type()

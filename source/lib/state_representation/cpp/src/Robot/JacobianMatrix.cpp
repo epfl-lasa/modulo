@@ -60,7 +60,7 @@ namespace StateRepresentation
 	const CartesianTwist JacobianMatrix::operator*(const JointVelocities& dq) const
 	{
 		if(dq.is_empty()) throw EmptyStateException(dq.get_name() + " state is empty");
-		if(!this->is_compatible(dq)) throw IncompatibleStatesException("The JacobianMatrix and the input JointVelocities are incompatible"o);
+		if(!this->is_compatible(dq)) throw IncompatibleStatesException("The JacobianMatrix and the input JointVelocities are incompatible");
 		Eigen::Matrix<double, 6, 1> twist = (*this) * dq.get_velocities();
 		// crate a CartesianTwist with name "robot"_end_effector and reference frame "robot"_base
 		CartesianTwist result(this->get_name() + "_end_effector", twist, this->get_name() + "_base");

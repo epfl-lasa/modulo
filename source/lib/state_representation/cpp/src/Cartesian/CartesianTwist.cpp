@@ -144,7 +144,7 @@ namespace StateRepresentation
 		CartesianTwist result(*this);
 		result *= lambda;
 		return result;
-b	}
+	}
 
 	void CartesianTwist::clamp(double max_linear, double max_angular, double linear_noise_ratio, double angular_noise_ratio)
 	{	
