@@ -38,17 +38,17 @@ USER ros2
 ENV HOME /home/${USER}
 
 # import previously downloaded packages
+RUN mkdir -p /home/${USER}/modulo_lib
 WORKDIR /home/${USER}/modulo_lib/
-COPY ./source/lib/ .
-RUN sudo chown -R ${USER}:${USER} .
+COPY --chown=${USER} ./source/lib/ .
 
 # build packages and libraries
 RUN sh build.sh
 
 # build ROS workspace
+RUN mkdir -p /home/${USER}/ros2_ws/src
 WORKDIR /home/${USER}/ros2_ws/
-COPY ./source/packages/ ./src/
-RUN sudo chown -R ${USER}:${USER} .
+COPY --chown=${USER} ./source/packages/ ./src/
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build --symlink-install"
 
