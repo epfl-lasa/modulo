@@ -15,9 +15,12 @@
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "modulo_msgs/msg/jacobian_matrix.hpp"
+#include "std_msgs/msg/float64_multi_array.hpp"
+// #include "std_msgs/msg/float32.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
 #include "rcutils/logging_macros.h"
 #include "rclcpp/time.hpp"
+
 
 namespace Modulo
 {
@@ -96,6 +99,9 @@ namespace Modulo
 				void write_msg(geometry_msgs::msg::TwistStamped & msg, const StateRepresentation::DualQuaternionTwist & state, const rclcpp::Time & time);
 
 				void write_msg(tf2_msgs::msg::TFMessage & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time & time);
+
+				void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::CartesianTwist & state, const rclcpp::Time & time);
+
 			}
 		}
 	}

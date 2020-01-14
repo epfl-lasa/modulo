@@ -341,6 +341,14 @@ namespace Modulo
 					write_msg(transform, state, time);
 					msg.transforms.push_back(transform);
 				}
+
+				void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::CartesianTwist & state, const rclcpp::Time & time)
+				{
+					if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+					Eigen::Matrix<double, 6, 1> twist;
+					twist << state.get_angular_velocity(), state.get_linear_velocity();
+					msg.data = std::vector<double>(twist.data(), twist.data() + twist.size());		
+				}
 			}
 		}
 	}

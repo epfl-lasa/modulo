@@ -9,6 +9,8 @@
 
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
+  <build_depend>state_representation</build_depend>
+  <build_depend>dynamical_systems</build_depend>
   <build_depend>rclcpp</build_depend>
   <build_depend>rclcpp_lifecycle</build_depend>
   <build_depend>modulo_msgs</build_depend>
@@ -19,6 +21,8 @@
   <build_depend>tf2_msgs</build_depend>
   <build_depend>tf2_ros</build_depend>
 
+  <exec_depend>state_representation</exec_depend>
+  <exec_depend>dynamical_systems</exec_depend>
   <exec_depend>rclcpp</exec_depend>
   <exec_depend>rclcpp_lifecycle</exec_depend>
   <exec_depend>modulo_msgs</exec_depend>
@@ -29,10 +33,8 @@
   <exec_depend>tf2_msgs</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
 
-  <build_export_depend>passive_ds_control</build_export_depend>
   <build_export_depend>state_representation</build_export_depend>
   <build_export_depend>dynamical_systems</build_export_depend>
-  <build_export_depend>protocol_buffers</build_export_depend>
   
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

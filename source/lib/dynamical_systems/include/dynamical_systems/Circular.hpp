@@ -86,25 +86,41 @@ namespace DynamicalSystems
 	template<>
 	const StateRepresentation::CartesianState Circular<StateRepresentation::CartesianState>::evaluate(const StateRepresentation::CartesianState& state) const
 	{
-		StateRepresentation::CartesianPose pose_in_center = static_cast<const StateRepresentation::CartesianPose&>(this->get_center()).inverse() * static_cast<const StateRepresentation::CartesianPose&>(state);
+		// StateRepresentation::CartesianPose pose_in_center = static_cast<const StateRepresentation::CartesianPose&>(this->get_center()).inverse() * static_cast<const StateRepresentation::CartesianPose&>(state);
 
-		double radius = pose_in_center.get_position().norm();
-		double theta = acos(pose_in_center.get_position()(2) / radius);
-		double phi = atan2(pose_in_center.get_position()(1), pose_in_center.get_position()(0));
+		// double radius = pose_in_center.get_position().norm();
+		// double theta = acos(pose_in_center.get_position()(2) / radius);
+		// double phi = atan2(pose_in_center.get_position()(1), pose_in_center.get_position()(0));
 
-		double dradius = -this->get_gain() * (radius - this->get_radius());
-		double dtheta = -this->get_gain() * (theta - this->get_elevation());
-		double dphi = this->get_gain();
+		// double dradius = -this->get_gain() * (radius - this->get_radius());
+		// double dtheta = -this->get_gain() * (theta - this->get_elevation());
+		// double dphi = this->get_gain();
 
-		Eigen::Vector3d linear_velocity;
-		linear_velocity(0) = dradius * sin(theta) * cos(phi) + dtheta * radius * cos(theta) * cos(phi) - dphi * radius * sin(theta) * sin(phi);
-		linear_velocity(1) = dradius * sin(theta) * sin(phi) + dtheta * radius * cos(theta) * sin(phi) + dphi * radius * sin(theta) * cos(phi);
-		linear_velocity(2) = dradius * cos(theta) - dtheta * radius * sin(theta);
+		// Eigen::Vector3d linear_velocity;
+		// linear_velocity(0) = dradius * sin(theta) * cos(phi) + dtheta * radius * cos(theta) * cos(phi) - dphi * radius * sin(theta) * sin(phi);
+		// linear_velocity(1) = dradius * sin(theta) * sin(phi) + dtheta * radius * cos(theta) * sin(phi) + dphi * radius * sin(theta) * cos(phi);
+		// linear_velocity(2) = dradius * cos(theta) - dtheta * radius * sin(theta);
 
+		// StateRepresentation::CartesianTwist velocity(state.get_name(), state.get_reference_frame());
+		// velocity.set_linear_velocity(pose_in_center.inverse() * linear_velocity);
+
+		// return velocity;
+
+		StateRepresentation::CartesianPose pose = static_cast<const StateRepresentation::CartesianPose&>(state) - static_cast<const StateRepresentation::CartesianPose&>(this->center_);
 		StateRepresentation::CartesianTwist velocity(state.get_name(), state.get_reference_frame());
-		velocity.set_linear_velocity(pose_in_center.inverse() * linear_velocity);
+		Eigen::Vector3d linear_velocity;
+		linear_velocity(2) = -pose.get_position()(2);
 
+		float R = sqrt(pose.get_position()(0) * pose.get_position()(0) + pose.get_position()(1) * pose.get_position()(1));
+		float T = atan2(pose.get_position()(1), pose.get_position()(0));
+		float omega = M_PI/2;
+
+		linear_velocity(0) = -(R-this->radius_) * cos(T) - R * omega * sin(T);
+		linear_velocity(1) = -(R-this->radius_) * sin(T) + R * omega * cos(T);
+
+		velocity.set_linear_velocity(linear_velocity);
 		return velocity;
+
 	}
 }
 #endif
