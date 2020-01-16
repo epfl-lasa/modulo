@@ -342,7 +342,7 @@ namespace Modulo
 					msg.transforms.push_back(transform);
 				}
 
-				void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::CartesianTwist & state, const rclcpp::Time & time)
+				void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::CartesianTwist & state, const rclcpp::Time)
 				{
 					if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 					Eigen::Matrix<double, 6, 1> twist;

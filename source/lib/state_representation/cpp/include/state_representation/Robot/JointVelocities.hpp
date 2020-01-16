@@ -5,11 +5,11 @@
  * @date 2019/09/09
  */
 
-#ifndef STATEREPRESENTATION_JOINT_JOINTVELOCITIES_H_
-#define STATEREPRESENTATION_JOINT_JOINTVELOCITIES_H_
+#ifndef STATEREPRESENTATION_ROBOT_JOINTVELOCITIES_H_
+#define STATEREPRESENTATION_ROBOT_JOINTVELOCITIES_H_
 
-#include "state_representation/Joint/JointState.hpp"
-#include "state_representation/Joint/JointPositions.hpp"
+#include "state_representation/Robot/JointState.hpp"
+#include "state_representation/Robot/JointPositions.hpp"
 
 namespace StateRepresentation 
 {

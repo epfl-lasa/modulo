@@ -8,7 +8,7 @@
 #ifndef STATEREPRESENTATION_CARTESIANWRENCH_H_
 #define STATEREPRESENTATION_CARTESIANWRENCH_H_
 
-#include "state_representation/Cartesian/CartesianState.hpp"
+#include "state_representation/Space/Cartesian/CartesianState.hpp"
 
 namespace StateRepresentation 
 {

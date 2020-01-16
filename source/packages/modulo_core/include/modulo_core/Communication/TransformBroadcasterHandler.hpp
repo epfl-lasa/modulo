@@ -10,7 +10,7 @@
 #define MODULO_COMMUNICATION_TRANSFORMBROADCASTERHANDLER_H_
 
 #include "modulo_core/Communication/PublisherHandler.hpp"
-#include "state_representation/Cartesian/CartesianPose.hpp"
+#include "state_representation/Space/Cartesian/CartesianPose.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
 
 namespace Modulo

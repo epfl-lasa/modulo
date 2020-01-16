@@ -5,14 +5,14 @@
  * @date 2019/04/16
  */
 
-#ifndef STATEREPRESENTATION_DUALQUATERNIONSTATE_H_
-#define STATEREPRESENTATION_DUALQUATERNIONSTATE_H_
+#ifndef STATEREPRESENTATION_SPACE_DUALQUATERNION_DUALQUATERNIONSTATE_H_
+#define STATEREPRESENTATION_SPACE_DUALQUATERNION_DUALQUATERNIONSTATE_H_
 
-#include "state_representation/State.hpp"
+#include "state_representation/Space/SpatialState.hpp"
 
 namespace StateRepresentation 
 {
-	class DualQuaternionState: public State
+	class DualQuaternionState: public SpatialState
 	{
 	private:
 		Eigen::Quaterniond primary; ///< primary part of the dual quaternion

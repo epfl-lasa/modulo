@@ -1,4 +1,4 @@
-#include "state_representation/Cartesian/CartesianWrench.hpp"
+#include "state_representation/Space/Cartesian/CartesianWrench.hpp"
 #include "state_representation/Exceptions/IncompatibleStatesException.hpp"
 #include "state_representation/Exceptions/IncompatibleReferenceFramesException.hpp"
 #include "state_representation/Exceptions/EmptyStateException.hpp"

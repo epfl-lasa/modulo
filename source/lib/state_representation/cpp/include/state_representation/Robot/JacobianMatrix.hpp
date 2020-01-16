@@ -10,10 +10,10 @@
 
 #include <eigen3/Eigen/Core>
 #include "state_representation/State.hpp"
-#include "state_representation/Cartesian/CartesianTwist.hpp"
-#include "state_representation/Cartesian/CartesianWrench.hpp"
-#include "state_representation/Joint/JointVelocities.hpp"
-#include "state_representation/Joint/JointTorques.hpp"
+#include "state_representation/Space/Cartesian/CartesianTwist.hpp"
+#include "state_representation/Space/Cartesian/CartesianWrench.hpp"
+#include "state_representation/Robot/JointVelocities.hpp"
+#include "state_representation/Robot/JointTorques.hpp"
 #include "state_representation/Exceptions/IncompatibleSizeException.hpp"
 
 using namespace StateRepresentation::Exceptions;

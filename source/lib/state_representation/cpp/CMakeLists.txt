@@ -29,18 +29,19 @@ include_directories(
 set(CORE_SOURCES
   src/MathTools.cpp
   src/State.cpp
-  src/Cartesian/CartesianState.cpp
-	src/Cartesian/CartesianPose.cpp
-  src/Cartesian/CartesianTwist.cpp
-  src/Cartesian/CartesianWrench.cpp
-  src/Joint/JointState.cpp
-  src/Joint/JointPositions.cpp
-  src/Joint/JointVelocities.cpp
-  src/Joint/JointTorques.cpp
-  src/DualQuaternion/DualQuaternionState.cpp
-  src/DualQuaternion/DualQuaternionPose.cpp
-  src/DualQuaternion/DualQuaternionTwist.cpp
+  src/Space/SpatialState.cpp
+  src/Space/Cartesian/CartesianState.cpp
+	src/Space/Cartesian/CartesianPose.cpp
+  src/Space/Cartesian/CartesianTwist.cpp
+  src/Space/Cartesian/CartesianWrench.cpp
+  src/Robot/JointState.cpp
+  src/Robot/JointPositions.cpp
+  src/Robot/JointVelocities.cpp
+  src/Robot/JointTorques.cpp
   src/Robot/JacobianMatrix.cpp
+  src/Space/DualQuaternion/DualQuaternionState.cpp
+  src/Space/DualQuaternion/DualQuaternionPose.cpp
+  src/Space/DualQuaternion/DualQuaternionTwist.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED 

@@ -3,11 +3,14 @@
 #ifndef MODULO_MOTION_STATECONVERSION_H_
 #define MODULO_MOTION_STATECONVERSION_H_
 
-#include "state_representation/Cartesian/CartesianState.hpp"
-#include "state_representation/Joint/JointState.hpp"
+#include "state_representation/Space/Cartesian/CartesianState.hpp"
+#include "state_representation/Space/Cartesian/CartesianPose.hpp"
+#include "state_representation/Space/Cartesian/CartesianTwist.hpp"
+#include "state_representation/Space/Cartesian/CartesianWrench.hpp"
+#include "state_representation/Robot/JointState.hpp"
 #include "state_representation/Robot/JacobianMatrix.hpp"
-#include "state_representation/DualQuaternion/DualQuaternionPose.hpp"
-#include "state_representation/DualQuaternion/DualQuaternionTwist.hpp"
+#include "state_representation/Space/DualQuaternion/DualQuaternionPose.hpp"
+#include "state_representation/Space/DualQuaternion/DualQuaternionTwist.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "geometry_msgs/msg/accel_stamped.hpp"
@@ -16,7 +19,6 @@
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "modulo_msgs/msg/jacobian_matrix.hpp"
 #include "std_msgs/msg/float64_multi_array.hpp"
-// #include "std_msgs/msg/float32.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
 #include "rcutils/logging_macros.h"
 #include "rclcpp/time.hpp"

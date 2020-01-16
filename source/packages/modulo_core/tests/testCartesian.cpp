@@ -1,7 +1,5 @@
 #include "modulo_core/MotionGenerator.hpp"
 #include "modulo_core/Visualizer.hpp"
-#include "state_representation/Cartesian/CartesianPose.hpp"
-#include "state_representation/Cartesian/CartesianTwist.hpp"
 #include "dynamical_systems/Linear.hpp"
 #include "rcutils/cmdline_parser.h"
 #include <eigen3/Eigen/Core>

@@ -1,4 +1,4 @@
-#include "state_representation/Cartesian/CartesianState.hpp"
+#include "state_representation/Space/Cartesian/CartesianState.hpp"
 #include "state_representation/Exceptions/EmptyStateException.hpp"
 
 using namespace StateRepresentation::Exceptions;
@@ -6,19 +6,19 @@ using namespace StateRepresentation::Exceptions;
 namespace StateRepresentation 
 {
 	CartesianState::CartesianState():
-	State("CartesianState")
+	SpatialState("CartesianState")
 	{
 		this->initialize();
 	}
 
 	CartesianState::CartesianState(const std::string& robot_name, const std::string& reference):
-	State("CartesianState", robot_name, reference)
+	SpatialState("CartesianState", robot_name, reference)
 	{
 		this->initialize();
 	}
 
 	CartesianState::CartesianState(const CartesianState& state):
-	State(state),
+	SpatialState(state),
 	position(state.position), orientation(state.orientation),
 	linear_velocity(state.linear_velocity), angular_velocity(state.angular_velocity),
 	linear_acceleration(state.linear_acceleration), angular_acceleration(state.angular_acceleration),

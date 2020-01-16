@@ -11,12 +11,11 @@
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
 #include <iostream>
-#include "state_representation/State.hpp"
-#include "state_representation/MathTools.hpp"
+#include "state_representation/Space/SpatialState.hpp"
 
-namespace StateRepresentation 
+namespace StateRepresentation
 {
-	class CartesianState: public State
+	class CartesianState: public SpatialState
 	{
 	private:
 		Eigen::Vector3d position; ///< position of the point
@@ -101,16 +100,6 @@ namespace StateRepresentation
 	 	 * @brief Getter of a wrench from force and torque attributes
 	     */
 		const Eigen::Matrix<double, 6, 1> get_wrench() const;
-
-		/**
-	 	 * @brief Setter of the name
-	     */
-		void set_name(const std::string& name);
-
-		/**
-	 	 * @brief Setter of the reference frame
-	     */
-		void set_reference_frame(const std::string& reference);
 
 		/**
 	 	 * @brief Setter of the position
@@ -267,16 +256,6 @@ namespace StateRepresentation
 		Eigen::Matrix<double, 6, 1> wrench;
 		wrench << this->force, this->torque;
 		return wrench;
-	}
-
-	inline void CartesianState::set_name(const std::string& name)
-	{
-		this->State::set_name(name);
-	}
-
-	inline void CartesianState::set_reference_frame(const std::string& reference)
-	{
-		this->State::set_reference_frame(reference);
 	}
 
 	inline void CartesianState::set_position(const Eigen::Vector3d& position)
