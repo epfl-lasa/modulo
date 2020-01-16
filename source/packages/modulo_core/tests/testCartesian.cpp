@@ -12,6 +12,7 @@ private:
 	std::shared_ptr<StateRepresentation::CartesianPose> current_pose;
 	std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
 	std::shared_ptr<StateRepresentation::CartesianPose> target_pose;
+	std::shared_ptr<StateRepresentation::Parameter<double> > gain;
 	DynamicalSystems::Linear<StateRepresentation::CartesianState> motion_generator;
 
 public:
@@ -20,6 +21,7 @@ public:
 	current_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
 	target_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d(-0.419, -0.0468, 0.15059), Eigen::Quaterniond(-0.04616,-0.124,0.991007,-0.018758))),
+	gain(std::make_shared<StateRepresentation::Parameter<double> >("ds_gain", 42)),
 	motion_generator(1)
 	{}
 
@@ -27,6 +29,7 @@ public:
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->current_pose);
 		this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
+		this->add_publisher<std_msgs::msg::Float64>("/ds/gain", this->gain, std::chrono::milliseconds(0));
 		this->motion_generator.set_attractor(*this->target_pose);
 	}
 
@@ -48,18 +51,21 @@ class ConsoleVisualizer : public Modulo::Visualizers::Visualizer
 private:
 	std::shared_ptr<StateRepresentation::CartesianPose> robot_pose;
 	std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
+	std::shared_ptr<StateRepresentation::Parameter<double> > ds_gain;
 
 public:
 	explicit ConsoleVisualizer(const std::string & node_name, const std::chrono::milliseconds & period) :
 	Visualizer(node_name, period, true),
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
-	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test"))
+	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
+	ds_gain(std::make_shared<StateRepresentation::Parameter<double> >("ds_gain"))
 	{}
 
 	void on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose);
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
+		this->add_subscription<std_msgs::msg::Float64>("/ds/gain", this->ds_gain);
 	}
 
 	void step()
@@ -68,6 +74,9 @@ public:
 		os << std::endl;
 		os << "##### ROBOT POSE #####" << std::endl;
 		os << *this->robot_pose << std::endl;
+
+		os << "##### DS GAIN #####" << std::endl;
+		os << this->ds_gain->get_value() << std::endl;
 		//os << "##### DESIRED VELOCITY #####" << std::endl;
 		//os << *this->desired_twist << std::endl;
 

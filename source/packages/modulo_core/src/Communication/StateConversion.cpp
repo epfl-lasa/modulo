@@ -157,6 +157,11 @@ namespace Modulo
 					read_msg(state, msg.twist);
 				}
 
+				void read_msg(StateRepresentation::Parameter<double> & state, const std_msgs::msg::Float64 & msg)
+				{
+					state.set_value(msg.data);
+				}
+
 				// write_msg functions
 				void write_msg(geometry_msgs::msg::Quaternion & msg, const StateRepresentation::CartesianState & state, const rclcpp::Time &)
 				{
@@ -342,12 +347,18 @@ namespace Modulo
 					msg.transforms.push_back(transform);
 				}
 
-				void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::CartesianTwist & state, const rclcpp::Time)
+				void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::CartesianTwist & state, const rclcpp::Time &)
 				{
 					if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 					Eigen::Matrix<double, 6, 1> twist;
 					twist << state.get_angular_velocity(), state.get_linear_velocity();
 					msg.data = std::vector<double>(twist.data(), twist.data() + twist.size());		
+				}
+
+				void write_msg(std_msgs::msg::Float64 & msg, const StateRepresentation::Parameter<double> & state, const rclcpp::Time &)
+				{
+					if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+					msg.data = state.get_value();
 				}
 			}
 		}
