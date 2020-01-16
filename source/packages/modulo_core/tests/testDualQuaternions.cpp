@@ -1,6 +1,5 @@
 #include "modulo_core/MotionGenerator.hpp"
 #include "modulo_core/Visualizer.hpp"
-
 #include "rcutils/cmdline_parser.h"
 #include <eigen3/Eigen/Core>
 #include <iostream>

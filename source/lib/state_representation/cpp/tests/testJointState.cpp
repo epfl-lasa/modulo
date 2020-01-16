@@ -1,6 +1,6 @@
-#include "state_representation/Joint/JointState.hpp"
-#include "state_representation/Joint/JointPositions.hpp"
-#include "state_representation/Joint/JointTorques.hpp"
+#include "state_representation/Robot/JointState.hpp"
+#include "state_representation/Robot/JointPositions.hpp"
+#include "state_representation/Robot/JointTorques.hpp"
 #include <gtest/gtest.h>
 #include <fstream>
 #include <zmq.hpp>

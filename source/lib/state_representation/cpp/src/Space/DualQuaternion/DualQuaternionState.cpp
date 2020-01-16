@@ -1,25 +1,25 @@
-#include "state_representation/DualQuaternion/DualQuaternionState.hpp"
+#include "state_representation/Space/DualQuaternion/DualQuaternionState.hpp"
 
 namespace StateRepresentation 
 {
 	DualQuaternionState::DualQuaternionState():
-	State("DualQuaternionState")
+	SpatialState("DualQuaternionState")
 	{}
 	
 	DualQuaternionState::DualQuaternionState(const std::string& name, const std::string& reference):
-	State("DualQuaternionState", name, reference)
+	SpatialState("DualQuaternionState", name, reference)
 	{
 		this->initialize();
 	}
 
 	DualQuaternionState::DualQuaternionState(const DualQuaternionState& state):
-	State(state),
+	SpatialState(state),
 	primary(state.primary),
 	dual(state.dual)
 	{}
 
 	DualQuaternionState::DualQuaternionState(const std::string& name, const Eigen::Quaterniond& primary, const Eigen::Quaterniond& dual, const std::string& reference):
-	State("DualQuaternionState", name, reference)
+	SpatialState("DualQuaternionState", name, reference)
 	{
 		this->set_primary(primary);
 		this->set_dual(dual);

@@ -10,10 +10,10 @@
 #define DYNAMICAL_SYSTEMS_DYNAMICAL_SYSTEM_H_
 
 
-#include "state_representation/Cartesian/CartesianState.hpp"
-#include "state_representation/Cartesian/CartesianPose.hpp"
-#include "state_representation/Cartesian/CartesianTwist.hpp"
-#include "state_representation/Joint/JointState.hpp"
+#include "state_representation/Space/Cartesian/CartesianState.hpp"
+#include "state_representation/Space/Cartesian/CartesianPose.hpp"
+#include "state_representation/Space/Cartesian/CartesianTwist.hpp"
+#include "state_representation/Robot/JointState.hpp"
 #include "dynamical_systems/Exceptions/NotImplementedException.hpp"
 #include <memory>
 

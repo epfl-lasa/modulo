@@ -5,13 +5,13 @@
  * @date 2019/06/07
  */
 
-#ifndef STATEREPRESENTATION_CARTESIAN_CARTESIANTWIST_H_
-#define STATEREPRESENTATION_CARTESIAN_CARTESIANTWIST_H_
+#ifndef STATEREPRESENTATION_SPACE_CARTESIAN_CARTESIANTWIST_H_
+#define STATEREPRESENTATION_SPACE_CARTESIAN_CARTESIANTWIST_H_
 
-#include "state_representation/Cartesian/CartesianState.hpp"
-#include "state_representation/Cartesian/CartesianPose.hpp"
+#include "state_representation/Space/Cartesian/CartesianState.hpp"
+#include "state_representation/Space/Cartesian/CartesianPose.hpp"
 
-namespace StateRepresentation 
+namespace StateRepresentation
 {
 	class CartesianPose;
 

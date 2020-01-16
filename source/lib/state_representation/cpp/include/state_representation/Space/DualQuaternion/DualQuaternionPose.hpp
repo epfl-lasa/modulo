@@ -5,10 +5,10 @@
  * @date 2019/04/16
  */
 
-#ifndef STATEREPRESENTATION_DUALQUATERNIONPOSE_H_
-#define STATEREPRESENTATION_DUALQUATERNIONPOSE_H_
+#ifndef STATEREPRESENTATION_SPACE_DUALQUATERNION_DUALQUATERNIONPOSE_H_
+#define STATEREPRESENTATION_SPACE_DUALQUATERNION_DUALQUATERNIONPOSE_H_
 
-#include "state_representation/DualQuaternion/DualQuaternionState.hpp"
+#include "state_representation/Space/DualQuaternion/DualQuaternionState.hpp"
 
 namespace StateRepresentation 
 {

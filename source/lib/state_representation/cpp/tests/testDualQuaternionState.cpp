@@ -1,5 +1,5 @@
-#include "state_representation/DualQuaternion/DualQuaternionPose.hpp"
-#include "state_representation/DualQuaternion/DualQuaternionTwist.hpp"
+#include "state_representation/Space/DualQuaternion/DualQuaternionPose.hpp"
+#include "state_representation/Space/DualQuaternion/DualQuaternionTwist.hpp"
 #include <gtest/gtest.h>
 
 
