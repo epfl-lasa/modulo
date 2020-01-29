@@ -1,6 +1,6 @@
 #!/bin/bash
 BASE_IMAGE=osrf/ros2
-BASE_TAG=nightly
+BASE_TAG=nightly-rmw-nonfree
 
 if [ -z "$1" ]; then
     TAG="latest"
