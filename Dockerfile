@@ -1,5 +1,5 @@
 ARG BASE_IMAGE=osrf/ros2
-ARG BASE_TAG=nightly
+ARG BASE_TAG=nightly-rmw-nonfree
 
 FROM ${BASE_IMAGE}:${BASE_TAG}
 ENV DEBIAN_FRONTEND=noninteractive
