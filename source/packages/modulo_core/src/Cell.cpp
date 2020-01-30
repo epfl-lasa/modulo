@@ -27,6 +27,11 @@ namespace Modulo
 		void Cell::reset()
 		{
 			this->handlers_.clear();
+			for(auto& t:this->active_threads_)
+			{
+				t.join();
+			}
+			this->active_threads_.clear();
 		}
 
 		void Cell::add_transform_broadcaster(const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size)
@@ -182,6 +187,7 @@ namespace Modulo
 		void Cell::on_shutdown()
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_shutdown of the Cell class called");
+			this->run_thread.join();
 		}
 
 		void on_parameter_event(const rcl_interfaces::msg::ParameterEvent::SharedPtr event, rclcpp::Logger logger)
@@ -236,6 +242,33 @@ namespace Modulo
 
 		void Cell::step()
 		{}
+
+		void Cell::run_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::milliseconds& period)
+		{
+			while(this->configured_)
+			{
+				auto start = std::chrono::steady_clock::now();
+				std::unique_lock<std::mutex> lck(*this->mutex_);
+				if(this->active_)
+				{
+					callback_function();
+				}
+				lck.unlock();
+				auto end = std::chrono::steady_clock::now();
+		    	auto elapsed = end - start;
+		    	auto timeToWait = period - elapsed;
+		    	if(timeToWait > std::chrono::milliseconds::zero())
+		    	{
+		        	std::this_thread::sleep_for(timeToWait);
+		    	}
+			}
+		}
+
+		void Cell::add_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::milliseconds& period)
+		{
+			std::function<void(const std::function<void(void)>&, const std::chrono::milliseconds&)> fnc = std::bind(&Cell::run_periodic_call, this, callback_function, period);
+			this->active_threads_.push_back(std::thread(fnc, callback_function, period));
+		}
 	}
 }
 

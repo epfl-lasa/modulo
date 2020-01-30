@@ -21,6 +21,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <list>
 
 #include "lifecycle_msgs/msg/transition.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -51,7 +52,7 @@ namespace Modulo
 			std::shared_ptr<std::mutex> mutex_; ///< a mutex to use when modifying messages between functions
 			std::chrono::milliseconds period_;  ///< rate of the publisher functions in milliseconds
 			std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > handlers_; ///< maps for storing publishers, subscriptions and tf 
-		
+			std::list<std::thread> active_threads_; ///< list of active threads for periodic calling
 			std::map<std::string, bool> configure_on_parameters_change_; ///< map of bools to store the configure_on_change value of each parameters
 
 			/**
@@ -370,6 +371,20 @@ namespace Modulo
 			 * @brief Main loop that will be executed in parallel of the rest. At each time step it calls the step function.
 			 */
 			void run();
+
+			/**
+			 * @brief Function to periodically call the given callback_function at the given period
+			 * @param callback_function the function to call
+			 * @param period the period between two calls
+			 */
+			void run_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::milliseconds& period);
+
+			/**
+			 * @brief Function to add a periodic call to the function given in input
+			 * @param callback_function the function to call
+			 * @param period the period between two calls
+			 */
+			void add_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::milliseconds& period);
 		};
 
 		inline const std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > & Cell::get_handlers() const
