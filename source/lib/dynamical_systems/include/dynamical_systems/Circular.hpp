@@ -109,14 +109,14 @@ namespace DynamicalSystems
 		StateRepresentation::CartesianPose pose = static_cast<const StateRepresentation::CartesianPose&>(state) - static_cast<const StateRepresentation::CartesianPose&>(this->center_);
 		StateRepresentation::CartesianTwist velocity(state.get_name(), state.get_reference_frame());
 		Eigen::Vector3d linear_velocity;
-		linear_velocity(2) = -pose.get_position()(2);
+		linear_velocity(2) = -this->get_gain() * pose.get_position()(2);
 
 		float R = sqrt(pose.get_position()(0) * pose.get_position()(0) + pose.get_position()(1) * pose.get_position()(1));
 		float T = atan2(pose.get_position()(1), pose.get_position()(0));
-		float omega = M_PI/2;
+		float omega = M_PI/3;
 
-		linear_velocity(0) = -(R-this->radius_) * cos(T) - R * omega * sin(T);
-		linear_velocity(1) = -(R-this->radius_) * sin(T) + R * omega * cos(T);
+		linear_velocity(0) = -this->get_gain()*((R-this->radius_) * cos(T) - R * omega * sin(T));
+		linear_velocity(1) = -this->get_gain()*((R-this->radius_) * sin(T) + R * omega * cos(T));
 
 		velocity.set_linear_velocity(linear_velocity);
 		return velocity;
