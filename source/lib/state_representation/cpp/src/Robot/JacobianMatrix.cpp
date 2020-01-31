@@ -5,26 +5,26 @@
 namespace StateRepresentation 
 {
 	JacobianMatrix::JacobianMatrix(const std::string& robot_name, unsigned int nb_joints):
-	State("JacobianMatrix", robot_name), nb_rows(6), nb_cols(nb_joints)
+	State(StateType::JACOBIANMATRIX, robot_name), nb_rows(6), nb_cols(nb_joints)
 	{
 		this->set_joint_names(nb_joints);
 	}
 
 	JacobianMatrix::JacobianMatrix(const std::string& robot_name, const std::vector<std::string>& joint_names):
-	State("JacobianMatrix", robot_name), nb_rows(6), nb_cols(joint_names.size())
+	State(StateType::JACOBIANMATRIX, robot_name), nb_rows(6), nb_cols(joint_names.size())
 	{
 		this->set_joint_names(joint_names);
 	}
 
 	JacobianMatrix::JacobianMatrix(const std::string& robot_name, const Eigen::MatrixXd& data):
-	State("JacobianMatrix", robot_name), nb_rows(data.rows()), nb_cols(data.cols())
+	State(StateType::JACOBIANMATRIX, robot_name), nb_rows(data.rows()), nb_cols(data.cols())
 	{
 		this->set_joint_names(this->get_nb_cols());
 		this->set_data(data);
 	}
 
 	JacobianMatrix::JacobianMatrix(const std::string& robot_name, const std::vector<std::string>& joint_names, const Eigen::MatrixXd& data):
-	State("JacobianMatrix", robot_name), nb_rows(data.rows()), nb_cols(joint_names.size())
+	State(StateType::JACOBIANMATRIX, robot_name), nb_rows(data.rows()), nb_cols(joint_names.size())
 	{
 		this->set_joint_names(joint_names);
 		this->set_data(data);

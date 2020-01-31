@@ -52,12 +52,12 @@ namespace StateRepresentation
 
 	template <typename T>
 	Parameter<T>::Parameter(const std::string& name):
-	State("Parameter", name)
+	State(StateType::PARAMETER, name)
 	{}
 
 	template <typename T>
 	Parameter<T>::Parameter(const std::string& name, const T& value):
-	State("Parameter", name), value(value)
+	State(StateType::PARAMETER, name), value(value)
 	{
 		this->set_filled();
 	}

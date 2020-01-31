@@ -18,27 +18,44 @@
 
 namespace StateRepresentation 
 {
+	enum class StateType
+	{
+		STATE,
+		PARAMETER,
+		CARTESIANSTATE,
+		DUALQUATERNIONSTATE,
+		JOINTSTATE,
+		JACOBIANMATRIX
+
+	};
+
 	class State
 	{
 	private:
-		std::string type; ///< type of the State
+		StateType type; ///< type of the State
 		std::string name; ///< name of the state
 		bool empty;  ///< indicate if the state is empty
 		std::chrono::time_point<std::chrono::steady_clock> timestamp;  ///< time since last modification made to the state
 	
 	public:
 		/**
-	 	 * @brief Empty constructor only specifying the type
+		 * @brief Empty constructor
+		 */
+		explicit State();
+
+		/**
+	 	 * @brief Constructor only specifying the type of the state from the StateType enumeration
+	 	 * @param type the type of State 
 	     */
-		explicit State(const std::string& type);
+		explicit State(const StateType& type);
 		
 		/**
 	 	 * @brief Constructor with name and reference frame specification
-	 	 * @param type the type of State (Cartesian, DualQuaternion or Joint)
+	 	 * @param type the type of State
 	 	 * @param name the name of the State
 	 	 * @param empty specify if the state is initialized as empty, default true
 	     */
-		explicit State(const std::string& type, const std::string& name, const bool& empty=true);
+		explicit State(const StateType& type, const std::string& name, const bool& empty=true);
 
 		/**
 	 	 * @brief Copy constructor from another State
@@ -47,13 +64,9 @@ namespace StateRepresentation
 
 		/**
 	 	 * @brief Getter of the type attribute
+	 	 * @return the type of the State
 	     */
-		const std::string& get_type() const;
-
-		/**
-	 	 * @brief Getter of the type attribute
-	     */
-		std::string& get_type();
+		const StateType& get_type() const;
 
 		/**
 	 	 * @brief Getter of the empty attribute
@@ -116,12 +129,7 @@ namespace StateRepresentation
 		friend std::ostream& operator<<(std::ostream& os, const State& state);
 	};
 
-	inline const std::string& State::get_type() const
-	{
-		return this->type;
-	}
-
-	inline std::string& State::get_type()
+	inline const StateType& State::get_type() const
 	{
 		return this->type;
 	}

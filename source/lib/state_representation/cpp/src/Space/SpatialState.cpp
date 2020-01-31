@@ -2,11 +2,11 @@
 
 namespace StateRepresentation
 {
-	SpatialState::SpatialState(const std::string& type):
+	SpatialState::SpatialState(const StateType& type):
 	State(type), reference_frame("world")
 	{}
 
-	SpatialState::SpatialState(const std::string& type, const std::string& name, const std::string& reference_frame, const bool& empty):
+	SpatialState::SpatialState(const StateType& type, const std::string& name, const std::string& reference_frame, const bool& empty):
 	State(type, name, empty), reference_frame(reference_frame)
 	{}
 

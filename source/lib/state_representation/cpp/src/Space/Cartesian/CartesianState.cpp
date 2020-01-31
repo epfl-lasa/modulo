@@ -6,13 +6,13 @@ using namespace StateRepresentation::Exceptions;
 namespace StateRepresentation 
 {
 	CartesianState::CartesianState():
-	SpatialState("CartesianState")
+	SpatialState(StateType::CARTESIANSTATE)
 	{
 		this->initialize();
 	}
 
 	CartesianState::CartesianState(const std::string& robot_name, const std::string& reference):
-	SpatialState("CartesianState", robot_name, reference)
+	SpatialState(StateType::CARTESIANSTATE, robot_name, reference)
 	{
 		this->initialize();
 	}

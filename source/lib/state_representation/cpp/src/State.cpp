@@ -2,11 +2,15 @@
 
 namespace StateRepresentation
 {
-	State::State(const std::string& type):
+	State::State():
+	type(StateType::STATE), name("none"), empty(true)
+	{}
+
+	State::State(const StateType& type):
 	type(type), name("none"), empty(true)
 	{}
 
-	State::State(const std::string& type, const std::string& name, const bool& empty):
+	State::State(const StateType& type, const std::string& name, const bool& empty):
 	type(type), name(name), empty(empty), timestamp(std::chrono::steady_clock::now())
 	{}
 

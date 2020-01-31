@@ -3,11 +3,11 @@
 namespace StateRepresentation 
 {
 	DualQuaternionState::DualQuaternionState():
-	SpatialState("DualQuaternionState")
+	SpatialState(StateType::DUALQUATERNIONSTATE)
 	{}
 	
 	DualQuaternionState::DualQuaternionState(const std::string& name, const std::string& reference):
-	SpatialState("DualQuaternionState", name, reference)
+	SpatialState(StateType::DUALQUATERNIONSTATE, name, reference)
 	{
 		this->initialize();
 	}
@@ -19,7 +19,7 @@ namespace StateRepresentation
 	{}
 
 	DualQuaternionState::DualQuaternionState(const std::string& name, const Eigen::Quaterniond& primary, const Eigen::Quaterniond& dual, const std::string& reference):
-	SpatialState("DualQuaternionState", name, reference)
+	SpatialState(StateType::DUALQUATERNIONSTATE, name, reference)
 	{
 		this->set_primary(primary);
 		this->set_dual(dual);

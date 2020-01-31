@@ -259,7 +259,7 @@ namespace StateRepresentation
 	inline bool JacobianMatrix::is_compatible(const State& state) const
 	{
 		bool compatible = false;
-		if(state.get_type() == "JointState")
+		if(state.get_type() == StateType::JOINTSTATE)
 		{
 			compatible = (this->get_name() == state.get_name()) && (this->get_nb_cols() == static_cast<const JointState&>(state).get_size());
 			if(compatible)
@@ -268,7 +268,7 @@ namespace StateRepresentation
 			}
 		}
 		// there is no possibilities to check that a correct frame associated to the robot is sent
-		else if(state.get_type() == "CartesianState")
+		else if(state.get_type() == StateType::CARTESIANSTATE)
 		{
 			compatible = true;
 		}

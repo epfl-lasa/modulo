@@ -14,16 +14,16 @@ namespace StateRepresentation
 		/**
 	 	 * @brief Empty constructor only specifying the type
 	     */
-		explicit SpatialState(const std::string& type);
+		explicit SpatialState(const StateType& type);
 		
 		/**
 	 	 * @brief Constructor with name and reference frame specification
-	 	 * @param type the type of State (Cartesian, DualQuaternion or Joint)
+	 	 * @param type the type of SpatialState (Cartesian or DualQuaternion)
 	 	 * @param name the name of the State
 	 	 * @param reference_frame the reference frame in which the state is expressed, by default world
 	 	 * @param empty specify if the state is initialized as empty, default true
 	     */
-		explicit SpatialState(const std::string& type, const std::string& name, const std::string& reference_frame="world", const bool& empty=true);
+		explicit SpatialState(const StateType& type, const std::string& name, const std::string& reference_frame="world", const bool& empty=true);
 
 		/**
 	 	 * @brief Copy constructor from another SpatialState

@@ -5,19 +5,19 @@
 namespace StateRepresentation 
 {
 	JointState::JointState():
-	State("JointState")
+	State(StateType::JOINTSTATE)
 	{
 		this->initialize();
 	}
 
 	JointState::JointState(const std::string& robot_name, unsigned int nb_joints):
-	State("JointState", robot_name), names(nb_joints)
+	State(StateType::JOINTSTATE, robot_name), names(nb_joints)
 	{
 		this->set_names(nb_joints);
 	}
 
 	JointState::JointState(const std::string& robot_name, const std::vector<std::string>& joint_names):
-	State("JointState", robot_name)
+	State(StateType::JOINTSTATE, robot_name)
 	{
 		this->set_names(joint_names);
 	}
