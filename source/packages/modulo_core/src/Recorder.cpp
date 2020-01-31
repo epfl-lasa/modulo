@@ -34,7 +34,7 @@ namespace Modulo
 		{
 			for (auto &h : this->get_handlers())
 			{
-				if(h.second->get_type() == "subscription")
+				if(h.second->get_type() == Core::Communication::CommunicationType::SUBSCRIPTION)
 				{
 					if(!this->record(h.second->get_recipient())) RCLCPP_ERROR(this->get_logger(), "Unable to record " + h.second->get_recipient().get_name());
 				}
@@ -43,12 +43,18 @@ namespace Modulo
 
 		bool Recorder::record(const StateRepresentation::State& state) const
 		{
-			if(typeid(state) == typeid(StateRepresentation::CartesianState))
+			switch(state.get_type())
 			{
-				return record(static_cast<const StateRepresentation::CartesianState&>(state));
+				case StateRepresentation::StateType::CARTESIANSTATE:
+					return record(static_cast<const StateRepresentation::CartesianState&>(state));
+
+				case StateRepresentation::StateType::JOINTSTATE:
+					return record(static_cast<const StateRepresentation::JointState&>(state));
+
+				default:
+					RCLCPP_ERROR(this->get_logger(), "Recording function for " + state.get_name() + " not defined for this type of state");
+					return false;
 			}
-			RCLCPP_ERROR(this->get_logger(), "Recording function for " + state.get_name() + " not defined for this type of state");
-			return false;
 		}
 
 		bool Recorder::record(const StateRepresentation::CartesianState& state) const

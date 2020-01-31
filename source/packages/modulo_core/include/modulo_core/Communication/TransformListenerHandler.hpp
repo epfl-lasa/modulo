@@ -21,29 +21,34 @@ namespace Modulo
 			class TransformListenerHandler: public CommunicationHandler
 			{
 			private:
-				tf2_ros::Buffer buffer_;
-				std::unique_ptr<tf2_ros::TransformListener> tf_listener_;
+				tf2_ros::Buffer buffer_; ///< tf2 ROS buffer to read transformation from
+				std::unique_ptr<tf2_ros::TransformListener> tf_listener_; ///< reference to the ROS2 transform listener
 
 			public:
-				explicit TransformListenerHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-				CommunicationHandler("tf_listener", "tf_listener", recipient, timeout, clock, mutex), buffer_(clock) 
-				{
-					this->tf_listener_ = std::make_unique<tf2_ros::TransformListener>(buffer_);
-				}
+				/**
+				 * @brief Constructor for an asychronous TransformListener
+				 * @param  recipient the associated recipient to store received transforms
+				 * @param  timeout   period before timeout
+				 * @param  clock     reference to the Cell clock
+				 * @param  mutex     reference to the Cell mutex
+				 */
+				explicit TransformListenerHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
 
-				explicit TransformListenerHandler(const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
-				CommunicationHandler("tf_listener", "tf_listener", std::make_shared<StateRepresentation::CartesianPose>(), timeout, clock, mutex), buffer_(clock) 
-				{
-					this->tf_listener_ = std::make_unique<tf2_ros::TransformListener>(buffer_);
-				}
-				const StateRepresentation::CartesianPose lookup_transform(const std::string& frame_name, const std::string& reference_frame) const
-				{
-					geometry_msgs::msg::TransformStamped transformStamped;
-					StateRepresentation::CartesianPose result(frame_name, reference_frame);
-					transformStamped = this->buffer_.lookupTransform(reference_frame, frame_name, tf2::TimePoint(std::chrono::milliseconds(0)), tf2::Duration(this->get_timeout()));
-	    			StateConversion::read_msg(result, transformStamped);
-	      			return result;
-				}
+				/**
+				 * @brief Constructor for a TransformListener without a recipient
+				 * @param  timeout   period before timeout
+				 * @param  clock     reference to the Cell clock
+				 * @param  mutex     reference to the Cell mutex
+				 */
+				explicit TransformListenerHandler(const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex);
+
+				/**
+				 * @brief Function to look up a transform over the network
+				 * @param  frame_name      name of the frame associated to the transform
+				 * @param  reference_frame name of its desired reference frame
+				 * @return                 the transform as a CartesianPose
+				 */
+				const StateRepresentation::CartesianPose lookup_transform(const std::string& frame_name, const std::string& reference_frame) const;
 		    };
 		}
 	}

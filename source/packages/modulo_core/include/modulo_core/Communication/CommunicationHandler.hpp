@@ -24,70 +24,147 @@ namespace Modulo
 	{
 		namespace Communication
 		{
+			enum class CommunicationType
+			{
+				PUBLISHER,
+				SUBSCRIPTION,
+				TRANSFORMLISTENER
+			};
+
 			class CommunicationHandler
 			{
 			private:
-				const std::string type_;
-				std::string channel_;
-				std::shared_ptr<StateRepresentation::State> recipient_;
-				std::chrono::milliseconds timeout_;
-				std::shared_ptr<rclcpp::Clock> clock_;
-				std::shared_ptr<std::mutex> mutex_;
+				const CommunicationType type_; ///< type of the handler from the CommunicationType enumeration
+				const std::string channel_; ///< channel associated to the handler
+				std::shared_ptr<StateRepresentation::State> recipient_; ///< recipient associated to the handler
+				std::chrono::milliseconds timeout_; ///< period before considered time out
+				std::shared_ptr<rclcpp::Clock> clock_; ///< reference to the Cell clock
+				std::shared_ptr<std::mutex> mutex_; ///< reference to the Cell mutex
 
 			public:
-				explicit CommunicationHandler(const std::string& type, const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-				type_(type), channel_(channel), recipient_(recipient), timeout_(timeout), clock_(clock), mutex_(mutex)
-				{}
+				/**
+				 * @brief Constructor for a CommunicationHandler
+				 * @param  type      the type of CommunicationHandler from the CommunicationType enumeration
+				 * @param  channel   channel associated to the handler
+				 * @param  recipient recipient associated to the handler
+				 * @param  timeout   period before considered time out
+				 * @param  clock     reference to the Cell clock
+				 * @param  mutex     reference to the Cell mutex
+				 */
+				explicit CommunicationHandler(const CommunicationType& type, const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
 
-				inline const std::string& get_type()
-				{
-					return this->type_;
-				}
+				/**
+				 * @brief Getter of the CommunicationType
+				 * @return the type of the handler
+				 */
+				const CommunicationType& get_type();
+			
+				/**
+				 * @brief Getter of the recipient
+				 * @return the recipient
+				 */
+				const StateRepresentation::State& get_recipient() const;
+			
+				/**
+				 * @brief Getter of the recipient as a non const value
+				 * @return the recipient
+				 */
+				StateRepresentation::State& get_recipient();
+				
+				/**
+				 * @brief Getter of the channel name
+				 * @return the channel name
+				 */
+				const std::string& get_channel() const;
+			
+				/**
+				 * @brief Getter of the timeout period
+				 * @return the timeout period
+				 */
+				const std::chrono::milliseconds& get_timeout() const;
+			
+				/**
+				 * @brief Getter of the clock reference
+				 * @return the clock reference
+				 */
+				const rclcpp::Clock& get_clock() const;
 
-				inline const StateRepresentation::State& get_recipient() const
-				{
-					return *this->recipient_;
-				}
+				/**
+				 * @brief Getter of the clock as a non const reference
+				 * @return the clock reference
+				 */
+				rclcpp::Clock& get_clock();
 
-				inline StateRepresentation::State& get_recipient()
-				{
-					return *this->recipient_;
-				}
-
-				inline const std::string& get_channel() const
-				{
-					return this->channel_;
-				}
-
-				inline const std::chrono::milliseconds& get_timeout() const
-				{
-					return this->timeout_;
-				}
-
-				inline const rclcpp::Clock& get_clock() const
-				{
-					return *this->clock_;
-				}
-
-				inline rclcpp::Clock& get_clock()
-				{
-					return *this->clock_;
-				}
-
-				inline std::mutex& get_mutex()
-				{
-					return *this->mutex_;
-				}
-
-				inline virtual void activate()
-				{}
-
-				inline virtual void deactivate()
-				{}
-
-				inline virtual void check_timeout()
-				{}
+				/**
+				 * @brief Getter of the mutex reference
+				 * @return the mutex reference
+				 */
+				std::mutex& get_mutex();
+			
+				/**
+				 * @brief Virtual function to activate a handler
+				 */
+				virtual void activate();
+			
+				/**
+				 * @brief Virtual function to deactivate a handler
+				 */
+				virtual void deactivate();
+			
+				/**
+				 * @brief Virtual function to check if the handler is timed out
+				 */
+				virtual void check_timeout();
 			};
+
+			inline const CommunicationType& CommunicationHandler::get_type()
+			{
+				return this->type_;
+			}
+
+			inline const StateRepresentation::State& CommunicationHandler::get_recipient() const
+			{
+				return *this->recipient_;
+			}
+
+			inline StateRepresentation::State& CommunicationHandler::get_recipient()
+			{
+				return *this->recipient_;
+			}
+
+			inline const std::string& CommunicationHandler::get_channel() const
+			{
+				return this->channel_;
+			}
+
+			inline const std::chrono::milliseconds& CommunicationHandler::get_timeout() const
+			{
+				return this->timeout_;
+			}
+
+			inline const rclcpp::Clock& CommunicationHandler::get_clock() const
+			{
+				return *this->clock_;
+			}
+
+			inline rclcpp::Clock& CommunicationHandler::get_clock()
+			{
+				return *this->clock_;
+			}
+
+			inline std::mutex& CommunicationHandler::get_mutex()
+			{
+				return *this->mutex_;
+			}
+
+			inline void CommunicationHandler::activate()
+			{}
+
+			inline void CommunicationHandler::deactivate()
+			{}
+
+			inline void CommunicationHandler::check_timeout()
+			{}
 		}
 	}
 }
