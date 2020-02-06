@@ -12,7 +12,7 @@ endif()
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
-  	set(CMAKE_CXX_STANDARD 14)
+  	set(CMAKE_CXX_STANDARD 17)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -29,6 +29,8 @@ include_directories(
 set(CORE_SOURCES
   src/MathTools.cpp
   src/State.cpp
+  src/Units/Distance.cpp
+  src/Units/LinearVelocity.cpp
   src/Space/SpatialState.cpp
   src/Space/Cartesian/CartesianState.cpp
 	src/Space/Cartesian/CartesianPose.cpp
@@ -71,6 +73,14 @@ if (runtests)
   	# Include the gtest library. gtest_SOURCE_DIR is available due to
   	# 'project(gtest)' above.
   	include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+
+    add_executable(runTestUnits tests/testUnits.cpp)
+    target_link_libraries(runTestUnits
+      gtest 
+      gtest_main
+      ${PROJECT_NAME}
+    )
+    add_test(NAME runTestUnits COMMAND runTestUnits)
 
   	add_executable(runTestCartesianState tests/testCartesianState.cpp)
   	target_link_libraries(runTestCartesianState
