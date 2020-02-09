@@ -88,37 +88,43 @@ namespace StateRepresentation
 
 			/**
 			 * @brief Getter of the value attribute
-			 * @return long double the value in meter
+			 * @return the value in meter per second
 			 */
 			constexpr long double get_value() const;
 
 			/**
+			 * @brief Overload the - operator
+			 * @return the negative velocity in the base unit
+			 */
+			constexpr Velocity<T>& operator-();
+
+			/**
 		 	 * @brief Overload the += operator
-		 	 * @param vel Velocity to add
+		 	 * @param rhs Velocity to add
 		 	 * @return the current Velocity added the Velocity given in argument
 		     */
-			constexpr Velocity<T>& operator+=(const Velocity<T>& vel);
+			constexpr Velocity<T>& operator+=(const Velocity<T>& rhs);
 
 			/**
 		 	 * @brief Overload the + operator
-		 	 * @param vel Velocity to add
+		 	 * @param rhs Velocity to add
 		 	 * @return the current Velocity added the Velocity given in argument
 		     */
-			constexpr Velocity<T> operator+(const Velocity<T>& vel) const;
+			constexpr Velocity<T> operator+(const Velocity<T>& rhs) const;
 
 			/**
 		 	 * @brief Overload the -= operator
-		 	 * @param vel Velocity to substract
+		 	 * @param rhs Velocity to substract
 		 	 * @return the current Velocity minus the Velocity given in argument
 		     */
-			constexpr Velocity<T>& operator-=(const Velocity<T>& vel);
+			constexpr Velocity<T>& operator-=(const Velocity<T>& rhs);
 
 			/**
 		 	 * @brief Overload the - operator
-		 	 * @param vel Velocity to substract
+		 	 * @param rhs Velocity to substract
 		 	 * @return the current Velocity minus the Velocity given in argument
 		     */
-			constexpr Velocity<T> operator-(const Velocity<T>& vel) const;
+			constexpr Velocity<T> operator-(const Velocity<T>& rhs) const;
 
 			/**
 		 	 * @brief Overload the *= operator with a scalar
@@ -238,39 +244,46 @@ namespace StateRepresentation
 		}
 
 		template <class T>
-		constexpr Velocity<T>& Velocity<T>::operator+=(const Velocity<T>& vel)
+		constexpr Velocity<T>& Velocity<T>::operator-()
 		{
-			this->value = value + vel.value;
+			this->value = -this->value;
 			return (*this);
 		}
 
 		template <class T>
-		constexpr Velocity<T> Velocity<T>::operator+(const Velocity<T>& vel) const
+		constexpr Velocity<T>& Velocity<T>::operator+=(const Velocity<T>& rhs)
+		{
+			this->value = this->value + rhs.value;
+			return (*this);
+		}
+
+		template <class T>
+		constexpr Velocity<T> Velocity<T>::operator+(const Velocity<T>& rhs) const
 		{
 			Velocity<T> result(*this);
-			result += vel;
+			result += rhs;
 			return result;
 		}
 
 		template <class T>
-		constexpr Velocity<T>& Velocity<T>::operator-=(const Velocity<T>& vel)
+		constexpr Velocity<T>& Velocity<T>::operator-=(const Velocity<T>& rhs)
 		{
-			this->value = value - vel.value;
+			this->value = this->value - rhs.value;
 			return (*this);
 		}
 
 		template <class T>
-		constexpr Velocity<T> Velocity<T>::operator-(const Velocity<T>& vel) const
+		constexpr Velocity<T> Velocity<T>::operator-(const Velocity<T>& rhs) const
 		{
 			Velocity<T> result(*this);
-			result -= vel;
+			result -= rhs;
 			return result;
 		}
 
 		template <class T>
 		constexpr Velocity<T>& Velocity<T>::operator*=(double lambda)
 		{
-			this->value = value * lambda;
+			this->value = this->value * lambda;
 			return (*this);
 		}
 
@@ -285,7 +298,7 @@ namespace StateRepresentation
 		template <class T>
 		constexpr Velocity<T>& Velocity<T>::operator/=(double lambda)
 		{
-			this->value = value / lambda;
+			this->value = this->value / lambda;
 			return (*this);
 		}
 

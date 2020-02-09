@@ -11,14 +11,39 @@ namespace StateRepresentation
 
 		inline namespace literals
 		{
+			/**
+			 * @brief Literal operator to create a Distance in meter
+			 * @param n the distance value in meter
+			 * @param the Distance in the base unit (meter)
+			 */
 			constexpr Distance operator""_m(long double n);
 
+			/**
+			 * @brief Literal operator to create a Distance in kilometer
+			 * @param n the distance value in kilometer
+			 * @param the Distance in the base unit (meter)
+			 */
 			constexpr Distance operator""_km(long double n);
 
+			/**
+			 * @brief Literal operator to create a Distance in decimeter
+			 * @param n the distance value in decimeter
+			 * @param the Distance in the base unit (meter)
+			 */
 			constexpr Distance operator""_dm(long double n);
 
+			/**
+			 * @brief Literal operator to create a Distance in centimeter
+			 * @param n the distance value in centimeter
+			 * @param the Distance in the base unit (meter)
+			 */
 			constexpr Distance operator""_cm(long double n);
 
+			/**
+			 * @brief Literal operator to create a Distance in millimeter
+			 * @param n the distance value in millimeter
+			 * @param the Distance in the base unit (meter)
+			 */
 			constexpr Distance operator""_mm(long double n);
 		}
 
@@ -42,37 +67,43 @@ namespace StateRepresentation
 
 			/**
 			 * @brief Getter of the value attribute
-			 * @return long double the value in meter
+			 * @return the value in meter
 			 */
 			constexpr long double get_value() const;
 
 			/**
+			 * @brief Overload the - operator
+			 * @return the negative distance in meter
+			 */
+			constexpr Distance& operator-();
+
+			/**
 		 	 * @brief Overload the += operator
-		 	 * @param dist Distance to add
+		 	 * @param rhs Distance to add
 		 	 * @return the current Distance added the Distance given in argument
 		     */
-			constexpr Distance& operator+=(const Distance& dist);
+			constexpr Distance& operator+=(const Distance& rhs);
 
 			/**
 		 	 * @brief Overload the + operator
-		 	 * @param dist Distance to add
+		 	 * @param rhs Distance to add
 		 	 * @return the current Distance added the Distance given in argument
 		     */
-			constexpr Distance operator+(const Distance& dist) const;
+			constexpr Distance operator+(const Distance& rhs) const;
 
 			/**
 		 	 * @brief Overload the -= operator
-		 	 * @param dist Distance to substract
+		 	 * @param rhs Distance to substract
 		 	 * @return the current Distance minus the Distance given in argument
 		     */
-			constexpr Distance& operator-=(const Distance& dist);
+			constexpr Distance& operator-=(const Distance& rhs);
 
 			/**
 		 	 * @brief Overload the - operator
-		 	 * @param dist Distance to substract
+		 	 * @param rhs Distance to substract
 		 	 * @return the current Distance minus the Distance given in argument
 		     */
-			constexpr Distance operator-(const Distance& dist) const;
+			constexpr Distance operator-(const Distance& rhs) const;
 
 			/**
 		 	 * @brief Overload the *= operator with a scalar
@@ -162,35 +193,35 @@ namespace StateRepresentation
 			/**
 			 * @brief Literal operator to create a Distance in meter
 			 * @param n the distance value in meter
-			 * @param Distance the Distance in the base unit (meter)
+			 * @param the Distance in the base unit (meter)
 			 */
 			friend constexpr Distance literals::operator""_m(long double n);
 
 			/**
 			 * @brief Literal operator to create a Distance in kilometer
 			 * @param n the distance value in kilometer
-			 * @param Distance the Distance in the base unit (meter)
+			 * @param the Distance in the base unit (meter)
 			 */
 			friend constexpr Distance literals::operator""_km(long double n);
 
 			/**
 			 * @brief Literal operator to create a Distance in decimeter
 			 * @param n the distance value in decimeter
-			 * @param Distance the Distance in the base unit (meter)
+			 * @param the Distance in the base unit (meter)
 			 */
 			friend constexpr Distance literals::operator""_dm(long double n);
 
 			/**
 			 * @brief Literal operator to create a Distance in centimeter
 			 * @param n the distance value in centimeter
-			 * @param Distance the Distance in the base unit (meter)
+			 * @param the Distance in the base unit (meter)
 			 */
 			friend constexpr Distance literals::operator""_cm(long double n);
 
 			/**
 			 * @brief Literal operator to create a Distance in millimeter
 			 * @param n the distance value in millimeter
-			 * @param Distance the Distance in the base unit (meter)
+			 * @param the Distance in the base unit (meter)
 			 */
 			friend constexpr Distance literals::operator""_mm(long double n);
 		};
@@ -208,35 +239,41 @@ namespace StateRepresentation
 			return this->value;
 		}
 
-		constexpr Distance& Distance::operator+=(const Distance& dist)
+		constexpr Distance& Distance::operator-()
 		{
-			this->value = value + dist.value;
+			this->value = -this->value;
 			return (*this);
 		}
 
-		constexpr Distance Distance::operator+(const Distance& dist) const
+		constexpr Distance& Distance::operator+=(const Distance& rhs)
+		{
+			this->value = this->value + rhs.value;
+			return (*this);
+		}
+
+		constexpr Distance Distance::operator+(const Distance& rhs) const
 		{
 			Distance result(*this);
-			result += dist;
+			result += rhs;
 			return result;
 		}
 
-		constexpr Distance& Distance::operator-=(const Distance& dist)
+		constexpr Distance& Distance::operator-=(const Distance& rhs)
 		{
-			this->value = value - dist.value;
+			this->value = this->value - rhs.value;
 			return (*this);
 		}
 
-		constexpr Distance Distance::operator-(const Distance& dist) const
+		constexpr Distance Distance::operator-(const Distance& rhs) const
 		{
 			Distance result(*this);
-			result -= dist;
+			result -= rhs;
 			return result;
 		}
 
 		constexpr Distance& Distance::operator*=(double lambda)
 		{
-			this->value = value * lambda;
+			this->value = this->value * lambda;
 			return (*this);
 		}
 
@@ -249,7 +286,7 @@ namespace StateRepresentation
 
 		constexpr Distance& Distance::operator/=(double lambda)
 		{
-			this->value = value / lambda;
+			this->value = this->value / lambda;
 			return (*this);
 		}
 
