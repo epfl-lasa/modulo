@@ -2,6 +2,7 @@
 #include <fstream>
 #include "state_representation/Units/Distance.hpp"
 #include "state_representation/Units/Velocity.hpp"
+#include "state_representation/Units/Angle.hpp"
 
 using namespace StateRepresentation::Units;
 using namespace StateRepresentation::Units::literals;
@@ -42,9 +43,19 @@ TEST(DistanceOperations, PositiveNos)
 
 TEST(CreateLinearVelocity, PositiveNos)
 {
-	Velocity<Distance> v1 = 1.0_m_s;
-	
+	LinearVelocity v1 = 1.0_m_s;
 	EXPECT_TRUE(abs(v1.get_value() - 1.0) < 1e-4);
+}
+
+TEST(CreateAngles, PositiveNos)
+{
+	Angle a1 = M_PI;
+	Angle a2 = 180.0_deg;
+	EXPECT_TRUE(a1 == a2);
+
+	Angle a3 = -M_PI / 2;
+	Angle a4 = -90.0_deg;
+	EXPECT_TRUE(a3 == a4);
 }
 
 int main(int argc, char **argv) {
