@@ -2,7 +2,8 @@
 #define STATEREPRESENTATION_UNITS_VELOCITY_H_
 
 #include <chrono>
-#include "state_representation/Units/Velocity.hpp"
+#include "state_representation/Units/Distance.hpp"
+#include "state_representation/Units/Angle.hpp"
 
 using namespace std::chrono_literals;
 
@@ -14,6 +15,7 @@ namespace StateRepresentation
 		class Velocity;
 
 		using LinearVelocity = Velocity<Distance>;
+		using AngularVelocity = Velocity<Angle>;
 
 		inline namespace literals
 		{
@@ -65,6 +67,20 @@ namespace StateRepresentation
 			 * @param the Velocity in the base unit (meter / second)
 			 */
 			constexpr LinearVelocity operator""_mm_h(long double n);
+
+			/**
+			 * @brief Literal operator to create an AngularVelocity in radian / second
+			 * @param n the Velocity value in radian / second
+			 * @param the Velocity in the base unit (radian / second)
+			 */
+			constexpr AngularVelocity operator""_rad_s(long double n);
+
+			/**
+			 * @brief Literal operator to create an AngularVelocity in degree / second
+			 * @param n the Velocity value in degree / second
+			 * @param the Velocity in the base unit (radian / second)
+			 */
+			constexpr AngularVelocity operator""_deg_s(long double n);
 		}
 
 		template <class T>
@@ -402,6 +418,20 @@ namespace StateRepresentation
 				Distance d = 1.0_mm;
 				auto t = 1.0h;
 				return n * (d / t);
+			}
+
+			constexpr AngularVelocity operator""_rad_s(long double n)
+			{
+				Angle a = 1.0_rad;
+				auto t = 1.0s;
+				return n * (a / t);
+			}
+
+			constexpr AngularVelocity operator""_deg_s(long double n)
+			{
+				Angle a = 1.0_deg;
+				auto t = 1.0s;
+				return n * (a / t);
 			}
 		}
 	}
