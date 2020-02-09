@@ -29,8 +29,6 @@ include_directories(
 set(CORE_SOURCES
   src/MathTools.cpp
   src/State.cpp
-  src/Units/Distance.cpp
-  src/Units/LinearVelocity.cpp
   src/Space/SpatialState.cpp
   src/Space/Cartesian/CartesianState.cpp
 	src/Space/Cartesian/CartesianPose.cpp

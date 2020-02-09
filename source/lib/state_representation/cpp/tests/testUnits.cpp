@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <fstream>
 #include "state_representation/Units/Distance.hpp"
-#include "state_representation/Units/LinearVelocity.hpp"
+#include "state_representation/Units/Velocity.hpp"
 
 using namespace StateRepresentation::Units;
 using namespace StateRepresentation::Units::literals;
@@ -32,14 +32,19 @@ TEST(DistanceOperations, PositiveNos)
 	Distance d4 = 0.0_m;
 
 	Distance d5 = 0.4_m;
-	Distance d6 = 0.02_m;
 
 	EXPECT_TRUE((d1 + d2) == d3);
 	EXPECT_TRUE((d1 - d2) == d4);
 
 	EXPECT_TRUE(2*(d1 + d2) == d5);
-	EXPECT_TRUE((d1 * d3) == d6);
+	EXPECT_TRUE(abs(d5 / d3 - 2.0) < 1e-4);
+}
 
+TEST(CreateLinearVelocity, PositiveNos)
+{
+	Velocity<Distance> v1 = 1.0_m_s;
+	
+	EXPECT_TRUE(abs(v1.get_value() - 1.0) < 1e-4);
 }
 
 int main(int argc, char **argv) {
