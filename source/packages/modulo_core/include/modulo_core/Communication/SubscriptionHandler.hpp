@@ -93,9 +93,12 @@ namespace Modulo
 			template <class RecT, typename MsgT>
 			inline void SubscriptionHandler<RecT, MsgT>::check_timeout()
 			{
-				if(this->get_recipient().is_deprecated(this->get_timeout()))
+				if(this->get_timeout() != std::chrono::milliseconds(0))
 				{
-					this->get_recipient().initialize();
+					if(this->get_recipient().is_deprecated(this->get_timeout()))
+					{
+						this->get_recipient().initialize();
+					}
 				}
 			}
 		}

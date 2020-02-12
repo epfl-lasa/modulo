@@ -14,13 +14,13 @@ private:
 public:
 	explicit MoveAction(const std::string & node_name, const std::chrono::milliseconds & period) :
 	Action<StateRepresentation::CartesianState>(std::make_shared<StateRepresentation::CartesianPose>("robot_test"), std::make_shared<StateRepresentation::CartesianTwist>("robot_test"), node_name, period, true),
-	target_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d(-0.419, -0.0468, 0.15059), Eigen::Quaterniond(-0.04616,-0.124,0.991007,-0.018758)))
+	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d(-0.419, -0.0468, 0.15059), Eigen::Quaterniond(-0.04616,-0.124,0.991007,-0.018758)))
 	{}
 
 	void on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->get_input_state());
-		//this->add_subscription<geometry_msgs::msg::PoseStamped>("/ds/attractor", this->target_pose, std::chrono::milliseconds(0));
+		this->add_subscription<geometry_msgs::msg::PoseStamped>("/ds/attractor", this->target_pose, std::chrono::milliseconds(0));
 		this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->get_output_state());
 
 		std::shared_ptr<DynamicalSystems::Linear<StateRepresentation::CartesianState> > move_dynamic = std::make_shared<DynamicalSystems::Linear<StateRepresentation::CartesianState> >(1);
@@ -37,7 +37,7 @@ private:
 public:
 	explicit RandomAttractor(const std::string & node_name, const std::chrono::milliseconds & period):
 	Cell(node_name, period, true),
-	target_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test"))
+	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor"))
 	{}
 
 	void on_configure()
@@ -48,6 +48,7 @@ public:
 	void step()
 	{
 		this->target_pose->set_position(Eigen::Vector3d::Random() * 5);
+		this->send_transform(this->target_pose);
 	}
 };
 
@@ -133,7 +134,7 @@ int main(int argc, char * argv[])
 	rclcpp::init(argc, argv);
 
 	rclcpp::executors::SingleThreadedExecutor exe;
-	const std::chrono::milliseconds period(1);
+	const std::chrono::milliseconds period(100);
 	const std::chrono::milliseconds period_visualization(100);
 	const std::chrono::milliseconds period_randomization(10000);
 
@@ -143,6 +144,7 @@ int main(int argc, char * argv[])
 	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", period);
 
 	exe.add_node(ma->get_node_base_interface());
+	exe.add_node(ra->get_node_base_interface());
 	exe.add_node(cv->get_node_base_interface());
 	exe.add_node(sri->get_node_base_interface());
 
