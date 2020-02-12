@@ -10,6 +10,7 @@
 #define MODULO_COMMUNICATION_PUBLISHER_HANDLER_H_
 
 #include "modulo_core/Communication/CommunicationHandler.hpp"
+#include <tuple>
 
 namespace Modulo
 {
@@ -17,6 +18,8 @@ namespace Modulo
 	{
 		namespace Communication
 		{
+			using PublisherParameters = std::tuple<StateRepresentation::StateType, std::string, std::chrono::milliseconds>;
+
 			template <class RecT, typename MsgT>
 			class PublisherHandler: public CommunicationHandler
 			{

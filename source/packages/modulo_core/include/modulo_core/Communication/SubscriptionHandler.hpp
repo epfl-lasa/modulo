@@ -17,6 +17,8 @@ namespace Modulo
 	{
 		namespace Communication
 		{
+			using SubscriptionParameters = std::tuple<StateRepresentation::StateType, std::string>;
+
 			template <class RecT, typename MsgT>
 			class SubscriptionHandler: public CommunicationHandler
 			{

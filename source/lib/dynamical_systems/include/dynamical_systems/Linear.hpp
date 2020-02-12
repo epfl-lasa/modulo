@@ -14,39 +14,79 @@
 
 namespace DynamicalSystems
 {
+	/**
+	 * @class Linear
+	 * @brief Represent a Linear dynamical system to move toward an attractor
+	 * @tparam S the type of space of the dynamical system (e.g. Cartesian or Joint)
+	 */
 	template<class S>
 	class Linear: public DynamicalSystem<S>
 	{
 	private:
-		S attractor_;
+		std::shared_ptr<S> attractor_; //< attractor of the dynamical system in the space
 
 	public:
+		/**
+		 * @brief Constructor with a provided gain 
+		 * @param  gain the gain of the dynamical system (default = 1)
+		 */
 		explicit Linear(double gain=1);
 
+		/**
+		 * @brief Getter of the attractor
+		 * @return the attractor as a const reference
+		 */
 		const S& get_attractor() const;
 
+		/**
+		 * @brief Setter of the attractor as a new shared_ptr
+		 * @param attractor the new attractor
+		 */
+		void set_attractor(const std::shared_ptr<S>& attractor);
+
+		/**
+		 * @brief Setter of the attractor as a new value
+		 * @param attractor the new attractor
+		 */
 		void set_attractor(const S& attractor);
 
+		/**
+		 * @brief Evaluate the value of the dynamical system at a given state
+		 * @param state state at wich to perform the evaluation
+		 * @return the state (velocity) to move toward the attractor
+		 */
 		const S evaluate(const S& state) const;
 
+		/**
+		 * @brief Evaluate the value of the dynamical system at a given state
+		 * @param state state at wich to perform the evaluation (given as a shared_ptr)
+		 * @return the state (velocity) to move toward the attractor
+		 */
 		const S evaluate(const std::shared_ptr<S>& state) const;
 	};
 
 	template<class S>
 	Linear<S>::Linear(double gain):
-	DynamicalSystem<S>(gain)
+	DynamicalSystem<S>(gain),
+	attractor_(std::make_shared<S>())
 	{}
 
 	template<class S>
 	inline const S& Linear<S>::get_attractor() const
 	{
-		return this->attractor_;
+		return *this->attractor_;
+	}
+
+	template<class S>
+	inline void Linear<S>::set_attractor(const std::shared_ptr<S>& attractor)
+	{
+		this->attractor_ = attractor;
 	}
 
 	template<class S>
 	inline void Linear<S>::set_attractor(const S& attractor)
 	{
-		this->attractor_ = attractor;
+		*this->attractor_ = attractor;
 	}
 
 	template<>
