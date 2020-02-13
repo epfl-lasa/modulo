@@ -30,9 +30,10 @@ namespace Modulo
 			class PublisherHandler : public MessagePassingCommunication
 			{
 			private:
-				bool activated_; ///< indicate if the publisher is activated or not
 				std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<MsgT> > publisher_; ///< reference to the ROS2 publisher
+				std::shared_ptr<rclcpp::Clock> clock_; ///< reference to the Cell clock
 				std::shared_ptr<rclcpp::TimerBase> timer_; ///< reference to the associated timer
+				bool activated_; ///< indicate if the publisher is activated or not
 
 			protected:
 				/**
@@ -44,18 +45,29 @@ namespace Modulo
 			public:
 				/**
 				 * @brief Constructor of a PublisherHandler
-				 * @param  channel   the channel associated to the publisher
 				 * @param  recipient the recipent associated to the publisher
 				 * @param  timeout   period before timeout
 				 * @param  clock     reference to the Cell clock
 				 * @param  mutex     reference to the Cell mutex
 				 */
-				explicit PublisherHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
+				explicit PublisherHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
 				
 				/**
 				 * @brief Function to publish periodically 
 				 */
 				void publish_callback();
+
+				/**
+				 * @brief Getter of the clock reference
+				 * @return the clock reference
+				 */
+				const rclcpp::Clock& get_clock() const;
+
+				/**
+				 * @brief Getter of the clock as a non const reference
+				 * @return the clock reference
+				 */
+				rclcpp::Clock& get_clock();
 
 				/**
 				 * @brief Setter of the publisher reference
@@ -86,8 +98,9 @@ namespace Modulo
 			};
 
 			template <class RecT, typename MsgT>
-			PublisherHandler<RecT, MsgT>::PublisherHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-			MessagePassingCommunication(CommunicationType::PUBLISHER, channel, recipient, timeout, clock, mutex),
+			PublisherHandler<RecT, MsgT>::PublisherHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
+			MessagePassingCommunication(CommunicationType::PUBLISHER, recipient, timeout, mutex),
+			clock_(clock),
 			activated_(false)
 			{}
 
@@ -107,6 +120,18 @@ namespace Modulo
 				{	
 					this->publish(static_cast<RecT&>(this->get_recipient()));
 				}
+			}
+
+			template <class RecT, typename MsgT>
+			inline const rclcpp::Clock& PublisherHandler<RecT, MsgT>::get_clock() const
+			{
+				return *this->clock_;
+			}
+
+			template <class RecT, typename MsgT>
+			inline rclcpp::Clock& PublisherHandler<RecT, MsgT>::get_clock()
+			{
+				return *this->clock_;
 			}
 
 			template <class RecT, typename MsgT>

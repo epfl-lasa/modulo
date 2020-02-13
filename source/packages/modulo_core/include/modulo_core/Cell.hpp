@@ -420,7 +420,7 @@ namespace Modulo
 		template <typename MsgT, class RecT>
 		void Cell::add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size)
 		{
-			auto handler = std::make_shared<Communication::PublisherHandler<RecT, MsgT> >(channel, recipient, timeout, this->get_clock(), this->mutex_);
+			auto handler = std::make_shared<Communication::PublisherHandler<RecT, MsgT> >(recipient, timeout, this->get_clock(), this->mutex_);
 			handler->set_publisher(this->create_publisher<MsgT>(channel, queue_size));
 			handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::PublisherHandler<RecT, MsgT>::publish_callback, handler)));
 			this->handlers_.insert(std::make_pair(channel, handler));
@@ -441,7 +441,7 @@ namespace Modulo
 		template <typename MsgT, class RecT>
 		void Cell::add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size)
 		{
-			auto handler = std::make_shared<Communication::SubscriptionHandler<RecT, MsgT> >(channel, recipient, timeout, this->get_clock(), this->mutex_);
+			auto handler = std::make_shared<Communication::SubscriptionHandler<RecT, MsgT> >(recipient, timeout, this->mutex_);
 			handler->set_subscription(this->create_subscription<MsgT>(channel, queue_size, std::bind(&Communication::SubscriptionHandler<RecT, MsgT>::subscription_callback, handler, std::placeholders::_1)));
 			this->handlers_.insert(std::make_pair(channel, handler));
 		}

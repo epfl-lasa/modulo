@@ -37,51 +37,30 @@ namespace Modulo
 			{
 			private:
 				const CommunicationType type_; ///< type of the handler from the CommunicationType enumeration
-				const std::string channel_; ///< channel associated to the handler
 				std::chrono::milliseconds timeout_; ///< period before considered time out
-				std::shared_ptr<rclcpp::Clock> clock_; ///< reference to the Cell clock
 				std::shared_ptr<std::mutex> mutex_; ///< reference to the Cell mutex
 
 			public:
 				/**
 				 * @brief Constructor for a CommunicationHandler
 				 * @param  type      the type of CommunicationHandler from the CommunicationType enumeration
-				 * @param  channel   channel associated to the handler
 				 * @param  timeout   period before considered time out
 				 * @param  clock     reference to the Cell clock
 				 * @param  mutex     reference to the Cell mutex
 				 */
-				explicit CommunicationHandler(const CommunicationType& type, const std::string& channel, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
+				explicit CommunicationHandler(const CommunicationType& type, const std::chrono::milliseconds& timeout, const std::shared_ptr<std::mutex>& mutex);
 
 				/**
 				 * @brief Getter of the CommunicationType
 				 * @return the type of the handler
 				 */
 				const CommunicationType& get_type();
-				
-				/**
-				 * @brief Getter of the channel name
-				 * @return the channel name
-				 */
-				const std::string& get_channel() const;
 			
 				/**
 				 * @brief Getter of the timeout period
 				 * @return the timeout period
 				 */
 				const std::chrono::milliseconds& get_timeout() const;
-			
-				/**
-				 * @brief Getter of the clock reference
-				 * @return the clock reference
-				 */
-				const rclcpp::Clock& get_clock() const;
-
-				/**
-				 * @brief Getter of the clock as a non const reference
-				 * @return the clock reference
-				 */
-				rclcpp::Clock& get_clock();
 
 				/**
 				 * @brief Getter of the mutex reference
@@ -110,24 +89,9 @@ namespace Modulo
 				return this->type_;
 			}
 
-			inline const std::string& CommunicationHandler::get_channel() const
-			{
-				return this->channel_;
-			}
-
 			inline const std::chrono::milliseconds& CommunicationHandler::get_timeout() const
 			{
 				return this->timeout_;
-			}
-
-			inline const rclcpp::Clock& CommunicationHandler::get_clock() const
-			{
-				return *this->clock_;
-			}
-
-			inline rclcpp::Clock& CommunicationHandler::get_clock()
-			{
-				return *this->clock_;
 			}
 
 			inline std::mutex& CommunicationHandler::get_mutex()

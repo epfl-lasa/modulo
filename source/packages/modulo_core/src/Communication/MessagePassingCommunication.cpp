@@ -6,8 +6,8 @@ namespace Modulo
 	{
 		namespace Communication
 		{
-			MessagePassingCommunication::MessagePassingCommunication(const CommunicationType& type, const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-			CommunicationHandler(type, channel, timeout, clock, mutex),
+			MessagePassingCommunication::MessagePassingCommunication(const CommunicationType& type, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<std::mutex>& mutex):
+			CommunicationHandler(type, timeout, mutex),
 			recipient_(recipient)
 			{}
 		}

@@ -32,13 +32,11 @@ namespace Modulo
 				/**
 				 * @brief Constructor for a CommunicationHandler
 				 * @param  type      the type of CommunicationHandler from the CommunicationType enumeration
-				 * @param  channel   channel associated to the handler
 				 * @param  recipient recipient associated to the handler
 				 * @param  timeout   period before considered time out
-				 * @param  clock     reference to the Cell clock
 				 * @param  mutex     reference to the Cell mutex
 				 */
-				explicit MessagePassingCommunication(const CommunicationType& type, const std::string& channel,  const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
+				explicit MessagePassingCommunication(const CommunicationType& type,  const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<std::mutex>& mutex);
 
 				/**
 				 * @brief Getter of the recipient

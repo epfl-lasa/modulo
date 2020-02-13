@@ -33,13 +33,11 @@ namespace Modulo
 			public:
 				/**
 				 * @brief Constructor of a SubscriptionHandler
-				 * @param  channel   the channel associated to the subscription
 				 * @param  recipient the recipient associated to the subscription
 				 * @param  timeout   the period before timeout
-				 * @param  clock     reference to the Cell clock
 				 * @param  mutex     reference to the Cell mutex
 				 */
-				explicit SubscriptionHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
+				explicit SubscriptionHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<std::mutex>& mutex);
 				
 				/**
 				 * @brief Callback function to receive the message from the network
@@ -70,8 +68,8 @@ namespace Modulo
 			};
 
 			template <class RecT, typename MsgT>
-			SubscriptionHandler<RecT, MsgT>::SubscriptionHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-			MessagePassingCommunication(CommunicationType::SUBSCRIPTION, channel, recipient, timeout, clock, mutex)
+			SubscriptionHandler<RecT, MsgT>::SubscriptionHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<std::mutex>& mutex):
+			MessagePassingCommunication(CommunicationType::SUBSCRIPTION, recipient, timeout, mutex)
 			{}
 			
 			template <class RecT, typename MsgT>
