@@ -36,7 +36,8 @@ namespace Modulo
 			{
 				if(h.second->get_type() == Core::Communication::CommunicationType::SUBSCRIPTION)
 				{
-					if(!this->record(h.second->get_recipient())) RCLCPP_ERROR(this->get_logger(), "Unable to record " + h.second->get_recipient().get_name());
+					const Core::Communication::MessagePassingCommunication& subscription = static_cast<const Core::Communication::MessagePassingCommunication&>(*h.second);
+					if(!this->record(subscription.get_recipient())) RCLCPP_ERROR(this->get_logger(), "Unable to record " + subscription.get_recipient().get_name());
 				}
 			}
 		}

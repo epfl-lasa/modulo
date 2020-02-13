@@ -23,6 +23,7 @@ ament_auto_find_build_dependencies()
 set(CORE_SOURCES
     src/Communication/StateConversion.cpp
     src/Communication/CommunicationHandler.cpp
+    src/Communication/MessagePassingCommunication.cpp
     src/Communication/TransformBroadcasterHandler.cpp
     src/Communication/TransformListenerHandler.cpp
     src/Cell.cpp

@@ -1,16 +1,15 @@
 /**
- * @class PublisherHandler
- * @brief Class to define a publisher
  * @author Baptiste Busch
  * @date 2019/06/14
- *
  */
 
 #ifndef MODULO_COMMUNICATION_PUBLISHER_HANDLER_H_
 #define MODULO_COMMUNICATION_PUBLISHER_HANDLER_H_
 
-#include "modulo_core/Communication/CommunicationHandler.hpp"
 #include <tuple>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp_lifecycle/lifecycle_publisher.hpp>
+#include "modulo_core/Communication/MessagePassingCommunication.hpp"
 
 namespace Modulo
 {
@@ -20,8 +19,15 @@ namespace Modulo
 		{
 			using PublisherParameters = std::tuple<StateRepresentation::StateType, std::string, std::chrono::milliseconds>;
 
+			/**
+ 		 	 * @class PublisherHandler
+ 		     * @brief Class to define a publisher
+ 		     * @tparam RecT the type of recipient (of StateRepresentation::State base class)
+ 		     * @tparam MsgT the type of associated ROS2 message
+ 		     *
+ 		     */
 			template <class RecT, typename MsgT>
-			class PublisherHandler: public CommunicationHandler
+			class PublisherHandler : public MessagePassingCommunication
 			{
 			private:
 				bool activated_; ///< indicate if the publisher is activated or not
@@ -81,7 +87,8 @@ namespace Modulo
 
 			template <class RecT, typename MsgT>
 			PublisherHandler<RecT, MsgT>::PublisherHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-			CommunicationHandler(CommunicationType::PUBLISHER, channel, recipient, timeout, clock, mutex), activated_(false)
+			MessagePassingCommunication(CommunicationType::PUBLISHER, channel, recipient, timeout, clock, mutex),
+			activated_(false)
 			{}
 
 			template <class RecT, typename MsgT>

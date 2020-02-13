@@ -1,17 +1,14 @@
 /**
- * @class TransformBroadcasterHandler
- * @brief Class to define a transform broadcaster
  * @author Baptiste Busch
  * @date 2019/06/14
- *
  */
 
 #ifndef MODULO_COMMUNICATION_TRANSFORMBROADCASTERHANDLER_H_
 #define MODULO_COMMUNICATION_TRANSFORMBROADCASTERHANDLER_H_
 
+#include <tf2_msgs/msg/tf_message.hpp>
 #include "modulo_core/Communication/PublisherHandler.hpp"
 #include "state_representation/Space/Cartesian/CartesianPose.hpp"
-#include "tf2_msgs/msg/tf_message.hpp"
 
 namespace Modulo
 {
@@ -19,6 +16,10 @@ namespace Modulo
 	{
 		namespace Communication
 		{
+			/**
+			 * @class TransformBroadcasterHandler
+			 * @brief Class to define a transform broadcaster
+			 */
 			class TransformBroadcasterHandler: public PublisherHandler<StateRepresentation::CartesianPose, tf2_msgs::msg::TFMessage>
 			{
 			public:

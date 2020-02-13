@@ -1,6 +1,4 @@
 /**
- * @class SubscriptionHandler
- * @brief Class to define a subscription
  * @author Baptiste Busch
  * @date 2019/06/14
  *
@@ -9,7 +7,7 @@
 #ifndef MODULO_COMMUNICATION_SUBSCRIPTION_HANDLER_H_
 #define MODULO_COMMUNICATION_SUBSCRIPTION_HANDLER_H_
 
-#include "modulo_core/Communication/CommunicationHandler.hpp"
+#include "modulo_core/Communication/MessagePassingCommunication.hpp"
 
 namespace Modulo
 {
@@ -19,8 +17,15 @@ namespace Modulo
 		{
 			using SubscriptionParameters = std::tuple<StateRepresentation::StateType, std::string>;
 
+			/**
+ 		 	 * @class SubscriptionHandler
+ 		     * @brief Class to define a subscription
+ 		     * @tparam RecT the type of recipient (of StateRepresentation::State base class)
+ 		     * @tparam MsgT the type of associated ROS2 message
+ 		     *
+ 		     */
 			template <class RecT, typename MsgT>
-			class SubscriptionHandler: public CommunicationHandler
+			class SubscriptionHandler : public MessagePassingCommunication
 			{
 			private:
 				std::shared_ptr<rclcpp::Subscription<MsgT> > subscription_; ///< reference to the ROS2 subscription
@@ -66,7 +71,7 @@ namespace Modulo
 
 			template <class RecT, typename MsgT>
 			SubscriptionHandler<RecT, MsgT>::SubscriptionHandler(const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-			CommunicationHandler(CommunicationType::SUBSCRIPTION, channel, recipient, timeout, clock, mutex)
+			MessagePassingCommunication(CommunicationType::SUBSCRIPTION, channel, recipient, timeout, clock, mutex)
 			{}
 			
 			template <class RecT, typename MsgT>

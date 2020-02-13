@@ -1,9 +1,6 @@
 /**
- * @class CommunicationHandler
- * @brief Abstract class to define a Communication interface
  * @author Baptiste Busch
  * @date 2019/06/14
- *
  */
 
 #ifndef MODULO_COMMUNICATION_COMMUNICATION_HANDLER_H_
@@ -12,11 +9,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
-
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp/publisher.hpp"
-#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
-#include "modulo_core/Communication/StateConversion.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace Modulo
 {
@@ -24,19 +17,27 @@ namespace Modulo
 	{
 		namespace Communication
 		{
+			/**
+			 * @enum CommunicationType
+			 * @brief enumeration of the possible type of communication interfaces
+			 */
 			enum class CommunicationType
 			{
 				PUBLISHER,
 				SUBSCRIPTION,
+				CLIENT,
 				TRANSFORMLISTENER
 			};
 
+			/**
+			 * @class CommunicationHandler
+			 * @brief Abstract class to define a Communication interface
+			 */
 			class CommunicationHandler
 			{
 			private:
 				const CommunicationType type_; ///< type of the handler from the CommunicationType enumeration
 				const std::string channel_; ///< channel associated to the handler
-				std::shared_ptr<StateRepresentation::State> recipient_; ///< recipient associated to the handler
 				std::chrono::milliseconds timeout_; ///< period before considered time out
 				std::shared_ptr<rclcpp::Clock> clock_; ///< reference to the Cell clock
 				std::shared_ptr<std::mutex> mutex_; ///< reference to the Cell mutex
@@ -46,30 +47,17 @@ namespace Modulo
 				 * @brief Constructor for a CommunicationHandler
 				 * @param  type      the type of CommunicationHandler from the CommunicationType enumeration
 				 * @param  channel   channel associated to the handler
-				 * @param  recipient recipient associated to the handler
 				 * @param  timeout   period before considered time out
 				 * @param  clock     reference to the Cell clock
 				 * @param  mutex     reference to the Cell mutex
 				 */
-				explicit CommunicationHandler(const CommunicationType& type, const std::string& channel, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
+				explicit CommunicationHandler(const CommunicationType& type, const std::string& channel, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
 
 				/**
 				 * @brief Getter of the CommunicationType
 				 * @return the type of the handler
 				 */
 				const CommunicationType& get_type();
-			
-				/**
-				 * @brief Getter of the recipient
-				 * @return the recipient
-				 */
-				const StateRepresentation::State& get_recipient() const;
-			
-				/**
-				 * @brief Getter of the recipient as a non const value
-				 * @return the recipient
-				 */
-				StateRepresentation::State& get_recipient();
 				
 				/**
 				 * @brief Getter of the channel name
@@ -120,16 +108,6 @@ namespace Modulo
 			inline const CommunicationType& CommunicationHandler::get_type()
 			{
 				return this->type_;
-			}
-
-			inline const StateRepresentation::State& CommunicationHandler::get_recipient() const
-			{
-				return *this->recipient_;
-			}
-
-			inline StateRepresentation::State& CommunicationHandler::get_recipient()
-			{
-				return *this->recipient_;
 			}
 
 			inline const std::string& CommunicationHandler::get_channel() const

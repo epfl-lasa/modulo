@@ -7,13 +7,15 @@ namespace Modulo
 		namespace Communication
 		{
 			TransformListenerHandler::TransformListenerHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-			CommunicationHandler(CommunicationType::TRANSFORMLISTENER, "tf_listener", recipient, timeout, clock, mutex), buffer_(clock) 
+			MessagePassingCommunication(CommunicationType::TRANSFORMLISTENER, "tf_listener", recipient, timeout, clock, mutex),
+			buffer_(clock)
 			{
 				this->tf_listener_ = std::make_unique<tf2_ros::TransformListener>(buffer_);
 			}
 
 			TransformListenerHandler::TransformListenerHandler(const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
-			CommunicationHandler(CommunicationType::TRANSFORMLISTENER, "tf_listener", std::make_shared<StateRepresentation::CartesianPose>(), timeout, clock, mutex), buffer_(clock) 
+			MessagePassingCommunication(CommunicationType::TRANSFORMLISTENER, "tf_listener", std::make_shared<StateRepresentation::CartesianPose>(), timeout, clock, mutex),
+			buffer_(clock) 
 			{
 				this->tf_listener_ = std::make_unique<tf2_ros::TransformListener>(buffer_);
 			}

@@ -1,16 +1,13 @@
 /**
- * @class TransformListenerHandler
- * @brief Class to define a transform listener
  * @author Baptiste Busch
  * @date 2019/06/14
- *
  */
 
 #ifndef MODULO_COMMUNICATION_TRANSFORMLISTENERHANDLER_H_
 #define MODULO_COMMUNICATION_TRANSFORMLISTENERHANDLER_H_
 
-#include "modulo_core/Communication/CommunicationHandler.hpp"
-#include "tf2_ros/transform_listener.h"
+#include <tf2_ros/transform_listener.h>
+#include "modulo_core/Communication/MessagePassingCommunication.hpp"
 
 namespace Modulo
 {
@@ -18,7 +15,11 @@ namespace Modulo
 	{
 		namespace Communication
 		{
-			class TransformListenerHandler: public CommunicationHandler
+			/**
+			 * @class TransformListenerHandler
+			 * @brief Class to define a transform listener
+			 */
+			class TransformListenerHandler : public MessagePassingCommunication
 			{
 			private:
 				tf2_ros::Buffer buffer_; ///< tf2 ROS buffer to read transformation from
