@@ -1,4 +1,5 @@
 #include "modulo_core/Action.hpp"
+#include "modulo_core/Monitor.hpp"
 #include "modulo_core/Visualizer.hpp"
 #include "dynamical_systems/Linear.hpp"
 #include "rcutils/cmdline_parser.h"
@@ -136,17 +137,22 @@ int main(int argc, char * argv[])
 	rclcpp::executors::SingleThreadedExecutor exe;
 	const std::chrono::milliseconds period(100);
 	const std::chrono::milliseconds period_visualization(100);
+	const std::chrono::milliseconds period_monitor(1000);
 	const std::chrono::milliseconds period_randomization(10000);
 
 	std::shared_ptr<MoveAction> ma = std::make_shared<MoveAction>("move_action", period);
 	std::shared_ptr<RandomAttractor> ra = std::make_shared<RandomAttractor>("random_attractor", period_randomization);
-	std::shared_ptr<ConsoleVisualizer> cv = std::make_shared<ConsoleVisualizer>("visualizer", period_visualization);
+	//std::shared_ptr<ConsoleVisualizer> cv = std::make_shared<ConsoleVisualizer>("visualizer", period_visualization);
 	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", period);
 
 	exe.add_node(ma->get_node_base_interface());
 	exe.add_node(ra->get_node_base_interface());
-	exe.add_node(cv->get_node_base_interface());
+	//exe.add_node(cv->get_node_base_interface());
 	exe.add_node(sri->get_node_base_interface());
+
+	std::list<std::string> monitored_nodes = {"move_action", "random_attractor", "robot_interface"};
+	std::shared_ptr<Modulo::Monitors::Monitor> mo = std::make_shared<Modulo::Monitors::Monitor>(monitored_nodes, "monitor", period_monitor);
+	exe.add_node(mo->get_node_base_interface());
 
 	exe.spin();
 
