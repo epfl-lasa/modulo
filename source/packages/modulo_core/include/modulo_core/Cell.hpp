@@ -35,6 +35,7 @@
 #include "modulo_core/Communication/PublisherHandler.hpp"
 #include "modulo_core/Communication/TransformBroadcasterHandler.hpp"
 #include "modulo_core/Communication/TransformListenerHandler.hpp"
+#include "modulo_core/Communication/ClientHandler.hpp"
 
 using namespace std::chrono_literals;
 
@@ -172,6 +173,14 @@ namespace Modulo
 			void add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10);
 
 			/**
+			 * @brief Template function to add a generic client to the map of handlers
+			 * @param channel unique name of the communication topic between the client and the server
+			 * @param timeout period before considering the server is not responding
+			 */
+			template <typename srvT>
+			void add_client(const std::string & channel, const std::chrono::milliseconds& timeout);
+
+			/**
 			 * @brief Add a parameter on the node parameter server
 			 * @param name the name of the parameter
 			 * @param default_value the default value of the parameter
@@ -241,6 +250,15 @@ namespace Modulo
 			 * @param transform the shared pointer to the transformation to send
 			 */
 			void send_transform(const std::shared_ptr<StateRepresentation::CartesianPose>& transform);
+
+			/**
+			 * @brief Send a request to the server and wait for its response
+			 * @param channel the channel of communication
+			 * @param request the request to send
+			 * @return the response from the server
+			 */
+			template <typename srvT>
+			decltype(auto) send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request) const;
 
 			/**
 			 * @brief Function to get a transform from the generic transform listener
@@ -452,6 +470,14 @@ namespace Modulo
 			this->add_subscription<MsgT, RecT>(channel, recipient, nb_period_to_timeout*this->period_, queue_size);
 		}
 
+		template <typename srvT>
+		void Cell::add_client(const std::string & channel, const std::chrono::milliseconds& timeout)
+		{
+			auto handler = std::make_shared<Communication::ClientHandler<srvT> >(timeout, this->mutex_);
+			handler->set_client(this->create_client<srvT>(channel));
+			this->handlers_.insert(std::make_pair(channel, handler));
+		}
+
 		template <typename T>
 		void Cell::add_parameter(const std::string & name, const T & default_value, bool configure_on_change)
 		{
@@ -474,6 +500,12 @@ namespace Modulo
 		{
 			auto parameter = this->parameters_client_->get_parameters({name});
 			return parameter[0].get_value<T>();
+		}
+
+		template <typename srvT>
+		decltype(auto) Cell::send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request) const
+		{
+  			return static_cast<Communication::ClientHandler<srvT>& >(*this->handlers_.at(channel)).send_request(request);
 		}
 	}
 }
