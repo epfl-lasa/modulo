@@ -59,8 +59,16 @@ namespace Modulo
 			 */
 			void set_dynamic(const std::shared_ptr<DynamicalSystems::DynamicalSystem<S> >& dynamic);
 
+			/**
+			 * @brief Getter of the input state as a shared_ptr
+			 * @return the state as a shared_ptr
+			 */
 			const std::shared_ptr<S>& get_input_state() const;
 
+			/**
+			 * @brief Getter of the output state as a shared_ptr
+			 * @return the state as a shared_ptr
+			 */
 			const std::shared_ptr<S>& get_output_state() const;
 
 			/**
