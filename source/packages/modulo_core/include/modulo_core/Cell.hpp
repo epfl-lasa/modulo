@@ -140,16 +140,17 @@ namespace Modulo
 			 * @brief Template function to add a generic publisher to the map of handlers
 			 * @param channel unique name of the publish channel that is used as key to the map
 			 * @param recipient the state that contain the data to be published
-			 * @param timeout the period after wich to consider that the publisher has timeout
+			 * @param period the period to wait between two publishing
+			 * @param nb_period_to_timeout the number of period (of the node) before considering that the publisher has timeout (default = 10, 0 means never timeout)
 			 */
 			template <typename MsgT, class RecT>
-			void add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size=10);
+			void add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& period, unsigned int nb_period_to_timeout=10, int queue_size=10);
 
 			/**
 			 * @brief Template function to add a generic publisher to the map of handlers
 			 * @param channel unique name of the publish channel that is used as key to the map
 			 * @param recipient the state that contain the data to be published
-			 * @param nb_period_to_timeout the number of period before considering that the publisher has timeout 
+			 * @param nb_period_to_timeout the number of period (of the node) before considering that the publisher has timeout (default = 10, 0 means never timeout)
 			 */
 			template <typename MsgT, class RecT>
 			void add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10);
@@ -215,14 +216,15 @@ namespace Modulo
 			/**
 			 * @brief Function to add a generic transform broadcaster to the map of handlers
 			 * @param recipient the state that contain the data to be published
-			 * @param timeout the period after wich to consider that the publisher has timeout
+			 * @param period the period to wait between two publishing
+			 * @param nb_period_to_timeout the number of period (of the node) before considering that the publisher has timeout (default = 10, 0 means never timeout)
 			 */
-			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, int queue_size=10);
+			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, unsigned int nb_period_to_timeout=10, int queue_size=10);
 
 			/**
 			 * @brief Function to add a generic transform broadcaster to the map of handlers
 			 * @param recipient the state that contain the data to be published
-			 * @param nb_period_to_timeout the number of period before considering that the broadcaster has timeout 
+			 * @param nb_period_to_timeout the number of period (of the node) before considering that the broadcaster has timeout 
 			 */
 			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10);
 
@@ -445,15 +447,15 @@ namespace Modulo
 		}
 
 		template <typename MsgT, class RecT>
-		void Cell::add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size)
+		void Cell::add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& period, unsigned int nb_period_to_timeout, int queue_size)
 		{
-			this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, timeout, queue_size);
+			this->add_publisher<MsgT, RecT>(channel, recipient, period, nb_period_to_timeout*this->period_, queue_size);
 		}
 
 		template <typename MsgT, class RecT>
 		void Cell::add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout, int queue_size)
 		{
-			this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, nb_period_to_timeout*this->period_, queue_size);
+			this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, nb_period_to_timeout * this->period_, queue_size);
 		}
 
 		template <typename MsgT, class RecT>
@@ -467,7 +469,7 @@ namespace Modulo
 		template <typename MsgT, class RecT>
 		void Cell::add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout, int queue_size)
 		{
-			this->add_subscription<MsgT, RecT>(channel, recipient, nb_period_to_timeout*this->period_, queue_size);
+			this->add_subscription<MsgT, RecT>(channel, recipient, nb_period_to_timeout * this->period_, queue_size);
 		}
 
 		template <typename srvT>

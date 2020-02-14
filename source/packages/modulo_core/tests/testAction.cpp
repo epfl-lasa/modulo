@@ -38,18 +38,18 @@ private:
 public:
 	explicit RandomAttractor(const std::string & node_name, const std::chrono::milliseconds & period):
 	Cell(node_name, period, true),
-	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor"))
+	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d::Random() * 5))
 	{}
 
 	void on_configure()
 	{
-		this->add_publisher<geometry_msgs::msg::PoseStamped>("/ds/attractor", target_pose);
+		this->add_publisher<geometry_msgs::msg::PoseStamped>("/ds/attractor", target_pose, std::chrono::milliseconds(100));
+		this->add_asynchronous_transform_broadcaster(target_pose, std::chrono::milliseconds(100));
 	}
 
 	void step()
 	{
 		this->target_pose->set_position(Eigen::Vector3d::Random() * 5);
-		this->send_transform(this->target_pose);
 	}
 };
 
@@ -107,7 +107,7 @@ public:
 	void on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
-		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose, std::chrono::milliseconds(0));
+		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose, 0);
 	}
 
 	void step()

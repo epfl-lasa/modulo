@@ -54,14 +54,14 @@ namespace Modulo
 			this->handlers_.insert(std::make_pair(recipient->get_name() + "_in_" + recipient->get_reference_frame() + "_broadcaster", handler));
 		}
 
-		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, int queue_size)
+		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, unsigned int nb_period_to_timeout, int queue_size)
 		{
-			this->add_asynchronous_transform_broadcaster(recipient, this->period_, timeout, queue_size);
+			this->add_asynchronous_transform_broadcaster(recipient, period, nb_period_to_timeout * this->period_, queue_size);
 		}
 
 		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, unsigned int nb_period_to_timeout, int queue_size)
 		{
-			this->add_asynchronous_transform_broadcaster(recipient, this->period_, nb_period_to_timeout*this->period_, queue_size);
+			this->add_asynchronous_transform_broadcaster(recipient, this->period_, nb_period_to_timeout * this->period_, queue_size);
 		}
 
 		void Cell::add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, int queue_size)

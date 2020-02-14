@@ -82,7 +82,7 @@ public:
 	{
 		this->robot_state->set_positions(Eigen::VectorXd::Random(6));
 		this->add_subscription<sensor_msgs::msg::JointState>("/ds/desired_velocities", this->desired_velocities);
-		this->add_publisher<sensor_msgs::msg::JointState>("/robot/joint_state", this->robot_state, std::chrono::milliseconds(0));
+		this->add_publisher<sensor_msgs::msg::JointState>("/robot/joint_state", this->robot_state, 0);
 	}
 
 	void step()
