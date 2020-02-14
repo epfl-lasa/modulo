@@ -22,6 +22,7 @@
 #include "std_msgs/msg/float64_multi_array.hpp"
 #include "std_msgs/msg/float64.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 #include "rcutils/logging_macros.h"
 #include "rclcpp/time.hpp"
 
@@ -103,6 +104,13 @@ namespace Modulo
 				 * @param msg The ROS msg to read from
 				 */
 				void read_msg(StateRepresentation::CartesianState & state, const geometry_msgs::msg::WrenchStamped & msg);
+
+				/**
+				 * @brief Convert a ROS geometry_msgs::msg::WrenchStamped to a CartesianState
+				 * @param state The CartesianState to populate
+				 * @param msg The ROS msg to read from
+				 */
+				void read_msg(StateRepresentation::CartesianState & state, const nav_msgs::msg::Odometry & msg);
 
 				/**
 				 * @brief Convert a ROS sensor_msgs::msg::JointState to a JointState
