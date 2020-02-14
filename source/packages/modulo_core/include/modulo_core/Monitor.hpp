@@ -29,7 +29,7 @@ namespace Modulo
 			  * @param node_name name of the ROS node
 			  * @param period rate used by each publisher of the class
 			  */
-			explicit Monitor(const std::list<std::string>& monitored_node, const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms = false);
+			explicit Monitor(const std::string & node_name, const std::list<std::string>& monitored_node, const std::chrono::milliseconds & period, bool intra_process_comms = false);
 
 			/**
 			 * @brief Destructor
