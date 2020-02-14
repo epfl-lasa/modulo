@@ -15,7 +15,7 @@ private:
 public:
 	explicit MoveAction(const std::string & node_name, const std::chrono::milliseconds & period) :
 	Action<StateRepresentation::CartesianState>(std::make_shared<StateRepresentation::CartesianPose>("robot_test"), std::make_shared<StateRepresentation::CartesianTwist>("robot_test"), node_name, period, true),
-	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d(-0.419, -0.0468, 0.15059), Eigen::Quaterniond(-0.04616,-0.124,0.991007,-0.018758)))
+	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d::Zero()))
 	{}
 
 	void on_configure()
@@ -38,18 +38,18 @@ private:
 public:
 	explicit RandomAttractor(const std::string & node_name, const std::chrono::milliseconds & period):
 	Cell(node_name, period, true),
-	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor"))
+	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom()))
 	{}
 
 	void on_configure()
 	{
-		this->add_publisher<geometry_msgs::msg::PoseStamped>("/ds/attractor", target_pose);
+		this->add_publisher<geometry_msgs::msg::PoseStamped>("/ds/attractor", target_pose, std::chrono::milliseconds(100));
+		this->add_asynchronous_transform_broadcaster(target_pose, std::chrono::milliseconds(100));
 	}
 
 	void step()
 	{
-		this->target_pose->set_position(Eigen::Vector3d::Random() * 5);
-		this->send_transform(this->target_pose);
+		this->target_pose->set_pose(Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom());
 	}
 };
 
@@ -107,7 +107,7 @@ public:
 	void on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
-		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose, std::chrono::milliseconds(0));
+		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose, 0);
 	}
 
 	void step()
@@ -139,7 +139,7 @@ int main(int argc, char * argv[])
 	const std::chrono::milliseconds period(100);
 	const std::chrono::milliseconds period_visualization(100);
 	const std::chrono::milliseconds period_monitor(1000);
-	const std::chrono::milliseconds period_randomization(10000);
+	const std::chrono::milliseconds period_randomization(5000);
 
 	std::shared_ptr<MoveAction> ma = std::make_shared<MoveAction>("move_action", period);
 	std::shared_ptr<RandomAttractor> ra = std::make_shared<RandomAttractor>("random_attractor", period_randomization);
@@ -151,9 +151,9 @@ int main(int argc, char * argv[])
 	//exe.add_node(cv->get_node_base_interface());
 	exe.add_node(sri->get_node_base_interface());
 
-	std::list<std::string> monitored_nodes = {"move_action", "random_attractor", "robot_interface"};
+/*	std::list<std::string> monitored_nodes = {"move_action", "random_attractor", "robot_interface"};
 	std::shared_ptr<Modulo::Monitors::Monitor> mo = std::make_shared<Modulo::Monitors::Monitor>("monitor", monitored_nodes, period_monitor);
-	exe.add_node(mo->get_node_base_interface());
+	exe.add_node(mo->get_node_base_interface());*/
 
 	exe.spin();
 

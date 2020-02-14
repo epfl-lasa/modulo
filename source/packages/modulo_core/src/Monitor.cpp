@@ -36,7 +36,7 @@ namespace Modulo
 			{
 				auto request = std::make_shared<lifecycle_msgs::srv::GetState::Request>();
 				auto response = this->send_blocking_request<lifecycle_msgs::srv::GetState>(name + "/get_state", request);
-				RCLCPP_INFO(get_logger(), "Node %s status is %s", name.c_str(), response.get()->current_state.label.c_str());
+				RCLCPP_INFO(get_logger(), "Node %s status is %s", name.c_str(), response->current_state.label.c_str());
 			}
 			RCLCPP_INFO(get_logger(), "----------------------");
 		}

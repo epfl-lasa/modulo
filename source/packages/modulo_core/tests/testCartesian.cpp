@@ -29,7 +29,7 @@ public:
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->current_pose);
 		this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
-		this->add_publisher<std_msgs::msg::Float64>("/ds/gain", this->gain, std::chrono::milliseconds(0));
+		this->add_publisher<std_msgs::msg::Float64>("/ds/gain", this->gain, 0);
 		this->motion_generator.set_attractor(*this->target_pose);
 		this->add_periodic_call(std::bind(&LinearMotionGenerator::hello_world, this), std::chrono::milliseconds(1000));
 	}
@@ -122,7 +122,7 @@ public:
 	void on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
-		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose, std::chrono::milliseconds(0));
+		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose, 0);
 		//this->add_fixed_transform_broadcaster(fixed_transform);
 	}
 
