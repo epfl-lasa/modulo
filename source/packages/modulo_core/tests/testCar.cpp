@@ -15,7 +15,7 @@ private:
 public:
 	explicit MoveAction(const std::string & node_name, const std::chrono::milliseconds & period) :
 	Action<StateRepresentation::CartesianState>(std::make_shared<StateRepresentation::CartesianPose>("car_test"), std::make_shared<StateRepresentation::CartesianTwist>("car_test"), node_name, period, true),
-	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d(0, 0, 0), Eigen::Quaterniond(0,0,1,0)))
+	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d::Zero()))
 	{}
 
 	void on_configure()
