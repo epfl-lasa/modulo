@@ -40,6 +40,13 @@ namespace Modulo
 				 */
 				void set_client(const std::shared_ptr<rclcpp::Client<srvT> > & client);
 
+				/**
+				 * @brief Static function to wait for the result of a request
+				 * @tparam WaitTimeT a period to wait in std::chrono
+				 * @param future_result the future result as a shared_future
+				 * @param time_to_wait the maximum time to wait for the result
+				 * @return the status of the waiting if the waited time is greater than the allowed time the status is timeout
+				 */
 				template<typename WaitTimeT>
 				static std::future_status wait_for_result(const std::shared_future<std::shared_ptr<typename srvT::Response> >& future_result, const WaitTimeT& time_to_wait);
 
