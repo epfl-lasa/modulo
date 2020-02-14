@@ -258,7 +258,7 @@ namespace Modulo
 			 * @return the response from the server
 			 */
 			template <typename srvT>
-			decltype(auto) send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request) const;
+			std::shared_ptr<typename srvT::Response> send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request);
 
 			/**
 			 * @brief Function to get a transform from the generic transform listener
@@ -503,9 +503,9 @@ namespace Modulo
 		}
 
 		template <typename srvT>
-		decltype(auto) Cell::send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request) const
+		std::shared_ptr<typename srvT::Response> Cell::send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request)
 		{
-  			return static_cast<Communication::ClientHandler<srvT>& >(*this->handlers_.at(channel)).send_request(request);
+  			return static_cast<Communication::ClientHandler<srvT>& >(*this->handlers_.at(channel)).send_blocking_request(request);;
 		}
 	}
 }
