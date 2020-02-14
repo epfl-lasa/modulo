@@ -22,7 +22,7 @@ public:
 	{
 		this->add_subscription<nav_msgs::msg::Odometry>("/demo/odom_demo", this->get_input_state());
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/ds/attractor", this->target_pose, std::chrono::milliseconds(0));
-		this->add_publisher<geometry_msgs::msg::Pose>("/demo/cmd_demo", this->get_output_state());
+		this->add_publisher<geometry_msgs::msg::Twist>("/demo/cmd_demo", this->get_output_state());
 
 		std::shared_ptr<DynamicalSystems::Linear<StateRepresentation::CartesianState> > move_dynamic = std::make_shared<DynamicalSystems::Linear<StateRepresentation::CartesianState> >(1);
 		move_dynamic->set_attractor(this->target_pose);
