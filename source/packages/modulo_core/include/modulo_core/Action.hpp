@@ -189,6 +189,7 @@ namespace Modulo
 			}
 			else
 			{
+				RCLCPP_WARN(get_logger(), "state is empty initializing");
 				this->output_state_->initialize();
 			}
 		}
