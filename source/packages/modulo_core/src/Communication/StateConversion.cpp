@@ -111,21 +111,14 @@ namespace Modulo
 
 				void read_msg(StateRepresentation::CartesianState & state, const nav_msgs::msg::Odometry & msg)
 				{
-					// transform messages
-					// Pose
-					Eigen::Vector3d position(msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z);
-					Eigen::Quaterniond orientation(msg.pose.pose.orientation.w, msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z);
-					// Twist
-					Eigen::Vector3d linear_velocity(msg.twist.twist.linear.x, msg.twist.twist.linear.y, msg.twist.twist.linear.z);
-					Eigen::Vector3d angular_velocity(msg.twist.twist.angular.x, msg.twist.twist.angular.y, msg.twist.twist.angular.z);
-
-					// read_msg the state
-					// Pose
-					state.set_position(position);
-					state.set_orientation(orientation);
-					// Twist
-					state.set_linear_velocity(linear_velocity);
-					state.set_angular_velocity(angular_velocity);
+					if(state.get_reference_frame() != msg.header.frame_id)
+					{
+						throw IncompatibleReferenceFramesException(state.get_name() + " expected in " + state.get_reference_frame() + ", got " + msg.header.frame_id);
+					}
+					// and odometry message contains a pose with uncertainty
+					read_msg(state, msg.pose.pose);
+					//and a twist with uncertainty
+					read_msg(state, msg.twist.twist);
 				}
 
 				void read_msg(StateRepresentation::JointState & state, const sensor_msgs::msg::JointState & msg)
