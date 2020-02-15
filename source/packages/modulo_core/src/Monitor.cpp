@@ -15,7 +15,7 @@ namespace Modulo
 
 		void Monitor::on_configure()
 		{
-			for (auto& name : this->monitored_node_) this->add_client<lifecycle_msgs::srv::GetState>(name + "/get_state", this->get_period());
+			for (auto& name : this->monitored_node_) this->add_client<lifecycle_msgs::srv::GetState>(name + "/get_state", 2*this->get_period());
 		}
 
 		void Monitor::on_activate()
