@@ -475,7 +475,7 @@ namespace Modulo
 		template <typename srvT>
 		void Cell::add_client(const std::string & channel, const std::chrono::milliseconds& timeout)
 		{
-			auto handler = std::make_shared<Communication::ClientHandler<srvT> >(timeout, this->mutex_);
+			auto handler = std::make_shared<Communication::ServiceClient::ClientHandler<srvT> >(timeout, this->mutex_);
 			handler->set_client(this->create_client<srvT>(channel));
 			this->handlers_.insert(std::make_pair(channel, handler));
 		}
@@ -507,7 +507,7 @@ namespace Modulo
 		template <typename srvT>
 		std::shared_ptr<typename srvT::Response> Cell::send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request)
 		{
-  			return static_cast<Communication::ClientHandler<srvT>& >(*this->handlers_.at(channel)).send_blocking_request(request);;
+  			return static_cast<Communication::ServiceClient::ClientHandler<srvT>& >(*this->handlers_.at(channel)).send_blocking_request(request);;
 		}
 	}
 }
