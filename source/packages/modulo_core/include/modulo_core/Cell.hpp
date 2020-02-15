@@ -31,11 +31,11 @@
 #include "rclcpp/function_traits.hpp"
 #include "rclcpp_components/register_node_macro.hpp"
 #include "rcutils/logging_macros.h"
-#include "modulo_core/Communication/SubscriptionHandler.hpp"
-#include "modulo_core/Communication/PublisherHandler.hpp"
-#include "modulo_core/Communication/TransformBroadcasterHandler.hpp"
-#include "modulo_core/Communication/TransformListenerHandler.hpp"
-#include "modulo_core/Communication/ClientHandler.hpp"
+#include "modulo_core/Communication/MessagePassing/SubscriptionHandler.hpp"
+#include "modulo_core/Communication/MessagePassing/PublisherHandler.hpp"
+#include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
+#include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
+#include "modulo_core/Communication/ServiceClient/ClientHandler.hpp"
 
 using namespace std::chrono_literals;
 
@@ -440,9 +440,9 @@ namespace Modulo
 		template <typename MsgT, class RecT>
 		void Cell::add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size)
 		{
-			auto handler = std::make_shared<Communication::PublisherHandler<RecT, MsgT> >(recipient, timeout, this->get_clock(), this->mutex_);
+			auto handler = std::make_shared<Communication::MessagePassing::PublisherHandler<RecT, MsgT> >(recipient, timeout, this->get_clock(), this->mutex_);
 			handler->set_publisher(this->create_publisher<MsgT>(channel, queue_size));
-			handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::PublisherHandler<RecT, MsgT>::publish_callback, handler)));
+			handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::MessagePassing::PublisherHandler<RecT, MsgT>::publish_callback, handler)));
 			this->handlers_.insert(std::make_pair(channel, handler));
 		}
 
@@ -461,8 +461,8 @@ namespace Modulo
 		template <typename MsgT, class RecT>
 		void Cell::add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size)
 		{
-			auto handler = std::make_shared<Communication::SubscriptionHandler<RecT, MsgT> >(recipient, timeout, this->mutex_);
-			handler->set_subscription(this->create_subscription<MsgT>(channel, queue_size, std::bind(&Communication::SubscriptionHandler<RecT, MsgT>::subscription_callback, handler, std::placeholders::_1)));
+			auto handler = std::make_shared<Communication::MessagePassing::SubscriptionHandler<RecT, MsgT> >(recipient, timeout, this->mutex_);
+			handler->set_subscription(this->create_subscription<MsgT>(channel, queue_size, std::bind(&Communication::MessagePassing::SubscriptionHandler<RecT, MsgT>::subscription_callback, handler, std::placeholders::_1)));
 			this->handlers_.insert(std::make_pair(channel, handler));
 		}
 
