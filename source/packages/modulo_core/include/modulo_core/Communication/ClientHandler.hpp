@@ -8,6 +8,7 @@
 
 #include "modulo_core/Communication/CommunicationHandler.hpp"
 #include "modulo_core/Exceptions/CommunicationTimeoutException.hpp"
+#include "modulo_core/Exceptions/ServiceNotAvailableException.hpp"
 
 namespace Modulo
 {
@@ -95,15 +96,26 @@ namespace Modulo
 			template <typename srvT>
 			std::shared_future<std::shared_ptr<typename srvT::Response> > ClientHandler<srvT>::send_request(const std::shared_ptr<typename srvT::Request>& request) const
 			{
+				if (!this->client_->wait_for_service(this->get_timeout())) 
+				{
+					throw Exceptions::ServiceNotAvailableException(this->client_->get_service_name());
+				}
 				return this->client_->async_send_request(request);
 			}
 
 			template <typename srvT>
 			std::shared_ptr<typename srvT::Response> ClientHandler<srvT>::send_blocking_request(const std::shared_ptr<typename srvT::Request>& request) const
 			{
+				if (!this->client_->wait_for_service(this->get_timeout())) 
+				{
+					throw Exceptions::CommunicationTimeoutException(this->client_->get_service_name());
+				}
 				auto response = this->client_->async_send_request(request);
 				std::future_status status = ClientHandler::wait_for_result(response, this->get_timeout());
-				if (status != std::future_status::ready) throw Exceptions::CommunicationTimeoutException("Communication with the server timed out");
+				if (status != std::future_status::ready)
+				{
+					throw Exceptions::CommunicationTimeoutException(this->client_->get_service_name());
+				}
 				return response.get();
 			}
 		}

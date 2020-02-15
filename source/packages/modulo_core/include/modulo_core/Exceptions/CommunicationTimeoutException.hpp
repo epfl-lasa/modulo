@@ -16,7 +16,8 @@ namespace Modulo
 		class CommunicationTimeoutException: public std::runtime_error
 		{
 		public:
-			explicit CommunicationTimeoutException(const std::string& msg) : runtime_error(msg)
+			explicit CommunicationTimeoutException(const std::string& service_name):
+			runtime_error("Communication with service " + service_name + " timed out")
 			{};
 		};
 	}

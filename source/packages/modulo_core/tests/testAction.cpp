@@ -151,9 +151,9 @@ int main(int argc, char * argv[])
 	//exe.add_node(cv->get_node_base_interface());
 	exe.add_node(sri->get_node_base_interface());
 
-/*	std::list<std::string> monitored_nodes = {"move_action", "random_attractor", "robot_interface"};
+	std::list<std::string> monitored_nodes = {"move_action", "random_attractor", "robot_interface"};
 	std::shared_ptr<Modulo::Monitors::Monitor> mo = std::make_shared<Modulo::Monitors::Monitor>("monitor", monitored_nodes, period_monitor);
-	exe.add_node(mo->get_node_base_interface());*/
+	exe.add_node(mo->get_node_base_interface());
 
 	exe.spin();
 
