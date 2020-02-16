@@ -46,6 +46,12 @@ namespace Modulo
 			this->handlers_.insert(std::make_pair("tf_listener", handler));
 		}
 
+		void Cell::add_lifececycle_change_state_client(const std::chrono::milliseconds& timeout)
+		{
+			this->change_state_client_ = std::make_shared<Communication::ServiceClient::LifecycleChangeStateClient>(timeout, this->mutex_);
+			this->change_state_client_->set_client(this->create_client<lifecycle_msgs::srv::ChangeState>(std::string(this->get_name()) + "/change_state"));
+		}
+
 		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size)
 		{
 			auto handler = std::make_shared<Communication::MessagePassing::TransformBroadcasterHandler>(recipient, timeout, this->get_clock(), this->mutex_);
@@ -104,9 +110,16 @@ namespace Modulo
 			// add default transform broadcaster and transform listener
 			this->add_transform_broadcaster(this->period_, 10*this->period_);
 			this->add_transform_listener(10*this->period_);
+			// add default client to the lifecycle change state service
+			this->add_lifececycle_change_state_client(10*this->period_);
 			// call the proxy on_configure function
 			this->on_configure();
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+		}
+
+		void Cell::configure()
+		{
+			this->change_state_client_->configure();
 		}
 
 		void Cell::on_configure()
@@ -129,6 +142,11 @@ namespace Modulo
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
+		void Cell::activate()
+		{
+			this->change_state_client_->activate();
+		}
+
 		void Cell::on_activate()
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate of the Cell class called");
@@ -149,6 +167,11 @@ namespace Modulo
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
+		void Cell::deactivate()
+		{
+			this->change_state_client_->deactivate();
+		}
+
 		void Cell::on_deactivate()
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_deactivate of the Cell class called");
@@ -165,6 +188,11 @@ namespace Modulo
 			// call the proxy on_cleanup function
 			this->on_cleanup();
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+		}
+
+		void Cell::cleanup()
+		{
+			this->change_state_client_->cleanup();
 		}
 
 		void Cell::on_cleanup()

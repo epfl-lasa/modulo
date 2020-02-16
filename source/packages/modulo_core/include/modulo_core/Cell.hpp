@@ -36,6 +36,7 @@
 #include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
 #include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
 #include "modulo_core/Communication/ServiceClient/ClientHandler.hpp"
+#include "modulo_core/Communication/ServiceClient/LifecycleChangeStateClient.hpp"
 
 using namespace std::chrono_literals;
 
@@ -56,6 +57,9 @@ namespace Modulo
 			std::list<std::thread> active_threads_; ///< list of active threads for periodic calling
 			std::map<std::string, bool> configure_on_parameters_change_; ///< map of bools to store the configure_on_change value of each parameters
 
+
+			std::shared_ptr<Communication::ServiceClient::LifecycleChangeStateClient> change_state_client_;
+
 			/**
 			 * @brief Function to clear all publishers, subscriptions and services
 			 */
@@ -73,6 +77,12 @@ namespace Modulo
 			 * @param timeout the period after wich to consider that the handler has timeout
 			 */
 			void add_transform_listener(const std::chrono::milliseconds& timeout);
+
+			/**
+			 * @brief Function to add a direct client to the lifecycle change state service of the node
+			 * @brief timeout the period after wich to consider that the client has timeout
+			 */
+			void add_lifececycle_change_state_client(const std::chrono::milliseconds& timeout);
 
 		protected:
 			/**
@@ -263,12 +273,26 @@ namespace Modulo
 			std::shared_ptr<typename srvT::Response> send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request);
 
 			/**
+			 * @brief Send a request to the server without waiting for its response
+			 * @param channel the channel of communication
+			 * @param request the request to send
+			 * @return the response from the server
+			 */
+			template <typename srvT>
+			std::shared_future<std::shared_ptr<typename srvT::Response> > send_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request);
+
+			/**
 			 * @brief Function to get a transform from the generic transform listener
 			 * @param frame_name name of the frame to look for
 			 * @param the frame in wich to express the transform
 			 * @return the CartesianPose representing the tranformation
 			 */
 			const StateRepresentation::CartesianPose lookup_transform(const std::string& frame_name, const std::string& reference_frame="world");
+
+			/**
+			 * @brief Call the lifecycle service to configure the node
+			 */
+			void configure();
 
 			/**
 			 * @brief Transition callback for state configuring
@@ -292,6 +316,11 @@ namespace Modulo
 			virtual void on_configure();
 
 			/**
+			 * @brief Call the lifecycle service to activate the node
+			 */
+			void activate();
+
+			/**
 			 * @brief Transition callback for state activating
 			 *
 			 * on_activate callback is being called when the lifecycle node
@@ -313,6 +342,11 @@ namespace Modulo
 			virtual void on_activate();
 
 			/**
+			 * @brief Call the lifecycle service to deactivate the node
+			 */
+			void deactivate();
+
+			/**
 			 * @brief Transition callback for state deactivating
 			 *
 			 * on_deactivate callback is being called when the lifecycle node
@@ -332,6 +366,11 @@ namespace Modulo
 			 * adapted to the derived class.
 			 */
 			virtual void on_deactivate();
+
+			/**
+			 * @brief Call the lifecycle service to cleanup the node
+			 */
+			void cleanup();
 
 			/**
 			 * @brief Transition callback for state cleaningup
@@ -507,7 +546,13 @@ namespace Modulo
 		template <typename srvT>
 		std::shared_ptr<typename srvT::Response> Cell::send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request)
 		{
-  			return static_cast<Communication::ServiceClient::ClientHandler<srvT>& >(*this->handlers_.at(channel)).send_blocking_request(request);;
+  			return static_cast<Communication::ServiceClient::ClientHandler<srvT>& >(*this->handlers_.at(channel)).send_blocking_request(request);
+		}
+
+		template <typename srvT>
+		std::shared_future<std::shared_ptr<typename srvT::Response> > Cell::send_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request)
+		{
+			return static_cast<Communication::ServiceClient::ClientHandler<srvT>& >(*this->handlers_.at(channel)).send_request(request);
 		}
 	}
 }
