@@ -1,4 +1,5 @@
 #include "modulo_core/Monitor.hpp"
+#include "modulo_core/Exceptions/CommunicationTimeoutException.hpp"
 
 namespace Modulo
 {
@@ -15,7 +16,7 @@ namespace Modulo
 
 		void Monitor::on_configure()
 		{
-			for (auto& name : this->monitored_node_) this->add_client<lifecycle_msgs::srv::GetState>(name + "/get_state", 10*this->get_period());
+			for (auto& name : this->monitored_node_) this->add_client<lifecycle_msgs::srv::GetState>(name + "/get_state", std::chrono::milliseconds(100));
 		}
 
 		void Monitor::on_activate()
@@ -34,11 +35,18 @@ namespace Modulo
 		{
 			for (auto& name : this->monitored_node_)
 			{
-				auto request = std::make_shared<lifecycle_msgs::srv::GetState::Request>();
-				auto response = this->send_blocking_request<lifecycle_msgs::srv::GetState>(name + "/get_state", request);
-				RCLCPP_INFO(get_logger(), "Node %s status is %s", name.c_str(), response->current_state.label.c_str());
+				try
+				{
+					auto request = std::make_shared<lifecycle_msgs::srv::GetState::Request>();
+					auto response = this->send_blocking_request<lifecycle_msgs::srv::GetState>(name + "/get_state", request);
+					RCLCPP_INFO(get_logger(), "Node %s status is %s", name.c_str(), response->current_state.label.c_str());
+				}
+				catch (Exceptions::CommunicationTimeoutException& e)
+				{
+					RCLCPP_ERROR(get_logger(), e.what());
+				}
 			}
-			RCLCPP_INFO(get_logger(), "----------------------");
+			RCLCPP_INFO(get_logger(), "----------------------"); 
 		}
 	}
 }
