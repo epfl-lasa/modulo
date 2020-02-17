@@ -14,7 +14,7 @@ private:
 
 public:
 	explicit MoveAction(const std::string & node_name, const std::chrono::milliseconds & period) :
-	Action<StateRepresentation::CartesianState>(std::make_shared<StateRepresentation::CartesianPose>("robot_test"), std::make_shared<StateRepresentation::CartesianTwist>("robot_test"), node_name, period, true),
+	Action<StateRepresentation::CartesianState>(std::make_shared<StateRepresentation::CartesianPose>("robot_test"), std::make_shared<StateRepresentation::CartesianTwist>("robot_test"), node_name, period, false),
 	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d::Zero()))
 	{}
 
@@ -34,11 +34,13 @@ class RandomAttractor : public Modulo::Core::Cell
 {
 private:
 	std::shared_ptr<StateRepresentation::CartesianPose> target_pose;
+	unsigned int counter;
 
 public:
 	explicit RandomAttractor(const std::string & node_name, const std::chrono::milliseconds & period):
-	Cell(node_name, period, true),
-	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom()))
+	Cell(node_name, period, false),
+	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom())),
+	counter(0)
 	{}
 
 	void on_configure()
@@ -50,6 +52,15 @@ public:
 	void step()
 	{
 		this->target_pose->set_pose(Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom());
+		if (counter == 5)
+		{
+			counter = 0;
+			this->deactivate();
+		}
+		else
+		{
+			++counter;
+		}
 	}
 };
 
@@ -62,7 +73,7 @@ private:
 
 public:
 	explicit ConsoleVisualizer(const std::string & node_name, const std::chrono::milliseconds & period) :
-	Visualizer(node_name, period, true),
+	Visualizer(node_name, period, false),
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test"))
 	{}
@@ -98,7 +109,7 @@ private:
 
 public:
 	explicit SimulatedRobotInterface(const std::string & node_name, const std::chrono::milliseconds & period):
-	Cell(node_name, period, true),
+	Cell(node_name, period, false),
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom())),
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
 	dt(period)
@@ -135,7 +146,7 @@ int main(int argc, char * argv[])
 
 	rclcpp::init(argc, argv);
 
-	rclcpp::executors::SingleThreadedExecutor exe;
+	rclcpp::executors::MultiThreadedExecutor exe;
 	const std::chrono::milliseconds period(100);
 	const std::chrono::milliseconds period_visualization(100);
 	const std::chrono::milliseconds period_monitor(1000);
@@ -143,17 +154,15 @@ int main(int argc, char * argv[])
 
 	std::shared_ptr<MoveAction> ma = std::make_shared<MoveAction>("move_action", period);
 	std::shared_ptr<RandomAttractor> ra = std::make_shared<RandomAttractor>("random_attractor", period_randomization);
-	//std::shared_ptr<ConsoleVisualizer> cv = std::make_shared<ConsoleVisualizer>("visualizer", period_visualization);
 	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", period);
 
 	exe.add_node(ma->get_node_base_interface());
 	exe.add_node(ra->get_node_base_interface());
-	//exe.add_node(cv->get_node_base_interface());
 	exe.add_node(sri->get_node_base_interface());
 
-/*	std::list<std::string> monitored_nodes = {"move_action", "random_attractor", "robot_interface"};
-	std::shared_ptr<Modulo::Monitors::Monitor> mo = std::make_shared<Modulo::Monitors::Monitor>("monitor", monitored_nodes, period_monitor);
-	exe.add_node(mo->get_node_base_interface());*/
+	std::list<std::string> monitored_nodes = {"move_action", "random_attractor", "robot_interface"};
+	std::shared_ptr<Modulo::Monitors::Monitor> mo = std::make_shared<Modulo::Monitors::Monitor>("monitor", monitored_nodes, period_monitor, false);
+	exe.add_node(mo->get_node_base_interface());
 
 	exe.spin();
 

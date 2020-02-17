@@ -31,11 +31,12 @@
 #include "rclcpp/function_traits.hpp"
 #include "rclcpp_components/register_node_macro.hpp"
 #include "rcutils/logging_macros.h"
-#include "modulo_core/Communication/SubscriptionHandler.hpp"
-#include "modulo_core/Communication/PublisherHandler.hpp"
-#include "modulo_core/Communication/TransformBroadcasterHandler.hpp"
-#include "modulo_core/Communication/TransformListenerHandler.hpp"
-#include "modulo_core/Communication/ClientHandler.hpp"
+#include "modulo_core/Communication/MessagePassing/SubscriptionHandler.hpp"
+#include "modulo_core/Communication/MessagePassing/PublisherHandler.hpp"
+#include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
+#include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
+#include "modulo_core/Communication/ServiceClient/ClientHandler.hpp"
+#include "modulo_core/Communication/ServiceClient/LifecycleChangeStateClient.hpp"
 
 using namespace std::chrono_literals;
 
@@ -56,6 +57,9 @@ namespace Modulo
 			std::list<std::thread> active_threads_; ///< list of active threads for periodic calling
 			std::map<std::string, bool> configure_on_parameters_change_; ///< map of bools to store the configure_on_change value of each parameters
 
+
+			std::shared_ptr<Communication::ServiceClient::LifecycleChangeStateClient> change_state_client_;
+
 			/**
 			 * @brief Function to clear all publishers, subscriptions and services
 			 */
@@ -73,6 +77,12 @@ namespace Modulo
 			 * @param timeout the period after wich to consider that the handler has timeout
 			 */
 			void add_transform_listener(const std::chrono::milliseconds& timeout);
+
+			/**
+			 * @brief Function to add a direct client to the lifecycle change state service of the node
+			 * @brief timeout the period after wich to consider that the client has timeout
+			 */
+			void add_lifececycle_change_state_client(const std::chrono::milliseconds& timeout);
 
 		protected:
 			/**
@@ -263,12 +273,26 @@ namespace Modulo
 			std::shared_ptr<typename srvT::Response> send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request);
 
 			/**
+			 * @brief Send a request to the server without waiting for its response
+			 * @param channel the channel of communication
+			 * @param request the request to send
+			 * @return the response from the server
+			 */
+			template <typename srvT>
+			std::shared_future<std::shared_ptr<typename srvT::Response> > send_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request);
+
+			/**
 			 * @brief Function to get a transform from the generic transform listener
 			 * @param frame_name name of the frame to look for
 			 * @param the frame in wich to express the transform
 			 * @return the CartesianPose representing the tranformation
 			 */
 			const StateRepresentation::CartesianPose lookup_transform(const std::string& frame_name, const std::string& reference_frame="world");
+
+			/**
+			 * @brief Call the lifecycle service to configure the node
+			 */
+			void configure();
 
 			/**
 			 * @brief Transition callback for state configuring
@@ -292,6 +316,11 @@ namespace Modulo
 			virtual void on_configure();
 
 			/**
+			 * @brief Call the lifecycle service to activate the node
+			 */
+			void activate();
+
+			/**
 			 * @brief Transition callback for state activating
 			 *
 			 * on_activate callback is being called when the lifecycle node
@@ -313,6 +342,11 @@ namespace Modulo
 			virtual void on_activate();
 
 			/**
+			 * @brief Call the lifecycle service to deactivate the node
+			 */
+			void deactivate();
+
+			/**
 			 * @brief Transition callback for state deactivating
 			 *
 			 * on_deactivate callback is being called when the lifecycle node
@@ -332,6 +366,11 @@ namespace Modulo
 			 * adapted to the derived class.
 			 */
 			virtual void on_deactivate();
+
+			/**
+			 * @brief Call the lifecycle service to cleanup the node
+			 */
+			void cleanup();
 
 			/**
 			 * @brief Transition callback for state cleaningup
@@ -440,9 +479,9 @@ namespace Modulo
 		template <typename MsgT, class RecT>
 		void Cell::add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size)
 		{
-			auto handler = std::make_shared<Communication::PublisherHandler<RecT, MsgT> >(recipient, timeout, this->get_clock(), this->mutex_);
+			auto handler = std::make_shared<Communication::MessagePassing::PublisherHandler<RecT, MsgT> >(recipient, timeout, this->get_clock(), this->mutex_);
 			handler->set_publisher(this->create_publisher<MsgT>(channel, queue_size));
-			handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::PublisherHandler<RecT, MsgT>::publish_callback, handler)));
+			handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::MessagePassing::PublisherHandler<RecT, MsgT>::publish_callback, handler)));
 			this->handlers_.insert(std::make_pair(channel, handler));
 		}
 
@@ -461,8 +500,8 @@ namespace Modulo
 		template <typename MsgT, class RecT>
 		void Cell::add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size)
 		{
-			auto handler = std::make_shared<Communication::SubscriptionHandler<RecT, MsgT> >(recipient, timeout, this->mutex_);
-			handler->set_subscription(this->create_subscription<MsgT>(channel, queue_size, std::bind(&Communication::SubscriptionHandler<RecT, MsgT>::subscription_callback, handler, std::placeholders::_1)));
+			auto handler = std::make_shared<Communication::MessagePassing::SubscriptionHandler<RecT, MsgT> >(recipient, timeout, this->mutex_);
+			handler->set_subscription(this->create_subscription<MsgT>(channel, queue_size, std::bind(&Communication::MessagePassing::SubscriptionHandler<RecT, MsgT>::subscription_callback, handler, std::placeholders::_1)));
 			this->handlers_.insert(std::make_pair(channel, handler));
 		}
 
@@ -475,7 +514,7 @@ namespace Modulo
 		template <typename srvT>
 		void Cell::add_client(const std::string & channel, const std::chrono::milliseconds& timeout)
 		{
-			auto handler = std::make_shared<Communication::ClientHandler<srvT> >(timeout, this->mutex_);
+			auto handler = std::make_shared<Communication::ServiceClient::ClientHandler<srvT> >(timeout, this->mutex_);
 			handler->set_client(this->create_client<srvT>(channel));
 			this->handlers_.insert(std::make_pair(channel, handler));
 		}
@@ -507,7 +546,13 @@ namespace Modulo
 		template <typename srvT>
 		std::shared_ptr<typename srvT::Response> Cell::send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request)
 		{
-  			return static_cast<Communication::ClientHandler<srvT>& >(*this->handlers_.at(channel)).send_blocking_request(request);;
+  			return static_cast<Communication::ServiceClient::ClientHandler<srvT>& >(*this->handlers_.at(channel)).send_blocking_request(request);
+		}
+
+		template <typename srvT>
+		std::shared_future<std::shared_ptr<typename srvT::Response> > Cell::send_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request)
+		{
+			return static_cast<Communication::ServiceClient::ClientHandler<srvT>& >(*this->handlers_.at(channel)).send_request(request);
 		}
 	}
 }

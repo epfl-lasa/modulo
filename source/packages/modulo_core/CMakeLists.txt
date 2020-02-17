@@ -21,11 +21,12 @@ find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
 set(CORE_SOURCES
-    src/Communication/StateConversion.cpp
     src/Communication/CommunicationHandler.cpp
-    src/Communication/MessagePassingCommunication.cpp
-    src/Communication/TransformBroadcasterHandler.cpp
-    src/Communication/TransformListenerHandler.cpp
+    src/Communication/MessagePassing/StateConversion.cpp
+    src/Communication/MessagePassing/MessagePassingHandler.cpp
+    src/Communication/MessagePassing/TransformBroadcasterHandler.cpp
+    src/Communication/MessagePassing/TransformListenerHandler.cpp
+    src/Communication/ServiceClient/LifecycleChangeStateClient.cpp
     src/Cell.cpp
     src/MotionGenerator.cpp
     src/Controller.cpp
