@@ -25,8 +25,8 @@ namespace Modulo
 			{
 				PUBLISHER,
 				SUBSCRIPTION,
+				TRANSFORMLISTENER,
 				CLIENT,
-				TRANSFORMLISTENER
 			};
 
 			/**

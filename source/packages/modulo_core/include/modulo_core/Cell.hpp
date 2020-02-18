@@ -50,14 +50,12 @@ namespace Modulo
 			bool configured_; ///< boolean that informs that the node has been configured, i.e passed by the on_configure state
 			bool active_; ///< boolean that informs that the node has been activated, i.e passed by the on_activate state
 			bool shutdown_; ///< boolean that informs that the node has been shutdown, i.e passed by the on_shutdown state
-			std::thread run_thread; ///< thread object to start the main loop, i.e. the run function, in parallel of the rest
+			std::thread run_thread_; ///< thread object to start the main loop, i.e. the run function, in parallel of the rest
 			std::shared_ptr<std::mutex> mutex_; ///< a mutex to use when modifying messages between functions
 			std::chrono::milliseconds period_;  ///< rate of the publisher functions in milliseconds
 			std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > handlers_; ///< maps for storing publishers, subscriptions and tf 
 			std::list<std::thread> active_threads_; ///< list of active threads for periodic calling
 			std::map<std::string, bool> configure_on_parameters_change_; ///< map of bools to store the configure_on_change value of each parameters
-
-
 			std::shared_ptr<Communication::ServiceClient::LifecycleChangeStateClient> change_state_client_;
 
 			/**

@@ -29,7 +29,7 @@ namespace Modulo
 				t.join();
 			}
 			this->active_threads_.clear();
-			this->run_thread.join();
+			this->run_thread_.join();
 		}
 
 		void Cell::add_transform_broadcaster(const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size)
@@ -103,7 +103,7 @@ namespace Modulo
 			std::lock_guard<std::mutex> lock(*this->mutex_);
 			// add the run thread
 			std::function<void(void)> run_fnc = std::bind(&Cell::run, this);
-			this->run_thread = std::thread(run_fnc);
+			this->run_thread_ = std::thread(run_fnc);
 			// start the parameters
 			this->active_ = false;
 			this->configured_ = true;
