@@ -1,16 +1,6 @@
 /**
- * @class Cell
- * @brief Abstract class to define a Call
  * @author Baptiste Busch
  * @date 2019/02/14
- *
- * A Cell is the base class of the whole architecture.
- * It handles all the basic ROS communications such as
- * definitions of subrscriptions, publishers and service
- * calls. It can then be derived into a MotionGenerator,
- * a Controller, a Sensor, or a RobotInterface. It is
- * derived from a lifecyle node which allows to use
- * ROS2 state machine functionnalities for nodes.
  */
 
 #ifndef MODULO_CELL_H_
@@ -22,15 +12,14 @@
 #include <string>
 #include <thread>
 #include <list>
-
-#include "lifecycle_msgs/msg/transition.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp/publisher.hpp"
-#include "rclcpp_lifecycle/lifecycle_node.hpp"
-#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
-#include "rclcpp/function_traits.hpp"
-#include "rclcpp_components/register_node_macro.hpp"
-#include "rcutils/logging_macros.h"
+#include <lifecycle_msgs/msg/transition.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp_lifecycle/lifecycle_node.hpp>
+#include <rclcpp_lifecycle/lifecycle_publisher.hpp>
+#include <rclcpp/function_traits.hpp>
+#include <rclcpp_components/register_node_macro.hpp>
+#include <rcutils/logging_macros.h>
 #include "modulo_core/Communication/MessagePassing/SubscriptionHandler.hpp"
 #include "modulo_core/Communication/MessagePassing/PublisherHandler.hpp"
 #include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
@@ -44,6 +33,18 @@ namespace Modulo
 {
 	namespace Core
 	{
+		/**
+		 * @class Cell
+ 		 * @brief Abstract class to define a Call
+		 *
+		 * A Cell is the base class of the whole architecture.
+		 * It handles all the basic ROS communications such as
+		 * definitions of subrscriptions, publishers and service
+		 * calls. It can then be derived into a MotionGenerator,
+		 * a Controller, a Sensor, or a RobotInterface. It is
+		 * derived from a lifecyle node which allows to use
+		 * ROS2 state machine functionnalities for nodes.
+		 */
 		class Cell : public rclcpp_lifecycle::LifecycleNode
 		{
 		private:
@@ -57,9 +58,7 @@ namespace Modulo
 			std::list<std::thread> active_threads_; ///< list of active threads for periodic calling
 			std::map<std::string, bool> configure_on_parameters_change_; ///< map of bools to store the configure_on_change value of each parameters
 			std::shared_ptr<rclcpp::SyncParametersClient> parameters_client_; ///< shared pointer to the parameter client that handles request to the parameter server
-
-			std::shared_ptr<Communication::ServiceClient::LifecycleChangeStateClient> change_state_client_;
-
+			std::shared_ptr<Communication::ServiceClient::LifecycleChangeStateClient> change_state_client_; ///< pointer to the lifecycle client to send lifecycle state operations from the cell
 
 			/**
 			 * @brief Function to clear all publishers, subscriptions and services
