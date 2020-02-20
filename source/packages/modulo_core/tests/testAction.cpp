@@ -147,10 +147,10 @@ int main(int argc, char * argv[])
 	rclcpp::init(argc, argv);
 
 	rclcpp::executors::MultiThreadedExecutor exe;
-	const std::chrono::milliseconds period(100);
-	const std::chrono::milliseconds period_visualization(100);
-	const std::chrono::milliseconds period_monitor(1000);
-	const std::chrono::milliseconds period_randomization(5000);
+	auto period = 100ms;
+	auto period_visualization = 100ms;
+	auto period_monitor = 1s;
+	auto period_randomization = 5s;
 
 	std::shared_ptr<MoveAction> ma = std::make_shared<MoveAction>("move_action", period);
 	std::shared_ptr<RandomAttractor> ra = std::make_shared<RandomAttractor>("random_attractor", period_randomization);

@@ -7,15 +7,6 @@ namespace Modulo
 {
 	namespace Core
 	{
-		Cell::Cell(const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms) :
-		rclcpp_lifecycle::LifecycleNode(node_name, rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),
-		configured_(false),
-		active_(false),
-		shutdown_(false),
-		mutex_(std::make_shared<std::mutex>()),
-		period_(period)
-		{}
-
 		Cell::~Cell()
 		{
 			this->on_shutdown();
@@ -32,52 +23,9 @@ namespace Modulo
 			this->run_thread_.join();
 		}
 
-		void Cell::add_transform_broadcaster(const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size)
-		{
-			auto handler = std::make_shared<Communication::MessagePassing::TransformBroadcasterHandler>(timeout, this->get_clock(), this->mutex_);
-			handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
-			handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::MessagePassing::TransformBroadcasterHandler::publish_callback, handler)));
-			this->handlers_.insert(std::make_pair("tf_broadcaster", handler));
-		}
-
-		void Cell::add_transform_listener(const std::chrono::milliseconds& timeout)
-		{
-			auto handler = std::make_shared<Communication::MessagePassing::TransformListenerHandler>(timeout, this->get_clock(), this->mutex_);
-			this->handlers_.insert(std::make_pair("tf_listener", handler));
-		}
-
-		void Cell::add_lifececycle_change_state_client(const std::chrono::milliseconds& timeout)
-		{
-			this->change_state_client_ = std::make_shared<Communication::ServiceClient::LifecycleChangeStateClient>(timeout, this->mutex_);
-			this->change_state_client_->set_client(this->create_client<lifecycle_msgs::srv::ChangeState>(std::string(this->get_name()) + "/change_state"));
-		}
-
-		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size)
-		{
-			auto handler = std::make_shared<Communication::MessagePassing::TransformBroadcasterHandler>(recipient, timeout, this->get_clock(), this->mutex_);
-			handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
-			handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::MessagePassing::TransformBroadcasterHandler::publish_callback, handler)));
-			this->handlers_.insert(std::make_pair(recipient->get_name() + "_in_" + recipient->get_reference_frame() + "_broadcaster", handler));
-		}
-
-		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, unsigned int nb_period_to_timeout, int queue_size)
-		{
-			this->add_asynchronous_transform_broadcaster(recipient, period, nb_period_to_timeout * this->period_, queue_size);
-		}
-
 		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, unsigned int nb_period_to_timeout, int queue_size)
 		{
 			this->add_asynchronous_transform_broadcaster(recipient, this->period_, nb_period_to_timeout * this->period_, queue_size);
-		}
-
-		void Cell::add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, int queue_size)
-		{
-			this->add_asynchronous_transform_broadcaster(recipient, period, std::chrono::milliseconds(0), queue_size);
-		}
-
-		void Cell::add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, int queue_size)
-		{
-			this->add_asynchronous_transform_broadcaster(recipient, this->period_, std::chrono::milliseconds(0), queue_size);
 		}
 
 		void Cell::send_transform(const StateRepresentation::CartesianPose& transform)
@@ -268,33 +216,6 @@ namespace Modulo
 
 		void Cell::step()
 		{}
-
-		void Cell::run_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::milliseconds& period)
-		{
-			while(this->configured_)
-			{
-				auto start = std::chrono::steady_clock::now();
-				std::unique_lock<std::mutex> lck(*this->mutex_);
-				if(this->active_)
-				{
-					callback_function();
-				}
-				lck.unlock();
-				auto end = std::chrono::steady_clock::now();
-		    	auto elapsed = end - start;
-		    	auto timeToWait = period - elapsed;
-		    	if(timeToWait > std::chrono::milliseconds::zero())
-		    	{
-		        	std::this_thread::sleep_for(timeToWait);
-		    	}
-			}
-		}
-
-		void Cell::add_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::milliseconds& period)
-		{
-			std::function<void(const std::function<void(void)>&, const std::chrono::milliseconds&)> fnc = std::bind(&Cell::run_periodic_call, this, callback_function, period);
-			this->active_threads_.push_back(std::thread(fnc, callback_function, period));
-		}
 	}
 }
 
