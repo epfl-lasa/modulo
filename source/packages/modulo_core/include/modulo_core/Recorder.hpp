@@ -30,7 +30,8 @@ namespace Modulo
 			 * @param node_name name of the ROS node
 			 * @param period rate used by each publisher of the class
 			 */
-			explicit Recorder(const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms = false);
+			template <typename DurationT>
+			explicit Recorder(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms=false);
 
 			/**
 			 * @brief Destructor
@@ -120,6 +121,11 @@ namespace Modulo
 			 */
 			virtual bool record(const StateRepresentation::JointState& state) const;
 		};
+
+		template <typename DurationT>
+		Recorder::Recorder(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms): 
+		Cell(node_name, period, intra_process_comms)
+		{}
 
 		inline const auto& Recorder::get_start_time() const
 		{

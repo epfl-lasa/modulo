@@ -21,13 +21,13 @@ namespace Modulo
 				/**
 				 * @class ClientHandler
 				 * @brief Class to define a client
-				 * @tparam srvT the type of service
+				 * @tparam SrvT the type of service
 				 */
-				template <typename srvT>
+				template <typename SrvT>
 				class ClientHandler : public CommunicationHandler
 				{
 				private:
-					std::shared_ptr<rclcpp::Client<srvT> > client_; ///< reference to the ROS2 client
+					std::shared_ptr<rclcpp::Client<SrvT> > client_; ///< reference to the ROS2 client
 
 				public:
 					/**
@@ -35,13 +35,14 @@ namespace Modulo
 					 * @param timeout period before timeout
 					 * @param mutex reference to the Cell mutex
 					 */
-					explicit ClientHandler(const std::chrono::milliseconds& timeout, const std::shared_ptr<std::mutex>& mutex);
+					template <typename DurationT>
+					explicit ClientHandler(const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<std::mutex>& mutex);
 
 					/**
 					 * @brief Setter of the publisher reference
 					 * @param publisher the reference to the publisher
 					 */
-					void set_client(const std::shared_ptr<rclcpp::Client<srvT> > & client);
+					void set_client(const std::shared_ptr<rclcpp::Client<SrvT> > & client);
 
 					/**
 					 * @brief Static function to wait for the result of a request
@@ -50,31 +51,31 @@ namespace Modulo
 					 * @param time_to_wait the maximum time to wait for the result
 					 * @return the status of the waiting if the waited time is greater than the allowed time the status is timeout
 					 */
-					template<typename WaitTimeT>
-					static std::future_status wait_for_result(const std::shared_future<std::shared_ptr<typename srvT::Response> >& future_result, const WaitTimeT& time_to_wait);
+					template <typename DurationT>
+					static std::future_status wait_for_result(const std::shared_future<std::shared_ptr<typename SrvT::Response> >& future_result, const std::chrono::duration<int64_t, DurationT>& time_to_wait);
 
 					/**
 					 * @brief Send a request to the server asymchronously withtout waiting for the answer
 					 * @param request the request
 					 * @return the response as a future pointer
 					 */
-					std::shared_future<std::shared_ptr<typename srvT::Response> > send_request(const std::shared_ptr<typename srvT::Request>& request) const;
+					std::shared_future<std::shared_ptr<typename SrvT::Response> > send_request(const std::shared_ptr<typename SrvT::Request>& request) const;
 
 					/**
 					 * @brief Send a request to the server asymchronously and wait for the answer
 					 * @param request the request
 					 * @return the response as a shared pointer
 					 */
-					std::shared_ptr<typename srvT::Response> send_blocking_request(const std::shared_ptr<typename srvT::Request>& request) const;
+					std::shared_ptr<typename SrvT::Response> send_blocking_request(const std::shared_ptr<typename SrvT::Request>& request) const;
 				};
 
-				template <typename srvT>
-				ClientHandler<srvT>::ClientHandler(const std::chrono::milliseconds& timeout, const std::shared_ptr<std::mutex>& mutex):
+				template <typename SrvT> template <typename DurationT>
+				ClientHandler<SrvT>::ClientHandler(const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<std::mutex>& mutex):
 				CommunicationHandler(CommunicationType::CLIENT, timeout, mutex)
 				{}
 
-				template <typename srvT>
-				inline void ClientHandler<srvT>::set_client(const std::shared_ptr<rclcpp::Client<srvT> > & client)
+				template <typename SrvT>
+				inline void ClientHandler<SrvT>::set_client(const std::shared_ptr<rclcpp::Client<SrvT> > & client)
 				{
 					this->client_ = std::move(client);
 					if (!this->client_->wait_for_service(this->get_timeout())) 
@@ -83,8 +84,8 @@ namespace Modulo
 					}
 				}
 
-				template<typename srvT> template<typename WaitTimeT>
-				std::future_status ClientHandler<srvT>::wait_for_result(const std::shared_future<std::shared_ptr<typename srvT::Response> >& future_result, const WaitTimeT& time_to_wait)
+				template<typename SrvT> template <typename DurationT>
+				std::future_status ClientHandler<SrvT>::wait_for_result(const std::shared_future<std::shared_ptr<typename SrvT::Response> >& future_result, const std::chrono::duration<int64_t, DurationT>& time_to_wait)
 				{
 					auto end = std::chrono::steady_clock::now() + time_to_wait;
 					std::chrono::milliseconds wait_period(1);
@@ -99,8 +100,8 @@ namespace Modulo
 					return status;
 				}
 
-				template <typename srvT>
-				std::shared_future<std::shared_ptr<typename srvT::Response> > ClientHandler<srvT>::send_request(const std::shared_ptr<typename srvT::Request>& request) const
+				template <typename SrvT>
+				std::shared_future<std::shared_ptr<typename SrvT::Response> > ClientHandler<SrvT>::send_request(const std::shared_ptr<typename SrvT::Request>& request) const
 				{
 					if (!this->client_->wait_for_service(this->get_timeout())) 
 					{
@@ -109,8 +110,8 @@ namespace Modulo
 					return this->client_->async_send_request(request);
 				}
 
-				template <typename srvT>
-				std::shared_ptr<typename srvT::Response> ClientHandler<srvT>::send_blocking_request(const std::shared_ptr<typename srvT::Request>& request) const
+				template <typename SrvT>
+				std::shared_ptr<typename SrvT::Response> ClientHandler<SrvT>::send_blocking_request(const std::shared_ptr<typename SrvT::Request>& request) const
 				{
 					if (!this->client_->wait_for_service(this->get_timeout())) 
 					{

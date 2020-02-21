@@ -5,10 +5,6 @@ namespace Modulo
 {
 	namespace Monitors
 	{
-		Monitor::Monitor(const std::string & node_name, const std::list<std::string>& monitored_node, const std::chrono::milliseconds & period, bool intra_process_comms) : 
-		Cell(node_name, period, intra_process_comms), monitored_node_(monitored_node)
-		{}
-
 		Monitor::~Monitor()
 		{
 			this->on_shutdown();

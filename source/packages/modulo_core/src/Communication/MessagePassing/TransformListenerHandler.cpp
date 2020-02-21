@@ -8,20 +8,6 @@ namespace Modulo
 		{
 			namespace MessagePassing
 			{
-				TransformListenerHandler::TransformListenerHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-				MessagePassingHandler(CommunicationType::TRANSFORMLISTENER, recipient, timeout, mutex),
-				buffer_(clock)
-				{
-					this->tf_listener_ = std::make_unique<tf2_ros::TransformListener>(buffer_);
-				}
-
-				TransformListenerHandler::TransformListenerHandler(const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex):
-				MessagePassingHandler(CommunicationType::TRANSFORMLISTENER, std::make_shared<StateRepresentation::CartesianPose>(), timeout, mutex),
-				buffer_(clock) 
-				{
-					this->tf_listener_ = std::make_unique<tf2_ros::TransformListener>(buffer_);
-				}
-
 				const StateRepresentation::CartesianPose TransformListenerHandler::lookup_transform(const std::string& frame_name, const std::string& reference_frame) const
 				{
 					geometry_msgs::msg::TransformStamped transformStamped;

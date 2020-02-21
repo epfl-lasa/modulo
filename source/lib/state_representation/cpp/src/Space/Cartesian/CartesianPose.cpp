@@ -5,7 +5,6 @@
 
 using namespace StateRepresentation::Exceptions;
 
-
 namespace StateRepresentation 
 {
 	CartesianPose::CartesianPose()
@@ -218,25 +217,25 @@ namespace StateRepresentation
 		return pose * lambda;
 	}
 
-	const CartesianTwist operator/(const CartesianPose& pose, const std::chrono::milliseconds& dt)
+	const Eigen::Array2d dist(const CartesianPose& p1, const CartesianPose& p2)
+	{
+		return p1.dist(p2);
+	}
+
+	const CartesianTwist operator/(const CartesianPose& pose, const std::chrono::nanoseconds& dt)
 	{
 		// sanity check
 		if(pose.is_empty()) throw EmptyStateException(pose.get_name() + " state is empty");
 		// operations
 		CartesianTwist twist(pose.get_name(), pose.get_reference_frame());
 		// convert the period to a double with the second as reference
-		double period = std::chrono::milliseconds(dt).count();
-		period /= 1000.;
+		double period = dt.count();
+		period /= 1e9;
 		// set linear velocity
 		twist.set_linear_velocity(pose.get_position() / period);
 		// set angular velocity from the log of the quaternion error
 		Eigen::Quaterniond log_q = MathTools::log(pose.get_orientation());
 		twist.set_angular_velocity(2 * log_q.vec() / period);
 		return twist;
-	}
-
-	const Eigen::Array2d dist(const CartesianPose& p1, const CartesianPose& p2)
-	{
-		return p1.dist(p2);
 	}
 }

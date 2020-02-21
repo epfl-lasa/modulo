@@ -13,15 +13,16 @@ private:
 	std::shared_ptr<StateRepresentation::CartesianPose> target_pose;
 
 public:
-	explicit MoveAction(const std::string & node_name, const std::chrono::milliseconds & period) :
+	template <typename DurationT>
+	explicit MoveAction(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period) :
 	Action<StateRepresentation::CartesianState>(std::make_shared<StateRepresentation::CartesianPose>("robot_test"), std::make_shared<StateRepresentation::CartesianTwist>("robot_test"), node_name, period, false),
 	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d::Zero()))
 	{}
 
 	void on_configure()
 	{
-		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->get_input_state());
-		this->add_subscription<geometry_msgs::msg::PoseStamped>("/ds/attractor", this->target_pose, std::chrono::milliseconds(0));
+		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->get_input_state(), 0);
+		this->add_subscription<geometry_msgs::msg::PoseStamped>("/ds/attractor", this->target_pose, 0);
 		this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->get_output_state());
 
 		std::shared_ptr<DynamicalSystems::Linear<StateRepresentation::CartesianState> > move_dynamic = std::make_shared<DynamicalSystems::Linear<StateRepresentation::CartesianState> >(1);
@@ -37,7 +38,8 @@ private:
 	unsigned int counter;
 
 public:
-	explicit RandomAttractor(const std::string & node_name, const std::chrono::milliseconds & period):
+	template <typename DurationT>
+	explicit RandomAttractor(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period):
 	Cell(node_name, period, false),
 	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom())),
 	counter(0)
@@ -45,14 +47,14 @@ public:
 
 	void on_configure()
 	{
-		this->add_publisher<geometry_msgs::msg::PoseStamped>("/ds/attractor", target_pose, std::chrono::milliseconds(100));
-		this->add_asynchronous_transform_broadcaster(target_pose, std::chrono::milliseconds(100));
+		this->add_publisher<geometry_msgs::msg::PoseStamped>("/ds/attractor", target_pose, 0);
+		this->add_asynchronous_transform_broadcaster(target_pose, 100ms);
 	}
 
 	void step()
 	{
 		this->target_pose->set_pose(Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom());
-		if (counter == 5)
+		/*if (counter == 5)
 		{
 			counter = 0;
 			this->deactivate();
@@ -60,7 +62,7 @@ public:
 		else
 		{
 			++counter;
-		}
+		}*/
 	}
 };
 
@@ -72,7 +74,8 @@ private:
 	std::shared_ptr<StateRepresentation::Parameter<double> > ds_gain;
 
 public:
-	explicit ConsoleVisualizer(const std::string & node_name, const std::chrono::milliseconds & period) :
+	template <typename DurationT>
+	explicit ConsoleVisualizer(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period) :
 	Visualizer(node_name, period, false),
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test"))
@@ -104,11 +107,11 @@ private:
 	std::shared_ptr<StateRepresentation::CartesianPose> robot_pose;
 	std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
 	std::shared_ptr<StateRepresentation::CartesianPose> fixed_transform;
-
-	std::chrono::milliseconds dt;
+	std::chrono::nanoseconds dt;
 
 public:
-	explicit SimulatedRobotInterface(const std::string & node_name, const std::chrono::milliseconds & period):
+	template <typename DurationT>
+	explicit SimulatedRobotInterface(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period):
 	Cell(node_name, period, false),
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom())),
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
@@ -117,7 +120,7 @@ public:
 
 	void on_configure()
 	{
-		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
+		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist, 0);
 		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose, 0);
 	}
 
@@ -147,21 +150,16 @@ int main(int argc, char * argv[])
 	rclcpp::init(argc, argv);
 
 	rclcpp::executors::MultiThreadedExecutor exe;
-	auto period = 100ms;
-	auto period_visualization = 100ms;
-	auto period_monitor = 1s;
-	auto period_randomization = 5s;
-
-	std::shared_ptr<MoveAction> ma = std::make_shared<MoveAction>("move_action", period);
-	std::shared_ptr<RandomAttractor> ra = std::make_shared<RandomAttractor>("random_attractor", period_randomization);
-	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", period);
+	std::shared_ptr<MoveAction> ma = std::make_shared<MoveAction>("move_action", 100ms);
+	std::shared_ptr<RandomAttractor> ra = std::make_shared<RandomAttractor>("random_attractor", 5s);
+	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", 100ms);
 
 	exe.add_node(ma->get_node_base_interface());
 	exe.add_node(ra->get_node_base_interface());
 	exe.add_node(sri->get_node_base_interface());
 
 	std::list<std::string> monitored_nodes = {"move_action", "random_attractor", "robot_interface"};
-	std::shared_ptr<Modulo::Monitors::Monitor> mo = std::make_shared<Modulo::Monitors::Monitor>("monitor", monitored_nodes, period_monitor, false);
+	std::shared_ptr<Modulo::Monitors::Monitor> mo = std::make_shared<Modulo::Monitors::Monitor>("monitor", monitored_nodes, 1s);
 	exe.add_node(mo->get_node_base_interface());
 
 	exe.spin();

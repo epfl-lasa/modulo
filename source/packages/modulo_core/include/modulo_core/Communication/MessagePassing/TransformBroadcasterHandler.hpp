@@ -32,7 +32,8 @@ namespace Modulo
 					 * @param  clock     reference to the Cell clock
 					 * @param  mutex     reference to the Cell mutex
 					 */
-					explicit TransformBroadcasterHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
+					template <typename DurationT>
+					explicit TransformBroadcasterHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
 
 					/**
 					 * @brief Constructor for TransformBroadcaster handler without an associated recipient
@@ -40,7 +41,8 @@ namespace Modulo
 					 * @param  clock     reference to the Cell clock
 					 * @param  mutex     reference to the Cell mutex
 					 */
-					explicit TransformBroadcasterHandler(const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, std::shared_ptr<std::mutex>& mutex);
+					template <typename DurationT>
+					explicit TransformBroadcasterHandler(const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
 
 					/**
 					 * @brief Function to send a transform over the network
@@ -48,6 +50,16 @@ namespace Modulo
 					 */
 					void send_transform(const StateRepresentation::CartesianPose& transform);
 			    };
+
+			    template <typename DurationT>
+			    TransformBroadcasterHandler::TransformBroadcasterHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
+				PublisherHandler<StateRepresentation::CartesianPose, tf2_msgs::msg::TFMessage>(recipient, timeout, clock, mutex)
+				{}
+
+				template <typename DurationT>
+				TransformBroadcasterHandler::TransformBroadcasterHandler(const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
+				PublisherHandler<StateRepresentation::CartesianPose, tf2_msgs::msg::TFMessage>(std::make_shared<StateRepresentation::CartesianPose>(), timeout, clock, mutex)
+				{}
 
 				inline void TransformBroadcasterHandler::send_transform(const StateRepresentation::CartesianPose& transform)
 				{

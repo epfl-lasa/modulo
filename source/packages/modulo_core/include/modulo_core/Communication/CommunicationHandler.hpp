@@ -37,7 +37,7 @@ namespace Modulo
 			{
 			private:
 				const CommunicationType type_; ///< type of the handler from the CommunicationType enumeration
-				std::chrono::milliseconds timeout_; ///< period before considered time out
+				std::chrono::nanoseconds timeout_; ///< period before considered time out
 				std::shared_ptr<std::mutex> mutex_; ///< reference to the Cell mutex
 
 			public:
@@ -48,7 +48,8 @@ namespace Modulo
 				 * @param  clock     reference to the Cell clock
 				 * @param  mutex     reference to the Cell mutex
 				 */
-				explicit CommunicationHandler(const CommunicationType& type, const std::chrono::milliseconds& timeout, const std::shared_ptr<std::mutex>& mutex);
+				template <typename DurationT>
+				explicit CommunicationHandler(const CommunicationType& type, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<std::mutex>& mutex);
 
 				/**
 				 * @brief Getter of the CommunicationType
@@ -60,7 +61,7 @@ namespace Modulo
 				 * @brief Getter of the timeout period
 				 * @return the timeout period
 				 */
-				const std::chrono::milliseconds& get_timeout() const;
+				const std::chrono::nanoseconds& get_timeout() const;
 
 				/**
 				 * @brief Getter of the mutex reference
@@ -84,12 +85,17 @@ namespace Modulo
 				virtual void check_timeout();
 			};
 
+			template <typename DurationT>
+			CommunicationHandler::CommunicationHandler(const CommunicationType& type, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<std::mutex>& mutex):
+			type_(type), timeout_(timeout), mutex_(mutex)
+			{}
+
 			inline const CommunicationType& CommunicationHandler::get_type()
 			{
 				return this->type_;
 			}
 
-			inline const std::chrono::milliseconds& CommunicationHandler::get_timeout() const
+			inline const std::chrono::nanoseconds& CommunicationHandler::get_timeout() const
 			{
 				return this->timeout_;
 			}

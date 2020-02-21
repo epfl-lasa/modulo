@@ -8,11 +8,6 @@ namespace Modulo
 		{
 			namespace ServiceClient
 			{
-				LifecycleChangeStateClient::LifecycleChangeStateClient(const std::chrono::milliseconds& timeout, const std::shared_ptr<std::mutex>& mutex):
-				ClientHandler<lifecycle_msgs::srv::ChangeState>(timeout, mutex),
-				request_(std::make_shared<lifecycle_msgs::srv::ChangeState::Request>())
-				{}
-
 				void LifecycleChangeStateClient::configure()
 				{
 					this->request_->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE;

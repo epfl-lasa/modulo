@@ -203,14 +203,14 @@ namespace StateRepresentation
 	 	 * @param dt the time period to multiply with
 	 	 * @return the JointPositions corresponding to the displacement over the time period
 	     */
-		friend const JointPositions operator*(const std::chrono::milliseconds& dt, const JointVelocities& velocities);
+		friend const JointPositions operator*(const std::chrono::nanoseconds& dt, const JointVelocities& velocities);
 
 		/**
 	 	 * @brief Overload the * operator with a time period
 	 	 * @param dt the time period to multiply with
 	 	 * @return the JointPositions corresponding to the displacement over the time period
 	     */
-		friend const JointPositions operator*(const JointVelocities& velocities, const std::chrono::milliseconds& dt);
+		friend const JointPositions operator*(const JointVelocities& velocities, const std::chrono::nanoseconds& dt);
 
 		/**
 	 	 * @brief Overload the / operator with a scalar

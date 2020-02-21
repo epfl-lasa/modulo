@@ -38,7 +38,8 @@ namespace Modulo
 					 * @param  timeout   period before considered time out
 					 * @param  mutex     reference to the Cell mutex
 					 */
-					explicit MessagePassingHandler(const CommunicationType& type,  const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<std::mutex>& mutex);
+					template <typename DurationT>
+					explicit MessagePassingHandler(const CommunicationType& type,  const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<std::mutex>& mutex);
 
 					/**
 					 * @brief Getter of the recipient
@@ -52,6 +53,12 @@ namespace Modulo
 					 */
 					StateRepresentation::State& get_recipient();
 				};
+
+				template <typename DurationT>
+				MessagePassingHandler::MessagePassingHandler(const CommunicationType& type, const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<std::mutex>& mutex):
+				CommunicationHandler(type, timeout, mutex),
+				recipient_(recipient)
+				{}
 
 				inline const StateRepresentation::State& MessagePassingHandler::get_recipient() const
 				{

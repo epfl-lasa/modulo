@@ -207,7 +207,7 @@ namespace Modulo
 				auto end = std::chrono::steady_clock::now();
 		    	auto elapsed = end - start;
 		    	auto timeToWait = this->period_ - elapsed;
-		    	if(timeToWait > std::chrono::milliseconds::zero())
+		    	if(timeToWait > std::chrono::nanoseconds::zero())
 		    	{
 		        	std::this_thread::sleep_for(timeToWait);
 		    	}

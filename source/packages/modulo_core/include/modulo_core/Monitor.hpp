@@ -24,12 +24,13 @@ namespace Modulo
 			std::list<std::string> monitored_node_; //< the list of nodes to monitor
 
 		public:
-			 /**
-			  * @brief Constructor for the Monitor class
-			  * @param node_name name of the ROS node
-			  * @param period rate used by each publisher of the class
-			  */
-			explicit Monitor(const std::string & node_name, const std::list<std::string>& monitored_node, const std::chrono::milliseconds & period, bool intra_process_comms = false);
+			/**
+			 * @brief Constructor for the Monitor class
+			 * @param node_name name of the ROS node
+			 * @param period rate used by each publisher of the class
+			 */
+			template <typename DurationT> 
+			explicit Monitor(const std::string& node_name, const std::list<std::string>& monitored_node, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms = false);
 
 			/**
 			 * @brief Destructor
@@ -83,6 +84,12 @@ namespace Modulo
 			 */
 			void step();
 		};
+
+		template <typename DurationT>
+		Monitor::Monitor(const std::string& node_name, const std::list<std::string>& monitored_node, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms) : 
+		Cell(node_name, period, intra_process_comms), monitored_node_(monitored_node)
+		{}
+
 	}
 }
 #endif
