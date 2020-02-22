@@ -48,7 +48,7 @@ public:
 	void on_configure()
 	{
 		this->add_publisher<geometry_msgs::msg::PoseStamped>("/ds/attractor", target_pose, 0);
-		this->add_asynchronous_transform_broadcaster(target_pose, 100ms);
+		this->add_asynchronous_transform_broadcaster(target_pose, 1ms);
 	}
 
 	void step()
@@ -149,10 +149,10 @@ int main(int argc, char * argv[])
 
 	rclcpp::init(argc, argv);
 
-	rclcpp::executors::MultiThreadedExecutor exe;
-	std::shared_ptr<MoveAction> ma = std::make_shared<MoveAction>("move_action", 100ms);
+	rclcpp::executors::SingleThreadedExecutor exe;
+	std::shared_ptr<MoveAction> ma = std::make_shared<MoveAction>("move_action", 250us);
 	std::shared_ptr<RandomAttractor> ra = std::make_shared<RandomAttractor>("random_attractor", 5s);
-	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", 100ms);
+	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", 250us);
 
 	exe.add_node(ma->get_node_base_interface());
 	exe.add_node(ra->get_node_base_interface());
