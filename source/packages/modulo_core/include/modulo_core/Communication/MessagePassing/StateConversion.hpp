@@ -3,6 +3,20 @@
 #ifndef MODULO_MOTION_STATECONVERSION_H_
 #define MODULO_MOTION_STATECONVERSION_H_
 
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <geometry_msgs/msg/accel_stamped.hpp>
+#include <geometry_msgs/msg/wrench_stamped.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <modulo_msgs/msg/jacobian_matrix.hpp>
+#include <std_msgs/msg/float64_multi_array.hpp>
+#include <std_msgs/msg/float64.hpp>
+#include <tf2_msgs/msg/tf_message.hpp>
+#include <nav_msgs/msg/odometry.hpp>
+#include <rcutils/logging_macros.h>
+#include <rclcpp/time.hpp>
 #include "state_representation/Space/Cartesian/CartesianState.hpp"
 #include "state_representation/Space/Cartesian/CartesianPose.hpp"
 #include "state_representation/Space/Cartesian/CartesianTwist.hpp"
@@ -12,19 +26,6 @@
 #include "state_representation/Space/DualQuaternion/DualQuaternionPose.hpp"
 #include "state_representation/Space/DualQuaternion/DualQuaternionTwist.hpp"
 #include "state_representation/Parameter/Parameter.hpp"
-#include "geometry_msgs/msg/pose_stamped.hpp"
-#include "geometry_msgs/msg/twist_stamped.hpp"
-#include "geometry_msgs/msg/accel_stamped.hpp"
-#include "geometry_msgs/msg/wrench_stamped.hpp"
-#include "geometry_msgs/msg/transform_stamped.hpp"
-#include "sensor_msgs/msg/joint_state.hpp"
-#include "modulo_msgs/msg/jacobian_matrix.hpp"
-#include "std_msgs/msg/float64_multi_array.hpp"
-#include "std_msgs/msg/float64.hpp"
-#include "tf2_msgs/msg/tf_message.hpp"
-#include "nav_msgs/msg/odometry.hpp"
-#include "rcutils/logging_macros.h"
-#include "rclcpp/time.hpp"
 
 
 namespace Modulo
@@ -321,7 +322,15 @@ namespace Modulo
 					 * @param state The state to read from
 					 * @param time The time of the message
 					 */
-					void write_msg(std_msgs::msg::Float64 & msg, const StateRepresentation::Parameter<double> & state, const rclcpp::Time & time);				
+					void write_msg(std_msgs::msg::Float64 & msg, const StateRepresentation::Parameter<double> & state, const rclcpp::Time & time);
+
+					/**
+					 * @brief Convert a JointState to a ROS trajectory_msgs::msg::JointTrajectoryPoint
+					 * @param msg The ROS msg to populate
+					 * @param state The state to read from
+					 * @param time The time of the message
+					 */
+					void write_msg(trajectory_msgs::msg::JointTrajectoryPoint & msg, const StateRepresentation::JointState & state, const rclcpp::Time &);				
 				}
 			}
 		}

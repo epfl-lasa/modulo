@@ -374,6 +374,16 @@ namespace Modulo
 						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 						msg.data = state.get_value();
 					}
+
+					void write_msg(trajectory_msgs::msg::JointTrajectoryPoint & msg, const StateRepresentation::JointState & state, const rclcpp::Time &)
+					{
+						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+						msg.positions = std::vector<double>(state.get_positions().data(), state.get_positions().data() + state.get_positions().size());
+						msg.velocities = std::vector<double>(state.get_velocities().data(), state.get_velocities().data() + state.get_velocities().size());
+						msg.accelerations = std::vector<double>(state.get_accelerations().data(), state.get_accelerations().data() + state.get_accelerations().size());
+						msg.effort = std::vector<double>(state.get_torques().data(), state.get_torques().data() + state.get_torques().size());
+						msg.time_from_start = rclcpp::Duration(std::chrono::milliseconds(100));
+					}	
 				}
 			}
 		}
