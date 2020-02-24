@@ -34,7 +34,8 @@ namespace Modulo
 			 * @param node_name name of the ROS node
 			 * @param period rate used by each publisher of the class
 			 */
-			explicit Action(const std::shared_ptr<S> input_state, const std::shared_ptr<S> output_state, const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms = false);
+			template <typename DurationT>
+			explicit Action(const std::shared_ptr<S>& input_state, const std::shared_ptr<S>& output_state, const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms=false);
 
 			/**
 			 * @brief Destructor
@@ -59,8 +60,16 @@ namespace Modulo
 			 */
 			void set_dynamic(const std::shared_ptr<DynamicalSystems::DynamicalSystem<S> >& dynamic);
 
+			/**
+			 * @brief Getter of the input state as a shared_ptr
+			 * @return the state as a shared_ptr
+			 */
 			const std::shared_ptr<S>& get_input_state() const;
 
+			/**
+			 * @brief Getter of the output state as a shared_ptr
+			 * @return the state as a shared_ptr
+			 */
 			const std::shared_ptr<S>& get_output_state() const;
 
 			/**
@@ -111,8 +120,8 @@ namespace Modulo
 			virtual void step();
 		};
 
-		template <class S>
-		Action<S>::Action(const std::shared_ptr<S> input_state, const std::shared_ptr<S> output_state, const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms) : 
+		template <class S> template <typename DurationT>
+		Action<S>::Action(const std::shared_ptr<S>& input_state, const std::shared_ptr<S>& output_state, const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms) : 
 		Cell(node_name, period, intra_process_comms), input_state_(input_state), output_state_(output_state)
 		{}
 
@@ -181,6 +190,7 @@ namespace Modulo
 			}
 			else
 			{
+				RCLCPP_WARN(get_logger(), "state is empty initializing");
 				this->output_state_->initialize();
 			}
 		}

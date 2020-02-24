@@ -1,16 +1,6 @@
 /**
- * @class Cell
- * @brief Abstract class to define a Call
  * @author Baptiste Busch
  * @date 2019/02/14
- *
- * A Cell is the base class of the whole architecture.
- * It handles all the basic ROS communications such as
- * definitions of subrscriptions, publishers and service
- * calls. It can then be derived into a MotionGenerator,
- * a Controller, a Sensor, or a RobotInterface. It is
- * derived from a lifecyle node which allows to use
- * ROS2 state machine functionnalities for nodes.
  */
 
 #ifndef MODULO_CELL_H_
@@ -22,19 +12,20 @@
 #include <string>
 #include <thread>
 #include <list>
-
-#include "lifecycle_msgs/msg/transition.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp/publisher.hpp"
-#include "rclcpp_lifecycle/lifecycle_node.hpp"
-#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
-#include "rclcpp/function_traits.hpp"
-#include "rclcpp_components/register_node_macro.hpp"
-#include "rcutils/logging_macros.h"
-#include "modulo_core/Communication/SubscriptionHandler.hpp"
-#include "modulo_core/Communication/PublisherHandler.hpp"
-#include "modulo_core/Communication/TransformBroadcasterHandler.hpp"
-#include "modulo_core/Communication/TransformListenerHandler.hpp"
+#include <lifecycle_msgs/msg/transition.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp_lifecycle/lifecycle_node.hpp>
+#include <rclcpp_lifecycle/lifecycle_publisher.hpp>
+#include <rclcpp/function_traits.hpp>
+#include <rclcpp_components/register_node_macro.hpp>
+#include <rcutils/logging_macros.h>
+#include "modulo_core/Communication/MessagePassing/SubscriptionHandler.hpp"
+#include "modulo_core/Communication/MessagePassing/PublisherHandler.hpp"
+#include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
+#include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
+#include "modulo_core/Communication/ServiceClient/ClientHandler.hpp"
+#include "modulo_core/Communication/ServiceClient/LifecycleChangeStateClient.hpp"
 
 using namespace std::chrono_literals;
 
@@ -42,18 +33,32 @@ namespace Modulo
 {
 	namespace Core
 	{
+		/**
+		 * @class Cell
+ 		 * @brief Abstract class to define a Call
+		 *
+		 * A Cell is the base class of the whole architecture.
+		 * It handles all the basic ROS communications such as
+		 * definitions of subrscriptions, publishers and service
+		 * calls. It can then be derived into a MotionGenerator,
+		 * a Controller, a Sensor, or a RobotInterface. It is
+		 * derived from a lifecyle node which allows to use
+		 * ROS2 state machine functionnalities for nodes.
+		 */
 		class Cell : public rclcpp_lifecycle::LifecycleNode
 		{
 		private:
 			bool configured_; ///< boolean that informs that the node has been configured, i.e passed by the on_configure state
 			bool active_; ///< boolean that informs that the node has been activated, i.e passed by the on_activate state
 			bool shutdown_; ///< boolean that informs that the node has been shutdown, i.e passed by the on_shutdown state
-			std::thread run_thread; ///< thread object to start the main loop, i.e. the run function, in parallel of the rest
+			std::thread run_thread_; ///< thread object to start the main loop, i.e. the run function, in parallel of the rest
 			std::shared_ptr<std::mutex> mutex_; ///< a mutex to use when modifying messages between functions
-			std::chrono::milliseconds period_;  ///< rate of the publisher functions in milliseconds
+			std::chrono::nanoseconds period_;  ///< rate of the publisher functions in nanoseconds
 			std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > handlers_; ///< maps for storing publishers, subscriptions and tf 
 			std::list<std::thread> active_threads_; ///< list of active threads for periodic calling
 			std::map<std::string, bool> configure_on_parameters_change_; ///< map of bools to store the configure_on_change value of each parameters
+			std::shared_ptr<rclcpp::SyncParametersClient> parameters_client_; ///< shared pointer to the parameter client that handles request to the parameter server
+			std::shared_ptr<Communication::ServiceClient::LifecycleChangeStateClient> change_state_client_; ///< pointer to the lifecycle client to send lifecycle state operations from the cell
 
 			/**
 			 * @brief Function to clear all publishers, subscriptions and services
@@ -62,16 +67,28 @@ namespace Modulo
 
 			/**
 			 * @brief Function to add a default transform broadcaster to the map of handlers
+			 * @tparam DurationT template value for accepting any type of std::chrono duration values
 			 * @param period the period to wait between two publishing
 			 * @param timeout the period after wich to consider that the publisher has timeout
 			 */
-			void add_transform_broadcaster(const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size=10);
+			template <typename DurationT>
+			void add_transform_broadcaster(const std::chrono::duration<int64_t, DurationT>& period, const std::chrono::duration<int64_t, DurationT>& timeout, int queue_size=10);
 
 			/**
 			 * @brief Function to add a default transform listener to the map of handlers
+			 * @tparam DurationT template value for accepting any type of std::chrono duration values
 			 * @param timeout the period after wich to consider that the handler has timeout
 			 */
-			void add_transform_listener(const std::chrono::milliseconds& timeout);
+			template <typename DurationT>
+			void add_transform_listener(const std::chrono::duration<int64_t, DurationT>& timeout);
+
+			/**
+			 * @brief Function to add a direct client to the lifecycle change state service of the node
+			 * @tparam DurationT template value for accepting any type of std::chrono duration values
+			 * @param timeout the period after wich to consider that the client has timeout
+			 */
+			template <typename DurationT>
+			void add_lifececycle_change_state_client(const std::chrono::duration<int64_t, DurationT>& timeout);
 
 		protected:
 			/**
@@ -105,14 +122,16 @@ namespace Modulo
 			bool is_shutdown() const;
 
 		public:
-
-			std::shared_ptr<rclcpp::SyncParametersClient> parameters_client_; ///< shared pointer to the parameter client that handles request to the parameter server
 			
 			/**
 			 * @brief Cell constructor with arguments needed from ROS2 node
+			 * @tparam DurationT template value for accepting any type of std::chrono duration values
 			 * @param node_name name of the ROS node
+			 * @param period the period of each step function call
+			 * @param intra_process_comms ROS2 parameter to declare if nodes share the same memory for instant process communication
 			 */
-			explicit Cell(const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms = false);
+			template <typename DurationT>
+			explicit Cell(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms = false);
 
 			/**
 			 * @brief Destructor
@@ -123,44 +142,56 @@ namespace Modulo
 			 * @brief Getter of the period attribute
 			 * @return Reference to the period attribute
 			 */
-			const std::chrono::milliseconds & get_period() const;
+			const std::chrono::nanoseconds& get_period() const;
 
 			/**
 			 * @brief Template function to add a generic publisher to the map of handlers
+			 * @tparam MsgT template value for accepting any type of ROS2 messages
+			 * @tparam RecT template value for accepting any type of recipient
+			 * @tparam DurationT template value for accepting any type of std::chrono duration values
 			 * @param channel unique name of the publish channel that is used as key to the map
 			 * @param recipient the state that contain the data to be published
 			 * @param period the period to wait between two publishing
 			 * @param timeout the period after wich to consider that the publisher has timeout
 			 */
-			template <typename MsgT, class RecT>
-			void add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size=10);
+			template <typename MsgT, class RecT, typename DurationT1, typename DurationT2>
+			void add_publisher(const std::string& channel, const std::shared_ptr<RecT>& recipient, const std::chrono::duration<int64_t, DurationT1>& period, const std::chrono::duration<int64_t, DurationT2>& timeout, int queue_size=10);
 
 			/**
 			 * @brief Template function to add a generic publisher to the map of handlers
+			 * @tparam MsgT template value for accepting any type of ROS2 messages
+			 * @tparam RecT template value for accepting any type of recipient
+			 * @tparam DurationT template value for accepting any type of std::chrono duration values
 			 * @param channel unique name of the publish channel that is used as key to the map
 			 * @param recipient the state that contain the data to be published
-			 * @param timeout the period after wich to consider that the publisher has timeout
+			 * @param period the period to wait between two publishing
+			 * @param nb_period_to_timeout the number of period (of the node) before considering that the publisher has timeout (default = 10, 0 means never timeout)
 			 */
-			template <typename MsgT, class RecT>
-			void add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size=10);
+			template <typename MsgT, class RecT, typename DurationT>
+			void add_publisher(const std::string& channel, const std::shared_ptr<RecT>& recipient, const std::chrono::duration<int64_t, DurationT>& period, unsigned int nb_period_to_timeout=10, int queue_size=10);
 
 			/**
 			 * @brief Template function to add a generic publisher to the map of handlers
+			 * @tparam MsgT template value for accepting any type of ROS2 messages
+			 * @tparam RecT template value for accepting any type of recipient
 			 * @param channel unique name of the publish channel that is used as key to the map
 			 * @param recipient the state that contain the data to be published
-			 * @param nb_period_to_timeout the number of period before considering that the publisher has timeout 
+			 * @param nb_period_to_timeout the number of period (of the node) before considering that the publisher has timeout (default = 10, 0 means never timeout)
 			 */
 			template <typename MsgT, class RecT>
-			void add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10);
+			void add_publisher(const std::string& channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10);
 
 			/**
 			 * @brief Template function to add a generic subscription to the map of handlers
+			 * @tparam MsgT template value for accepting any type of ROS2 messages
+			 * @tparam RecT template value for accepting any type of recipient
+			 * @tparam DurationT template value for accepting any type of std::chrono duration values
 			 * @param channel unique name of the subscription channel that is used as key to the map
 			 * @param recipient the state that will contain the received data
 			 * @param timeout the period after wich to consider that the subscriber has timeout
 			 */
-			template <typename MsgT, class RecT>
-			void add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size=10);
+			template <typename MsgT, class RecT, typename DurationT>
+			void add_subscription(const std::string& channel, const std::shared_ptr<RecT>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, int queue_size=10);
 
 			/**
 			 * @brief Template function to add a generic subscription to the map of handlers
@@ -169,31 +200,44 @@ namespace Modulo
 			 * @param nb_period_to_timeout the number of period before considering that the subscription has timeout 
 			 */
 			template <typename MsgT, class RecT>
-			void add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10);
+			void add_subscription(const std::string& channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10);
+
+			/**
+			 * @brief Template function to add a generic client to the map of handlers
+			 * @tparam srvT tamplate value to accept any type of ROS2 services
+			 * @tparam DurationT template value for accepting any type of std::chrono duration values
+			 * @param channel unique name of the communication topic between the client and the server
+			 * @param timeout period before considering the server is not responding
+			 */
+			template <typename srvT, typename DurationT>
+			void add_client(const std::string& channel, const std::chrono::duration<int64_t, DurationT>& timeout);
 
 			/**
 			 * @brief Add a parameter on the node parameter server
+			 * @tparam T template value to accept any type of parameters
 			 * @param name the name of the parameter
 			 * @param default_value the default value of the parameter
 			 * @param configure_on_change if true deactivate the node and call 
 			 * the on_configure state e.g. to change the topics of publisher/subcriptions
 			 */
 			template <typename T>
-			void add_parameter(const std::string & name, const T & default_value, bool configure_on_change=false);
+			void add_parameter(const std::string& name, const T& default_value, bool configure_on_change=false);
 
 			/**
 			 * @brief Set the value of the parameter on the node parameter server
+			 * @tparam T template value to accept any type of parameters
 			 * @param name the name of the parameter
 			 */
 			template <typename T>
-			void set_parameter(const std::string & name, const T & value);
+			void set_parameter(const std::string& name, const T & value);
 
 			/**
 			 * @brief Get the value of the parameter on the node parameter server
+			 * @tparam T template value to accept any type of parameters
 			 * @param name the name of the parameter
 			 */
 			template <typename T>
-			decltype(auto) get_parameter(const std::string & name) const;
+			decltype(auto) get_parameter(const std::string& name) const;
 
 			/**
 			 * @brief Function to add a generic transform broadcaster to the map of handlers
@@ -201,19 +245,22 @@ namespace Modulo
 			 * @param period the period to wait between two publishing
 			 * @param timeout the period after wich to consider that the publisher has timeout
 			 */
-			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size=10);
+			template <typename DurationT1, typename DurationT2>
+			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT1>& period, const std::chrono::duration<int64_t, DurationT2>& timeout, int queue_size=10);
 
 			/**
 			 * @brief Function to add a generic transform broadcaster to the map of handlers
 			 * @param recipient the state that contain the data to be published
-			 * @param timeout the period after wich to consider that the publisher has timeout
+			 * @param period the period to wait between two publishing
+			 * @param nb_period_to_timeout the number of period (of the node) before considering that the publisher has timeout (default = 10, 0 means never timeout)
 			 */
-			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& timeout, int queue_size=10);
+			template <typename DurationT>
+			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT>& period, unsigned int nb_period_to_timeout=10, int queue_size=10);
 
 			/**
 			 * @brief Function to add a generic transform broadcaster to the map of handlers
 			 * @param recipient the state that contain the data to be published
-			 * @param nb_period_to_timeout the number of period before considering that the broadcaster has timeout 
+			 * @param nb_period_to_timeout the number of period (of the node) before considering that the broadcaster has timeout 
 			 */
 			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10);
 
@@ -222,12 +269,14 @@ namespace Modulo
 			 * @param recipient the state that contain the data to be published
 			 * @param period the period to wait between two publishing
 			 */
-			void add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::milliseconds& period, int queue_size=10);
+			template <typename DurationT>
+			void add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT>& period, int queue_size=10);
 	
 			/**
 			 * @brief Function to add a fixed transform broadcaster to the map of handlers. A fixed transform broadcaster never times out as opposded to a normal broadcaster.
 			 * @param recipient the state that contain the data to be published
 			 */
+			template <typename DurationT>
 			void add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, int queue_size=10);
 
 			/**
@@ -243,12 +292,35 @@ namespace Modulo
 			void send_transform(const std::shared_ptr<StateRepresentation::CartesianPose>& transform);
 
 			/**
+			 * @brief Send a request to the server and wait for its response
+			 * @param channel the channel of communication
+			 * @param request the request to send
+			 * @return the response from the server
+			 */
+			template <typename srvT>
+			std::shared_ptr<typename srvT::Response> send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request);
+
+			/**
+			 * @brief Send a request to the server without waiting for its response
+			 * @param channel the channel of communication
+			 * @param request the request to send
+			 * @return the response from the server
+			 */
+			template <typename srvT>
+			std::shared_future<std::shared_ptr<typename srvT::Response> > send_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request);
+
+			/**
 			 * @brief Function to get a transform from the generic transform listener
 			 * @param frame_name name of the frame to look for
 			 * @param the frame in wich to express the transform
 			 * @return the CartesianPose representing the tranformation
 			 */
 			const StateRepresentation::CartesianPose lookup_transform(const std::string& frame_name, const std::string& reference_frame="world");
+
+			/**
+			 * @brief Call the lifecycle service to configure the node
+			 */
+			void configure();
 
 			/**
 			 * @brief Transition callback for state configuring
@@ -272,6 +344,11 @@ namespace Modulo
 			virtual void on_configure();
 
 			/**
+			 * @brief Call the lifecycle service to activate the node
+			 */
+			void activate();
+
+			/**
 			 * @brief Transition callback for state activating
 			 *
 			 * on_activate callback is being called when the lifecycle node
@@ -293,6 +370,11 @@ namespace Modulo
 			virtual void on_activate();
 
 			/**
+			 * @brief Call the lifecycle service to deactivate the node
+			 */
+			void deactivate();
+
+			/**
 			 * @brief Transition callback for state deactivating
 			 *
 			 * on_deactivate callback is being called when the lifecycle node
@@ -312,6 +394,11 @@ namespace Modulo
 			 * adapted to the derived class.
 			 */
 			virtual void on_deactivate();
+
+			/**
+			 * @brief Call the lifecycle service to cleanup the node
+			 */
+			void cleanup();
 
 			/**
 			 * @brief Transition callback for state cleaningup
@@ -377,15 +464,27 @@ namespace Modulo
 			 * @param callback_function the function to call
 			 * @param period the period between two calls
 			 */
-			void run_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::milliseconds& period);
+			template <typename CallbackT, typename DurationT>
+			void run_periodic_call(const CallbackT& callback_function, const std::chrono::duration<int64_t, DurationT>& period);
 
 			/**
 			 * @brief Function to add a periodic call to the function given in input
 			 * @param callback_function the function to call
 			 * @param period the period between two calls
 			 */
-			void add_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::milliseconds& period);
+			template <typename CallbackT, typename DurationT>
+			void add_periodic_call(const CallbackT& callback_function, const std::chrono::duration<int64_t, DurationT>& period);
 		};
+
+		template <typename DurationT>
+		Cell::Cell(const std::string & node_name, const std::chrono::duration<int64_t, DurationT> & period, bool intra_process_comms) :
+		rclcpp_lifecycle::LifecycleNode(node_name, rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),
+		configured_(false),
+		active_(false),
+		shutdown_(false),
+		mutex_(std::make_shared<std::mutex>()),
+		period_(period)
+		{}
 
 		inline const std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > & Cell::get_handlers() const
 		{
@@ -412,55 +511,113 @@ namespace Modulo
 			return (*this->mutex_);
 		}
 
-		inline const std::chrono::milliseconds & Cell::get_period() const
+		inline const std::chrono::nanoseconds& Cell::get_period() const
 		{
 			return this->period_;
 		}
 
-		template <typename MsgT, class RecT>
-		void Cell::add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& period, const std::chrono::milliseconds& timeout, int queue_size)
+		template <typename MsgT, class RecT, typename DurationT1, typename DurationT2>
+		void Cell::add_publisher(const std::string& channel, const std::shared_ptr<RecT>& recipient, const std::chrono::duration<int64_t, DurationT1>& period, const std::chrono::duration<int64_t, DurationT2>& timeout, int queue_size)
 		{
-			auto handler = std::make_shared<Communication::PublisherHandler<RecT, MsgT> >(channel, recipient, timeout, this->get_clock(), this->mutex_);
+			auto handler = std::make_shared<Communication::MessagePassing::PublisherHandler<RecT, MsgT> >(recipient, timeout, this->get_clock(), this->mutex_);
 			handler->set_publisher(this->create_publisher<MsgT>(channel, queue_size));
-			handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::PublisherHandler<RecT, MsgT>::publish_callback, handler)));
+			handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::MessagePassing::PublisherHandler<RecT, MsgT>::publish_callback, handler)));
+			this->handlers_.insert(std::make_pair(channel, handler));
+		}
+
+		template <typename MsgT, class RecT, typename DurationT>
+		void Cell::add_publisher(const std::string& channel, const std::shared_ptr<RecT>& recipient, const std::chrono::duration<int64_t, DurationT>& period, unsigned int nb_period_to_timeout, int queue_size)
+		{
+			this->add_publisher<MsgT, RecT>(channel, recipient, period, nb_period_to_timeout*this->period_, queue_size);
+		}
+
+		template <typename MsgT, class RecT>
+		void Cell::add_publisher(const std::string& channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout, int queue_size)
+		{
+			this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, nb_period_to_timeout * this->period_, queue_size);
+		}
+
+		template <typename MsgT, class RecT, typename DurationT>
+		void Cell::add_subscription(const std::string& channel, const std::shared_ptr<RecT>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, int queue_size)
+		{
+			auto handler = std::make_shared<Communication::MessagePassing::SubscriptionHandler<RecT, MsgT> >(recipient, timeout, this->mutex_);
+			handler->set_subscription(this->create_subscription<MsgT>(channel, queue_size, std::bind(&Communication::MessagePassing::SubscriptionHandler<RecT, MsgT>::subscription_callback, handler, std::placeholders::_1)));
 			this->handlers_.insert(std::make_pair(channel, handler));
 		}
 
 		template <typename MsgT, class RecT>
-		void Cell::add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size)
+		void Cell::add_subscription(const std::string& channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout, int queue_size)
 		{
-			this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, timeout, queue_size);
+			this->add_subscription<MsgT, RecT>(channel, recipient, nb_period_to_timeout * this->period_, queue_size);
 		}
 
-		template <typename MsgT, class RecT>
-		void Cell::add_publisher(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout, int queue_size)
+		template <typename DurationT>
+		void Cell::add_transform_broadcaster(const std::chrono::duration<int64_t, DurationT>& period, const std::chrono::duration<int64_t, DurationT>& timeout, int queue_size)
 		{
-			this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, nb_period_to_timeout*this->period_, queue_size);
+			auto handler = std::make_shared<Communication::MessagePassing::TransformBroadcasterHandler>(timeout, this->get_clock(), this->mutex_);
+			handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
+			handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::MessagePassing::TransformBroadcasterHandler::publish_callback, handler)));
+			this->handlers_.insert(std::make_pair("tf_broadcaster", handler));
 		}
 
-		template <typename MsgT, class RecT>
-		void Cell::add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, const std::chrono::milliseconds& timeout, int queue_size)
+		template <typename DurationT>
+		void Cell::add_transform_listener(const std::chrono::duration<int64_t, DurationT>& timeout)
 		{
-			auto handler = std::make_shared<Communication::SubscriptionHandler<RecT, MsgT> >(channel, recipient, timeout, this->get_clock(), this->mutex_);
-			handler->set_subscription(this->create_subscription<MsgT>(channel, queue_size, std::bind(&Communication::SubscriptionHandler<RecT, MsgT>::subscription_callback, handler, std::placeholders::_1)));
+			auto handler = std::make_shared<Communication::MessagePassing::TransformListenerHandler>(timeout, this->get_clock(), this->mutex_);
+			this->handlers_.insert(std::make_pair("tf_listener", handler));
+		}
+
+		template <typename DurationT>
+		void Cell::add_lifececycle_change_state_client(const std::chrono::duration<int64_t, DurationT>& timeout)
+		{
+			this->change_state_client_ = std::make_shared<Communication::ServiceClient::LifecycleChangeStateClient>(timeout, this->mutex_);
+			this->change_state_client_->set_client(this->create_client<lifecycle_msgs::srv::ChangeState>(std::string(this->get_name()) + "/change_state"));
+		}
+
+		template <typename DurationT1, typename DurationT2>
+		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT1>& period, const std::chrono::duration<int64_t, DurationT2>& timeout, int queue_size)
+		{
+			auto handler = std::make_shared<Communication::MessagePassing::TransformBroadcasterHandler>(recipient, timeout, this->get_clock(), this->mutex_);
+			handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
+			handler->set_timer(this->create_wall_timer(period, std::bind(&Communication::MessagePassing::TransformBroadcasterHandler::publish_callback, handler)));
+			this->handlers_.insert(std::make_pair(recipient->get_name() + "_in_" + recipient->get_reference_frame() + "_broadcaster", handler));
+		}
+
+		template <typename DurationT>
+		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT>& period, unsigned int nb_period_to_timeout, int queue_size)
+		{
+			this->add_asynchronous_transform_broadcaster(recipient, period, nb_period_to_timeout * this->period_, queue_size);
+		}
+
+		template <typename DurationT>
+		void Cell::add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT>& period, int queue_size)
+		{
+			this->add_asynchronous_transform_broadcaster(recipient, period, std::chrono::duration<int64_t, DurationT>(0), queue_size);
+		}
+
+		template <typename DurationT>
+		void Cell::add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, int queue_size)
+		{
+			this->add_asynchronous_transform_broadcaster(recipient, this->period_, std::chrono::duration<int64_t, DurationT>(0), queue_size);
+		}
+
+		template <typename srvT, typename DurationT>
+		void Cell::add_client(const std::string& channel, const std::chrono::duration<int64_t, DurationT>& timeout)
+		{
+			auto handler = std::make_shared<Communication::ServiceClient::ClientHandler<srvT> >(timeout, this->mutex_);
+			handler->set_client(this->create_client<srvT>(channel));
 			this->handlers_.insert(std::make_pair(channel, handler));
-		}
-
-		template <typename MsgT, class RecT>
-		void Cell::add_subscription(const std::string & channel, const std::shared_ptr<RecT>& recipient, unsigned int nb_period_to_timeout, int queue_size)
-		{
-			this->add_subscription<MsgT, RecT>(channel, recipient, nb_period_to_timeout*this->period_, queue_size);
 		}
 
 		template <typename T>
-		void Cell::add_parameter(const std::string & name, const T & default_value, bool configure_on_change)
+		void Cell::add_parameter(const std::string& name, const T & default_value, bool configure_on_change)
 		{
 			this->configure_on_parameters_change_.insert(std::make_pair(name, configure_on_change));
 			this->declare_parameter(name, rclcpp::ParameterValue(default_value));
 		}
 
 		template <typename T>
-		void Cell::set_parameter(const std::string & name, const T & value)
+		void Cell::set_parameter(const std::string& name, const T & value)
 		{
 			auto result = this->parameters_client_->set_parameters({rclcpp::Parameter(name, value)});
 			if (!result[0].successful) 
@@ -470,10 +627,51 @@ namespace Modulo
 		}
 
 		template <typename T>
-		decltype(auto) Cell::get_parameter(const std::string & name) const
+		decltype(auto) Cell::get_parameter(const std::string& name) const
 		{
 			auto parameter = this->parameters_client_->get_parameters({name});
 			return parameter[0].get_value<T>();
+		}
+
+		template <typename srvT>
+		std::shared_ptr<typename srvT::Response> Cell::send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request)
+		{
+  			return static_cast<Communication::ServiceClient::ClientHandler<srvT>& >(*this->handlers_.at(channel)).send_blocking_request(request);
+		}
+
+		template <typename srvT>
+		std::shared_future<std::shared_ptr<typename srvT::Response> > Cell::send_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request)
+		{
+			return static_cast<Communication::ServiceClient::ClientHandler<srvT>& >(*this->handlers_.at(channel)).send_request(request);
+		}
+
+		template <typename CallbackT, typename DurationT>
+		void Cell::run_periodic_call(const CallbackT& callback_function, const std::chrono::duration<int64_t, DurationT>& period)
+		{
+			while(this->configured_)
+			{
+				auto start = std::chrono::steady_clock::now();
+				std::unique_lock<std::mutex> lck(*this->mutex_);
+				if(this->active_)
+				{
+					callback_function();
+				}
+				lck.unlock();
+				auto end = std::chrono::steady_clock::now();
+		    	auto elapsed = end - start;
+		    	auto timeToWait = period - elapsed;
+		    	if(timeToWait > std::chrono::nanoseconds::zero())
+		    	{
+		        	std::this_thread::sleep_for(timeToWait);
+		    	}
+			}
+		}
+
+		template <typename CallbackT, typename DurationT>
+		void Cell::add_periodic_call(const CallbackT& callback_function, const std::chrono::duration<int64_t, DurationT>& period)
+		{
+			std::function<void(const std::function<void(void)>&, const std::chrono::duration<int64_t, DurationT>&)> fnc = std::bind(&Cell::run_periodic_call, this, callback_function, period);
+			this->active_threads_.push_back(std::thread(fnc, callback_function, period));
 		}
 	}
 }

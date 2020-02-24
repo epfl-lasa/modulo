@@ -4,10 +4,6 @@ namespace Modulo
 {
 	namespace Recorders
 	{
-		Recorder::Recorder(const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms) : 
-		Cell(node_name, period, intra_process_comms)
-		{}
-
 		Recorder::~Recorder()
 		{}
 
@@ -36,7 +32,8 @@ namespace Modulo
 			{
 				if(h.second->get_type() == Core::Communication::CommunicationType::SUBSCRIPTION)
 				{
-					if(!this->record(h.second->get_recipient())) RCLCPP_ERROR(this->get_logger(), "Unable to record " + h.second->get_recipient().get_name());
+					const Core::Communication::MessagePassing::MessagePassingHandler& subscription = static_cast<const Core::Communication::MessagePassing::MessagePassingHandler&>(*h.second);
+					if(!this->record(subscription.get_recipient())) RCLCPP_ERROR(this->get_logger(), "Unable to record " + subscription.get_recipient().get_name());
 				}
 			}
 		}

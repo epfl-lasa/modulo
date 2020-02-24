@@ -62,6 +62,9 @@ USER ros2
 COPY config/entrypoint.sh /ros_entrypoint.sh 
 RUN sudo chmod +x /ros_entrypoint.sh ; sudo chown ${USER} /ros_entrypoint.sh ; 
 
+# change to the home root
+WORKDIR $HOME
+
 # Clean image
 RUN sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
 

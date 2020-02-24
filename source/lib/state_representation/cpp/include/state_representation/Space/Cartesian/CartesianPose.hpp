@@ -11,6 +11,7 @@
 #include "state_representation/Space/Cartesian/CartesianState.hpp"
 #include "state_representation/Space/Cartesian/CartesianTwist.hpp"
 
+
 namespace StateRepresentation 
 {
 	class CartesianTwist;
@@ -169,7 +170,7 @@ namespace StateRepresentation
 	 	 * @param dt the time period to divise by
 	 	 * @return the corresponding CartesianTwist
 	     */
-		friend const CartesianTwist operator/(const CartesianPose& pose, const std::chrono::milliseconds& dt);
+		friend const CartesianTwist operator/(const CartesianPose& pose, const std::chrono::nanoseconds& dt);
 
 		/**
 		 * @brief compute the distance between two CartesianPose

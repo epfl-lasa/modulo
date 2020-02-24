@@ -4,10 +4,6 @@ namespace Modulo
 {
 	namespace Modulators
 	{
-		Modulator::Modulator(const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms) : 
-		Cell(node_name, period, intra_process_comms)
-		{}
-
 		Modulator::~Modulator()
 		{
 			this->on_shutdown();

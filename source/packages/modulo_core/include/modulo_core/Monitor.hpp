@@ -1,36 +1,41 @@
 /**
- * @class MotionGenerator
- * @brief Abstract class to define a MotionGenerator
  * @author Baptiste Busch
  * @date 2019/02/14
- *
- * A MotionGenerator generate desired motion from a current state.
  */
 
-#ifndef MODULO_MOTION_GENERATOR_H_
-#define MODULO_MOTION_GENERATOR_H_
+#ifndef MODULO_CONTROLLER_H_
+#define MODULO_CONTROLLER_H_
 
+#include <lifecycle_msgs/srv/get_state.hpp>
+#include <list>
 #include "modulo_core/Cell.hpp"
 
 namespace Modulo
 {
-	namespace MotionGenerators
+	namespace Monitors
 	{
-		class MotionGenerator: public Core::Cell 
+		/**
+		 * @class Monitor 
+         * @brief Abstract class to define a Monitor
+		 */
+		class Monitor: public Core::Cell 
 		{
+		private:
+			std::list<std::string> monitored_node_; //< the list of nodes to monitor
+
 		public:
 			/**
-			 * @brief Constructor for the MotionGenerator class
+			 * @brief Constructor for the Monitor class
 			 * @param node_name name of the ROS node
 			 * @param period rate used by each publisher of the class
 			 */
-			template <typename DurationT>
-			explicit MotionGenerator(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms=false);
+			template <typename DurationT> 
+			explicit Monitor(const std::string& node_name, const std::list<std::string>& monitored_node, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms = false);
 
 			/**
 			 * @brief Destructor
 			 */
-			~MotionGenerator();
+			~Monitor();
 
 			/**
 			 * @brief This function is called time the configure call 
@@ -77,13 +82,14 @@ namespace Modulo
 			/**
 			 * @brief Function computing one step of calculation. It is called periodically in the run function.
 			 */
-			virtual void step() = 0;
+			void step();
 		};
 
 		template <typename DurationT>
-		MotionGenerator::MotionGenerator(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms): 
-		Cell(node_name, period, intra_process_comms)
+		Monitor::Monitor(const std::string& node_name, const std::list<std::string>& monitored_node, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms) : 
+		Cell(node_name, period, intra_process_comms), monitored_node_(monitored_node)
 		{}
+
 	}
 }
 #endif

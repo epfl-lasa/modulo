@@ -213,14 +213,14 @@ namespace StateRepresentation
 	 	 * @param dt the time period to multiply with
 	 	 * @return the CartesianPose corresponding to the displacement over the time period
 	     */
-		friend const CartesianPose operator*(const std::chrono::milliseconds& dt, const CartesianTwist& twist);
+		friend const CartesianPose operator*(const std::chrono::nanoseconds& dt, const CartesianTwist& twist);
 
 		/**
 	 	 * @brief Overload the * operator with a time period
 	 	 * @param dt the time period to multiply with
 	 	 * @return the CartesianPose corresponding to the displacement over the time period
 	     */
-		friend const CartesianPose operator*(const CartesianTwist& twist, const std::chrono::milliseconds& dt);
+		friend const CartesianPose operator*(const CartesianTwist& twist, const std::chrono::nanoseconds& dt);
 	};
 }
 

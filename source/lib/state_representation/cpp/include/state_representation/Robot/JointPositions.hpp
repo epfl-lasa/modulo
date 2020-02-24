@@ -198,7 +198,7 @@ namespace StateRepresentation
 	 	 * @param dt the time period to multiply with
 	 	 * @return the JointVelocities corresponding to the velocities over the time period
 	     */
-		friend const JointVelocities operator/(const JointPositions& positions, const std::chrono::milliseconds& dt);
+		friend const JointVelocities operator/(const JointPositions& positions, const std::chrono::nanoseconds& dt);
 	};
 }
 #endif
