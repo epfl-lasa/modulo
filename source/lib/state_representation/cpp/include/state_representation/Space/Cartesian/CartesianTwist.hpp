@@ -161,6 +161,8 @@ namespace StateRepresentation
 		 * the velocity will be set to 0
 		 * @return the clamped velocity
 		 */
+		void scale(double gain_linear);
+
 		const CartesianTwist clamped(double max_linear, double max_angular, double noise_ratio=0, double angular_noise_ratio=0) const;
 
 		/**
