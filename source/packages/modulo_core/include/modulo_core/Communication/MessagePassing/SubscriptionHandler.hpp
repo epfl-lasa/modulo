@@ -37,7 +37,8 @@ namespace Modulo
 					 * @param  timeout   the period before timeout
 					 * @param  mutex     reference to the Cell mutex
 					 */
-					explicit SubscriptionHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<std::mutex>& mutex);
+					template <typename DurationT>
+					explicit SubscriptionHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<std::mutex>& mutex);
 					
 					/**
 					 * @brief Callback function to receive the message from the network
@@ -67,8 +68,8 @@ namespace Modulo
 					void check_timeout();
 				};
 
-				template <class RecT, typename MsgT>
-				SubscriptionHandler<RecT, MsgT>::SubscriptionHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<std::mutex>& mutex):
+				template <class RecT, typename MsgT> template <typename DurationT>
+				SubscriptionHandler<RecT, MsgT>::SubscriptionHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<std::mutex>& mutex):
 				MessagePassingHandler(CommunicationType::SUBSCRIPTION, recipient, timeout, mutex)
 				{}
 				
@@ -96,7 +97,7 @@ namespace Modulo
 				template <class RecT, typename MsgT>
 				inline void SubscriptionHandler<RecT, MsgT>::check_timeout()
 				{
-					if(this->get_timeout() != std::chrono::milliseconds(0))
+					if(this->get_timeout() != std::chrono::nanoseconds::zero())
 					{
 						if(this->get_recipient().is_deprecated(this->get_timeout()))
 						{

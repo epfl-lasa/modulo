@@ -188,14 +188,14 @@ namespace StateRepresentation
 		return result;
 	}
 
-	const JointVelocities operator/(const JointPositions& positions, const std::chrono::milliseconds& dt)
+	const JointVelocities operator/(const JointPositions& positions, const std::chrono::nanoseconds& dt)
 	{
 		if(positions.is_empty()) throw EmptyStateException(positions.get_name() + " state is empty");
 		// operations
 		JointVelocities velocities(positions.get_name(), positions.get_names());
 		// convert the period to a double with the second as reference
-		double period = std::chrono::milliseconds(dt).count();
-		period /= 1000.;
+		double period = dt.count();
+		period /= 1e9;
 		// multiply the positions by this period value
 		velocities.set_velocities(positions.get_positions() / period);
 		return velocities;

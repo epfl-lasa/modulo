@@ -171,21 +171,21 @@ namespace StateRepresentation
 		return result;
 	}
 
-	const JointPositions operator*(const std::chrono::milliseconds& dt, const JointVelocities& velocities)
+	const JointPositions operator*(const std::chrono::nanoseconds& dt, const JointVelocities& velocities)
 	{
 		if(velocities.is_empty()) throw EmptyStateException(velocities.get_name() + " state is empty");
 		// operations
 		JointPositions displacement(velocities.get_name(), velocities.get_size());
 		// convert the period to a double with the second as reference
-		double period = std::chrono::milliseconds(dt).count();
-		period /= 1000.;
+		double period = dt.count();
+		period /= 1e9;
 		// multiply the velocities by this period value
 		displacement.set_positions(period * velocities.get_velocities());
 		return displacement;
 
 	}
 
-	const JointPositions operator*(const JointVelocities& velocities, const std::chrono::milliseconds& dt)
+	const JointPositions operator*(const JointVelocities& velocities, const std::chrono::nanoseconds& dt)
 	{
 		return dt * velocities;
 	}

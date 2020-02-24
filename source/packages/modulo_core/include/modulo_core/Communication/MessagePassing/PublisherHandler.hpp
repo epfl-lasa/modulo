@@ -52,7 +52,8 @@ namespace Modulo
 					 * @param  clock     reference to the Cell clock
 					 * @param  mutex     reference to the Cell mutex
 					 */
-					explicit PublisherHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
+					template <typename DurationT>
+					explicit PublisherHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
 					
 					/**
 					 * @brief Function to publish periodically 
@@ -99,8 +100,8 @@ namespace Modulo
 					virtual void check_timeout();
 				};
 
-				template <class RecT, typename MsgT>
-				PublisherHandler<RecT, MsgT>::PublisherHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::milliseconds& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
+				template <class RecT, typename MsgT> template <typename DurationT>
+				PublisherHandler<RecT, MsgT>::PublisherHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
 				MessagePassingHandler(CommunicationType::PUBLISHER, recipient, timeout, mutex),
 				clock_(clock),
 				activated_(false)
@@ -165,7 +166,7 @@ namespace Modulo
 				template <class RecT, typename MsgT>
 				inline void PublisherHandler<RecT, MsgT>::check_timeout()
 				{
-					if(this->get_timeout() != std::chrono::milliseconds(0))
+					if(this->get_timeout() != std::chrono::nanoseconds::zero())
 					{
 						if(this->get_recipient().is_deprecated(this->get_timeout()))
 						{

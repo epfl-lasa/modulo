@@ -108,7 +108,8 @@ namespace StateRepresentation
 	 	 * @brief Check if the state is deprecated given a certain time delay
 	 	 * @param time_delay the time after which to consider the state as deprecated
 	     */
-		bool is_deprecated(const std::chrono::milliseconds& time_delay);
+	    template <typename DurationT>
+		bool is_deprecated(const std::chrono::duration<int64_t, DurationT>& time_delay);
 
 		/**
 	 	 * @brief Check if the state is compatible for operations with the state given as argument
@@ -161,7 +162,8 @@ namespace StateRepresentation
 		this->timestamp = std::chrono::steady_clock::now();
 	}
 
-	inline bool State::is_deprecated(const std::chrono::milliseconds& time_delay)
+	template <typename DurationT>
+	inline bool State::is_deprecated(const std::chrono::duration<int64_t, DurationT>& time_delay)
 	{
 		return ((std::chrono::steady_clock::now() - this->timestamp) > time_delay);
 	}

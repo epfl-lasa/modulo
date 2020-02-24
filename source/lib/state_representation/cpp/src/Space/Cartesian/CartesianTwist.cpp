@@ -214,15 +214,15 @@ namespace StateRepresentation
 		return twist * lambda;
 	}
 
-	const CartesianPose operator*(const std::chrono::milliseconds& dt, const CartesianTwist& twist)
+	const CartesianPose operator*(const std::chrono::nanoseconds& dt, const CartesianTwist& twist)
 	{
 		// sanity check
 		if(twist.is_empty()) throw EmptyStateException(twist.get_name() + " state is empty");
 		// operations
 		CartesianPose displacement(twist.get_name(), twist.get_reference_frame());
 		// convert the period to a double with the second as reference
-		double period = std::chrono::milliseconds(dt).count();
-		period /= 1000.;
+		double period = dt.count();
+		period /= 1e9;
 		// convert the velocities into a displacement
 		displacement.set_position(period * twist.get_linear_velocity());
 		Eigen::Quaterniond angular_displacement = Eigen::Quaterniond::Identity();
@@ -236,7 +236,7 @@ namespace StateRepresentation
 		return displacement;
 	}
 
-	const CartesianPose operator*(const CartesianTwist& twist, const std::chrono::milliseconds& dt)
+	const CartesianPose operator*(const CartesianTwist& twist, const std::chrono::nanoseconds& dt)
 	{
 		return dt * twist;
 	}

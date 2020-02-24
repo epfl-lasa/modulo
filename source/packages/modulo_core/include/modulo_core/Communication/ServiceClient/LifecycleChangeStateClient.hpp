@@ -33,7 +33,8 @@ namespace Modulo
 					 * @param timeout period before timeout
 					 * @param mutex reference to the Cell mutex
 					 */
-					explicit LifecycleChangeStateClient(const std::chrono::milliseconds& timeout, const std::shared_ptr<std::mutex>& mutex);
+					template <typename DurationT>
+					explicit LifecycleChangeStateClient(const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<std::mutex>& mutex);
 
 					void configure();
 
@@ -43,6 +44,13 @@ namespace Modulo
 
 					void cleanup();
 				};
+
+				template <typename DurationT>
+				LifecycleChangeStateClient::LifecycleChangeStateClient(const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<std::mutex>& mutex):
+				ClientHandler<lifecycle_msgs::srv::ChangeState>(timeout, mutex),
+				request_(std::make_shared<lifecycle_msgs::srv::ChangeState::Request>())
+				{}
+
 			}
 		}
 	}

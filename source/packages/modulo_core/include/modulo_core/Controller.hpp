@@ -25,12 +25,13 @@ namespace Modulo
 		class Controller: public Core::Cell 
 		{
 		public:
-			 /**
-			  * @brief Constructor for the Controller class
-			  * @param node_name name of the ROS node
-			  * @param period rate used by each publisher of the class
-			  */
-			explicit Controller(const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms = false);
+			/**
+			 * @brief Constructor for the Controller class
+			 * @param node_name name of the ROS node
+			 * @param period rate used by each publisher of the class
+			 */
+			template <typename DurationT>
+			explicit Controller(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms=false);
 
 			/**
 			 * @brief Destructor
@@ -84,6 +85,11 @@ namespace Modulo
 			 */
 			virtual void step() = 0;
 		};
+
+		template <typename DurationT>
+		Controller::Controller(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms): 
+		Cell(node_name, period, intra_process_comms)
+		{}
 	}
 }
 #endif

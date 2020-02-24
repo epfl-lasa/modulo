@@ -24,7 +24,8 @@ namespace Modulo
 			 * @param node_name name of the ROS node
 			 * @param period rate used by each publisher of the class
 			 */
-			explicit MotionGenerator(const std::string & node_name, const std::chrono::milliseconds & period, bool intra_process_comms = false);
+			template <typename DurationT>
+			explicit MotionGenerator(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms=false);
 
 			/**
 			 * @brief Destructor
@@ -78,6 +79,11 @@ namespace Modulo
 			 */
 			virtual void step() = 0;
 		};
+
+		template <typename DurationT>
+		MotionGenerator::MotionGenerator(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms): 
+		Cell(node_name, period, intra_process_comms)
+		{}
 	}
 }
 #endif
