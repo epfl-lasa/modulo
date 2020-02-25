@@ -382,7 +382,17 @@ namespace Modulo
 						msg.velocities = std::vector<double>(state.get_velocities().data(), state.get_velocities().data() + state.get_velocities().size());
 						msg.accelerations = std::vector<double>(state.get_accelerations().data(), state.get_accelerations().data() + state.get_accelerations().size());
 						msg.effort = std::vector<double>(state.get_torques().data(), state.get_torques().data() + state.get_torques().size());
-						msg.time_from_start = rclcpp::Duration(std::chrono::milliseconds(100));
+					}
+
+					void write_msg(trajectory_msgs::msg::JointTrajectory & msg, const StateRepresentation::Trajectory<StateRepresentation::JointState> & state, const rclcpp::Time & time)
+					{
+						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+						msg.header.stamp = time;
+						//msg.joint_names = state.get_names();
+						msg.points.resize(1);
+						auto point = state[0];
+						write_msg(msg.points[0], point.first, time);
+						msg.points[0].time_from_start = rclcpp::Duration(point.second);
 					}	
 				}
 			}

@@ -112,4 +112,12 @@ if (runtests)
     )
     add_test(NAME runTestJacobianMatrix COMMAND runTestJacobianMatrix)
 
+    add_executable(runTestTrajectory tests/testTrajectory.cpp)
+    target_link_libraries(runTestTrajectory
+      gtest 
+      gtest_main
+      ${PROJECT_NAME}
+    )
+    add_test(NAME runTestTrajectory COMMAND runTestTrajectory)
+
 endif()
