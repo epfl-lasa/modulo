@@ -1,0 +1,202 @@
+## 0.1.1 (febbraio 26, 2020)
+
+
+## 0.1.0 (febbraio 26, 2020)
+
+
+## 0.1.0 (febbraio 26, 2020)
+  - Remove the robot interface for testing purpose
+  - Remove lifecycle client as nodes already have the possibility to call lifecycle functions internally
+  - Simplify Dockerfile
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Add publisher for trajectory point
+  - Add representation for trajectories
+  - Change back to SingleThreadedExecutor
+  - Remove all the milliseconds dependencies
+  - Improve documentation
+  - Declare the timers as template to accept any type std::chrono::duration
+  - Put back the wokdir in home directory after build
+  - Respect naming convention
+  - Simplify the demo
+  - \Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Propagate a CommunicationTimeoutException and catch it properly in the monitor
+  - Add a default client to the lifecycle change state service of the node
+  - Increase timeout even further
+  - Put client in a ServiceClient subfolder and namespace
+  - Increase timeout period
+  - Reorganize Communication folder into subcategories
+  - Correct the problems with the monitor by waiting that the service is available
+  - Add warning message
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Initialize with 0 position
+  - Output should be a Twist not a Pose
+  - Simplify the conversion
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Car demo
+  - Randomize orientation as well and publish attractor at a different rate than the node period
+  - Add possibility to set a pose from position and orientation
+  - Changes the way to specify the publishing period in publishers
+  - Add missing docstring
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Better handle the client side with blocking request
+  - Change order of arguments on Monitor
+  - First node that uses a client to get the status of the nodes
+  - First attempt to define a client communication paradigm
+  - Clean the unused variables
+  - Add a base class between CommunicationHandler and the other ones to remove the recipient
+  - Add missing docstring
+  - Improve the action example
+  - Add a random target generator
+  - Add an action class
+  - Add AngularVelocity
+  - Add the angle representation
+  - Clean and add the negative operator
+  - Define Velocity as a template class with its own literals
+  - First implementation of a unit class using custom literals
+  - Clean the Communication folder to have proper conventions and docstring
+  - Change the type string to an enumeration for later switch case usage
+  - Properly clean the main thread on cleanup
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Add methods to add periodic call of a function
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Change docker tag due to errors in the nightly build
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Updated circulard DS
+  - Add Parameter representation to be able to send and receive standard types
+  - Reorganize StateRepresentation to integrate Parameters
+  - First attempt for circular DS on IIWA
+  - Copy and apply ownership in single line
+  - Remove nvidia runtime
+  - Correct typos and add missing doc
+  - Remove garbage in files
+  - resolve typo
+  - resolve conflict
+  - merge files
+  - create files
+  - create all files
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Scale the quaternion based on the scaled angular velocity from identity
+  - Put the quaternion log and ecp into functions in a file named MathTools
+  - Add missing memory import
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - add python files
+  - First attempt to use a launchfile but not working correctly
+  - Test shared_ptr acceptation and synchronus send_transform
+  - Add a way to publish synchronusly. This is used to perform multiple send_transform
+  - Accept shared_ptr as input
+  - Accept shared_ptr as input
+  - Quaternion addition is not commutative
+  - Add rm option in container
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Check the multiplication sign after the operation
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - add clamping in JointTorques
+  - Add tested joint acclerations and torques + reorganize test folder
+  - Add tested joint positions and velocities
+  - Change printing function
+  - Remove trailing whitespace
+  - Add tested joint state
+  - Add name in description
+  - Remove unused jacobian matrix
+  - Test python implementation of State
+  - Reorganize to ease the mount of volumes
+  - Add python based StateRepresentation of State
+  - Reorganize StateConversion for clarity
+  - Change writing of State
+  - Remove protobuf
+  - Remove protocol buffers
+  - Put a cpp folder to include a python version of the lib
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Remove unnecessary script
+  - Update README.md
+  - Reorganize folders architecture
+  - Correct typos and test filtering
+  - Do not check for name equality when performing the operations only for reference frames
+  - Add function to record a joint state
+  - Proper implementation of the recorder to only record subscriptions
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - The step function is not virtual here
+  - Add the Recorder subclass
+  - Use double quotes
+  - Catch by reference
+  - Add the badge to the code verification using codacy
+  - Improve coding style
+  - Add an exception to raise when a controller is not supported
+  - Better style formatting
+  - add a dockerignore file
+  - Simplify the image by using WORKDIR
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Add functions for parameters (future) and boolean for activation, configure and shutdown
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Add noise ratio for both angular and linear velocities
+  - remove the stop container at exit
+  - Modify the way to calculate the displacement
+  - Very important here to multiply by the gain after calculating a velocity
+  - Correctly calculate the angular velocity (tested on the franka robot)
+  - Create the base  functions to handle parameters using ROS2 paramter system
+  - Clean the Cell header
+  - Put the subscribers/publishers in on_configure functions and validate the lifecycle process
+  - Add CartesianWrench and JointTorques representations
+  - Add operations + and - with Eigen Vectors
+  - Refactor CartesianVelocity to CartesianTwist
+  - Also pass the joint names in the JacobianMatrix message
+  - Add placeholders for velocity clamping in joint space
+  - Build missing modulator
+  - Add a function to access the mutex
+  - Add the jacobian and change topic names
+  - Remove unnecessary mutex lock and pass its shared_ptr by const reference
+  - Add possibility to initialize a jacobian without knowing the number of joints
+  - Add a copy function based on the copy constructor
+  - Put the default timeout ot 10*period and set it from an attribute to the function
+  - Correct the mutex problem that was causing the publisher to randomly crash
+  - Set dt as the time period of the node
+  - Correct a missing factor argument. Now position and orientation converges at the same rate
+  - Add exception to be thrown in not yet implemented functions
+  - Test the jacobian publication and correct errors in StateConversion
+  - Simplify the name of tests
+  - JacobianMatrix implementation tested
+  - Major restructuration
+  - Add a class to represent the jacbobian matrix of a robot
+  - Put the initialization of the base class that set empty to false
+  - Add twist setter and a constructor from a twist
+  - Add JointPositions and JointVelocities (not tested)
+  - Add distance calculations
+  - Add a noise ration to apply a deadzone under which the velocity is set to 0
+  - Add clamping functions for velocity both in place and with return value
+  - The quaternion error was incorrect resulting in an angular velocity of inversed sign
+  - Coorect conditions in orientation for the tests
+  - Correct the problem of non convergence of orientation that was due to incorrect ordering
+  - Solve the constant inversion problem but make the DS test fail
+  - Not sending the robot transform was causing problem for the test
+  - Simplify calculation of the log of the quaternion error
+  - always normalize and change the way to check if quaternions are on the same hemisphere
+  - Adapt to changes made in state_representation and simplify
+  - Add implicit conversion between pose and velocities by using operator over period of 1 second
+  - Correct mounting volume
+  - Changes the operators to have operations that have physical meaning
+  - Always normalize
+  - Add googletests dependencies
+  - Add JointState example
+  - Simplify by only considering a singe float gain for the moment
+  - Add NotImplementedException
+  - Add missing return statement
+  - Add missing empty constructor
+  - Change h header
+  - Add operator to be able to do commutative operations with a scalar
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Add a publisher for Quaternion messages
+  - Update README.md
+  - Correct missing path in cmake
+  - Add the possibility to build modulo on top of specific version of ROS2
+  - Add c++ highlightning
+  - Update README.md
+  - Update README.md
+  - Update README.md
+  - Update README.md
+  - Update README.md
+  - Add README
+  - Modify the README
+  - Add the software architechture at its current stage of development
+  - Initial commit
+
