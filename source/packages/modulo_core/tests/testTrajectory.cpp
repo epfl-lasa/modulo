@@ -10,27 +10,57 @@
 #include <exception>
 
 
+// class Publisher : public Modulo::Core::Cell
+// {
+// private: 
+// 	std::shared_ptr<StateRepresentation::JointState> point;
+	
+// public:
+// 	explicit Publisher(const std::string & node_name, const std::chrono::milliseconds & period) :
+// 	Cell(node_name, period, false),
+// 	point(std::make_shared<StateRepresentation::JointState>("robot", 4))
+// 	{}
+
+// 	void on_configure()
+// 	{
+// 		this->add_publisher<trajectory_msgs::msg::JointTrajectoryPoint>("/test", point);
+// 	}
+
+// 	void step()
+// 	{
+// 		Eigen::ArrayXd positions(4);
+// 		positions << 0.2, 0.2, 0.2, 0.2;
+// 		this->point->set_positions(positions);
+// 	}
+// };
+
 class Publisher : public Modulo::Core::Cell
 {
 private: 
-	std::shared_ptr<StateRepresentation::JointState> point;
+	StateRepresentation::JointState point;
+	std::shared_ptr<StateRepresentation::Trajectory<StateRepresentation::JointState>> traj;
 	
 public:
 	explicit Publisher(const std::string & node_name, const std::chrono::milliseconds & period) :
 	Cell(node_name, period, false),
-	point(std::make_shared<StateRepresentation::JointState>("robot", 4))
+	//point(std::make_shared<StateRepresentation::JointState>("robot", 1)),
+	point("robot", 1),
+	traj(std::make_shared<StateRepresentation::Trajectory<StateRepresentation::JointState>>())
 	{}
 
 	void on_configure()
 	{
-		this->add_publisher<trajectory_msgs::msg::JointTrajectoryPoint>("/test", point);
+		this->add_publisher<trajectory_msgs::msg::JointTrajectory>("/test", traj);
 	}
 
 	void step()
-	{
-		Eigen::ArrayXd positions(4);
-		positions << 0.2, 0.2, 0.2, 0.2;
-		this->point->set_positions(positions);
+	{	
+		this->traj->clear();
+		std::chrono::milliseconds step_period(100);
+		Eigen::ArrayXd positions(1);
+		positions << 0.2;
+		this->point.set_positions(positions);
+		this->traj->add_point(this->point, step_period);
 	}
 };
 
