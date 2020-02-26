@@ -1,3 +1,7 @@
+## 0.1.4 (febbraio 26, 2020)
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Testing of Trajectory (publish JointTrajectory message)
+
 ## 0.1.3 (febbraio 26, 2020)
   - Merge branch 'hotfix-0.1.2'
   - Forgot to remove the file from the CMakeLists.txt
