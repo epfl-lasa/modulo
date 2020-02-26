@@ -25,7 +25,6 @@
 #include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
 #include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
 #include "modulo_core/Communication/ServiceClient/ClientHandler.hpp"
-#include "modulo_core/Communication/ServiceClient/LifecycleChangeStateClient.hpp"
 
 using namespace std::chrono_literals;
 
