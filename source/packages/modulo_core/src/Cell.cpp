@@ -58,16 +58,9 @@ namespace Modulo
 			// add default transform broadcaster and transform listener
 			this->add_transform_broadcaster(this->period_, 10*this->period_);
 			this->add_transform_listener(10*this->period_);
-			// add default client to the lifecycle change state service
-			this->add_lifececycle_change_state_client(10*this->period_);
 			// call the proxy on_configure function
 			this->on_configure();
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
-		}
-
-		void Cell::configure()
-		{
-			this->change_state_client_->configure();
 		}
 
 		void Cell::on_configure()
@@ -90,11 +83,6 @@ namespace Modulo
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
-		void Cell::activate()
-		{
-			this->change_state_client_->activate();
-		}
-
 		void Cell::on_activate()
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate of the Cell class called");
@@ -115,11 +103,6 @@ namespace Modulo
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
-		void Cell::deactivate()
-		{
-			this->change_state_client_->deactivate();
-		}
-
 		void Cell::on_deactivate()
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_deactivate of the Cell class called");
@@ -136,11 +119,6 @@ namespace Modulo
 			// call the proxy on_cleanup function
 			this->on_cleanup();
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
-		}
-
-		void Cell::cleanup()
-		{
-			this->change_state_client_->cleanup();
 		}
 
 		void Cell::on_cleanup()
