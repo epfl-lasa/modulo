@@ -38,16 +38,16 @@ USER ros2
 ENV HOME /home/${USER}
 
 # import previously downloaded packages
-RUN mkdir -p /home/${USER}/modulo_lib
-WORKDIR /home/${USER}/modulo_lib/
+RUN mkdir -p ${HOME}/modulo_lib
+WORKDIR ${HOME}/modulo_lib/
 COPY --chown=${USER} ./source/lib/ .
 
 # build packages and libraries
 RUN sh build.sh
 
 # build ROS workspace
-RUN mkdir -p /home/${USER}/ros2_ws/src
-WORKDIR /home/${USER}/ros2_ws/
+RUN mkdir -p ${HOME}/ros2_ws/src
+WORKDIR ${HOME}/ros2_ws/
 COPY --chown=${USER} ./source/packages/ ./src/
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build --symlink-install"
@@ -63,7 +63,7 @@ COPY config/entrypoint.sh /ros_entrypoint.sh
 RUN sudo chmod +x /ros_entrypoint.sh ; sudo chown ${USER} /ros_entrypoint.sh ; 
 
 # change to the home root
-WORKDIR $HOME
+WORKDIR ${HOME}
 
 # Clean image
 RUN sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*

@@ -25,7 +25,6 @@
 #include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
 #include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
 #include "modulo_core/Communication/ServiceClient/ClientHandler.hpp"
-#include "modulo_core/Communication/ServiceClient/LifecycleChangeStateClient.hpp"
 
 using namespace std::chrono_literals;
 
@@ -58,7 +57,6 @@ namespace Modulo
 			std::list<std::thread> active_threads_; ///< list of active threads for periodic calling
 			std::map<std::string, bool> configure_on_parameters_change_; ///< map of bools to store the configure_on_change value of each parameters
 			std::shared_ptr<rclcpp::SyncParametersClient> parameters_client_; ///< shared pointer to the parameter client that handles request to the parameter server
-			std::shared_ptr<Communication::ServiceClient::LifecycleChangeStateClient> change_state_client_; ///< pointer to the lifecycle client to send lifecycle state operations from the cell
 
 			/**
 			 * @brief Function to clear all publishers, subscriptions and services
@@ -81,14 +79,6 @@ namespace Modulo
 			 */
 			template <typename DurationT>
 			void add_transform_listener(const std::chrono::duration<int64_t, DurationT>& timeout);
-
-			/**
-			 * @brief Function to add a direct client to the lifecycle change state service of the node
-			 * @tparam DurationT template value for accepting any type of std::chrono duration values
-			 * @param timeout the period after wich to consider that the client has timeout
-			 */
-			template <typename DurationT>
-			void add_lifececycle_change_state_client(const std::chrono::duration<int64_t, DurationT>& timeout);
 
 		protected:
 			/**
@@ -318,11 +308,6 @@ namespace Modulo
 			const StateRepresentation::CartesianPose lookup_transform(const std::string& frame_name, const std::string& reference_frame="world");
 
 			/**
-			 * @brief Call the lifecycle service to configure the node
-			 */
-			void configure();
-
-			/**
 			 * @brief Transition callback for state configuring
 			 *
 			 * on_configure callback is being called when the lifecycle node
@@ -342,11 +327,6 @@ namespace Modulo
 			 * adapted to the derived class.
 			 */
 			virtual void on_configure();
-
-			/**
-			 * @brief Call the lifecycle service to activate the node
-			 */
-			void activate();
 
 			/**
 			 * @brief Transition callback for state activating
@@ -370,11 +350,6 @@ namespace Modulo
 			virtual void on_activate();
 
 			/**
-			 * @brief Call the lifecycle service to deactivate the node
-			 */
-			void deactivate();
-
-			/**
 			 * @brief Transition callback for state deactivating
 			 *
 			 * on_deactivate callback is being called when the lifecycle node
@@ -394,11 +369,6 @@ namespace Modulo
 			 * adapted to the derived class.
 			 */
 			virtual void on_deactivate();
-
-			/**
-			 * @brief Call the lifecycle service to cleanup the node
-			 */
-			void cleanup();
 
 			/**
 			 * @brief Transition callback for state cleaningup
@@ -565,13 +535,6 @@ namespace Modulo
 		{
 			auto handler = std::make_shared<Communication::MessagePassing::TransformListenerHandler>(timeout, this->get_clock(), this->mutex_);
 			this->handlers_.insert(std::make_pair("tf_listener", handler));
-		}
-
-		template <typename DurationT>
-		void Cell::add_lifececycle_change_state_client(const std::chrono::duration<int64_t, DurationT>& timeout)
-		{
-			this->change_state_client_ = std::make_shared<Communication::ServiceClient::LifecycleChangeStateClient>(timeout, this->mutex_);
-			this->change_state_client_->set_client(this->create_client<lifecycle_msgs::srv::ChangeState>(std::string(this->get_name()) + "/change_state"));
 		}
 
 		template <typename DurationT1, typename DurationT2>
