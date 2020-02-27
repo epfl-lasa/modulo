@@ -40,6 +40,17 @@ namespace StateRepresentation
 		void add_point(const StateT& new_point, const std::chrono::duration<int64_t, DurationT>& new_time);
 
 		/**
+		* @brief Insert new point and corresponding time to trajectory between two already existing points
+		*/
+		template <typename DurationT>
+		void insert_point(const StateT& new_point, const std::chrono::duration<int64_t, DurationT>& new_time, int pos);
+
+		/**
+		* @brief Delete last point and corresponding time from trajectory
+		*/
+		void delete_point();
+
+		/**
 		* @brief Clear trajectory
 		*/
 		void clear();
@@ -93,18 +104,43 @@ namespace StateRepresentation
 	{
 		this->set_filled();
 		this->points.push_back(new_point);
-		if(!times.empty())
+		if(!this->times.empty())
 		{
 			auto previous_time = this->times.back();
 			this->times.push_back(previous_time + new_time);
 		}
+		else
+			this->times.push_back(new_time);
 	}
 
-	// template <class StateT> template <typename DurationT>
-	// void Trajectory<StateT>::delete_point()
-	// {
-	// 	
-	// }
+	template <class StateT> template <typename DurationT>
+	void Trajectory<StateT>::insert_point(const StateT& new_point, const std::chrono::duration<int64_t, DurationT>& new_time, int pos)
+	{
+		this->set_filled();
+
+		auto it_points = this->points.begin();
+		auto it_times = this->times.begin();
+		std::advance(it_points, pos);
+		std::advance(it_times, pos);
+		
+		this->points.insert(it_points, new_point);
+
+		auto previous_time = this->times[pos-1];
+		this->times.insert(it_times, previous_time + new_time);
+
+		for(unsigned int i = pos+1; i <= points.size(); i++)
+			this->times[i] = times[i] + new_time;
+	}
+
+	template <class StateT>
+	void Trajectory<StateT>::delete_point()
+	{
+		this->set_filled();
+		if(!this->points.empty())
+			this->points.pop_back();
+		if(!this->times.empty())
+			this->times.pop_back();
+	}
 
 	template <class StateT>
 	void Trajectory<StateT>::clear()
@@ -128,15 +164,6 @@ namespace StateRepresentation
 	template <class StateT>
 	const std::pair<StateT, std::chrono::milliseconds> Trajectory<StateT>::operator[](unsigned int idx) const
 	{
-		//To be added: check that i-th element does exist
-		// std::pair<StateT, std::chrono::milliseconds> traj_pt;
-		// typename std::list<StateT>::const_iterator it_point = this->points.begin();
-		// std::list<std::chrono::milliseconds>::const_iterator it_time = this->times.begin();
-		// std::advance(it_point, idx);
-		// std::advance(it_time, idx);
-		// traj_pt.first = *it_point;
-		// traj_pt.second = *it_time;
-		// return traj_pt;
 		return std::make_pair(this->points[idx], this->times[idx]);
 	}
 
