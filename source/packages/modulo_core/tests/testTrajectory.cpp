@@ -43,23 +43,45 @@ private:
 public:
 	explicit Publisher(const std::string & node_name, const std::chrono::milliseconds & period) :
 	Cell(node_name, period, false),
-	//point(std::make_shared<StateRepresentation::JointState>("robot", 1)),
-	point("robot", 1),
+	point("robot", 6),
 	traj(std::make_shared<StateRepresentation::Trajectory<StateRepresentation::JointState>>())
 	{}
 
 	void on_configure()
 	{
-		this->add_publisher<trajectory_msgs::msg::JointTrajectory>("/test", traj);
+		this->add_publisher<trajectory_msgs::msg::JointTrajectory>("/set_joint_trajectory", traj);
+		traj->set_reference_frame("world");
+		traj->set_joint_names(6);
 	}
 
 	void step()
 	{	
 		this->traj->clear();
 		std::chrono::milliseconds step_period(100);
-		Eigen::ArrayXd positions(1);
-		positions << 0.2;
+		Eigen::ArrayXd positions(6);
+		Eigen::ArrayXd velocities(6);
+		positions << 1, 0, 0, 0, 0, 0;
+		velocities << 0, 0, 0, 0, 0, 0;
 		this->point.set_positions(positions);
+		this->point.set_velocities(velocities);
+		this->traj->add_point(this->point, step_period);
+
+		positions << 2, 0, 0, 0, 0, 0;
+		velocities << 1, 0, 0, 0, 0, 0;
+		this->point.set_positions(positions);
+		this->point.set_velocities(velocities);
+		this->traj->add_point(this->point, step_period);
+
+		positions << 3, 0, 0, 0, 0, 0;
+		velocities << 1, 0, 0, 0, 0, 0;
+		this->point.set_positions(positions);
+		this->point.set_velocities(velocities);
+		this->traj->add_point(this->point, step_period);
+
+		positions << 3, 0, 0, 0, 0, 0;
+		velocities << 0, 0, 0, 0, 0, 0;
+		this->point.set_positions(positions);
+		this->point.set_velocities(velocities);
 		this->traj->add_point(this->point, step_period);
 	}
 };
@@ -80,7 +102,7 @@ int main(int argc, char * argv[])
 	rclcpp::init(argc, argv);
 
 	rclcpp::executors::SingleThreadedExecutor exe;
-	const std::chrono::milliseconds period(100);
+	const std::chrono::milliseconds period(10);
 
 	std::shared_ptr<Publisher> pub = std::make_shared<Publisher>("publish", period);
 
