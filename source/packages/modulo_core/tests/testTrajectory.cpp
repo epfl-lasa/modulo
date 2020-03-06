@@ -57,32 +57,32 @@ public:
 	void step()
 	{	
 		this->traj->clear();
-		std::chrono::milliseconds step_period(100);
+		std::chrono::milliseconds step_period(1);
 		Eigen::ArrayXd positions(6);
 		Eigen::ArrayXd velocities(6);
-		positions << 1, 0, 0, 0, 0, 0;
-		velocities << 0, 0, 0, 0, 0, 0;
+		// positions << 0, 0.9, 0, 0, 0, 0;
+		// velocities << 0, 0.2, 0, 0, 0, 0;
+		// this->point.set_positions(positions);
+		// this->point.set_velocities(velocities);
+		// this->traj->add_point(this->point, step_period);
+
+		positions << 0, 0.5, 0, 0, 0, 0;
+		velocities << 0, 0.2, 0, 0, 0, 0;
 		this->point.set_positions(positions);
 		this->point.set_velocities(velocities);
 		this->traj->add_point(this->point, step_period);
 
-		positions << 2, 0, 0, 0, 0, 0;
-		velocities << 1, 0, 0, 0, 0, 0;
+		positions << 0, 0.3, 0, 0, 0, 0;
+		velocities << 0, 0.2, 0, 0, 0, 0;
 		this->point.set_positions(positions);
 		this->point.set_velocities(velocities);
 		this->traj->add_point(this->point, step_period);
 
-		positions << 3, 0, 0, 0, 0, 0;
-		velocities << 1, 0, 0, 0, 0, 0;
-		this->point.set_positions(positions);
-		this->point.set_velocities(velocities);
-		this->traj->add_point(this->point, step_period);
-
-		positions << 3, 0, 0, 0, 0, 0;
-		velocities << 0, 0, 0, 0, 0, 0;
-		this->point.set_positions(positions);
-		this->point.set_velocities(velocities);
-		this->traj->add_point(this->point, step_period);
+		// positions << 0, 0, 0, 0, 0, 0;
+		// velocities << 0, 0.2, 0, 0, 0, 0;
+		// this->point.set_positions(positions);
+		// this->point.set_velocities(velocities);
+		// this->traj->add_point(this->point, step_period);
 	}
 };
 
@@ -102,7 +102,7 @@ int main(int argc, char * argv[])
 	rclcpp::init(argc, argv);
 
 	rclcpp::executors::SingleThreadedExecutor exe;
-	const std::chrono::milliseconds period(10);
+	const std::chrono::milliseconds period(1000);
 
 	std::shared_ptr<Publisher> pub = std::make_shared<Publisher>("publish", period);
 

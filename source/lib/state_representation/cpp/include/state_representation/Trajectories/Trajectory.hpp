@@ -161,13 +161,14 @@ namespace StateRepresentation
 	{
 		this->set_filled();
 		this->points.push_back(new_point);
-		if(!this->times.empty())
-		{
-			auto previous_time = this->times.back();
-			this->times.push_back(previous_time + new_time);
-		}
-		else
-			this->times.push_back(new_time);
+		// if(!this->times.empty())
+		// {
+		// 	auto previous_time = this->times.back();
+		// 	this->times.push_back(previous_time + new_time);
+		// }
+		// else
+		// 	this->times.push_back(new_time);
+		this->times.push_back(new_time);
 
 		this->trajectory_size++;
 	}
