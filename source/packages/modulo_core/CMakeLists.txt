@@ -28,7 +28,6 @@ set(CORE_SOURCES
     src/Controller.cpp
     src/Visualizer.cpp
     src/SensorInterface.cpp
-    src/RobotInterface.cpp
     src/Modulator.cpp
     src/Recorder.cpp
     src/Monitor.cpp
