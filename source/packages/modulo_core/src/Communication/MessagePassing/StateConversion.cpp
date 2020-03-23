@@ -400,6 +400,18 @@ namespace Modulo
 							msg.points[i].time_from_start = rclcpp::Duration(point.second);
 						} 
 
+					}
+
+					void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::JointPositions & state, const rclcpp::Time &)
+					{
+						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+						msg.data = std::vector<double>(state.get_positions().data(), state.get_positions().data() + state.get_positions().size());
+					}	
+
+					void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::JointVelocities & state, const rclcpp::Time &)
+					{
+						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+						msg.data = std::vector<double>(state.get_velocities().data(), state.get_velocities().data() + state.get_velocities().size());
 					}	
 				}
 			}

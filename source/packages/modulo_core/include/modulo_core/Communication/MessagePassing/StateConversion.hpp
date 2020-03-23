@@ -341,6 +341,22 @@ namespace Modulo
 					 * @param time The time of the message
 					 */
 					void write_msg(trajectory_msgs::msg::JointTrajectory & msg, const StateRepresentation::Trajectory<StateRepresentation::JointState> & state, const rclcpp::Time & time);
+
+					/**
+					 * @brief Convert a JointPositions to a ROS std_msgs::msg::Float64MultiArray
+					 * @param msg The ROS msg to populate
+					 * @param state The state to read from
+					 * @param time The time of the message
+					 */
+					void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::JointPositions & state, const rclcpp::Time & );
+
+					/**
+					 * @brief Convert a JointVelocities to a ROS std_msgs::msg::Float64MultiArray
+					 * @param msg The ROS msg to populate
+					 * @param state The state to read from
+					 * @param time The time of the message
+					 */
+					void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::JointVelocities & state, const rclcpp::Time & );
 				}
 			}
 		}
