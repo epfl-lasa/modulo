@@ -19,6 +19,7 @@ RUN apt update && apt install -y \
   iputils-ping \
   mesa-utils \
   libeigen3-dev \
+  software-properties-common \
   && rm -rf /var/lib/apt/lists/*
 
 ENV QT_X11_NO_MITSHM 1
