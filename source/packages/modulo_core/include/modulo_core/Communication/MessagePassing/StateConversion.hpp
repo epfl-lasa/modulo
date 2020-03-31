@@ -9,6 +9,7 @@
 #include <geometry_msgs/msg/wrench_stamped.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <modulo_msgs/msg/jacobian_matrix.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
@@ -26,6 +27,7 @@
 #include "state_representation/Space/DualQuaternion/DualQuaternionPose.hpp"
 #include "state_representation/Space/DualQuaternion/DualQuaternionTwist.hpp"
 #include "state_representation/Parameter/Parameter.hpp"
+#include "state_representation/Trajectories/Trajectory.hpp"
 
 
 namespace Modulo
@@ -331,6 +333,14 @@ namespace Modulo
 					 * @param time The time of the message
 					 */
 					void write_msg(trajectory_msgs::msg::JointTrajectoryPoint & msg, const StateRepresentation::JointState & state, const rclcpp::Time &);				
+
+					/**
+					 * @brief Convert a JointState to a ROS trajectory_msgs::msg::JointTrajectory
+					 * @param msg The ROS msg to populate
+					 * @param state The state to read from
+					 * @param time The time of the message
+					 */
+					void write_msg(trajectory_msgs::msg::JointTrajectory & msg, const StateRepresentation::Trajectory<StateRepresentation::JointState> & state, const rclcpp::Time & time);
 				}
 			}
 		}

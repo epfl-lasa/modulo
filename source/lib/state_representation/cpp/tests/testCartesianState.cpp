@@ -6,15 +6,6 @@
 #include <zmq.hpp>
 #include <unistd.h>
 
-Eigen::Vector4d quat_mul(Eigen::Vector4d a, Eigen::Vector4d b)
-{
-	Eigen::Vector4d res;
-	res[2] =  a[0]*b[1] - a[1]*b[0] + a[2]*b[3] + a[3]*b[2];
-	res[3] = -a[0]*b[0] - a[1]*b[1] - a[2]*b[2] + a[3]*b[3];
-	if (res[3]<0)
-		res *= -1;
-	return res;
-}
 
 TEST(NegateQuaternion, PositiveNos)
 {
@@ -23,30 +14,6 @@ TEST(NegateQuaternion, PositiveNos)
 
 	EXPECT_TRUE(q.w() == -q2.w());
 	for (int i = 0; i < 3; ++i) EXPECT_TRUE(q.vec()(i) == -q2.vec()(i));
-}
-
-TEST(QuaternionMultiply, PositiveNos)
-{
-	Eigen::Quaterniond q1 = Eigen::Quaterniond::UnitRandom();
-	Eigen::Quaterniond q2 = Eigen::Quaterniond::UnitRandom();
-	Eigen::Quaterniond qres = q1 * q2;
-	if(qres.dot(q1) < 0) qres = Eigen::Quaterniond(-qres.coeffs());
-
-	std::cout << qres.coeffs() << std::endl;
-	Eigen::Vector4d res = quat_mul(q1.coeffs(), q2.coeffs());
-	std::cout << res << std::endl;
-
-	for (int i = 0; i < 4; ++i) EXPECT_TRUE(qres.coeffs()(i) == res(i));
-
-	Eigen::Quaterniond q3 = Eigen::Quaterniond(-q2.coeffs());
-	qres = q1 * q3;
-
-	std::cout << qres.coeffs() << std::endl;
-	res = quat_mul(q1.coeffs(), q3.coeffs());
-	std::cout << res << std::endl;
-
-	for (int i = 0; i < 4; ++i) EXPECT_TRUE(qres.coeffs()(i) == res(i));
-
 }
 
 TEST(MultiplyTransformsBothOperators, PositiveNos)
@@ -351,7 +318,8 @@ TEST(TestFilter, PositiveNos)
 	EXPECT_TRUE(dist(tf1, tf2)(0) < 1e-4);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) 
+{
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
