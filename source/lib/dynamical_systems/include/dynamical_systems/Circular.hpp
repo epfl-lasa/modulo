@@ -22,6 +22,7 @@ namespace DynamicalSystems
 		S center_;
 		double radius_;
 		double elevation_;
+		double circular_velocity_;
 
 	public:
 		explicit Circular(float gain=1);
@@ -39,12 +40,16 @@ namespace DynamicalSystems
 		double get_elevation() const;
 
 		void set_elevation(double elevation);
+
+		double get_circular_velocity() const;
+
+		void set_circular_velocity(double circular_velocity);		
 	};
 
 	template<class S>
 	Circular<S>::Circular(float gain):
 	DynamicalSystem<S>(gain),
-	radius_(1), elevation_(M_PI/2)
+	radius_(1), elevation_(M_PI/2),circular_velocity_(M_PI/2)
 	{}
 
 	template<class S>
@@ -83,6 +88,18 @@ namespace DynamicalSystems
 		this->elevation_ = elevation;
 	}
 
+	template<class S>
+	inline double Circular<S>::get_circular_velocity() const
+	{
+		return this->circular_velocity_;
+	}
+
+	template<class S>
+	inline void Circular<S>::set_circular_velocity(double circular_velocity)
+	{
+		this->circular_velocity_ = circular_velocity;
+	}
+
 	template<>
 	const StateRepresentation::CartesianState Circular<StateRepresentation::CartesianState>::evaluate(const StateRepresentation::CartesianState& state) const
 	{
@@ -109,14 +126,15 @@ namespace DynamicalSystems
 		StateRepresentation::CartesianPose pose = static_cast<const StateRepresentation::CartesianPose&>(state) - static_cast<const StateRepresentation::CartesianPose&>(this->center_);
 		StateRepresentation::CartesianTwist velocity(state.get_name(), state.get_reference_frame());
 		Eigen::Vector3d linear_velocity;
+		// linear_velocity(2) = -this->get_gain() * pose.get_position()(2);
 		linear_velocity(2) = -this->get_gain() * pose.get_position()(2);
 
 		float R = sqrt(pose.get_position()(0) * pose.get_position()(0) + pose.get_position()(1) * pose.get_position()(1));
 		float T = atan2(pose.get_position()(1), pose.get_position()(0));
-		float omega = M_PI/3;
+		float omega = this->circular_velocity_;
 
-		linear_velocity(0) = -this->get_gain()*((R-this->radius_) * cos(T) - R * omega * sin(T));
-		linear_velocity(1) = -this->get_gain()*((R-this->radius_) * sin(T) + R * omega * cos(T));
+		linear_velocity(0) = -this->get_gain()*(R-this->radius_) * cos(T) - R * omega * sin(T);
+		linear_velocity(1) = -this->get_gain()*(R-this->radius_) * sin(T) + R * omega * cos(T);
 
 		velocity.set_linear_velocity(linear_velocity);
 		return velocity;
