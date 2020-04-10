@@ -125,7 +125,7 @@ class State(object):
     # Multiplication and division not commutative
     
     def __repr__(self):
-        return "State(%r, %r, %r, %r)" % (self._typename, self._name, self._reference_frame, self._empty)
+        return "State(%r, %r, %r, %r)" % (self._typename, self._name, self._reference_frame, self._is_empty)
 
     def __str__(self):
         if self._empty:

@@ -1,16 +1,20 @@
 #!/usr/bin/python
 from state_representation.state import State
+
 import numpy as np
 import math
 import copy
 
 class JointState(State):
     def __init__(self, robot_name, nb_joints=0, joint_names=[], positions=np.array([]), velocities=np.array([]), accelerations=np.array([]), torques=np.array([])):
+        
         super().__init__("JointState", robot_name)
+        
         if not joint_names:
             self._names = ["joint" + str(i) for i in range(nb_joints)]
         else:
             self._names = joint_names
+        
         self.initialize()
         self._positions = positions
         self._velocities = velocities

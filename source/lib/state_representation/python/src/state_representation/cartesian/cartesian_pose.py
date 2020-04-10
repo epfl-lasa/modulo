@@ -12,16 +12,15 @@ import time
 import quaternion
 
 class CartesianPose(CartesianState):
-    def __init__(self, *args, name=None,
+    def __init__(self, *args, 
                  position=[0, 0, 0], orientation=[1, 0, 0, 0], reference="world",
+                 name=None,
                  state=None,
                  x=None, y=None, z=None):
 
         if len(args): # Assign arguments
-            if isinstance(args[0],
-                          (CartesianState, CartesianPose, CartesianTwist, CartesianWrench)):
+            if isinstance(args[0], CartesianState):
                 state = args[0]
-
             elif isinstance(args[0], str):
                 name = args[0]
                 ii = 1
@@ -51,10 +50,6 @@ class CartesianPose(CartesianState):
             
         if isinstance(state, CartesianPose):
             self = copy.deepcopy(state)
-        elif isinstance(state, CartesianTwist):
-            super().__init__(state)
-        elif isinstance(state, CartesianWrench):
-            super().__init__(state)
         elif isinstance(state, CartesianState):
             super().__init__(state)
 
@@ -70,23 +65,19 @@ class CartesianPose(CartesianState):
 
     @property
     def linear(self):
-        self._linear = self.position
-        return self._linear
+        return self._position
 
     @linear.setter
     def linear(self, value):
-        self._linear = value
-        self._position = value
+        self.position = value
         
     @property
     def angular(self):
-        self.angular = self.orientation
-        return self._angular
+        return self.orientation
 
     @angular.setter
     def angular(self, value):
-        self._angular = value
-        self._orientation = value
+        self.orientation = value
 
     @property
     def value_names(self):
@@ -136,15 +127,24 @@ class CartesianPose(CartesianState):
         return result
 
 
-    def __idiv__(self, other):
-        if other.is_empty:
-            raise RuntimeError("{} state is empty".format(other.name))
+    def __itruediv__(self, other):
+        if self.is_empty:
+            raise RuntimeError("{} state is empty".format(self.name))
 
-        twist = CartesianTwist(other.name, other.reference_frame)
-        period = time.time()
-        twist.linear_velocity(other.position/period)
+        if isinstance(other, (float, int)):
+            self.position = self.position/2
+            # self.position = self.position/2
+            warnings.warn("only position division is implemented.")
+            
+        else:
+            raise TypeError("Unsupported operant type(s) for /: {} and {}".format(type(self).__name__, type(other).__name__))
+        
+        # twist = CartesianTwist(other.name, other.reference_frame)
+        # period = time.time()
+        # twist.linear_velocity(other.position/period)
+        return self
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         result = copy.deepcopy(self)
         result /= other
         return result
@@ -152,18 +152,23 @@ class CartesianPose(CartesianState):
     def __iadd__(self, other):
         if self.is_empty:
             raise RuntimeError("{} state is empty".format(self.name))
-        if isinstance(other, CartesianPose):
+        
+        if isinstance(other, CartesianState):
             if other.is_empty:
                 raise RuntimeError("{} state is empty".format(other.name()))
                   
             if self.reference_frame != other.reference_frame:
                 raise ValueError("Expected {}, got {}".format(self.reference_frame,
                                                                 other.reference_frame))
-            self.position += other.position
-            self.orientation *= self.orientation
+            self.position += other.linear
+            if isinstance(other, (CartesianTwist, CartesianWrench)):
+                orientation = quaternion.from_rotation_vector(other.angular)
+            else:
+                orientation = other.angular
+            self.orientation *= orientation
+            
         else:
-            raise TypeError()
-
+            raise TypeError("Expected <<Cartesian Pose>>, got {}".format(type(other)))
         return self
     
     def __add__(self, other):
@@ -175,17 +180,23 @@ class CartesianPose(CartesianState):
         if isinstance(other, CartesianPose):
             if self.is_empty:
                 raise RuntimeError("{} state is empty".format(self.name()))
-                  
+            
             if other.is_empty:
                 raise RuntimeError("{} state is empty".format(other.name()))
                   
             if self.reference_frame != other.reference_frame:
                 raise ValueError("Expected {}, got {}".format(self.reference_frame,
                                                            other.reference_frame))
+            self.position = self.position - other.linear
+            if isinstance(other, (CartesianTwist, CartesianWrench)):
+                orientation = quaternion.from_rotation_vector(other.angular)
+            else:
+                orientation = other.angular
 
-            self.orientation *= other.orientation.conjugate
+            self.orientation *= orientation.conjugate()
+            
         else:
-            TypeError()
+            raise TypeError("Expected <<Cartesian Pose>>, got {}".format(type(other)))
                   
         return self
     
@@ -229,9 +240,12 @@ class CartesianPose(CartesianState):
         result.position = quaternion.rotate_vectors(result.orientation, -self.position)
         
         return result
+
+    def distance(self, *args, **kwargs):
+        return self.dist(*args, **kwargs)
     
     def dist(self, pose1, pose2=None):
-        if isinstance(pose2, type(None)):
+        if pose2 is None:
             pose2 = self
 
         if pose1.is_empty:
@@ -240,10 +254,9 @@ class CartesianPose(CartesianState):
         if pose2.is_empty:
             raise RuntimeError("{} state is empty".format(pose2.name()))
 
-        result_dist = pose1.position - pose2.position
-        result_orient = pose1.orientation.dot(pose2.orientation)
-        result_orient = math.arccos(2 * result_orient * result_orient - 1)
-        return result_dist, result_orient
+        result_dist = np.linalg.norm(pose1.position - pose2.position)
+        result_orient = (pose1.orientation * pose2.orientation.conjugate()) # Quaternion multiplication
+        return result_dist, result_orient.angle()
 
                             
     def copy(self):

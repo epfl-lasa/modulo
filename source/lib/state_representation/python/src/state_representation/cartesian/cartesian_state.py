@@ -11,8 +11,10 @@ import quaternion
 class CartesianState(State):
     def __init__(self, *args, name=None, reference="world",
                  state=None):
+        
         self.dimensions = 3
-        self.initialize()
+        
+        self.initialize() # TODO move to normal init function
         # self.derivative=0
 
         # Decode input
@@ -26,7 +28,6 @@ class CartesianState(State):
                 if len(args)==2:
                     reference = args[1]
 
-                    
         if isinstance(state, CartesianState):
             super().__init__(state)
             self.position = state.position
@@ -37,16 +38,13 @@ class CartesianState(State):
             self.force = state.force
             self.torque = state.torque
             
-        elif isinstance(name, str):
-            super().__init__("CartesianState", name, reference)
-            
         else:
-            super().__init__("CartesianState")
+            super().__init__("CartesianState", name, reference)
             
     def initialize(self):
         super().initialize()
         self.position = np.zeros((self.dimensions, 1))
-        self.orientation = np.zeros((self.dimensions, 1))
+        self.orientation = [1, 0, 0, 0]
         self.linear_velocity = np.zeros((self.dimensions, 1))
         self.angular_velocity = np.zeros((self.dimensions, 1))
         self.linear_acceleration = np.zeros((self.dimensions, 1))
@@ -86,7 +84,7 @@ class CartesianState(State):
             self._position = np.squeeze(value)
             self.set_filled()
         else:
-            TypeError("Wrong input position argument -- {}".format(value))
+            raise TypeError("Wrong input position argument -- {}".format(value))
 
     @property
     def orientation(self):
@@ -94,15 +92,12 @@ class CartesianState(State):
 
     @orientation.setter
     def orientation(self, value):
-        if (isinstance(value, (list, np.ndarray)) and
-                      np.squeeze(value).shape==(4,)):
+        if (isinstance(value, (list, np.ndarray)) and np.squeeze(value).shape==(4,)):
             self._orientation = quaternion.as_quat_array(value)
         elif isinstance(value, (quaternion.quaternion)):
             self._orientation = value
         else:
-            TypeError("Wrong input argument -- {}".format(value))
-        
-        self._orientation = value
+            raise TypeError("Wrong input argument -- {}".format(value))
 
     @property
     def linear_velocity(self):
@@ -115,7 +110,7 @@ class CartesianState(State):
             self._linear_velocity = np.squeeze(value)
             self.set_filled()
         else:
-            TypeError("Wrong input argument -- {}".format(value))
+            raise TypeError("Wrong input argument -- {}".format(value))
 
     @property
     def angular_velocity(self):
@@ -128,7 +123,7 @@ class CartesianState(State):
             self._angular_velocity = np.squeeze(value)
             self.set_filled()
         else:
-            TypeError("Wrong input argument -- {}".format(value))
+            raise TypeError("Wrong input argument -- {}".format(value))
 
     @property
     def linear_acceleration(self):
@@ -141,7 +136,7 @@ class CartesianState(State):
             self._linear_acceleration = np.squeeze(value)
             self.set_filled()
         else:
-            TypeError("Wrong input argument -- {}".format(value))
+            raise TypeError("Wrong input argument -- {}".format(value))
 
     @property
     def angular_acceleration(self):
@@ -154,7 +149,7 @@ class CartesianState(State):
             self._angular_acceleration = value
             self.set_filled()
         else:
-            TypeError("Wrong input argument -- {}".format(value))
+            raise TypeError("Wrong input argument -- {}".format(value))
 
     @property
     def force(self):
@@ -167,7 +162,7 @@ class CartesianState(State):
             self._force = value
             self.set_filled()
         else:
-            TypeError("Wrong input argument -- {}".format(value))
+            raise TypeError("Wrong input argument -- {}".format(value))
 
     @property
     def torque(self):
@@ -180,12 +175,12 @@ class CartesianState(State):
             self._torque = value
             self.set_filled()
         else:
-            TypeError("Wrong input argument -- {}".format(value))
+            raise TypeError("Wrong input argument -- {}".format(value))
                       
     
     def __imul__(self, other):
         if self.is_empty:
-            RuntimeError("State is empty")
+            raise RuntimeError("State is empty")
 
         self.position = self.position * other
         self.orientation = self.orientation * other # NOT MEANINGFUL

@@ -7,7 +7,7 @@ def test_state_creation():
 	s = JointState("test", 6)
 	assert s.name == "test"
 	assert s.reference_frame == "world"
-	assert s.is_empty()
+	assert s.is_empty
 	assert len(s.names) == 6
 	assert s.names[0] == "joint0"
 
