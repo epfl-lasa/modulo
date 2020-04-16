@@ -326,7 +326,7 @@ namespace Modulo
 			 * This function is called by the main on_configure function and is made to
 			 * adapted to the derived class.
 			 */
-			virtual void on_configure();
+			virtual bool on_configure();
 
 			/**
 			 * @brief Transition callback for state activating
@@ -347,7 +347,7 @@ namespace Modulo
 			 * This function is called by the main on_activate function and is made to
 			 * adapted to the derived class.
 			 */
-			virtual void on_activate();
+			virtual bool on_activate();
 
 			/**
 			 * @brief Transition callback for state deactivating
@@ -368,7 +368,7 @@ namespace Modulo
 			 * This function is called by the main on_deactivate function and is made to
 			 * adapted to the derived class.
 			 */
-			virtual void on_deactivate();
+			virtual bool on_deactivate();
 
 			/**
 			 * @brief Transition callback for state cleaningup
@@ -389,7 +389,7 @@ namespace Modulo
 			 * This function is called by the main on_cleanup function and is made to
 			 * adapted to the derived class.
 			 */
-			virtual void on_cleanup();
+			virtual bool on_cleanup();
 
 			/**
 			 * @brief Transition callback for state shutting down
@@ -410,7 +410,7 @@ namespace Modulo
 			 * This function is called by the main on_shutdown function and is made to
 			 * adapted to the derived class.
 			 */
-			virtual void on_shutdown();
+			virtual bool on_shutdown();
 
 			/**
 			 * @brief Function called each time a a parameter is modified on the paramter server of the node

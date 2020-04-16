@@ -10,22 +10,31 @@ namespace Modulo
 			this->on_shutdown();
 		}
 
-		void Monitor::on_configure()
+		bool Monitor::on_configure()
 		{
 			for (auto& name : this->monitored_node_) this->add_client<lifecycle_msgs::srv::GetState>(name + "/get_state", std::chrono::milliseconds(100));
+			return true;
 		}
 
-		void Monitor::on_activate()
-		{}
+		bool Monitor::on_activate()
+		{
+			return true;
+		}
 
-		void Monitor::on_deactivate()
-		{}
+		bool Monitor::on_deactivate()
+		{
+			return true;
+		}
 
-		void Monitor::on_cleanup()
-		{}
+		bool Monitor::on_cleanup()
+		{
+			return true;
+		}
 
-		void Monitor::on_shutdown()
-		{}
+		bool Monitor::on_shutdown()
+		{
+			return true;
+		}
 
 		void Monitor::step()
 		{

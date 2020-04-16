@@ -18,7 +18,7 @@ public:
 	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d::Zero(), "odom_demo"))
 	{}
 
-	void on_configure()
+	bool on_configure()
 	{
 		this->add_subscription<nav_msgs::msg::Odometry>("/demo/odom_demo", this->get_input_state());
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/ds/attractor", this->target_pose, std::chrono::milliseconds(0));
@@ -27,6 +27,7 @@ public:
 		std::shared_ptr<DynamicalSystems::Linear<StateRepresentation::CartesianState> > move_dynamic = std::make_shared<DynamicalSystems::Linear<StateRepresentation::CartesianState> >(1);
 		move_dynamic->set_attractor(this->target_pose);
 		this->set_dynamic(move_dynamic);
+		return true;
 	}
 };
 
@@ -41,10 +42,11 @@ public:
 	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", "odom_demo"))
 	{}
 
-	void on_configure()
+	bool on_configure()
 	{
 		this->add_publisher<geometry_msgs::msg::PoseStamped>("/ds/attractor", target_pose, std::chrono::milliseconds(100));
 		this->add_asynchronous_transform_broadcaster(target_pose, std::chrono::milliseconds(100));
+		return true;
 	}
 
 	void step()
@@ -68,9 +70,10 @@ public:
 	odometry(std::make_shared<StateRepresentation::CartesianState>("odom_demo", "odom_demo"))
 	{}
 
-	void on_configure()
+	bool on_configure()
 	{
 		this->add_subscription<nav_msgs::msg::Odometry>("/demo/odom_demo", this->odometry);
+		return true;
 	}
 
 	void step()

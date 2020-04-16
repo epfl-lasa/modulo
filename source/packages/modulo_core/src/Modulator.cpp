@@ -9,19 +9,29 @@ namespace Modulo
 			this->on_shutdown();
 		}
 
-		void Modulator::on_configure()
-		{}
+		bool Modulator::on_configure()
+		{
+			return true;
+		}
 
-		void Modulator::on_activate()
-		{}
+		bool Modulator::on_activate()
+		{
+			return true;
+		}
 
-		void Modulator::on_deactivate()
-		{}
+		bool Modulator::on_deactivate()
+		{
+			return true;
+		}
 
-		void Modulator::on_cleanup()
-		{}
+		bool Modulator::on_cleanup()
+		{
+			return true;
+		}
 
-		void Modulator::on_shutdown()
-		{}
+		bool Modulator::on_shutdown()
+		{
+			return true;
+		}
 	}
 }

@@ -57,7 +57,7 @@ namespace Modulo
 			 * or resetting an history buffer. After being 
 			 * configured the node can be activated.
 			 */
-			virtual void on_configure();
+			virtual bool on_configure();
 
 			/**
 			 * @brief This function is called time the activate call 
@@ -65,7 +65,7 @@ namespace Modulo
 			 * and subsciptions and can be extended to start a recording
 			 * or replay.
 			 */
-			void on_activate();
+			bool on_activate();
 
 			/**
 			 * @brief This function is called time the deactivate call 
@@ -73,7 +73,7 @@ namespace Modulo
 			 * and subsciptions and can be extended to stop a recording
 			 * or a replay.
 			 */
-			void on_deactivate();
+			bool on_deactivate();
 
 			/**
 			 * @brief This function is called time the cleanup call 
@@ -82,7 +82,7 @@ namespace Modulo
 			 * or delete pointers. After cleanup a new configure call
 			 * can be made.
 			 */
-			virtual void on_cleanup();
+			virtual bool on_cleanup();
 
 			/**
 			 * @brief This function is called time the shutdown call 
@@ -90,7 +90,7 @@ namespace Modulo
 			 * Each elements needed to be cleaned before termination should
 			 * be here.
 			 */
-			virtual void on_shutdown();
+			virtual bool on_shutdown();
 
 			/**
 			 * @brief Function computing one step of calculation. It is called periodically in the run function.

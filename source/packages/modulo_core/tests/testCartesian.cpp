@@ -25,12 +25,13 @@ public:
 	motion_generator(1)
 	{}
 
-	void on_configure()
+	bool on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->current_pose);
 		this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
 		this->add_publisher<std_msgs::msg::Float64>("/ds/gain", this->gain, 0);
 		this->motion_generator.set_attractor(*this->target_pose);
+		return true;
 	}
 
 	void step()
@@ -61,11 +62,12 @@ public:
 	ds_gain(std::make_shared<StateRepresentation::Parameter<double> >("ds_gain"))
 	{}
 
-	void on_configure()
+	bool on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose);
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
 		this->add_subscription<std_msgs::msg::Float64>("/ds/gain", this->ds_gain);
+		return true;
 	}
 
 	void step()
@@ -113,11 +115,12 @@ public:
 	dt(period)
 	{}
 
-	void on_configure()
+	bool on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
 		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose, 0);
 		//this->add_fixed_transform_broadcaster(fixed_transform);
+		return true;
 	}
 
 	void step()

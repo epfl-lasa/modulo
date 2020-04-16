@@ -5,26 +5,36 @@ namespace Modulo
 	namespace Recorders
 	{
 		Recorder::~Recorder()
-		{}
+		{
+			this->on_shutdown();
+		}
 
-		void Recorder::on_configure()
-		{}
+		bool Recorder::on_configure()
+		{
+			return true;
+		}
 
-		void Recorder::on_activate()
+		bool Recorder::on_activate()
 		{
 			this->start_time = std::chrono::system_clock::now();
+			return true;
 		}
 
-		void Recorder::on_deactivate()
+		bool Recorder::on_deactivate()
 		{
 			this->end_time = std::chrono::system_clock::now();
+			return true;
 		}
 
-		void Recorder::on_cleanup()
-		{}
+		bool Recorder::on_cleanup()
+		{
+			return true;
+		}
 
-		void Recorder::on_shutdown()
-		{}
+		bool Recorder::on_shutdown()
+		{
+			return true;
+		}
 
 		void Recorder::step()
 		{

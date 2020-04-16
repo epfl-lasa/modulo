@@ -19,7 +19,7 @@ public:
 	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d::Zero()))
 	{}
 
-	void on_configure()
+	bool on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->get_input_state(), 0);
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/ds/attractor", this->target_pose, 0);
@@ -28,6 +28,7 @@ public:
 		std::shared_ptr<DynamicalSystems::Linear<StateRepresentation::CartesianState> > move_dynamic = std::make_shared<DynamicalSystems::Linear<StateRepresentation::CartesianState> >(1);
 		move_dynamic->set_attractor(this->target_pose);
 		this->set_dynamic(move_dynamic);
+		return true;
 	}
 };
 
@@ -45,10 +46,11 @@ public:
 	counter(0)
 	{}
 
-	void on_configure()
+	bool on_configure()
 	{
 		this->add_publisher<geometry_msgs::msg::PoseStamped>("/ds/attractor", target_pose, 0);
 		this->add_asynchronous_transform_broadcaster(target_pose, 1ms);
+		return true;
 	}
 
 	void step()
@@ -81,10 +83,11 @@ public:
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test"))
 	{}
 
-	void on_configure()
+	bool on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose);
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
+		return true;
 	}
 
 	void step()
@@ -118,10 +121,11 @@ public:
 	dt(period)
 	{}
 
-	void on_configure()
+	bool on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist, 0);
 		this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose, 0);
+		return true;
 	}
 
 	void step()

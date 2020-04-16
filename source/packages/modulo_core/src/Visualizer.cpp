@@ -9,19 +9,29 @@ namespace Modulo
 			this->on_shutdown();
 		}
 
-		void Visualizer::on_configure()
-		{}
+		bool Visualizer::on_configure()
+		{
+			return true;
+		}
 
-		void Visualizer::on_activate()
-		{}
+		bool Visualizer::on_activate()
+		{
+			return true;
+		}
 
-		void Visualizer::on_deactivate()
-		{}
+		bool Visualizer::on_deactivate()
+		{
+			return true;
+		}
 
-		void Visualizer::on_cleanup()
-		{}
+		bool Visualizer::on_cleanup()
+		{
+			return true;
+		}
 
-		void Visualizer::on_shutdown()
-		{}
+		bool Visualizer::on_shutdown()
+		{
+			return true;
+		}
 	}
 }

@@ -47,11 +47,12 @@ public:
 	traj(std::make_shared<StateRepresentation::Trajectory<StateRepresentation::JointState>>())
 	{}
 
-	void on_configure()
+	bool on_configure()
 	{
 		this->add_publisher<trajectory_msgs::msg::JointTrajectory>("/set_joint_trajectory", traj);
 		traj->set_reference_frame("world");
 		traj->set_joint_names(6);
+		return true;
 	}
 
 	void step()

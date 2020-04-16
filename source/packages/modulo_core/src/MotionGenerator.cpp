@@ -9,19 +9,29 @@ namespace Modulo
 			this->on_shutdown();
 		}
 
-		void MotionGenerator::on_configure()
-		{}
+		bool MotionGenerator::on_configure()
+		{
+			return true;
+		}
 
-		void MotionGenerator::on_activate()
-		{}
+		bool MotionGenerator::on_activate()
+		{
+			return true;
+		}
 
-		void MotionGenerator::on_deactivate()
-		{}
+		bool MotionGenerator::on_deactivate()
+		{
+			return true;
+		}
 
-		void MotionGenerator::on_cleanup()
-		{}
+		bool MotionGenerator::on_cleanup()
+		{
+			return true;
+		}
 
-		void MotionGenerator::on_shutdown()
-		{}
+		bool MotionGenerator::on_shutdown()
+		{
+			return true;
+		}
 	}
 }

@@ -59,13 +59,14 @@ namespace Modulo
 			this->add_transform_broadcaster(this->period_, 10*this->period_);
 			this->add_transform_listener(10*this->period_);
 			// call the proxy on_configure function
-			this->on_configure();
+			if(!this->on_configure()) return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
-		void Cell::on_configure()
+		bool Cell::on_configure()
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_configure of the Cell class called");
+			return true;
 		}
 
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_activate(const rclcpp_lifecycle::State &)
@@ -79,13 +80,14 @@ namespace Modulo
 				h.second->activate();
 			}
 			// call the proxy on_activate function
-			this->on_activate();
+			if(!this->on_activate()) return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
-		void Cell::on_activate()
+		bool Cell::on_activate()
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate of the Cell class called");
+			return true;
 		}
 
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_deactivate(const rclcpp_lifecycle::State &)
@@ -99,13 +101,14 @@ namespace Modulo
 				h.second->deactivate();
 			}
 			// call the proxy on_deactivate function
-			this->on_deactivate();
+			if(!this->on_deactivate()) return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
-		void Cell::on_deactivate()
+		bool Cell::on_deactivate()
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_deactivate of the Cell class called");
+			return true;
 		}
 
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_cleanup(const rclcpp_lifecycle::State &) 
@@ -117,13 +120,14 @@ namespace Modulo
 			// reset all handlers
 			this->reset();
 			// call the proxy on_cleanup function
-			this->on_cleanup();
+			if(!this->on_cleanup()) return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
-		void Cell::on_cleanup()
+		bool Cell::on_cleanup()
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_cleanup of the Cell class called");
+			return true;
 		}
 
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_shutdown(const rclcpp_lifecycle::State & state) 
@@ -136,13 +140,14 @@ namespace Modulo
 			// reset all handlers for clean shutdown
 			this->reset();
 			// call the proxy on_shutdown function
-			this->on_shutdown();
+			if(!this->on_shutdown()) return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
-		void Cell::on_shutdown()
+		bool Cell::on_shutdown()
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_shutdown of the Cell class called");
+			return true;
 		}
 
 		void on_parameter_event(const rcl_interfaces::msg::ParameterEvent::SharedPtr event, rclcpp::Logger logger)

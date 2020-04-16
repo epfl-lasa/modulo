@@ -50,6 +50,7 @@ RUN sh build.sh
 # build ROS workspace
 RUN mkdir -p ${HOME}/ros2_ws/src
 WORKDIR ${HOME}/ros2_ws/
+RUN rosdep update
 COPY --chown=${USER} ./source/packages/ ./src/
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build --symlink-install"
