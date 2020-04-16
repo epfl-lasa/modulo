@@ -25,9 +25,7 @@ set(CORE_SOURCES
     src/Communication/MessagePassing/TransformListenerHandler.cpp
     src/Cell.cpp
     src/MotionGenerator.cpp
-    src/Controller.cpp
     src/Visualizer.cpp
-    src/SensorInterface.cpp
     src/Modulator.cpp
     src/Recorder.cpp
     src/Monitor.cpp
