@@ -169,6 +169,12 @@ namespace StateRepresentation
 		return result;
 	}
 
+
+	void CartesianTwist::scale(double gain_linear)
+	{	
+		this->set_linear_velocity(gain_linear*this->get_linear_velocity());
+	}
+
 	const CartesianTwist CartesianTwist::copy() const
 	{
 		CartesianTwist result(*this);

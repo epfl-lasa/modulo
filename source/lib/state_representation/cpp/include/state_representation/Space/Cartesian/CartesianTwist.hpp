@@ -167,6 +167,12 @@ namespace StateRepresentation
 		 * @brief Return a copy of the CartesianTwist
 		 * @return the copy
 		 */
+
+		void scale(double gain_linear);
+		/**
+		 * @brief Scale the velocity to avoid slowing down when approaching attractor
+		 */		
+
 		const CartesianTwist copy() const;
 
 		/**
