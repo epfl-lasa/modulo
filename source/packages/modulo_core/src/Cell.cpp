@@ -14,6 +14,8 @@ namespace Modulo
 
 		void Cell::reset()
 		{
+			this->active_ = false;
+			this->configured_ = false;
 			this->handlers_.clear();
 			for(auto& t:this->active_threads_)
 			{
@@ -49,6 +51,13 @@ namespace Modulo
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_configure() is called.");
 			std::lock_guard<std::mutex> lock(*this->mutex_);
+			// call the proxy on_configure function
+			if(!this->on_configure())
+			{
+				RCLCPP_ERROR(get_logger(), "Configuration failed");
+				this->reset();
+				return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
+			}
 			// add the run thread
 			std::function<void(void)> run_fnc = std::bind(&Cell::run, this);
 			this->run_thread_ = std::thread(run_fnc);
@@ -58,8 +67,6 @@ namespace Modulo
 			// add default transform broadcaster and transform listener
 			this->add_transform_broadcaster(this->period_, 10*this->period_);
 			this->add_transform_listener(10*this->period_);
-			// call the proxy on_configure function
-			if(!this->on_configure()) return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
@@ -71,16 +78,20 @@ namespace Modulo
 
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_activate(const rclcpp_lifecycle::State &)
 		{
+			RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
 			std::lock_guard<std::mutex> lock(*this->mutex_);
+			// call the proxy on_activate function
+			if(!this->on_activate())
+			{
+				RCLCPP_ERROR(get_logger(), "Activation failed.");
+				return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
+			}
 			// set all handlers to activated
 			this->active_ = true;
-			RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
 			for (auto &h : this->handlers_)
 			{
 				h.second->activate();
 			}
-			// call the proxy on_activate function
-			if(!this->on_activate()) return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
@@ -94,14 +105,18 @@ namespace Modulo
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_deactivate() is called.");
 			std::lock_guard<std::mutex> lock(*this->mutex_);
+			// call the proxy on_deactivate function
+			if(!this->on_deactivate())
+			{
+				RCLCPP_ERROR(get_logger(), "Deactivation failed.");
+				return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
+			}
 			// set all handlers to not activated
 			this->active_ = false;
 			for (auto &h : this->handlers_)
 			{
 				h.second->deactivate();
 			}
-			// call the proxy on_deactivate function
-			if(!this->on_deactivate()) return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
@@ -115,12 +130,14 @@ namespace Modulo
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_cleanup() is called.");
 			std::lock_guard<std::mutex> lock(*this->mutex_);
-			this->active_ = false;
-			this->configured_ = false;
+			// call the proxy on_cleanup function
+			if(!this->on_cleanup())
+			{
+				RCLCPP_ERROR(get_logger(), "Cleanup failed.");
+				return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
+			}
 			// reset all handlers
 			this->reset();
-			// call the proxy on_cleanup function
-			if(!this->on_cleanup()) return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
@@ -134,13 +151,15 @@ namespace Modulo
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_shutdown() is called from state %s.", state.label().c_str());
 			std::lock_guard<std::mutex> lock(*this->mutex_);
-			this->configured_ = false;
-			this->active_ = false;
-			this->shutdown_ = true;
+			// call the proxy on_shutdown function
+			if(!this->on_shutdown())
+			{
+				RCLCPP_ERROR(get_logger(), "Shutdown failed.");
+				return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
+			}
 			// reset all handlers for clean shutdown
 			this->reset();
-			// call the proxy on_shutdown function
-			if(!this->on_shutdown()) return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
+			this->shutdown_ = true;
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
