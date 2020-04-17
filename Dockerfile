@@ -20,6 +20,7 @@ RUN apt update && apt install -y \
   mesa-utils \
   libeigen3-dev \
   software-properties-common \
+  ros-eloquent-rviz2 \
   && rm -rf /var/lib/apt/lists/*
 
 ENV QT_X11_NO_MITSHM 1
