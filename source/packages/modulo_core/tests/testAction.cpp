@@ -16,19 +16,23 @@ public:
 	template <typename DurationT>
 	explicit MoveAction(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period) :
 	Action<StateRepresentation::CartesianState>(std::make_shared<StateRepresentation::CartesianPose>("robot_test"), std::make_shared<StateRepresentation::CartesianTwist>("robot_test"), node_name, period, false),
-	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d::Zero()))
+	target_pose(std::make_shared<StateRepresentation::CartesianPose>("attractor", Eigen::Vector3d::Random()))
 	{}
 
 	bool on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->get_input_state(), 0);
-		this->add_subscription<geometry_msgs::msg::PoseStamped>("/ds/attractor", this->target_pose, 0);
 		this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->get_output_state());
 
 		std::shared_ptr<DynamicalSystems::Linear<StateRepresentation::CartesianState> > move_dynamic = std::make_shared<DynamicalSystems::Linear<StateRepresentation::CartesianState> >(1);
 		move_dynamic->set_attractor(this->target_pose);
 		this->set_dynamic(move_dynamic);
 		return true;
+	}
+
+	bool is_terminated()
+	{
+		return this->get_input_state()->dist(*this->target_pose) < 1e-3;
 	}
 };
 
@@ -154,15 +158,17 @@ int main(int argc, char * argv[])
 	rclcpp::init(argc, argv);
 
 	rclcpp::executors::SingleThreadedExecutor exe;
-	std::shared_ptr<MoveAction> ma = std::make_shared<MoveAction>("move_action", 250us);
-	std::shared_ptr<RandomAttractor> ra = std::make_shared<RandomAttractor>("random_attractor", 5s);
+	std::shared_ptr<MoveAction> mh = std::make_shared<MoveAction>("move_home", 250us);
+	std::shared_ptr<MoveAction> ma1 = std::make_shared<MoveAction>("move_action1", 250us);
+	std::shared_ptr<MoveAction> ma2 = std::make_shared<MoveAction>("move_action2", 250us);
 	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", 250us);
 
-	exe.add_node(ma->get_node_base_interface());
-	exe.add_node(ra->get_node_base_interface());
+	exe.add_node(mh->get_node_base_interface());
+	exe.add_node(ma1->get_node_base_interface());
+	exe.add_node(ma2->get_node_base_interface());
 	exe.add_node(sri->get_node_base_interface());
 
-	std::list<std::string> monitored_nodes = {"move_action", "random_attractor", "robot_interface"};
+	std::list<std::string> monitored_nodes = {"move_home", "move_action1", "move_action2", "robot_interface"};
 	std::shared_ptr<Modulo::Monitors::Monitor> mo = std::make_shared<Modulo::Monitors::Monitor>("monitor", monitored_nodes, 1s);
 	exe.add_node(mo->get_node_base_interface());
 

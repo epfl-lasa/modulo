@@ -118,6 +118,13 @@ namespace Modulo
 			 * @brief Function computing one step of calculation. It is called periodically in the run function.
 			 */
 			virtual void step();
+
+			virtual bool is_interrupted();
+
+			virtual bool in_error_state();
+
+			virtual bool is_terminated();
+
 		};
 
 		template <class S> template <typename DurationT>
@@ -203,6 +210,24 @@ namespace Modulo
 				RCLCPP_WARN(get_logger(), "state is empty initializing");
 				this->output_state_->initialize();
 			}
+		}
+
+		template <class S>
+		bool Action<S>::is_interrupted()
+		{
+			return false;
+		}
+
+		template <class S>
+		bool Action<S>::in_error_state()
+		{
+			return false;
+		}
+
+		template <class S>
+		bool Action<S>::is_terminated()
+		{
+			return false;
 		}
 	}
 }
