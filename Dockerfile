@@ -20,6 +20,7 @@ RUN apt update && apt install -y \
   mesa-utils \
   libeigen3-dev \
   software-properties-common \
+  libboost-all-dev \
   ros-eloquent-rviz2 \
   && rm -rf /var/lib/apt/lists/*
 
@@ -44,7 +45,8 @@ ENV HOME /home/${USER}
 RUN mkdir -p ${HOME}/modulo_lib
 WORKDIR ${HOME}/modulo_lib/
 COPY --chown=${USER} ./source/lib/ .
-
+# install SML
+RUN git clone https://github.com/boost-experimental/sml.git
 # build packages and libraries
 RUN sh build.sh
 
