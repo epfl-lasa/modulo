@@ -189,6 +189,13 @@ namespace StateRepresentation
 		const CartesianState operator*(double lambda) const;
 
 		/**
+		 * @brief Compute the distance between two states as the sum of distances between each features
+		 * @param state the second state
+		 * @return dist the distance value as a double
+		 */
+		double dist(const CartesianState& state) const;
+
+		/**
 	 	 * @brief Overload the ostream operator for printing
 	 	 * @param os the ostream to happend the string representing the state to
 	 	 * @param state the state to print
@@ -202,6 +209,14 @@ namespace StateRepresentation
 	 	 * @return the CartesianState provided multiply by lambda
 	     */
 		friend const CartesianState operator*(double lambda, const CartesianState& state);
+
+		/**
+		 * @brief compute the distance between two CartesianStates
+		 * @param s1 the first CartesianState
+		 * @param s2 the second CartesianState
+		 * @return the distance beteen the two states
+		 */
+		friend double dist(const CartesianState& s1, const CartesianState& s2);
 	};
 
 	inline const Eigen::Vector3d& CartesianState::get_position() const

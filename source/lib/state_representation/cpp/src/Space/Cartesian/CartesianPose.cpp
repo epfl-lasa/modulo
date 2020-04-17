@@ -171,22 +171,6 @@ namespace StateRepresentation
 		return result;
 	}
 
-	const Eigen::Array2d CartesianPose::dist(const CartesianPose& pose) const
-	{
-		// sanity check
-		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
-		if(pose.is_empty()) throw EmptyStateException(pose.get_name() + " state is empty");
-		if(!(this->get_reference_frame() == pose.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
-		// calculation
-		Eigen::Array2d result;
-		// euclidean distance for position
-		result(0) = (this->get_position() - pose.get_position()).norm();
-		// https://math.stackexchange.com/questions/90081/quaternion-distance for orientation
-		double inner_product = this->get_orientation().dot(pose.get_orientation());
-		result(1) = acos(2 * inner_product * inner_product - 1);
-		return result;
-	}
-
 	std::ostream& operator<<(std::ostream& os, const CartesianPose& pose) 
 	{
 		if(pose.is_empty())
@@ -215,11 +199,6 @@ namespace StateRepresentation
 	const CartesianPose operator*(double lambda, const CartesianPose& pose)
 	{
 		return pose * lambda;
-	}
-
-	const Eigen::Array2d dist(const CartesianPose& p1, const CartesianPose& p2)
-	{
-		return p1.dist(p2);
 	}
 
 	const CartesianTwist operator/(const CartesianPose& pose, const std::chrono::nanoseconds& dt)
