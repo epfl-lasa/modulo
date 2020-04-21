@@ -24,7 +24,8 @@ class EventPublisher : public rclcpp::Node
     {
       int event;
       auto message = std_msgs::msg::Int64();
-      std::cout << "Trigger event (3: start, 0: home, 1: action1, 2: action2): "; std::cin >> event;
+      //std::cout << "Trigger event (3: start, 0: home, 1: action1, 2: action2): "; std::cin >> event;
+      std::cout << "Trigger event (0: start, 1: launch, 1: action1, 2: action2): "; std::cin >> event;
 
       message.data = event;
       publisher_->publish(message);

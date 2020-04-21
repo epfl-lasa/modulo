@@ -45,6 +45,9 @@ target_link_libraries(${PROJECT_NAME}_test_action ${PROJECT_NAME})
 ament_auto_add_executable(${PROJECT_NAME}_test_action_sml tests/testActionSML.cpp)
 target_link_libraries(${PROJECT_NAME}_test_action_sml ${PROJECT_NAME})
 
+ament_auto_add_executable(${PROJECT_NAME}_test_action_cycsml tests/testActionCyclicSML.cpp)
+target_link_libraries(${PROJECT_NAME}_test_action_cycsml ${PROJECT_NAME})
+
 ament_auto_add_executable(${PROJECT_NAME}_test_events tests/testSetEvent.cpp)
 target_link_libraries(${PROJECT_NAME}_test_events ${PROJECT_NAME})
 
