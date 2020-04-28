@@ -92,24 +92,6 @@ namespace Modulo
 			 */
 			std::mutex & get_mutex();
 
-			/**
-			 * @brief Getter of the configured boolean attribute
-			 * @return true if configured
-			 */
-			bool is_configured() const;
-
-			/**
-			 * @brief Getter of the active boolean attribute
-			 * @return true if active
-			 */
-			bool is_active() const;
-
-			/**
-			 * @brief Getter of the shutdown boolean attribute
-			 * @return true if shutdown
-			 */
-			bool is_shutdown() const;
-
 		public:
 			
 			/**
@@ -132,6 +114,24 @@ namespace Modulo
 			 * @return Reference to the period attribute
 			 */
 			const std::chrono::nanoseconds& get_period() const;
+
+			/**
+			 * @brief Getter of the configured boolean attribute
+			 * @return true if configured
+			 */
+			bool is_configured() const;
+
+			/**
+			 * @brief Getter of the active boolean attribute
+			 * @return true if active
+			 */
+			bool is_active() const;
+
+			/**
+			 * @brief Getter of the shutdown boolean attribute
+			 * @return true if shutdown
+			 */
+			bool is_shutdown() const;
 
 			/**
 			 * @brief Template function to add a generic publisher to the map of handlers
