@@ -52,6 +52,11 @@ namespace StateRepresentation
 		void set_joint_names(unsigned int nb_joints);
 
 		/**
+	 	 * @brief Setter of the names attribute from the joints names
+	     */
+		void set_joint_names(const std::vector<std::string>& joint_names);
+
+		/**
 		* @brief Initialize trajectory
 		*/
 		void initialize();
@@ -148,6 +153,12 @@ namespace StateRepresentation
 	}
 
 	template <class StateT>
+	inline void Trajectory<StateT>::set_joint_names(const std::vector<std::string>& joint_names)
+	{
+		this->joint_names = joint_names;
+	}
+
+	template <class StateT>
 	void Trajectory<StateT>::initialize()
 	{
 		this->State::initialize();
@@ -161,14 +172,14 @@ namespace StateRepresentation
 	{
 		this->set_filled();
 		this->points.push_back(new_point);
-		// if(!this->times.empty())
-		// {
-		// 	auto previous_time = this->times.back();
-		// 	this->times.push_back(previous_time + new_time);
-		// }
-		// else
-		// 	this->times.push_back(new_time);
-		this->times.push_back(new_time);
+
+		if(!this->times.empty())
+		{
+			auto const previous_time = this->times.back();
+			this->times.push_back(previous_time + new_time);
+		}
+		else
+			this->times.push_back(new_time);
 
 		this->trajectory_size++;
 	}
