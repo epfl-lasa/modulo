@@ -181,7 +181,7 @@ namespace StateRepresentation
 		 * @brief Return the pose as a std vector of floats
 		 * @return std::vector<float> the pose vector as a 7 elements vector
 		 */
-		const std::vector<double> to_std_vector() const;
+		const std::vector<double> to_std_vector() const override;
 	};
 }
 
