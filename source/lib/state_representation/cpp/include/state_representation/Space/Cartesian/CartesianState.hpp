@@ -229,6 +229,12 @@ namespace StateRepresentation
 		 * @return the distance beteen the two states
 		 */
 		friend double dist(const CartesianState& s1, const CartesianState& s2);
+
+		/**
+		 * @brief Return the pose as a std vector of floats
+		 * @return std::vector<float> the pose vector as a 7 elements vector
+		 */
+		virtual const std::vector<double> to_std_vector() const;
 	};
 
 	inline const Eigen::Vector3d& CartesianState::get_position() const
