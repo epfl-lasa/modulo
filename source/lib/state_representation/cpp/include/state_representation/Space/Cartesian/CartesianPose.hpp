@@ -26,8 +26,8 @@ namespace StateRepresentation
 
 		/**
 	 	 * @brief Constructor with name and reference frame provided
-	 	 * @brief name the name of the state
-	 	 * @brief reference the name of the reference frame
+	 	 * @param name the name of the state
+	 	 * @param reference the name of the reference frame
 	     */
 		explicit CartesianPose(const std::string& name, const std::string& reference="world");
 
@@ -60,6 +60,14 @@ namespace StateRepresentation
 	 	 * @brief Construct a CartesianPose from a position given as a vector of coordinates and a quaternion.
 	     */
 		explicit CartesianPose(const std::string& name, const Eigen::Vector3d& position, const Eigen::Quaterniond& orientation, const std::string& reference="world");
+
+		/**
+		 * @brief Constructor for a random pose
+		 * @param name the name of the state
+		 * @param the name of the reference frame
+		 * @return CartesianPose random pose
+		 */
+		static const CartesianPose Random(const std::string& name, const std::string& reference="world");
 
 		/**
 		 * @brief Set the values of the 6D pose from a 7D Eigen Vector (3 for position, 4 for quaternion)

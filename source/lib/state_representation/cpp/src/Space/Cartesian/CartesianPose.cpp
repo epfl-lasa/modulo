@@ -45,6 +45,11 @@ namespace StateRepresentation
 	CartesianState(std::chrono::seconds(1) * twist)
 	{}
 
+	const CartesianPose CartesianPose::Random(const std::string& name, const std::string& reference)
+	{
+		return CartesianPose(name, Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom(), reference);
+	}
+
 	CartesianPose& CartesianPose::operator=(const Eigen::Matrix<double, 7, 1>& pose)
 	{
 		this->set_pose(pose);
