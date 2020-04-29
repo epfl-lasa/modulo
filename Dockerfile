@@ -45,8 +45,6 @@ ENV HOME /home/${USER}
 RUN mkdir -p ${HOME}/modulo_lib
 WORKDIR ${HOME}/modulo_lib/
 COPY --chown=${USER} ./source/lib/ .
-# install SML
-RUN git clone https://github.com/boost-experimental/sml.git
 # build packages and libraries
 RUN sh build.sh
 
