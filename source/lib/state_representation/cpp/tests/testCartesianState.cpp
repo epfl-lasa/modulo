@@ -317,6 +317,17 @@ TEST(TestFilter, PositiveNos)
 	//EXPECT_TRUE(dist(tf1, tf2) < 1e-4);
 }
 
+TEST(TestToSTDVector, PositiveNos)
+{
+	StateRepresentation::CartesianPose p = StateRepresentation::CartesianPose::Random("t1");
+	std::vector<double> v = p.to_std_vector();
+	for(unsigned int i=0; i<3; ++i) EXPECT_NEAR(p.get_position()(i), v[i], 0.00001);
+	EXPECT_NEAR(p.get_orientation().w(), v[3], 0.00001);
+	EXPECT_NEAR(p.get_orientation().x(), v[4], 0.00001);
+	EXPECT_NEAR(p.get_orientation().y(), v[5], 0.00001);
+	EXPECT_NEAR(p.get_orientation().z(), v[6], 0.00001);
+}
+
 int main(int argc, char **argv) 
 {
     testing::InitGoogleTest(&argc, argv);
