@@ -62,6 +62,18 @@ namespace StateRepresentation
 		explicit CartesianPose(const std::string& name, const Eigen::Vector3d& position, const Eigen::Quaterniond& orientation, const std::string& reference="world");
 
 		/**
+		 * @brief Set the values of the 6D pose from a 7D Eigen Vector (3 for position, 4 for quaternion)
+		 * @param pose the pose as an Eigen Vector
+		 */
+		CartesianPose& operator=(const Eigen::Matrix<double, 7, 1>& pose);
+
+		/**
+		 * @brief Set the values of the 6D pose from a 7D std vector (3 for position, 4 for quaternion)
+		 * @param pose the pose as an Eigen Vector
+		 */
+		CartesianPose& operator=(const std::vector<double>& pose);
+
+		/**
 	 	 * @brief Overload the *= operator
 	 	 * @param pose CartesianPose to multiply with
 	 	 * @return the current CartesianPose multiply by the CartesianPose given in argument
@@ -164,6 +176,12 @@ namespace StateRepresentation
 	 	 * @return the corresponding CartesianTwist
 	     */
 		friend const CartesianTwist operator/(const CartesianPose& pose, const std::chrono::nanoseconds& dt);
+
+		/**
+		 * @brief Return the pose as a std vector of floats
+		 * @return std::vector<float> the pose vector as a 7 elements vector
+		 */
+		const std::vector<double> to_std_vector() const;
 	};
 }
 

@@ -45,6 +45,18 @@ namespace StateRepresentation
 	CartesianState(std::chrono::seconds(1) * twist)
 	{}
 
+	CartesianPose& CartesianPose::operator=(const Eigen::Matrix<double, 7, 1>& pose)
+	{
+		this->set_pose(pose);
+		return (*this);
+	}
+
+	CartesianPose& CartesianPose::operator=(const std::vector<double>& pose)
+	{
+		this->set_pose(pose);
+		return (*this);
+	}
+
 	CartesianPose& CartesianPose::operator*=(const CartesianPose& pose)
 	{
 		// sanity check
@@ -216,5 +228,16 @@ namespace StateRepresentation
 		Eigen::Quaterniond log_q = MathTools::log(pose.get_orientation());
 		twist.set_angular_velocity(2 * log_q.vec() / period);
 		return twist;
+	}
+
+	const std::vector<double> CartesianPose::to_std_vector() const
+	{
+		std::vector<double> pose = std::vector<double>(this->get_position().data(), this->get_position().data() + 3);
+		pose.resize(7);
+		pose[3] = this->get_orientation().w();
+		pose[4] = this->get_orientation().x();
+		pose[5] = this->get_orientation().y();
+		pose[6] = this->get_orientation().z();
+		return pose;
 	}
 }
