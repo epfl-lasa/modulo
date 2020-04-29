@@ -39,21 +39,6 @@ target_link_libraries(${PROJECT_NAME}
 ament_auto_add_executable(${PROJECT_NAME}_test_cartesian tests/testCartesian.cpp)
 target_link_libraries(${PROJECT_NAME}_test_cartesian ${PROJECT_NAME})
 
-ament_auto_add_executable(${PROJECT_NAME}_test_action tests/testAction.cpp)
-target_link_libraries(${PROJECT_NAME}_test_action ${PROJECT_NAME})
-
-ament_auto_add_executable(${PROJECT_NAME}_test_action_sml tests/testActionSML.cpp)
-target_link_libraries(${PROJECT_NAME}_test_action_sml ${PROJECT_NAME})
-
-ament_auto_add_executable(${PROJECT_NAME}_test_action_cycsml tests/testActionCyclicSML.cpp)
-target_link_libraries(${PROJECT_NAME}_test_action_cycsml ${PROJECT_NAME})
-
-ament_auto_add_executable(${PROJECT_NAME}_test_events tests/testSetEvent.cpp)
-target_link_libraries(${PROJECT_NAME}_test_events ${PROJECT_NAME})
-
-ament_auto_add_executable(${PROJECT_NAME}_test_car tests/testCar.cpp)
-target_link_libraries(${PROJECT_NAME}_test_car ${PROJECT_NAME})
-
 ament_auto_add_executable(${PROJECT_NAME}_test_trajectory tests/testTrajectory.cpp)
 target_link_libraries(${PROJECT_NAME}_test_trajectory ${PROJECT_NAME})
 

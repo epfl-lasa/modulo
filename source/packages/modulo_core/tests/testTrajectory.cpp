@@ -1,4 +1,3 @@
-#include "modulo_core/Action.hpp"
 #include "modulo_core/Monitor.hpp"
 #include "modulo_core/Visualizer.hpp"
 #include "dynamical_systems/Linear.hpp"
