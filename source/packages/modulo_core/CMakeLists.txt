@@ -39,9 +39,6 @@ target_link_libraries(${PROJECT_NAME}
 ament_auto_add_executable(${PROJECT_NAME}_test_cartesian tests/testCartesian.cpp)
 target_link_libraries(${PROJECT_NAME}_test_cartesian ${PROJECT_NAME})
 
-ament_auto_add_executable(${PROJECT_NAME}_test_trajectory tests/testTrajectory.cpp)
-target_link_libraries(${PROJECT_NAME}_test_trajectory ${PROJECT_NAME})
-
 ament_auto_add_executable(${PROJECT_NAME}_test_joints tests/testJoints.cpp)
 target_link_libraries(${PROJECT_NAME}_test_joints ${PROJECT_NAME})
 
