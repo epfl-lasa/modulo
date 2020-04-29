@@ -291,7 +291,7 @@ namespace Modulo
 			 * TRANSITION_CALLBACK_FAILURE transitions to "unconfigured"
 			 * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
 			 */
-			rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(const rclcpp_lifecycle::State &);
+			rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(const rclcpp_lifecycle::State &) override;
 
 			/**
 			 * @brief Proxy function for the on_configure ROS2 lifecycle function.
@@ -312,7 +312,7 @@ namespace Modulo
 			 * TRANSITION_CALLBACK_FAILURE transitions to "inactive"
 			 * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
 			 */
-			rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(const rclcpp_lifecycle::State &);
+			rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(const rclcpp_lifecycle::State &) override;
 
 			/**
 			 * @brief Proxy function for the on_activate ROS2 lifecycle function.
@@ -333,7 +333,7 @@ namespace Modulo
 			 * TRANSITION_CALLBACK_FAILURE transitions to "active"
 			 * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
 			 */
-			rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(const rclcpp_lifecycle::State &);
+			rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(const rclcpp_lifecycle::State &) override;
 
 			/**
 			 * @brief Proxy function for the on_deactivate ROS2 lifecycle function.
@@ -354,7 +354,7 @@ namespace Modulo
 			 * TRANSITION_CALLBACK_FAILURE transitions to "inactive"
 			 * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
 			 */
-			rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_cleanup(const rclcpp_lifecycle::State &);
+			rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_cleanup(const rclcpp_lifecycle::State &) override;
 
 			/**
 			 * @brief Proxy function for the on_cleanup ROS2 lifecycle function.
@@ -375,7 +375,7 @@ namespace Modulo
 			 * TRANSITION_CALLBACK_FAILURE transitions to current state
 			 * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
 			 */
-			rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_shutdown(const rclcpp_lifecycle::State & state);
+			rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_shutdown(const rclcpp_lifecycle::State & state) override;
 
 			/**
 			 * @brief Proxy function for the on_shutdown ROS2 lifecycle function.
