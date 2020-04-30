@@ -55,7 +55,7 @@ namespace Modulo
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_configure(const rclcpp_lifecycle::State &) 
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_configure() is called.");
-			std::lock_guard<std::mutex> lock(*this->mutex_);
+			//std::lock_guard<std::mutex> lock(*this->mutex_);
 			// call the proxy on_configure function
 			if(!this->on_configure())
 			{
@@ -84,7 +84,7 @@ namespace Modulo
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_activate(const rclcpp_lifecycle::State &)
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
-			std::lock_guard<std::mutex> lock(*this->mutex_);
+			//std::lock_guard<std::mutex> lock(*this->mutex_);
 			// call the proxy on_activate function
 			if(!this->on_activate())
 			{
@@ -109,7 +109,7 @@ namespace Modulo
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_deactivate(const rclcpp_lifecycle::State &)
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_deactivate() is called.");
-			std::lock_guard<std::mutex> lock(*this->mutex_);
+			//std::lock_guard<std::mutex> lock(*this->mutex_);
 			// call the proxy on_deactivate function
 			if(!this->on_deactivate())
 			{
@@ -134,7 +134,7 @@ namespace Modulo
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_cleanup(const rclcpp_lifecycle::State &) 
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_cleanup() is called.");
-			std::lock_guard<std::mutex> lock(*this->mutex_);
+			//std::lock_guard<std::mutex> lock(*this->mutex_);
 			// call the proxy on_cleanup function
 			if(!this->on_cleanup())
 			{
@@ -155,7 +155,7 @@ namespace Modulo
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_shutdown(const rclcpp_lifecycle::State & state) 
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_shutdown() is called from state %s.", state.label().c_str());
-			std::lock_guard<std::mutex> lock(*this->mutex_);
+			//std::lock_guard<std::mutex> lock(*this->mutex_);
 			// call the proxy on_shutdown function
 			if(!this->on_shutdown())
 			{
@@ -172,28 +172,6 @@ namespace Modulo
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_shutdown of the Cell class called");
 			return true;
-		}
-
-		void on_parameter_event(const rcl_interfaces::msg::ParameterEvent::SharedPtr event, rclcpp::Logger logger)
-		{
-			std::stringstream ss;
-			ss << "\nParameter event:\n new parameters:";
-			for (auto & new_parameter : event->new_parameters) 
-			{
-			    ss << "\n  " << new_parameter.name;
-			}
-			ss << "\n changed parameters:";
-			for (auto & changed_parameter : event->changed_parameters) 
-			{
-				ss << "\n  " << changed_parameter.name;
-			}
-			ss << "\n deleted parameters:";
-			for (auto & deleted_parameter : event->deleted_parameters) 
-			{
-				ss << "\n  " << deleted_parameter.name;
-			}
-			ss << "\n";
-			RCLCPP_INFO(logger, ss.str().c_str());
 		}
 
 		void Cell::run()

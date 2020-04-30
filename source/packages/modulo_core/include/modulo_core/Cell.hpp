@@ -384,13 +384,6 @@ namespace Modulo
 			virtual bool on_shutdown();
 
 			/**
-			 * @brief Function called each time a a parameter is modified on the paramter server of the node
-			 * @param event the type of event in parameter added, parameter changed or deleted
-			 * @param logger logger of the node for printing
-			 */
-			void on_parameter_event(const rcl_interfaces::msg::ParameterEvent::SharedPtr event, rclcpp::Logger logger);
-
-			/**
 			 * @brief Function computing one step of calculation. It is called periodically in the run function.
 			 */
 			virtual void step() = 0;
