@@ -208,7 +208,7 @@ namespace Modulo
 			 * @param timeout the period after wich to consider that the publisher has timeout
 			 */
 			template <typename DurationT1, typename DurationT2>
-			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT1>& period, const std::chrono::duration<int64_t, DurationT2>& timeout, int queue_size=10);
+			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, const std::chrono::duration<int64_t, DurationT1>& period, const std::chrono::duration<int64_t, DurationT2>& timeout, int queue_size=10);
 
 			/**
 			 * @brief Function to add a generic transform broadcaster to the map of handlers
@@ -217,14 +217,14 @@ namespace Modulo
 			 * @param nb_period_to_timeout the number of period (of the node) before considering that the publisher has timeout (default = 10, 0 means never timeout)
 			 */
 			template <typename DurationT>
-			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT>& period, unsigned int nb_period_to_timeout=10, int queue_size=10);
+			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, const std::chrono::duration<int64_t, DurationT>& period, unsigned int nb_period_to_timeout=10, int queue_size=10);
 
 			/**
 			 * @brief Function to add a generic transform broadcaster to the map of handlers
 			 * @param recipient the state that contain the data to be published
 			 * @param nb_period_to_timeout the number of period (of the node) before considering that the broadcaster has timeout 
 			 */
-			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10);
+			void add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, unsigned int nb_period_to_timeout=10, int queue_size=10);
 
 			/**
 			 * @brief Function to add a fixed transform broadcaster to the map of handlers. A fixed transform broadcaster never times out as opposded to a normal broadcaster.
@@ -232,26 +232,25 @@ namespace Modulo
 			 * @param period the period to wait between two publishing
 			 */
 			template <typename DurationT>
-			void add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT>& period, int queue_size=10);
+			void add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, const std::chrono::duration<int64_t, DurationT>& period, int queue_size=10);
 	
 			/**
 			 * @brief Function to add a fixed transform broadcaster to the map of handlers. A fixed transform broadcaster never times out as opposded to a normal broadcaster.
 			 * @param recipient the state that contain the data to be published
 			 */
-			template <typename DurationT>
-			void add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, int queue_size=10);
+			void add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, int queue_size=10);
 
 			/**
 			 * @brief Function to send a transform using the generic transform broadcaster
 			 * @param transform the transformation to send
 			 */
-			void send_transform(const StateRepresentation::CartesianPose& transform);
+			void send_transform(const StateRepresentation::CartesianState& transform);
 
 			/**
 			 * @brief Function to send a transform using the generic transform broadcaster
 			 * @param transform the shared pointer to the transformation to send
 			 */
-			void send_transform(const std::shared_ptr<StateRepresentation::CartesianPose>& transform);
+			void send_transform(const std::shared_ptr<StateRepresentation::CartesianState>& transform);
 
 			/**
 			 * @brief Send a request to the server and wait for its response
@@ -275,7 +274,7 @@ namespace Modulo
 			 * @brief Function to get a transform from the generic transform listener
 			 * @param frame_name name of the frame to look for
 			 * @param the frame in wich to express the transform
-			 * @return the CartesianPose representing the tranformation
+			 * @return the CartesianPose representing the transformation
 			 */
 			const StateRepresentation::CartesianPose lookup_transform(const std::string& frame_name, const std::string& reference_frame="world");
 
@@ -510,7 +509,7 @@ namespace Modulo
 		}
 
 		template <typename DurationT1, typename DurationT2>
-		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT1>& period, const std::chrono::duration<int64_t, DurationT2>& timeout, int queue_size)
+		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, const std::chrono::duration<int64_t, DurationT1>& period, const std::chrono::duration<int64_t, DurationT2>& timeout, int queue_size)
 		{
 			auto handler = std::make_shared<Communication::MessagePassing::TransformBroadcasterHandler>(recipient, timeout, this->get_clock(), this->mutex_);
 			handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
@@ -519,21 +518,15 @@ namespace Modulo
 		}
 
 		template <typename DurationT>
-		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT>& period, unsigned int nb_period_to_timeout, int queue_size)
+		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, const std::chrono::duration<int64_t, DurationT>& period, unsigned int nb_period_to_timeout, int queue_size)
 		{
 			this->add_asynchronous_transform_broadcaster(recipient, period, nb_period_to_timeout * this->period_, queue_size);
 		}
 
 		template <typename DurationT>
-		void Cell::add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT>& period, int queue_size)
+		void Cell::add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, const std::chrono::duration<int64_t, DurationT>& period, int queue_size)
 		{
 			this->add_asynchronous_transform_broadcaster(recipient, period, std::chrono::duration<int64_t, DurationT>(0), queue_size);
-		}
-
-		template <typename DurationT>
-		void Cell::add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, int queue_size)
-		{
-			this->add_asynchronous_transform_broadcaster(recipient, this->period_, std::chrono::duration<int64_t, DurationT>(0), queue_size);
 		}
 
 		template <typename srvT, typename DurationT>

@@ -25,18 +25,23 @@ namespace Modulo
 			this->run_thread_.join();
 		}
 
-		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, unsigned int nb_period_to_timeout, int queue_size)
+		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, unsigned int nb_period_to_timeout, int queue_size)
 		{
 			this->add_asynchronous_transform_broadcaster(recipient, this->period_, nb_period_to_timeout * this->period_, queue_size);
 		}
 
-		void Cell::send_transform(const StateRepresentation::CartesianPose& transform)
+		void Cell::add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, int queue_size)
+		{
+			this->add_asynchronous_transform_broadcaster(recipient, this->period_, 0ms, queue_size);
+		}
+
+		void Cell::send_transform(const StateRepresentation::CartesianState& transform)
 		{
 			if (!this->configured_) throw UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
 			static_cast<Communication::MessagePassing::TransformBroadcasterHandler&>(*this->handlers_["tf_broadcaster"]).send_transform(transform);
 		}
 
-		void Cell::send_transform(const std::shared_ptr<StateRepresentation::CartesianPose>& transform)
+		void Cell::send_transform(const std::shared_ptr<StateRepresentation::CartesianState>& transform)
 		{
 			this->send_transform(*transform);
 		}
