@@ -11,7 +11,8 @@
 #include <string>
 #include <rclcpp/rclcpp.hpp>
 #include "modulo_core/Communication/CommunicationHandler.hpp"
-#include "modulo_core/Communication/MessagePassing/StateConversion.hpp"
+#include "modulo_core/Communication/MessagePassing/ReadStateConversion.hpp"
+#include "modulo_core/Communication/MessagePassing/WriteStateConversion.hpp"
 
 namespace Modulo
 {
