@@ -65,13 +65,6 @@ namespace DynamicalSystems
 		 * @return the state (velocity) to move toward the attractor
 		 */
 		virtual const S evaluate(const S& state) const;
-
-		/**
-		 * @brief Evaluate the value of the dynamical system at a given state
-		 * @param state state at wich to perform the evaluation
-		 * @return the state (velocity) to move toward the attractor
-		 */
-		virtual const S evaluate(const std::shared_ptr<S> state) const;
 	};
 
 	template<class S>
@@ -116,11 +109,5 @@ namespace DynamicalSystems
 	{
 		throw Exceptions::NotImplementedException("This method is not implemented for abstract base class");
 		return state;
-	}
-
-	template<class S>
-	const S DynamicalSystem<S>::evaluate(const std::shared_ptr<S> state) const
-	{
-		return this->evaluate(*state);
 	}
 }

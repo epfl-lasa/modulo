@@ -95,7 +95,7 @@ namespace DynamicalSystems
 		 * @param state state at wich to perform the evaluation
 		 * @return the state (velocity) to move toward the attractor
 		 */
-		const S evaluate(const std::shared_ptr<S> state) const override;
+		const S evaluate(const std::shared_ptr<S>& state) const override;
 	};
 
 	template <class S>
@@ -171,11 +171,5 @@ namespace DynamicalSystems
 			S += (this->weights_[i] * this->systems_[i]->evaluate(state));
 		}
 		return output;
-	}
-
-	template<class S>
-	const S Blending<S>::evaluate(const std::shared_ptr<S> state) const
-	{
-		return this->evaluate(*state);
 	}
 }

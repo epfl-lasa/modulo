@@ -35,13 +35,6 @@ namespace DynamicalSystems
 		 * @return the state (velocity) to move toward the attractor
 		 */
 		const S evaluate(const S& state) const override;
-
-		/**
-		 * @brief Evaluate the value of the dynamical system at a given state
-		 * @param state state at wich to perform the evaluation
-		 * @return the state (velocity) to move toward the attractor
-		 */
-		const S evaluate(const std::shared_ptr<S> state) const override;
 	};
 
 	template<class S>
@@ -64,11 +57,5 @@ namespace DynamicalSystems
 		StateRepresentation::JointState velocities(state.get_name(), state.get_names());
 		velocities.set_velocities(positions.get_positions());
 		return velocities;
-	}
-
-	template<class S>
-	const S Linear<S>::evaluate(const std::shared_ptr<S> state) const
-	{
-		return this->evaluate(*state);
 	}
 }

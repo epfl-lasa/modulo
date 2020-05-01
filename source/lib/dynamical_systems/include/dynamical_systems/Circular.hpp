@@ -82,11 +82,11 @@ namespace DynamicalSystems
 		 * @param state state at wich to perform the evaluation
 		 * @return the state (velocity) to move toward the attractor
 		 */
-		virtual const S evaluate(const std::shared_ptr<S> state) const;
+		virtual const S evaluate(const std::shared_ptr<S>& state) const;
 	};
 
 	template<class S>
-	Circular<S>::Circular(float gain):
+	Circular<S>::Circular(double gain):
 	DynamicalSystem<S>(gain),
 	radius_(1),
 	elevation_(M_PI/2),
@@ -171,7 +171,7 @@ namespace DynamicalSystems
 	}
 
 	template<>
-	const S Circular<StateRepresentation::CartesianState>::evaluate(const std::shared_ptr<StateRepresentation::CartesianState> state) const
+	const S Circular<StateRepresentation::CartesianState>::evaluate(const std::shared_ptr<StateRepresentation::CartesianState>& state) const
 	{
 		return this->evaluate(*state);
 	}
