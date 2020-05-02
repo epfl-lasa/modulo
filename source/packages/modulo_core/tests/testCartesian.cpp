@@ -38,7 +38,7 @@ public:
 	{
 		if(!this->current_pose->is_empty())
 		{
-			*this->desired_twist = this->motion_generator.evaluate(this->current_pose);
+			*this->desired_twist = this->motion_generator.evaluate(*this->current_pose);
 		}
 		else
 		{
@@ -129,8 +129,8 @@ public:
 		{
 			*this->robot_pose = dt * *this->desired_twist + *this->robot_pose;
 		}
-		this->send_transform(this->robot_pose);
-		this->send_transform(this->fixed_transform);
+		this->send_transform(*this->robot_pose);
+		this->send_transform(*this->fixed_transform);
 	}
 };
 
