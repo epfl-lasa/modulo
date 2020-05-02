@@ -17,6 +17,7 @@ namespace Modulo
 			this->active_ = false;
 			this->configured_ = false;
 			this->handlers_.clear();
+			this->parameters_.clear();
 			for(auto& t:this->active_threads_)
 			{
 				t.join();
@@ -35,15 +36,17 @@ namespace Modulo
 			this->add_asynchronous_transform_broadcaster(recipient, this->period_, 0ms, queue_size);
 		}
 
+		template<>
+		void Cell::add_parameter(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::CartesianState>>& parameter)
+		{
+			this->parameters_.push_back(parameter);
+			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
+		}
+
 		void Cell::send_transform(const StateRepresentation::CartesianState& transform)
 		{
 			if (!this->configured_) throw UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
 			static_cast<Communication::MessagePassing::TransformBroadcasterHandler&>(*this->handlers_["tf_broadcaster"]).send_transform(transform);
-		}
-
-		void Cell::send_transform(const std::shared_ptr<StateRepresentation::CartesianState>& transform)
-		{
-			this->send_transform(*transform);
 		}
 
 		const StateRepresentation::CartesianPose Cell::lookup_transform(const std::string& frame_name, const std::string& reference_frame)

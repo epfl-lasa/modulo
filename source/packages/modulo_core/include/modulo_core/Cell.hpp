@@ -3,8 +3,7 @@
  * @date 2019/02/14
  */
 
-#ifndef MODULO_CELL_H_
-#define MODULO_CELL_H_
+#pragma once
 
 #include <chrono>
 #include <iostream>
@@ -25,6 +24,7 @@
 #include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
 #include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
 #include "modulo_core/Communication/ServiceClient/ClientHandler.hpp"
+#include "state_representation/Parameter/Parameter.hpp"
 
 using namespace std::chrono_literals;
 
@@ -53,9 +53,9 @@ namespace Modulo
 			std::thread run_thread_; ///< thread object to start the main loop, i.e. the run function, in parallel of the rest
 			std::shared_ptr<std::mutex> mutex_; ///< a mutex to use when modifying messages between functions
 			std::chrono::nanoseconds period_;  ///< rate of the publisher functions in nanoseconds
-			std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > handlers_; ///< maps for storing publishers, subscriptions and tf 
 			std::list<std::thread> active_threads_; ///< list of active threads for periodic calling
-			std::shared_ptr<rclcpp::SyncParametersClient> parameters_client_; ///< shared pointer to the parameter client that handles request to the parameter server
+			std::list<std::shared_ptr<StateRepresentation::State>> parameters_; ///< list for storing parameters
+			std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > handlers_; ///< map for storing publishers, subscriptions and tf 
 
 			/**
 			 * @brief Function to clear all publishers, subscriptions and services
@@ -78,6 +78,12 @@ namespace Modulo
 			 */
 			template <typename DurationT>
 			void add_transform_listener(const std::chrono::duration<int64_t, DurationT>& timeout);
+
+			/**
+			 * @brief Update the value of the parameters from the parameter server
+			 */
+			template <typename T>
+			void update_parameter(StateRepresentation::Parameter<T>& parameter);
 
 		protected:
 			/**
@@ -241,16 +247,25 @@ namespace Modulo
 			void add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, int queue_size=10);
 
 			/**
+			 * @brief Add a parameter to be updated by the parameter server
+			 * @brief The parameter using the StateRepresentation of a parameter
+			 */
+			template <typename T>
+			void add_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter);
+
+			/**
+			 * @brief Add a parameter to be updated by the parameter server from a name and a value
+			 * @brief name the name of the parameter to be stored
+			 * @brief value the default value of the parameter
+			 */
+			template <typename T>
+			void add_parameter(const std::string& name, const T& value);
+
+			/**
 			 * @brief Function to send a transform using the generic transform broadcaster
 			 * @param transform the transformation to send
 			 */
 			void send_transform(const StateRepresentation::CartesianState& transform);
-
-			/**
-			 * @brief Function to send a transform using the generic transform broadcaster
-			 * @param transform the shared pointer to the transformation to send
-			 */
-			void send_transform(const std::shared_ptr<StateRepresentation::CartesianState>& transform);
 
 			/**
 			 * @brief Send a request to the server and wait for its response
@@ -530,6 +545,18 @@ namespace Modulo
 			this->handlers_.insert(std::make_pair(channel, handler));
 		}
 
+		template <typename T>
+		void Cell::add_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter)
+		{
+			this->parameters_.push_back(parameter);
+			this->declare_parameters(parameter->get_name(), parameter->get_value());
+		}
+
+		template <typename T>
+		void Cell::add_parameter(const std::string& name, const T& value)
+		{
+			this->add_parameter(std::make_shared<StateRepresentation::Parameter<T>>(name, value));
+		}
 		template <typename srvT>
 		std::shared_ptr<typename srvT::Response> Cell::send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request)
 		{
@@ -572,5 +599,3 @@ namespace Modulo
 		}
 	}
 }
-#endif
-
