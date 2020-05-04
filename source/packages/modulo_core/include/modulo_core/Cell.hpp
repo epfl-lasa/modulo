@@ -539,13 +539,6 @@ namespace Modulo
 			this->handlers_.insert(std::make_pair(channel, handler));
 		}
 
-		template <typename T>
-		void Cell::add_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter)
-		{
-			this->parameters_.push_back(parameter);
-			this->declare_parameter(parameter->get_name(), parameter->get_value());
-		}
-
 		template <typename srvT>
 		std::shared_ptr<typename srvT::Response> Cell::send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request)
 		{

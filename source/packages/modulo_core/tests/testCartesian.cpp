@@ -59,7 +59,7 @@ public:
 	Visualizer(node_name, period, false),
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
-	ds_gain(std::make_shared<StateRepresentation::Parameter<double> >("ds_gain"))
+	ds_gain(std::make_shared<StateRepresentation::Parameter<double> >("ds_gain", 0))
 	{
 		this->add_parameter(ds_gain);
 	}
