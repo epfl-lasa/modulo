@@ -36,6 +36,12 @@ namespace StateRepresentation
 		const T& get_value() const;
 
 		/**
+		 * @brief Getter of the value attribute
+		 * @return the value attribute
+		 */
+		T& get_value();
+
+		/**
 		 * @brief Setter of the value attribute
 		 * @param the new value attribute
 		 */
@@ -47,20 +53,9 @@ namespace StateRepresentation
 	 	 * @param parameter the Parameter to print
 	 	 * @return the appended ostream
 	     */
-		friend std::ostream& operator<<(std::ostream& os, const Parameter<T>& parameter);
+		template <typename U>
+		friend std::ostream& operator<<(std::ostream& os, const Parameter<U>& parameter);
 	};
-
-	template <typename T>
-	Parameter<T>::Parameter(const std::string& name):
-	State(StateType::PARAMETER, name)
-	{}
-
-	template <typename T>
-	Parameter<T>::Parameter(const std::string& name, const T& value):
-	State(StateType::PARAMETER, name), value(value)
-	{
-		this->set_filled();
-	}
 
 	template <typename T>
 	Parameter<T>::Parameter(const Parameter<T>& parameter):
@@ -69,6 +64,12 @@ namespace StateRepresentation
 
 	template <typename T>
 	inline const T& Parameter<T>::get_value() const
+	{
+		return this->value;
+	}
+
+	template <typename T>
+	inline T& Parameter<T>::get_value()
 	{
 		return this->value;
 	}
@@ -85,9 +86,12 @@ namespace StateRepresentation
 	{
 		if(parameter.is_empty())
 		{
-			os << " Parameter " << parameter.get_name() << "is empty" << std::endl;
+			os << " Parameter " << parameter.get_name() << " is empty" << std::endl;
 		}
-		os << " Parameter " << parameter.get_name() << ": " << parameter.value << std::endl;
+		else
+		{
+			os << " Parameter " << parameter.get_name() << ": " << parameter.value << std::endl;
+		}
   		return os;
 	}
 }
