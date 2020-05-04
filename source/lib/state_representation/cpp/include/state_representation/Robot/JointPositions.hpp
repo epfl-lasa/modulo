@@ -199,6 +199,12 @@ namespace StateRepresentation
 	 	 * @return the JointVelocities corresponding to the velocities over the time period
 	     */
 		friend const JointVelocities operator/(const JointPositions& positions, const std::chrono::nanoseconds& dt);
+
+		/**
+		 * @brief Return the joint positions as a std vector of floats
+		 * @return std::vector<float> the joint positions vector as a std vector
+		 */
+		const std::vector<double> to_std_vector() const;
 	};
 }
 #endif

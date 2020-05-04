@@ -200,4 +200,9 @@ namespace StateRepresentation
 		velocities.set_velocities(positions.get_positions() / period);
 		return velocities;
 	}
+
+	const std::vector<double> JointPositions::to_std_vector() const
+	{
+		return std::vector<double>(this->get_positions().data(), this->get_positions().data() + this->get_size());
+	}
 }

@@ -180,6 +180,12 @@ namespace StateRepresentation
 	 	 * @return the JointState provided multiply by lambda
 	     */
 		friend const JointState operator*(const Eigen::ArrayXd& lambda, const JointState& state);
+
+		/**
+		 * @brief Return the joint state as a std vector of floats
+		 * @return std::vector<float> the joint vector as a std vector
+		 */
+		virtual const std::vector<double> to_std_vector() const;
 	};
 
 	inline bool JointState::is_compatible(const State& state) const

@@ -1,6 +1,7 @@
 #include "state_representation/Robot/JointState.hpp"
 #include "state_representation/Exceptions/IncompatibleStatesException.hpp"
 #include "state_representation/Exceptions/EmptyStateException.hpp"
+#include "state_representation/Exceptions/NotImplementedException.hpp"
 
 namespace StateRepresentation 
 {
@@ -140,5 +141,11 @@ namespace StateRepresentation
 		result.set_accelerations(lambda * state.get_accelerations().array());
 		result.set_torques(lambda * state.get_torques().array());
 		return result;
+	}
+
+	const std::vector<double> JointState::to_std_vector() const
+	{
+		throw(NotImplementedException("to_std_vector() is not implemented for the base JointState class"));
+		return std::vector<double>();
 	}
 }
