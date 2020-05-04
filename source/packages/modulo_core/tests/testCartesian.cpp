@@ -60,13 +60,14 @@ public:
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
 	ds_gain(std::make_shared<StateRepresentation::Parameter<double> >("ds_gain"))
-	{}
+	{
+		this->add_parameter(ds_gain);
+	}
 
 	bool on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose);
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
-		this->add_parameter(ds_gain);
 		return true;
 	}
 

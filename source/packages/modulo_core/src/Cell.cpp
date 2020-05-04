@@ -8,6 +8,7 @@ namespace Modulo
 	{
 		Cell::~Cell()
 		{
+			this->parameters_.clear();
 			this->on_shutdown();
 		}
 
@@ -16,7 +17,6 @@ namespace Modulo
 			this->active_ = false;
 			this->configured_ = false;
 			this->handlers_.clear();
-			this->parameters_.clear();
 			for(auto& t:this->active_threads_)
 			{
 				t.join();
@@ -70,9 +70,6 @@ namespace Modulo
 			// add the run thread
 			std::function<void(void)> run_fnc = std::bind(&Cell::run, this);
 			this->run_thread_ = std::thread(run_fnc);
-			// add the update parameters call
-			std::function<void(void)> update_parameters_fnc = std::bind(&Cell::update_parameters, this);
-			this->add_periodic_call(update_parameters_fnc, this->period_);
 			// add default transform broadcaster and transform listener
 			this->add_transform_broadcaster(this->period_, 10*this->period_);
 			this->add_transform_listener(10*this->period_);
@@ -233,79 +230,106 @@ namespace Modulo
 		{
 			using namespace StateRepresentation;
 			using namespace StateRepresentation::Exceptions;
-			try
+			while(!this->shutdown_)
 			{
-				for (auto& param : this->parameters_)
+				auto start = std::chrono::steady_clock::now();
+				try
 				{
-					switch (param->get_type())
+					for (auto& param : this->parameters_)
 					{
-						case StateType::PARAMETER_DOUBLE:
+						switch (param->get_type())
 						{
-							double value = this->get_parameter(param->get_name()).as_double();
-							static_cast<Parameter<double>&>(*param).set_value(value);
-							break;
-						}
+							case StateType::PARAMETER_DOUBLE:
+							{
+								std::unique_lock<std::mutex> lck(*this->mutex_);
+								double value = this->get_parameter(param->get_name()).as_double();
+								static_cast<Parameter<double>&>(*param).set_value(value);
+								lck.unlock();
+								break;
+							}
 
-						case StateType::PARAMETER_DOUBLE_ARRAY:
-						{
-							std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-							static_cast<Parameter<std::vector<double>>&>(*param).set_value(value);
-							break;
-						}
+							case StateType::PARAMETER_DOUBLE_ARRAY:
+							{
+								std::unique_lock<std::mutex> lck(*this->mutex_);
+								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+								static_cast<Parameter<std::vector<double>>&>(*param).set_value(value);
+								lck.unlock();
+								break;
+							}
 
-						case StateType::PARAMETER_BOOL:
-						{
-							bool value = this->get_parameter(param->get_name()).as_bool();
-							static_cast<Parameter<bool>&>(*param).set_value(value);
-							break;
-						}
+							case StateType::PARAMETER_BOOL:
+							{
+								std::unique_lock<std::mutex> lck(*this->mutex_);
+								bool value = this->get_parameter(param->get_name()).as_bool();
+								static_cast<Parameter<bool>&>(*param).set_value(value);
+								lck.unlock();
+								break;
+							}
 
-						case StateType::PARAMETER_BOOL_ARRAY:
-						{
-							std::vector<bool> value = this->get_parameter(param->get_name()).as_bool_array();
-							static_cast<Parameter<std::vector<bool>>&>(*param).set_value(value);
-							break;
-						}
+							case StateType::PARAMETER_BOOL_ARRAY:
+							{
+								std::unique_lock<std::mutex> lck(*this->mutex_);
+								std::vector<bool> value = this->get_parameter(param->get_name()).as_bool_array();
+								static_cast<Parameter<std::vector<bool>>&>(*param).set_value(value);
+								lck.unlock();
+								break;
+							}
 
-						case StateType::PARAMETER_STRING:
-						{
-							std::string value = this->get_parameter(param->get_name()).as_string();
-							static_cast<Parameter<std::string>&>(*param).set_value(value);
-							break;
-						}
+							case StateType::PARAMETER_STRING:
+							{
+								std::unique_lock<std::mutex> lck(*this->mutex_);
+								std::string value = this->get_parameter(param->get_name()).as_string();
+								static_cast<Parameter<std::string>&>(*param).set_value(value);
+								lck.unlock();
+								break;
+							}
 
-						case StateType::PARAMETER_STRING_ARRAY:
-						{
-							std::vector<std::string> value = this->get_parameter(param->get_name()).as_string_array();
-							static_cast<Parameter<std::vector<std::string>>&>(*param).set_value(value);
-							break;
-						}
+							case StateType::PARAMETER_STRING_ARRAY:
+							{
+								std::unique_lock<std::mutex> lck(*this->mutex_);
+								std::vector<std::string> value = this->get_parameter(param->get_name()).as_string_array();
+								static_cast<Parameter<std::vector<std::string>>&>(*param).set_value(value);
+								lck.unlock();
+								break;
+							}
 
-						case StateType::PARAMETER_CARTESIANPOSE:
-						{
-							std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-							static_cast<Parameter<CartesianPose>&>(*param).get_value().set_pose(value);
-							break;
-						}
+							case StateType::PARAMETER_CARTESIANPOSE:
+							{
+								std::unique_lock<std::mutex> lck(*this->mutex_);
+								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+								static_cast<Parameter<CartesianPose>&>(*param).get_value().set_pose(value);
+								lck.unlock();
+								break;
+							}
 
-						/*case StateType::PARAMETER_JOINTPOSITIONS:
-						{
-							std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-							static_cast<Parameter<JointPositions>&>(*param).set_value(value);
-							break;
-						}*/
+							/*case StateType::PARAMETER_JOINTPOSITIONS:
+							{
+								std::unique_lock<std::mutex> lck(*this->mutex_);
+								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+								static_cast<Parameter<JointPositions>&>(*param).set_value(value);
+								lck.unlock();
+								break;
+							}*/
 
-						default:
-						{
-							throw UnrecognizedParameterTypeException("The Parameter type is not available");
-							break;
+							default:
+							{
+								throw UnrecognizedParameterTypeException("The Parameter type is not available");
+								break;
+							}
 						}
 					}
 				}
-			}
-			catch (rclcpp::ParameterTypeException& e)
-			{
-				RCLCPP_ERROR(this->get_logger(), e.what());
+				catch (rclcpp::ParameterTypeException& e)
+				{
+					RCLCPP_ERROR(this->get_logger(), e.what());
+				}
+				auto end = std::chrono::steady_clock::now();
+		    	auto elapsed = end - start;
+		    	auto timeToWait = this->period_ - elapsed;
+		    	if(timeToWait > std::chrono::nanoseconds::zero())
+		    	{
+		        	std::this_thread::sleep_for(timeToWait);
+		    	}
 			}
 		}
 	}

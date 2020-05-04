@@ -51,6 +51,7 @@ namespace Modulo
 			bool active_; ///< boolean that informs that the node has been activated, i.e passed by the on_activate state
 			bool shutdown_; ///< boolean that informs that the node has been shutdown, i.e passed by the on_shutdown state
 			std::thread run_thread_; ///< thread object to start the main loop, i.e. the run function, in parallel of the rest
+			std::thread parameter_update_thread_; ///< thread object to start the parameter update loop
 			std::shared_ptr<std::mutex> mutex_; ///< a mutex to use when modifying messages between functions
 			std::chrono::nanoseconds period_;  ///< rate of the publisher functions in nanoseconds
 			std::list<std::thread> active_threads_; ///< list of active threads for periodic calling
@@ -422,7 +423,11 @@ namespace Modulo
 		shutdown_(false),
 		mutex_(std::make_shared<std::mutex>()),
 		period_(period)
-		{}
+		{
+			// add the update parameters call
+			std::function<void(void)> update_parameters_fnc = std::bind(&Cell::update_parameters, this);
+			this->parameter_update_thread_ = std::thread(update_parameters_fnc);
+		}
 
 		inline const std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > & Cell::get_handlers() const
 		{
