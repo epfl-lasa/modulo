@@ -25,7 +25,7 @@
 #include "state_representation/Robot/JacobianMatrix.hpp"
 #include "state_representation/Space/DualQuaternion/DualQuaternionPose.hpp"
 #include "state_representation/Space/DualQuaternion/DualQuaternionTwist.hpp"
-#include "state_representation/Parameter/Parameter.hpp"
+#include "state_representation/Parameters/Parameter.hpp"
 #include "state_representation/Trajectories/Trajectory.hpp"
 #include "state_representation/Exceptions/EmptyStateException.hpp"
 

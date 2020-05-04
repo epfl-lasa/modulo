@@ -1,7 +1,6 @@
 #include "modulo_core/Cell.hpp"
 #include "modulo_core/Exceptions/UnconfiguredNodeException.hpp"
-
-using namespace Modulo::Exceptions;
+#include "state_representation/Exceptions/UnrecognizedParameterTypeException.hpp"
 
 namespace Modulo
 {
@@ -45,20 +44,19 @@ namespace Modulo
 
 		void Cell::send_transform(const StateRepresentation::CartesianState& transform)
 		{
-			if (!this->configured_) throw UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
+			if (!this->configured_) throw Exceptions::UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
 			static_cast<Communication::MessagePassing::TransformBroadcasterHandler&>(*this->handlers_["tf_broadcaster"]).send_transform(transform);
 		}
 
 		const StateRepresentation::CartesianPose Cell::lookup_transform(const std::string& frame_name, const std::string& reference_frame)
 		{
-			if (!this->configured_) throw UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
+			if (!this->configured_) throw Exceptions::UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
 			return static_cast<Communication::MessagePassing::TransformListenerHandler&>(*this->handlers_["tf_listener"]).lookup_transform(frame_name, reference_frame);
 		}
 
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_configure(const rclcpp_lifecycle::State &) 
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_configure() is called.");
-			//std::lock_guard<std::mutex> lock(*this->mutex_);
 			// call the proxy on_configure function
 			if(!this->on_configure())
 			{
@@ -66,12 +64,15 @@ namespace Modulo
 				this->reset();
 				return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
 			}
-			// add the run thread
-			std::function<void(void)> run_fnc = std::bind(&Cell::run, this);
-			this->run_thread_ = std::thread(run_fnc);
 			// start the parameters
 			this->active_ = false;
 			this->configured_ = true;
+			// add the run thread
+			std::function<void(void)> run_fnc = std::bind(&Cell::run, this);
+			this->run_thread_ = std::thread(run_fnc);
+			// add the update parameters call
+			std::function<void(void)> update_parameters_fnc = std::bind(&Cell::update_parameters, this);
+			this->add_periodic_call(update_parameters_fnc, this->period_);
 			// add default transform broadcaster and transform listener
 			this->add_transform_broadcaster(this->period_, 10*this->period_);
 			this->add_transform_listener(10*this->period_);
@@ -87,7 +88,6 @@ namespace Modulo
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_activate(const rclcpp_lifecycle::State &)
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
-			//std::lock_guard<std::mutex> lock(*this->mutex_);
 			// call the proxy on_activate function
 			if(!this->on_activate())
 			{
@@ -112,7 +112,6 @@ namespace Modulo
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_deactivate(const rclcpp_lifecycle::State &)
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_deactivate() is called.");
-			//std::lock_guard<std::mutex> lock(*this->mutex_);
 			// call the proxy on_deactivate function
 			if(!this->on_deactivate())
 			{
@@ -137,7 +136,6 @@ namespace Modulo
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_cleanup(const rclcpp_lifecycle::State &) 
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_cleanup() is called.");
-			//std::lock_guard<std::mutex> lock(*this->mutex_);
 			// call the proxy on_cleanup function
 			if(!this->on_cleanup())
 			{
@@ -158,7 +156,6 @@ namespace Modulo
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_shutdown(const rclcpp_lifecycle::State & state) 
 		{
 			RCUTILS_LOG_INFO_NAMED(get_name(), "on_shutdown() is called from state %s.", state.label().c_str());
-			//std::lock_guard<std::mutex> lock(*this->mutex_);
 			// call the proxy on_shutdown function
 			if(!this->on_shutdown())
 			{
@@ -204,6 +201,113 @@ namespace Modulo
 
 		void Cell::step()
 		{}
+
+		void Cell::run_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::nanoseconds& period)
+		{
+			while(this->configured_)
+			{
+				auto start = std::chrono::steady_clock::now();
+				std::unique_lock<std::mutex> lck(*this->mutex_);
+				if(this->active_)
+				{
+					callback_function();
+				}
+				lck.unlock();
+				auto end = std::chrono::steady_clock::now();
+		    	auto elapsed = end - start;
+		    	auto timeToWait = period - elapsed;
+		    	if(timeToWait > std::chrono::nanoseconds::zero())
+		    	{
+		        	std::this_thread::sleep_for(timeToWait);
+		    	}
+			}
+		}
+
+		void Cell::add_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::nanoseconds& period)
+		{
+			std::function<void(const std::function<void(void)>&, const std::chrono::nanoseconds&)> fnc = std::bind(&Cell::run_periodic_call, this, callback_function, period);
+			this->active_threads_.push_back(std::thread(fnc, callback_function, period));
+		}
+
+		void Cell::update_parameters()
+		{
+			using namespace StateRepresentation;
+			using namespace StateRepresentation::Exceptions;
+			try
+			{
+				for (auto& param : this->parameters_)
+				{
+					switch (param->get_type())
+					{
+						case StateType::PARAMETER_DOUBLE:
+						{
+							double value = this->get_parameter(param->get_name()).as_double();
+							static_cast<Parameter<double>&>(*param).set_value(value);
+							break;
+						}
+
+						case StateType::PARAMETER_DOUBLE_ARRAY:
+						{
+							std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+							static_cast<Parameter<std::vector<double>>&>(*param).set_value(value);
+							break;
+						}
+
+						case StateType::PARAMETER_BOOL:
+						{
+							bool value = this->get_parameter(param->get_name()).as_bool();
+							static_cast<Parameter<bool>&>(*param).set_value(value);
+							break;
+						}
+
+						case StateType::PARAMETER_BOOL_ARRAY:
+						{
+							std::vector<bool> value = this->get_parameter(param->get_name()).as_bool_array();
+							static_cast<Parameter<std::vector<bool>>&>(*param).set_value(value);
+							break;
+						}
+
+						case StateType::PARAMETER_STRING:
+						{
+							std::string value = this->get_parameter(param->get_name()).as_string();
+							static_cast<Parameter<std::string>&>(*param).set_value(value);
+							break;
+						}
+
+						case StateType::PARAMETER_STRING_ARRAY:
+						{
+							std::vector<std::string> value = this->get_parameter(param->get_name()).as_string_array();
+							static_cast<Parameter<std::vector<std::string>>&>(*param).set_value(value);
+							break;
+						}
+
+						case StateType::PARAMETER_CARTESIANPOSE:
+						{
+							std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+							static_cast<Parameter<CartesianPose>&>(*param).get_value().set_pose(value);
+							break;
+						}
+
+						/*case StateType::PARAMETER_JOINTPOSITIONS:
+						{
+							std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+							static_cast<Parameter<JointPositions>&>(*param).set_value(value);
+							break;
+						}*/
+
+						default:
+						{
+							throw UnrecognizedParameterTypeException("The Parameter type is not available");
+							break;
+						}
+					}
+				}
+			}
+			catch (rclcpp::ParameterTypeException& e)
+			{
+				RCLCPP_ERROR(this->get_logger(), e.what());
+			}
+		}
 	}
 }
 

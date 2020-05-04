@@ -17,7 +17,7 @@ private:
 
 public:
 	explicit LinearMotionGenerator(const std::string & node_name, const std::chrono::milliseconds & period) :
-	MotionGenerator(node_name, period, true),
+	MotionGenerator(node_name, period, false),
 	current_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
 	target_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d(-0.419, -0.0468, 0.15059), Eigen::Quaterniond(-0.04616,-0.124,0.991007,-0.018758))),
@@ -56,7 +56,7 @@ private:
 
 public:
 	explicit ConsoleVisualizer(const std::string & node_name, const std::chrono::milliseconds & period) :
-	Visualizer(node_name, period, true),
+	Visualizer(node_name, period, false),
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
 	ds_gain(std::make_shared<StateRepresentation::Parameter<double> >("ds_gain"))
@@ -66,7 +66,7 @@ public:
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose);
 		this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
-		this->add_subscription<std_msgs::msg::Float64>("/ds/gain", this->ds_gain);
+		this->add_parameter(ds_gain);
 		return true;
 	}
 
@@ -78,7 +78,7 @@ public:
 		os << *this->robot_pose << std::endl;
 
 		os << "##### DS GAIN #####" << std::endl;
-		os << this->ds_gain->get_value() << std::endl;
+		os << *this->ds_gain << std::endl;
 		//os << "##### DESIRED VELOCITY #####" << std::endl;
 		//os << *this->desired_twist << std::endl;
 
@@ -108,7 +108,7 @@ private:
 
 public:
 	explicit SimulatedRobotInterface(const std::string & node_name, const std::chrono::milliseconds & period):
-	Cell(node_name, period, true),
+	Cell(node_name, period, false),
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom())),
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
 	fixed_transform(std::make_shared<StateRepresentation::CartesianPose>("robot_base", 4, 5, 3, "robot_test")),
@@ -149,13 +149,11 @@ int main(int argc, char * argv[])
 
 	rclcpp::init(argc, argv);
 
-	rclcpp::executors::SingleThreadedExecutor exe;
-	const std::chrono::milliseconds period(1);
-	const std::chrono::milliseconds period_visualization(100);
+	rclcpp::executors::MultiThreadedExecutor exe;
 
-	std::shared_ptr<LinearMotionGenerator> lmg = std::make_shared<LinearMotionGenerator>("motion_generator", period);
-	std::shared_ptr<ConsoleVisualizer> cv = std::make_shared<ConsoleVisualizer>("visualizer", period_visualization);
-	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", period);
+	std::shared_ptr<LinearMotionGenerator> lmg = std::make_shared<LinearMotionGenerator>("motion_generator", 1ms);
+	std::shared_ptr<ConsoleVisualizer> cv = std::make_shared<ConsoleVisualizer>("visualizer", 100ms);
+	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", 1ms);
 
 	exe.add_node(lmg->get_node_base_interface());
 	exe.add_node(cv->get_node_base_interface());

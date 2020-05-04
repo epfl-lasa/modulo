@@ -24,7 +24,7 @@
 #include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
 #include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
 #include "modulo_core/Communication/ServiceClient/ClientHandler.hpp"
-#include "state_representation/Parameter/Parameter.hpp"
+#include "state_representation/Parameters/Parameter.hpp"
 
 using namespace std::chrono_literals;
 
@@ -82,8 +82,7 @@ namespace Modulo
 			/**
 			 * @brief Update the value of the parameters from the parameter server
 			 */
-			template <typename T>
-			void update_parameter(StateRepresentation::Parameter<T>& parameter);
+			void update_parameters();
 
 		protected:
 			/**
@@ -254,14 +253,6 @@ namespace Modulo
 			void add_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter);
 
 			/**
-			 * @brief Add a parameter to be updated by the parameter server from a name and a value
-			 * @brief name the name of the parameter to be stored
-			 * @brief value the default value of the parameter
-			 */
-			template <typename T>
-			void add_parameter(const std::string& name, const T& value);
-
-			/**
 			 * @brief Function to send a transform using the generic transform broadcaster
 			 * @param transform the transformation to send
 			 */
@@ -413,16 +404,14 @@ namespace Modulo
 			 * @param callback_function the function to call
 			 * @param period the period between two calls
 			 */
-			template <typename CallbackT, typename DurationT>
-			void run_periodic_call(const CallbackT& callback_function, const std::chrono::duration<int64_t, DurationT>& period);
+			void run_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::nanoseconds& period);
 
 			/**
 			 * @brief Function to add a periodic call to the function given in input
 			 * @param callback_function the function to call
 			 * @param period the period between two calls
 			 */
-			template <typename CallbackT, typename DurationT>
-			void add_periodic_call(const CallbackT& callback_function, const std::chrono::duration<int64_t, DurationT>& period);
+			void add_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::nanoseconds& period);
 		};
 
 		template <typename DurationT>
@@ -549,14 +538,9 @@ namespace Modulo
 		void Cell::add_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter)
 		{
 			this->parameters_.push_back(parameter);
-			this->declare_parameters(parameter->get_name(), parameter->get_value());
+			this->declare_parameter(parameter->get_name(), parameter->get_value());
 		}
 
-		template <typename T>
-		void Cell::add_parameter(const std::string& name, const T& value)
-		{
-			this->add_parameter(std::make_shared<StateRepresentation::Parameter<T>>(name, value));
-		}
 		template <typename srvT>
 		std::shared_ptr<typename srvT::Response> Cell::send_blocking_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request)
 		{
@@ -567,35 +551,6 @@ namespace Modulo
 		std::shared_future<std::shared_ptr<typename srvT::Response> > Cell::send_request(const std::string& channel, const  std::shared_ptr<typename srvT::Request>& request)
 		{
 			return static_cast<Communication::ServiceClient::ClientHandler<srvT>& >(*this->handlers_.at(channel)).send_request(request);
-		}
-
-		template <typename CallbackT, typename DurationT>
-		void Cell::run_periodic_call(const CallbackT& callback_function, const std::chrono::duration<int64_t, DurationT>& period)
-		{
-			while(this->configured_)
-			{
-				auto start = std::chrono::steady_clock::now();
-				std::unique_lock<std::mutex> lck(*this->mutex_);
-				if(this->active_)
-				{
-					callback_function();
-				}
-				lck.unlock();
-				auto end = std::chrono::steady_clock::now();
-		    	auto elapsed = end - start;
-		    	auto timeToWait = period - elapsed;
-		    	if(timeToWait > std::chrono::nanoseconds::zero())
-		    	{
-		        	std::this_thread::sleep_for(timeToWait);
-		    	}
-			}
-		}
-
-		template <typename CallbackT, typename DurationT>
-		void Cell::add_periodic_call(const CallbackT& callback_function, const std::chrono::duration<int64_t, DurationT>& period)
-		{
-			std::function<void(const std::function<void(void)>&, const std::chrono::duration<int64_t, DurationT>&)> fnc = std::bind(&Cell::run_periodic_call, this, callback_function, period);
-			this->active_threads_.push_back(std::thread(fnc, callback_function, period));
 		}
 	}
 }
