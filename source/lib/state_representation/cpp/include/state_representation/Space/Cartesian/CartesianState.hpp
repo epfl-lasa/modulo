@@ -231,10 +231,16 @@ namespace StateRepresentation
 		friend double dist(const CartesianState& s1, const CartesianState& s2);
 
 		/**
-		 * @brief Return the pose as a std vector of floats
-		 * @return std::vector<float> the pose vector as a 7 elements vector
+		 * @brief Return the state as a std vector of floats
+		 * @return std::vector<float> the state vector as a std vector
 		 */
 		virtual const std::vector<double> to_std_vector() const;
+
+		/**
+		 * @brief Set the value from a std vector
+		 * @param value the value as a std vector
+		 */
+		virtual void from_std_vector(const std::vector<double>& value);
 	};
 
 	inline const Eigen::Vector3d& CartesianState::get_position() const

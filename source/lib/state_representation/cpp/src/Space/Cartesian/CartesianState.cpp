@@ -156,4 +156,9 @@ namespace StateRepresentation
 		throw(NotImplementedException("to_std_vector() is not implemented for the base CartesianState class"));
 		return std::vector<double>();
 	}
+
+	void CartesianState::from_std_vector(const std::vector<double>&)
+	{
+		throw(NotImplementedException("from_std_vector() is not implemented for the base CartesianState class"));
+	}
 }

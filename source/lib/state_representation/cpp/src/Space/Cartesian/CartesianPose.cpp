@@ -245,4 +245,9 @@ namespace StateRepresentation
 		pose[6] = this->get_orientation().z();
 		return pose;
 	}
+
+	void CartesianPose::from_std_vector(const std::vector<double>& value)
+	{
+		this->set_pose(value);
+	}
 }
