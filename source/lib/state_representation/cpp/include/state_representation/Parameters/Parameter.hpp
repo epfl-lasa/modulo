@@ -1,12 +1,11 @@
-#ifndef STATEREPRESENTATION_PARAMETER_H_
-#define STATEREPRESENTATION_PARAMETER_H_
+#pragma once
 
-#include "state_representation/State.hpp"
+#include "state_representation/Parameters/ParameterInterface.hpp"
 
 namespace StateRepresentation 
 {
 	template <typename T>
-	class Parameter : public State
+	class Parameter : public ParameterInterface
 	{
 	private:
 		T value; ///< Value of the parameter
@@ -59,7 +58,7 @@ namespace StateRepresentation
 
 	template <typename T>
 	Parameter<T>::Parameter(const Parameter<T>& parameter):
-	State(parameter), value(parameter.value)
+	ParameterInterface(parameter), value(parameter.value)
 	{}
 
 	template <typename T>
@@ -95,5 +94,3 @@ namespace StateRepresentation
   		return os;
 	}
 }
-
-#endif

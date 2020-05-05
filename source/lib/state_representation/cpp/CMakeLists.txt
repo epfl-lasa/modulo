@@ -42,6 +42,7 @@ set(CORE_SOURCES
   src/Space/DualQuaternion/DualQuaternionState.cpp
   src/Space/DualQuaternion/DualQuaternionPose.cpp
   src/Space/DualQuaternion/DualQuaternionTwist.cpp
+  src/Parameters/ParameterInterface.cpp
   src/Parameters/Parameter.cpp
 )
 

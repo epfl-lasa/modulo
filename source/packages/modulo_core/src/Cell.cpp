@@ -28,7 +28,7 @@ namespace Modulo
 		template <typename T>
 		void Cell::add_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter, const std::string& prefix)
 		{
-			parameter->set_name(prefix + parameter->get_name());
+			parameter->set_name(prefix + "_" + parameter->get_name());
 			this->parameters_.push_back(parameter);
 			this->declare_parameter(parameter->get_name(), parameter->get_value());
 		}
@@ -48,7 +48,7 @@ namespace Modulo
 		template <>
 		void Cell::add_parameter<StateRepresentation::CartesianPose>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>& parameter, const std::string& prefix)
 		{
-			parameter->set_name(prefix + parameter->get_name());
+			parameter->set_name(prefix + "_" + parameter->get_name());
 			this->parameters_.push_back(parameter);
 			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
 		}
@@ -56,9 +56,74 @@ namespace Modulo
 		template<>
 		void Cell::add_parameter<StateRepresentation::JointPositions>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::JointPositions>>& parameter, const std::string& prefix)
 		{
-			parameter->set_name(prefix + parameter->get_name());
+			parameter->set_name(prefix + "_" + parameter->get_name());
 			this->parameters_.push_back(parameter);
 			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
+		}
+
+		void Cell::add_parameters(const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>>& parameters, const std::string& prefix)
+		{
+			using namespace StateRepresentation;
+			using namespace StateRepresentation::Exceptions;
+			for (auto& param : parameters)
+			{
+				switch (param->get_type())
+				{
+					case StateType::PARAMETER_DOUBLE:
+					{
+						this->add_parameter(std::static_pointer_cast<Parameter<double>>(param), prefix);
+						break;
+					}
+
+					case StateType::PARAMETER_DOUBLE_ARRAY:
+					{
+						this->add_parameter(std::static_pointer_cast<Parameter<std::vector<double>>>(param), prefix);
+						break;
+					}
+
+					case StateType::PARAMETER_BOOL:
+					{
+						this->add_parameter(std::static_pointer_cast<Parameter<bool>>(param), prefix);
+						break;
+					}
+
+					case StateType::PARAMETER_BOOL_ARRAY:
+					{
+						this->add_parameter(std::static_pointer_cast<Parameter<std::vector<double>>>(param), prefix);
+						break;
+					}
+
+					case StateType::PARAMETER_STRING:
+					{
+						this->add_parameter(std::static_pointer_cast<Parameter<std::string>>(param), prefix);
+						break;
+					}
+
+					case StateType::PARAMETER_STRING_ARRAY:
+					{
+						this->add_parameter(std::static_pointer_cast<Parameter<std::vector<std::string>>>(param), prefix);
+						break;
+					}
+
+					case StateType::PARAMETER_CARTESIANPOSE:
+					{
+						this->add_parameter(std::static_pointer_cast<Parameter<CartesianPose>>(param), prefix);
+						break;
+					}
+
+					case StateType::PARAMETER_JOINTPOSITIONS:
+					{
+						this->add_parameter(std::static_pointer_cast<Parameter<JointPositions>>(param), prefix);
+						break;
+					}
+
+					default:
+					{
+						throw UnrecognizedParameterTypeException("The Parameter type is not available");
+						break;
+					}
+				}
+			}
 		}
 
 		void Cell::send_transform(const StateRepresentation::CartesianState& transform)

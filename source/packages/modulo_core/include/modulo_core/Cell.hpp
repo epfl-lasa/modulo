@@ -24,6 +24,7 @@
 #include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
 #include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
 #include "modulo_core/Communication/ServiceClient/ClientHandler.hpp"
+#include "state_representation/Parameters/ParameterInterface.hpp"
 #include "state_representation/Parameters/Parameter.hpp"
 
 using namespace std::chrono_literals;
@@ -55,7 +56,7 @@ namespace Modulo
 			std::shared_ptr<std::mutex> mutex_; ///< a mutex to use when modifying messages between functions
 			std::chrono::nanoseconds period_;  ///< rate of the publisher functions in nanoseconds
 			std::list<std::thread> active_threads_; ///< list of active threads for periodic calling
-			std::list<std::shared_ptr<StateRepresentation::State>> parameters_; ///< list for storing parameters
+			std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> parameters_; ///< list for storing parameters
 			std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > handlers_; ///< map for storing publishers, subscriptions and tf 
 
 			/**
@@ -257,6 +258,13 @@ namespace Modulo
 			 */
 			template <typename T>
 			void add_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter, const std::string& prefix="");
+
+			/**
+			 * @brief Add multiple parameters to be updated by the parameter server
+			 * @param parameters the list of parameters
+			 * @param prefix a string for prefixing the parameter name 
+			 */
+			void add_parameters(const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>>& parameters, const std::string& prefix="");
 
 			/**
 			 * @brief Function to send a transform using the generic transform broadcaster
