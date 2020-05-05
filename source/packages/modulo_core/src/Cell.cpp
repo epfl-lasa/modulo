@@ -28,7 +28,8 @@ namespace Modulo
 		template <typename T>
 		void Cell::add_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter, const std::string& prefix)
 		{
-			parameter->set_name(prefix + "_" + parameter->get_name());
+			std::string tprefix = (prefix != "") ? prefix + "_" : "";
+			parameter->set_name(tprefix + parameter->get_name());
 			this->parameters_.push_back(parameter);
 			this->declare_parameter(parameter->get_name(), parameter->get_value());
 		}
@@ -48,7 +49,8 @@ namespace Modulo
 		template <>
 		void Cell::add_parameter<StateRepresentation::CartesianPose>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>& parameter, const std::string& prefix)
 		{
-			parameter->set_name(prefix + "_" + parameter->get_name());
+			std::string tprefix = (prefix != "") ? prefix + "_" : "";
+			parameter->set_name(tprefix + parameter->get_name());
 			this->parameters_.push_back(parameter);
 			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
 		}
@@ -56,7 +58,8 @@ namespace Modulo
 		template<>
 		void Cell::add_parameter<StateRepresentation::JointPositions>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::JointPositions>>& parameter, const std::string& prefix)
 		{
-			parameter->set_name(prefix + "_" + parameter->get_name());
+			std::string tprefix = (prefix != "") ? prefix + "_" : "";
+			parameter->set_name(tprefix + parameter->get_name());
 			this->parameters_.push_back(parameter);
 			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
 		}
@@ -381,7 +384,7 @@ namespace Modulo
 							{
 								std::unique_lock<std::mutex> lck(*this->mutex_);
 								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-								static_cast<Parameter<CartesianPose>&>(*param).get_value().set_pose(value);
+								static_cast<Parameter<CartesianPose>&>(*param).get_value().from_std_vector(value);
 								lck.unlock();
 								break;
 							}

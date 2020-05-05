@@ -52,16 +52,20 @@ class ConsoleVisualizer : public Modulo::Visualizers::Visualizer
 private:
 	std::shared_ptr<StateRepresentation::CartesianPose> robot_pose;
 	std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
-	std::shared_ptr<StateRepresentation::Parameter<double> > ds_gain;
+	std::shared_ptr<StateRepresentation::Parameter<double>> ds_gain;
+
+	std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::CartesianPose>> test_pose;
 
 public:
 	explicit ConsoleVisualizer(const std::string & node_name, const std::chrono::milliseconds & period) :
 	Visualizer(node_name, period, false),
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
 	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
-	ds_gain(std::make_shared<StateRepresentation::Parameter<double> >("ds_gain", 0))
+	ds_gain(std::make_shared<StateRepresentation::Parameter<double> >("ds_gain", 0)),
+	test_pose(std::make_shared<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>("test_pose", StateRepresentation::CartesianPose::Random("robot")))
 	{
 		this->add_parameter(ds_gain);
+		this->add_parameter(test_pose);
 	}
 
 	bool on_configure()
@@ -80,6 +84,10 @@ public:
 
 		os << "##### DS GAIN #####" << std::endl;
 		os << *this->ds_gain << std::endl;
+
+		os << "##### TEST POSE #####" << std::endl;
+		os << *this->test_pose << std::endl;
+
 		//os << "##### DESIRED VELOCITY #####" << std::endl;
 		//os << *this->desired_twist << std::endl;
 
