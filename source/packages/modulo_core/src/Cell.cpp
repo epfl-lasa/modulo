@@ -26,46 +26,39 @@ namespace Modulo
 		}
 
 		template <typename T>
-		void Cell::add_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter)
+		void Cell::add_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter, const std::string& prefix)
 		{
+			parameter->set_name(prefix + parameter->get_name());
 			this->parameters_.push_back(parameter);
 			this->declare_parameter(parameter->get_name(), parameter->get_value());
 		}
 
-		template void Cell::add_parameter<double>(const std::shared_ptr<StateRepresentation::Parameter<double>>& parameter);
+		template void Cell::add_parameter<double>(const std::shared_ptr<StateRepresentation::Parameter<double>>& parameter, const std::string& prefix);
 
-		template void Cell::add_parameter<std::vector<double>>(const std::shared_ptr<StateRepresentation::Parameter<std::vector<double>>>& parameter);
+		template void Cell::add_parameter<std::vector<double>>(const std::shared_ptr<StateRepresentation::Parameter<std::vector<double>>>& parameter, const std::string& prefix);
 
-		template void Cell::add_parameter<bool>(const std::shared_ptr<StateRepresentation::Parameter<bool>>& parameter);
+		template void Cell::add_parameter<bool>(const std::shared_ptr<StateRepresentation::Parameter<bool>>& parameter, const std::string& prefix);
 
-		template void Cell::add_parameter<std::vector<bool>>(const std::shared_ptr<StateRepresentation::Parameter<std::vector<bool>>>& parameter);
+		template void Cell::add_parameter<std::vector<bool>>(const std::shared_ptr<StateRepresentation::Parameter<std::vector<bool>>>& parameter, const std::string& prefix);
 
-		template void Cell::add_parameter<std::string>(const std::shared_ptr<StateRepresentation::Parameter<std::string>>& parameter);
+		template void Cell::add_parameter<std::string>(const std::shared_ptr<StateRepresentation::Parameter<std::string>>& parameter, const std::string& prefix);
 
-		template void Cell::add_parameter<std::vector<std::string>>(const std::shared_ptr<StateRepresentation::Parameter<std::vector<std::string>>>& parameter);
+		template void Cell::add_parameter<std::vector<std::string>>(const std::shared_ptr<StateRepresentation::Parameter<std::vector<std::string>>>& parameter, const std::string& prefix);
 
 		template <>
-		void Cell::add_parameter<StateRepresentation::CartesianPose>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>& parameter)
+		void Cell::add_parameter<StateRepresentation::CartesianPose>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>& parameter, const std::string& prefix)
 		{
+			parameter->set_name(prefix + parameter->get_name());
 			this->parameters_.push_back(parameter);
 			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
 		}
 
 		template<>
-		void Cell::add_parameter<StateRepresentation::JointPositions>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::JointPositions>>& parameter)
+		void Cell::add_parameter<StateRepresentation::JointPositions>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::JointPositions>>& parameter, const std::string& prefix)
 		{
+			parameter->set_name(prefix + parameter->get_name());
 			this->parameters_.push_back(parameter);
 			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
-		}
-
-		void Cell::add_asynchronous_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, unsigned int nb_period_to_timeout, int queue_size)
-		{
-			this->add_asynchronous_transform_broadcaster(recipient, this->period_, nb_period_to_timeout * this->period_, queue_size);
-		}
-
-		void Cell::add_fixed_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, int queue_size)
-		{
-			this->add_asynchronous_transform_broadcaster(recipient, this->period_, 0ms, queue_size);
 		}
 
 		void Cell::send_transform(const StateRepresentation::CartesianState& transform)
