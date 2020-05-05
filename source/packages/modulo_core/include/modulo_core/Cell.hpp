@@ -57,7 +57,7 @@ namespace Modulo
 			std::chrono::nanoseconds period_;  ///< rate of the publisher functions in nanoseconds
 			std::list<std::thread> active_threads_; ///< list of active threads for periodic calling
 			std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> parameters_; ///< list for storing parameters
-			std::map<std::string, std::shared_ptr<Communication::CommunicationHandler> > handlers_; ///< map for storing publishers, subscriptions and tf 
+			std::map<std::string, std::shared_ptr<Communication::CommunicationHandler>> handlers_; ///< map for storing publishers, subscriptions and tf 
 
 			/**
 			 * @brief Function to clear all publishers, subscriptions and services
