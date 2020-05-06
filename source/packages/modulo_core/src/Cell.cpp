@@ -47,12 +47,30 @@ namespace Modulo
 		template void Cell::add_parameter<std::vector<std::string>>(const std::shared_ptr<StateRepresentation::Parameter<std::vector<std::string>>>& parameter, const std::string& prefix);
 
 		template <>
+		void Cell::add_parameter<StateRepresentation::CartesianState>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::CartesianState>>& parameter, const std::string& prefix)
+		{
+			std::string tprefix = (prefix != "") ? prefix + "_" : "";
+			parameter->set_name(tprefix + parameter->get_name());
+			this->parameters_.push_back(parameter);
+			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().StateRepresentation::CartesianState::to_std_vector());
+		}
+
+		template <>
 		void Cell::add_parameter<StateRepresentation::CartesianPose>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>& parameter, const std::string& prefix)
 		{
 			std::string tprefix = (prefix != "") ? prefix + "_" : "";
 			parameter->set_name(tprefix + parameter->get_name());
 			this->parameters_.push_back(parameter);
-			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
+			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().StateRepresentation::CartesianPose::to_std_vector());
+		}
+
+		template<>
+		void Cell::add_parameter<StateRepresentation::JointState>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::JointState>>& parameter, const std::string& prefix)
+		{
+			std::string tprefix = (prefix != "") ? prefix + "_" : "";
+			parameter->set_name(tprefix + parameter->get_name());
+			this->parameters_.push_back(parameter);
+			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().StateRepresentation::JointState::to_std_vector());
 		}
 
 		template<>
@@ -61,7 +79,7 @@ namespace Modulo
 			std::string tprefix = (prefix != "") ? prefix + "_" : "";
 			parameter->set_name(tprefix + parameter->get_name());
 			this->parameters_.push_back(parameter);
-			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
+			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().StateRepresentation::JointPositions::to_std_vector());
 		}
 
 		void Cell::add_parameters(const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>>& parameters, const std::string& prefix)
@@ -108,9 +126,21 @@ namespace Modulo
 						break;
 					}
 
+					case StateType::PARAMETER_CARTESIANSTATE:
+					{
+						this->add_parameter(std::static_pointer_cast<Parameter<CartesianState>>(param), prefix);
+						break;
+					}
+
 					case StateType::PARAMETER_CARTESIANPOSE:
 					{
 						this->add_parameter(std::static_pointer_cast<Parameter<CartesianPose>>(param), prefix);
+						break;
+					}
+
+					case StateType::PARAMETER_JOINTSTATE:
+					{
+						this->add_parameter(std::static_pointer_cast<Parameter<JointState>>(param), prefix);
 						break;
 					}
 
@@ -380,11 +410,20 @@ namespace Modulo
 								break;
 							}
 
+							case StateType::PARAMETER_CARTESIANSTATE:
+							{
+								std::unique_lock<std::mutex> lck(*this->mutex_);
+								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+								static_cast<Parameter<CartesianState>&>(*param).get_value().CartesianState::from_std_vector(value);
+								lck.unlock();
+								break;
+							}
+
 							case StateType::PARAMETER_CARTESIANPOSE:
 							{
 								std::unique_lock<std::mutex> lck(*this->mutex_);
 								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-								static_cast<Parameter<CartesianPose>&>(*param).get_value().from_std_vector(value);
+								static_cast<Parameter<CartesianPose>&>(*param).get_value().CartesianPose::from_std_vector(value);
 								lck.unlock();
 								break;
 							}

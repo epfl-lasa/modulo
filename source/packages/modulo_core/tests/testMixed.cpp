@@ -19,8 +19,7 @@ public:
 	current_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_end_effector", "robot_base")),
 	target_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_end_effector", Eigen::Vector3d::Random(), "robot_base")),
 	desired_velocities(std::make_shared<StateRepresentation::JointVelocities>("robot", 6)),
-	jacobian(std::make_shared<StateRepresentation::JacobianMatrix>("robot", 6)),
-	motion_generator(1)
+	jacobian(std::make_shared<StateRepresentation::JacobianMatrix>("robot", 6))
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot/eef_pose", this->current_pose);
 		this->add_subscription<modulo_msgs::msg::JacobianMatrix>("/robot/jacobian", this->jacobian);

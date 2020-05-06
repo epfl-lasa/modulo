@@ -11,26 +11,21 @@ class LinearMotionGenerator : public Modulo::MotionGenerators::MotionGenerator
 private:
 	std::shared_ptr<StateRepresentation::CartesianPose> current_pose;
 	std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
-	std::shared_ptr<StateRepresentation::CartesianPose> target_pose;
-	std::shared_ptr<StateRepresentation::Parameter<double> > gain;
 	DynamicalSystems::Linear<StateRepresentation::CartesianState> motion_generator;
 
 public:
 	explicit LinearMotionGenerator(const std::string & node_name, const std::chrono::milliseconds & period) :
 	MotionGenerator(node_name, period, false),
 	current_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
-	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
-	target_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d(-0.419, -0.0468, 0.15059), Eigen::Quaterniond(-0.04616,-0.124,0.991007,-0.018758))),
-	gain(std::make_shared<StateRepresentation::Parameter<double> >("ds_gain", 42)),
-	motion_generator(1)
-	{}
+	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test"))
+	{
+		this->add_parameters(this->motion_generator.get_parameters());
+	}
 
 	bool on_configure()
 	{
 		this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->current_pose);
 		this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
-		this->add_publisher<std_msgs::msg::Float64>("/ds/gain", this->gain, 0);
-		this->motion_generator.set_attractor(*this->target_pose);
 		return true;
 	}
 
@@ -60,13 +55,8 @@ public:
 	explicit ConsoleVisualizer(const std::string & node_name, const std::chrono::milliseconds & period) :
 	Visualizer(node_name, period, false),
 	robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
-	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
-	ds_gain(std::make_shared<StateRepresentation::Parameter<double> >("ds_gain", 0)),
-	test_pose(std::make_shared<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>("test_pose", StateRepresentation::CartesianPose::Random("robot")))
-	{
-		this->add_parameter(ds_gain);
-		this->add_parameter(test_pose);
-	}
+	desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test"))
+	{}
 
 	bool on_configure()
 	{
@@ -81,28 +71,6 @@ public:
 		os << std::endl;
 		os << "##### ROBOT POSE #####" << std::endl;
 		os << *this->robot_pose << std::endl;
-
-		os << "##### DS GAIN #####" << std::endl;
-		os << *this->ds_gain << std::endl;
-
-		os << "##### TEST POSE #####" << std::endl;
-		os << *this->test_pose << std::endl;
-
-		//os << "##### DESIRED VELOCITY #####" << std::endl;
-		//os << *this->desired_twist << std::endl;
-
-		// look up the robot_base transform
-		/*try
-		{
-			StateRepresentation::CartesianPose robot_base_pose = this->lookup_transform("robot_base");
-			os << "##### ROBOT BASE POSE #####" << std::endl;
-			os << robot_base_pose;
-		}
-		catch (const std::exception& e)
-		{
-			RCLCPP_ERROR(get_logger(), e.what());
-		}*/
-
 		RCLCPP_INFO(get_logger(), "%s", os.str().c_str());
 	}
 };

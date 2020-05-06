@@ -17,8 +17,7 @@ public:
 	MotionGenerator(node_name, period, true),
 	current_positions(std::make_shared<StateRepresentation::JointState>("robot", 6)),
 	desired_velocities(std::make_shared<StateRepresentation::JointState>("robot", 6)),
-	target_positions(std::make_shared<StateRepresentation::JointState>("robot", 6)),
-	motion_generator(1)
+	target_positions(std::make_shared<StateRepresentation::JointState>("robot", 6))
 	{
 		this->add_subscription<sensor_msgs::msg::JointState>("/robot/joint_state", this->current_positions);
 		this->add_publisher<sensor_msgs::msg::JointState>("/ds/desired_velocities", this->desired_velocities);
