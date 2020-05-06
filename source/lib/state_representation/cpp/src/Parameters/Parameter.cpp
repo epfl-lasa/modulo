@@ -79,6 +79,18 @@ namespace StateRepresentation
 	}
 
 	template <>
+	Parameter<CartesianState>::Parameter(const std::string& name):
+	ParameterInterface(StateType::PARAMETER_CARTESIANSTATE, name)
+	{}
+
+	template <>
+	Parameter<CartesianState>::Parameter(const std::string& name, const CartesianState& value):
+	ParameterInterface(StateType::PARAMETER_CARTESIANSTATE, name), value(value)
+	{
+		this->set_filled();
+	}
+
+	template <>
 	Parameter<CartesianPose>::Parameter(const std::string& name):
 	ParameterInterface(StateType::PARAMETER_CARTESIANPOSE, name)
 	{}
@@ -86,6 +98,18 @@ namespace StateRepresentation
 	template <>
 	Parameter<CartesianPose>::Parameter(const std::string& name, const CartesianPose& value):
 	ParameterInterface(StateType::PARAMETER_CARTESIANPOSE, name), value(value)
+	{
+		this->set_filled();
+	}
+
+	template <>
+	Parameter<JointState>::Parameter(const std::string& name):
+	ParameterInterface(StateType::PARAMETER_JOINTSTATE, name)
+	{}
+
+	template <>
+	Parameter<JointState>::Parameter(const std::string& name, const JointState& value):
+	ParameterInterface(StateType::PARAMETER_JOINTSTATE, name), value(value)
 	{
 		this->set_filled();
 	}

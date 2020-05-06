@@ -14,19 +14,26 @@ namespace StateRepresentation
 		/**
 		 * @brief Empty constructor
 		 */
-		explicit Parameter(const std::string& name);
+		Parameter(const std::string& name);
 		
 		/**
 		 * @brief Constructor with a value
 		 * @param value value of the parameter
 		 */
-		explicit Parameter(const std::string& name, const T& value);
+		Parameter(const std::string& name, const T& value);
 
 		/**
 		 * @brief Copy constructor
 		 * @param parameter the parameter to copy
 		 */
-		Parameter(const Parameter<T>& parameter);
+		template <typename U>
+		Parameter(const Parameter<U>& parameter);
+
+		/**
+		 * @brief Conversion equality
+		 */
+		template <typename U>
+		Parameter<T>& operator=(const Parameter<U>& parameter);
 
 		/**
 		 * @brief Getter of the value attribute
@@ -56,10 +63,18 @@ namespace StateRepresentation
 		friend std::ostream& operator<<(std::ostream& os, const Parameter<U>& parameter);
 	};
 
-	template <typename T>
-	Parameter<T>::Parameter(const Parameter<T>& parameter):
-	ParameterInterface(parameter), value(parameter.value)
+	template <typename T> template <typename U>
+	Parameter<T>::Parameter(const Parameter<U>& parameter):
+	ParameterInterface(parameter), value(parameter.get_value())
 	{}
+
+	template <typename T> template <typename U>
+	Parameter<T>& Parameter<T>::operator=(const Parameter<U>& parameter)
+	{
+		Parameter<T> temp(parameter);
+		*this = temp;
+		return *this;
+	}
 
 	template <typename T>
 	inline const T& Parameter<T>::get_value() const

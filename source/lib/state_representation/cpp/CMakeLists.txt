@@ -122,4 +122,12 @@ if (runtests)
     )
     add_test(NAME runTestTrajectory COMMAND runTestTrajectory)
 
+    add_executable(runTestParameter tests/testParameter.cpp)
+    target_link_libraries(runTestParameter
+      gtest 
+      gtest_main
+      ${PROJECT_NAME}
+    )
+    add_test(NAME runTestParameter COMMAND runTestParameter)
+
 endif()
