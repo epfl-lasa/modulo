@@ -23,16 +23,15 @@ namespace DynamicalSystems
 	class Circular: public DynamicalSystem<S>
 	{
 	private:
-		double radius_; ///< radius of the limit circle
-		double elevation_; ///< elevation of the limit circle
-		double circular_velocity_; ///< velocity at wich to navigate the limit circle
+		std::shared_ptr<StateRepresentation::Parameter<double>> radius_; ///< radius of the limit circle
+		std::shared_ptr<StateRepresentation::Parameter<double>> elevation_; ///< elevation of the limit circle
+		std::shared_ptr<StateRepresentation::Parameter<double>> circular_velocity_; ///< velocity at wich to navigate the limit circle
 
 	public:
 		/**
-		 * @brief Constructor with a provided gain 
-		 * @param  gain the gain of the dynamical system (default = 1)
+		 * @brief Empty constructor 
 		 */
-		explicit Circular(double gain=1);
+		explicit Circular();
 
 		/**
 		 * @brief Getter of the radius attribute
@@ -75,58 +74,57 @@ namespace DynamicalSystems
 		 * @param state state at wich to perform the evaluation
 		 * @return the state (velocity) to move toward the attractor
 		 */
-		virtual const S evaluate(const S& state) const;
+		const S evaluate(const S& state) const override;
 
 		/**
-		 * @brief Evaluate the value of the dynamical system at a given state
-		 * @param state state at wich to perform the evaluation
-		 * @return the state (velocity) to move toward the attractor
+		 * @brief Return a list of all the parameters of the dynamical system
+		 * @return the list of parameters
 		 */
-		virtual const S evaluate(const std::shared_ptr<S>& state) const;
+		const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> get_parameters() const override;
 	};
 
-	template<class S>
-	Circular<S>::Circular(double gain):
-	DynamicalSystem<S>(gain),
-	radius_(1),
-	elevation_(M_PI/2),
-	circular_velocity_(M_PI/2)
+	template<>
+	Circular<StateRepresentation::CartesianState>::Circular():
+	DynamicalSystem<StateRepresentation::CartesianState>(std::make_shared<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>(StateRepresentation::Parameter<StateRepresentation::CartesianPose>("center"))),
+	radius_(std::make_shared<StateRepresentation::Parameter<double>>("radius", 1.)),
+	elevation_(std::make_shared<StateRepresentation::Parameter<double>>("elevation", M_PI/2)),
+	circular_velocity_(std::make_shared<StateRepresentation::Parameter<double>>("circular_velocity", M_PI/2))
 	{}
 
 	template<class S>
 	inline double Circular<S>::get_radius() const
 	{
-		return this->radius_;
+		return this->radius_->get_value();
 	}
 
 	template<class S>
 	inline void Circular<S>::set_radius(double radius)
 	{
-		this->radius_ = radius;
+		this->radius_->set_value(radius);
 	}
 
 	template<class S>
 	inline double Circular<S>::get_elevation() const
 	{
-		return this->elevation_;
+		return this->elevation_->get_value();
 	}
 
 	template<class S>
 	inline void Circular<S>::set_elevation(double elevation)
 	{
-		this->elevation_ = elevation;
+		this->elevation_->set_value(elevation);
 	}
 
 	template<class S>
 	inline double Circular<S>::get_circular_velocity() const
 	{
-		return this->circular_velocity_;
+		return this->circular_velocity_->get_value();
 	}
 
 	template<class S>
 	inline void Circular<S>::set_circular_velocity(double circular_velocity)
 	{
-		this->circular_velocity_ = circular_velocity;
+		this->circular_velocity_->set_value(circular_velocity);
 	}
 
 	template<>
@@ -170,8 +168,12 @@ namespace DynamicalSystems
 
 	}
 
-	template<>
-	const S Circular<StateRepresentation::CartesianState>::evaluate(const std::shared_ptr<StateRepresentation::CartesianState>& state) const
+	template<class S>
+	const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> Circular<S>::get_parameters() const
 	{
-		return this->evaluate(*state);
+		std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> param_list = this->DynamicalSystem<S>::get_param_list();
+		param_list.push_back(this->radius_);
+		param_list.push_back(this->elevation_);
+		param_list.push_back(this->circular_velocity_);
+		return param_list;
 	}

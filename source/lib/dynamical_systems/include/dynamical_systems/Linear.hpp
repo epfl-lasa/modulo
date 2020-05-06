@@ -24,10 +24,9 @@ namespace DynamicalSystems
 	{
 	public:
 		/**
-		 * @brief Constructor with a provided gain 
-		 * @param  gain the gain of the dynamical system (default = 1)
+		 * @brief Empty constructor
 		 */
-		explicit Linear(double gain=1);
+		explicit Linear();
 
 		/**
 		 * @brief Evaluate the value of the dynamical system at a given state
@@ -37,9 +36,14 @@ namespace DynamicalSystems
 		const S evaluate(const S& state) const override;
 	};
 
-	template<class S>
-	Linear<S>::Linear(double gain):
-	DynamicalSystem<S>(gain)
+	template<>
+	Linear<StateRepresentation::CartesianState>::Linear():
+	DynamicalSystem<StateRepresentation::CartesianState>(std::make_shared<StateRepresentation::Parameter<StateRepresentation::CartesianState>>(StateRepresentation::Parameter<StateRepresentation::CartesianPose>("target")))
+	{}
+
+	template<>
+	Linear<StateRepresentation::JointState>::Linear():
+	DynamicalSystem<StateRepresentation::JointState>(std::make_shared<StateRepresentation::Parameter<StateRepresentation::JointState>>(StateRepresentation::Parameter<StateRepresentation::JointState>("target")))
 	{}
 
 	template<>
