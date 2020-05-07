@@ -86,6 +86,11 @@ namespace StateRepresentation
 		void set_positions(const Eigen::VectorXd& positions);
 
 		/**
+	 	 * @brief Setter of the posistions attribute
+	     */
+		void set_positions(const std::vector<double>& positions);
+
+		/**
 	 	 * @brief Getter of the velocities attribute
 	     */
 		const Eigen::VectorXd& get_velocities() const;
@@ -187,6 +192,12 @@ namespace StateRepresentation
 		 * @return std::vector<float> the joint vector as a std vector
 		 */
 		virtual const std::vector<double> to_std_vector() const;
+
+		/**
+		 * @brief Set the value from a std vector
+		 * @param value the value as a std vector
+		 */
+		virtual void from_std_vector(const std::vector<double>& value);
 	};
 
 	inline bool JointState::is_compatible(const State& state) const
@@ -237,6 +248,15 @@ namespace StateRepresentation
 		this->set_filled();
 		// positions are angles between -pi and pi
 		this->positions = positions.unaryExpr([](double x){return atan2(sin(x), cos(x));});
+	}
+
+	inline void JointState::set_positions(const std::vector<double>& positions)
+	{
+		if(positions.size() != this->get_size()) throw IncompatibleSizeException("Input vector is of incorrect size: expected " + std::to_string(this->get_size()) + ", given " + std::to_string(positions.size()));
+		this->set_filled();
+		this->positions = Eigen::VectorXd::Map(positions.data(), positions.size());
+		// positions are angles between -pi and pi
+		this->positions = this->positions.unaryExpr([](double x){return atan2(sin(x), cos(x));});
 	}
 
 	inline const Eigen::VectorXd& JointState::get_velocities() const

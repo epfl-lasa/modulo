@@ -148,4 +148,9 @@ namespace StateRepresentation
 		throw(NotImplementedException("to_std_vector() is not implemented for the base JointState class"));
 		return std::vector<double>();
 	}
+
+	void JointState::from_std_vector(const std::vector<double>&)
+	{
+		throw(NotImplementedException("from_std_vector() is not implemented for the base JointState class"));
+	}
 }

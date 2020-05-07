@@ -206,5 +206,11 @@ namespace StateRepresentation
 		 * @return std::vector<float> the joint positions vector as a std vector
 		 */
 		const std::vector<double> to_std_vector() const;
+
+		/**
+		 * @brief Set the value from a std vector
+		 * @param value the value as a std vector
+		 */
+		void from_std_vector(const std::vector<double>& value);
 	};
 }

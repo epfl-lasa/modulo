@@ -203,6 +203,12 @@ namespace StateRepresentation
 
 	const std::vector<double> JointPositions::to_std_vector() const
 	{
-		return std::vector<double>(this->get_positions().data(), this->get_positions().data() + this->get_size());
+		std::vector<double> temp(this->get_positions().data(), this->get_positions().data() + this->get_size());
+		return temp;
+	}
+
+	void JointPositions::from_std_vector(const std::vector<double>& value)
+	{
+		this->set_positions(value);
 	}
 }
