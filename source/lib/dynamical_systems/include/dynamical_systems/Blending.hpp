@@ -25,7 +25,7 @@ namespace DynamicalSystems
 	{
 	private:
 		std::vector<std::shared_ptr<DynamicalSystem<S>>> systems_; ///< pointer to the individual systmes
-		std::vector<double> weights_; ///< weights of each system
+		std::shared_ptr<StateRepresentation::Parameter<std::vector<double>>> weights_; ///< weights of each system
 
 		/**
 		 * @brief Normalize the weight vector
@@ -107,9 +107,9 @@ namespace DynamicalSystems
 	void Blending<S>::normalize_weights()
 	{
 		double mod = 0.0;
-    	for (const auto& w: this->weights_) mod += w * w;
+    	for (const auto& w: this->weights_->get_value()) mod += w * w;
     	double mag = std::sqrt(mod);
-    	for (auto& w: this->weights_) w /= mag;
+    	for (auto& w: this->weights_->get_value()) w /= mag;
 	}
 
 	template <class S>
@@ -128,7 +128,7 @@ namespace DynamicalSystems
 	void Blending<S>::add_dynamical_system(const std::shared_ptr<DynamicalSystem<S>> ds, double weight, bool normalize_weights=true)
 	{
 		this->systems_.push_back(ds);
-		this->weights_.push_back(weight);
+		this->weights_->get_value().push_back(weight);
 		if (normalize_weights) this->normalize_weights();
 	}
 
@@ -139,7 +139,7 @@ namespace DynamicalSystems
 		for (unsigned int i=0; i<ds.size(); ++i)
 		{
 			this->systems_.push_back(ds);
-			this->weights_.push_back(weight);
+			this->weights_->get_value().push_back(weight);
 		}
 		if (normalize_weights) this->normalize_weights();
 	}
@@ -147,7 +147,7 @@ namespace DynamicalSystems
 	template <class S>
 	void Blending<S>::set_weight(unsigned int idx, double weight, bool normalize_weights=true)
 	{
-		this->weights_[idx] = weight;
+		this->weights_->get_value()[idx] = weight;
 		if (normalize_weights) this->normalize_weights();
 	}
 
@@ -157,7 +157,7 @@ namespace DynamicalSystems
 		if (idx.size() != weights.size()) throw IncompatibleSizeException("The index vector and the weight vector have different sizes");
 		for (unsigned int i=0; i<idx.size(); ++i)
 		{
-			this->weights_[idx[i]] = weights[i];
+			this->weights_->get_value()[idx[i]] = weights[i];
 		}
 		if (normalize_weights) this->normalize_weights();
 	}
@@ -168,7 +168,7 @@ namespace DynamicalSystems
 		S output;
 		for (unsigned int i=0; i<ds.size(); ++i)
 		{
-			S += (this->weights_[i] * this->systems_[i]->evaluate(state));
+			S += (this->weights_->get_value()[i] * this->systems_[i]->evaluate(state));
 		}
 		return output;
 	}

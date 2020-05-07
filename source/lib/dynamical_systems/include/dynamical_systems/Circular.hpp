@@ -23,15 +23,40 @@ namespace DynamicalSystems
 	class Circular: public DynamicalSystem<S>
 	{
 	private:
+		std::shared_ptr<StateRepresentation::Parameter<S>> center_; ///< attractor of the dynamical system in the space
+		std::shared_ptr<StateRepresentation::Parameter<double>> gain_; ///< gain associate to the system
 		std::shared_ptr<StateRepresentation::Parameter<double>> radius_; ///< radius of the limit circle
-		std::shared_ptr<StateRepresentation::Parameter<double>> elevation_; ///< elevation of the limit circle
 		std::shared_ptr<StateRepresentation::Parameter<double>> circular_velocity_; ///< velocity at wich to navigate the limit circle
 
 	public:
 		/**
 		 * @brief Empty constructor 
 		 */
-		explicit Circular();
+		explicit Circular(const S& center, double gain=1.0, double radius=1.0, double circular_velocity=M_PI/2);
+
+		/**
+		 * @brief Getter of the attractor
+		 * @return the attractor as a const reference
+		 */
+		const S& get_center() const;
+
+		/**
+		 * @brief Setter of the attractor as a new value
+		 * @param attractor the new attractor
+		 */
+		void set_center(const S& attractor);
+
+		/**
+		 * @brief Getter of the gain attribute
+		 * @return The gain value 
+		 */
+		double get_gain() const;
+
+		/**
+		 * @brief Getter of the gain attribute
+		 * @return The gain value 
+		 */
+		void set_gain(double gain);
 
 		/**
 		 * @brief Getter of the radius attribute
@@ -44,18 +69,6 @@ namespace DynamicalSystems
 		 * @param radius the new radius value
 		 */
 		void set_radius(double radius);
-
-		/**
-		 * @brief Getter of the evlevation attribute
-		 * @return the elevation value
-		 */
-		double get_elevation() const;
-
-		/**
-		 *@brief Setter of the elevation attribute
-		 * @param elevation the new elevation value
-		 */
-		void set_elevation(double elevation);
 
 		/**
 		 * @brief Getter of the circular velocity attribute
@@ -84,12 +97,37 @@ namespace DynamicalSystems
 	};
 
 	template<>
-	Circular<StateRepresentation::CartesianState>::Circular():
-	DynamicalSystem<StateRepresentation::CartesianState>(std::make_shared<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>(StateRepresentation::Parameter<StateRepresentation::CartesianPose>("center"))),
-	radius_(std::make_shared<StateRepresentation::Parameter<double>>("radius", 1.)),
-	elevation_(std::make_shared<StateRepresentation::Parameter<double>>("elevation", M_PI/2)),
-	circular_velocity_(std::make_shared<StateRepresentation::Parameter<double>>("circular_velocity", M_PI/2))
+	Circular<StateRepresentation::CartesianState>::Circular(const StateRepresentation::CartesianState& center, double gain, double radius=1.0, double circular_velocity=M_PI/2):
+	DynamicalSystem<StateRepresentation::CartesianState>(),
+	center_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>(StateRepresentation::Parameter<StateRepresentation::CartesianPose>("center", center))),
+	gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain)),
+	radius_(std::make_shared<StateRepresentation::Parameter<double>>("radius", radius)),
+	circular_velocity_(std::make_shared<StateRepresentation::Parameter<double>>("circular_velocity", circular_velocity))
 	{}
+
+	template<class S>
+	inline const S& Circular<S>::get_center() const
+	{
+		return this->center_->get_value();
+	}
+
+	template<class S>
+	inline void Circular<S>::set_center(const S& attractor)
+	{
+		this->attractor_->set_center(attractor);
+	}
+
+	template<class S>
+	inline double Circular<S>::get_gain() const
+	{
+		return this->gain_->get_value();
+	}
+
+	template<class S>
+	inline void Circular<S>::set_gain(double gain)
+	{
+		this->gain_->set_value(gain);
+	}
 
 	template<class S>
 	inline double Circular<S>::get_radius() const
@@ -130,30 +168,9 @@ namespace DynamicalSystems
 	template<>
 	const StateRepresentation::CartesianState Circular<StateRepresentation::CartesianState>::evaluate(const StateRepresentation::CartesianState& state) const
 	{
-		// StateRepresentation::CartesianPose pose_in_center = static_cast<const StateRepresentation::CartesianPose&>(this->get_center()).inverse() * static_cast<const StateRepresentation::CartesianPose&>(state);
-
-		// double radius = pose_in_center.get_position().norm();
-		// double theta = acos(pose_in_center.get_position()(2) / radius);
-		// double phi = atan2(pose_in_center.get_position()(1), pose_in_center.get_position()(0));
-
-		// double dradius = -this->get_gain() * (radius - this->get_radius());
-		// double dtheta = -this->get_gain() * (theta - this->get_elevation());
-		// double dphi = this->get_gain();
-
-		// Eigen::Vector3d linear_velocity;
-		// linear_velocity(0) = dradius * sin(theta) * cos(phi) + dtheta * radius * cos(theta) * cos(phi) - dphi * radius * sin(theta) * sin(phi);
-		// linear_velocity(1) = dradius * sin(theta) * sin(phi) + dtheta * radius * cos(theta) * sin(phi) + dphi * radius * sin(theta) * cos(phi);
-		// linear_velocity(2) = dradius * cos(theta) - dtheta * radius * sin(theta);
-
-		// StateRepresentation::CartesianTwist velocity(state.get_name(), state.get_reference_frame());
-		// velocity.set_linear_velocity(pose_in_center.inverse() * linear_velocity);
-
-		// return velocity;
-
 		StateRepresentation::CartesianPose pose = static_cast<const StateRepresentation::CartesianPose&>(state) - static_cast<const StateRepresentation::CartesianPose&>(this->get_attractor());
 		StateRepresentation::CartesianTwist velocity(state.get_name(), state.get_reference_frame());
 		Eigen::Vector3d linear_velocity;
-		// linear_velocity(2) = -this->get_gain() * pose.get_position()(2);
 		linear_velocity(2) = -this->get_gain() * pose.get_position()(2);
 
 		float R = sqrt(pose.get_position()(0) * pose.get_position()(0) + pose.get_position()(1) * pose.get_position()(1));
@@ -172,8 +189,9 @@ namespace DynamicalSystems
 	const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> Circular<S>::get_parameters() const
 	{
 		std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> param_list = this->DynamicalSystem<S>::get_param_list();
+		param_list.push_back(this->center_);
+		param_list.push_back(this->gain_);
 		param_list.push_back(this->radius_);
-		param_list.push_back(this->elevation_);
 		param_list.push_back(this->circular_velocity_);
 		return param_list;
 	}

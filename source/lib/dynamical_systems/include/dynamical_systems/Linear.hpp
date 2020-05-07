@@ -22,11 +22,39 @@ namespace DynamicalSystems
 	template<class S>
 	class Linear: public DynamicalSystem<S>
 	{
+	private:
+		std::shared_ptr<StateRepresentation::Parameter<S>> attractor_; ///< attractor of the dynamical system in the space
+		std::shared_ptr<StateRepresentation::Parameter<double>> gain_; ///< gain associate to the system
+	
 	public:
 		/**
 		 * @brief Empty constructor
 		 */
-		explicit Linear();
+		explicit Linear(const S& attractor, double gain=1.0);
+
+		/**
+		 * @brief Getter of the attractor
+		 * @return the attractor as a const reference
+		 */
+		const S& get_attractor() const;
+
+		/**
+		 * @brief Setter of the attractor as a new value
+		 * @param attractor the new attractor
+		 */
+		void set_attractor(const S& attractor);
+
+		/**
+		 * @brief Getter of the gain attribute
+		 * @return The gain value 
+		 */
+		double get_gain() const;
+
+		/**
+		 * @brief Getter of the gain attribute
+		 * @return The gain value 
+		 */
+		void set_gain(double gain);
 
 		/**
 		 * @brief Evaluate the value of the dynamical system at a given state
@@ -34,17 +62,51 @@ namespace DynamicalSystems
 		 * @return the state (velocity) to move toward the attractor
 		 */
 		const S evaluate(const S& state) const override;
+
+		/**
+		 * @brief Return a list of all the parameters of the dynamical system
+		 * @return the list of parameters
+		 */
+		const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> get_parameters() const;
 	};
 
 	template<>
-	Linear<StateRepresentation::CartesianState>::Linear():
-	DynamicalSystem<StateRepresentation::CartesianState>(std::make_shared<StateRepresentation::Parameter<StateRepresentation::CartesianState>>(StateRepresentation::Parameter<StateRepresentation::CartesianPose>("target")))
+	Linear<StateRepresentation::CartesianState>::Linear(const StateRepresentation::CartesianState& attractor, double gain):
+	DynamicalSystem<StateRepresentation::CartesianState>(),
+	attractor_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::CartesianState>>(StateRepresentation::Parameter<StateRepresentation::CartesianPose>("attractor", attractor))),
+	gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain))
 	{}
 
 	template<>
-	Linear<StateRepresentation::JointState>::Linear():
-	DynamicalSystem<StateRepresentation::JointState>(std::make_shared<StateRepresentation::Parameter<StateRepresentation::JointState>>(StateRepresentation::Parameter<StateRepresentation::JointState>("target")))
+	Linear<StateRepresentation::JointState>::Linear(const StateRepresentation::JointState& attractor, double gain):
+	DynamicalSystem<StateRepresentation::JointState>(),
+	attractor_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::JointState>>(StateRepresentation::Parameter<StateRepresentation::JointState>("attractor", attractor))),
+	gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain))
 	{}
+
+	template<class S>
+	inline const S& Linear<S>::get_attractor() const
+	{
+		return this->attractor_->get_value();
+	}
+
+	template<class S>
+	inline void Linear<S>::set_attractor(const S& attractor)
+	{
+		this->attractor_->set_value(attractor);
+	}
+
+	template<class S>
+	inline double Linear<S>::get_gain() const
+	{
+		return this->gain_->get_value();
+	}
+
+	template<class S>
+	inline void Linear<S>::set_gain(double gain)
+	{
+		this->gain_->set_value(gain);
+	}
 
 	template<>
 	const StateRepresentation::CartesianState Linear<StateRepresentation::CartesianState>::evaluate(const StateRepresentation::CartesianState& state) const
@@ -61,5 +123,14 @@ namespace DynamicalSystems
 		StateRepresentation::JointState velocities(state.get_name(), state.get_names());
 		velocities.set_velocities(positions.get_positions());
 		return velocities;
+	}
+
+	template<class S>
+	const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> Linear<S>::get_parameters() const
+	{
+		std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> param_list;
+		param_list.push_back(this->attractor_);
+		param_list.push_back(this->gain_);
+		return param_list;
 	}
 }
