@@ -1,3 +1,6 @@
+## 0.2.1 (mai 07, 2020)
+  - Correct synchronization with mutex
+
 ## 0.2.0 (mai 07, 2020)
   - Remove unnecessary break
   - Remove scale function
