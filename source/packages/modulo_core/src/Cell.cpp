@@ -1,6 +1,7 @@
 #include "modulo_core/Cell.hpp"
 #include "modulo_core/Exceptions/UnconfiguredNodeException.hpp"
 #include "state_representation/Exceptions/UnrecognizedParameterTypeException.hpp"
+#include "state_representation/Exceptions/IncompatibleSizeException.hpp"
 
 namespace Modulo
 {
@@ -446,6 +447,14 @@ namespace Modulo
 					}
 				}
 				catch (rclcpp::ParameterTypeException& e)
+				{
+					RCLCPP_ERROR(this->get_logger(), e.what());
+				}
+				catch (IncompatibleSizeException& e)
+				{
+					RCLCPP_ERROR(this->get_logger(), e.what());
+				}
+				catch (UnrecognizedParameterTypeException& e)
 				{
 					RCLCPP_ERROR(this->get_logger(), e.what());
 				}
