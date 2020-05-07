@@ -80,7 +80,7 @@ namespace DynamicalSystems
 	template<>
 	Linear<StateRepresentation::JointState>::Linear(const StateRepresentation::JointState& attractor, double gain):
 	DynamicalSystem<StateRepresentation::JointState>(),
-	attractor_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::JointState>>(StateRepresentation::Parameter<StateRepresentation::JointState>("attractor", attractor))),
+	attractor_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::JointState>>(StateRepresentation::Parameter<StateRepresentation::JointPositions>("attractor", attractor))),
 	gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain))
 	{}
 
