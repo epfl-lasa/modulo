@@ -1,3 +1,91 @@
+## 0.2.0 (mai 07, 2020)
+  - Remove unnecessary break
+  - Remove scale function
+  - Merge branch 'develop'
+  - Add parameter test
+  - Correct name for coherence with Cartesian example
+  - Add JointPositions parameter get and remove CartesianState and JointState parameter handlers
+  - Add from_std_vector function for JointPositions
+  - Correct parameter initilaization in JointSpace
+  - Catch exceptions that arise during parameter set
+  - Clean dynamical system library to handle properly parameters
+  - Clean Cell package to remove unnecessary files
+  - Add conversion from std vector to set position and orientation
+  - Clean header files
+  - Propagate changes made to the parameter conversion
+  - Add parameters to the dynamical systems
+  - Handle the parameters and conversions between them
+  - Test the setting of a pose parameter
+  - Add from_std_vector function
+  - Remove trailing space
+  - Use a proxy parameter interface to be able to add a list of parameters
+  - Add the possibility to prefix the parameter name
+  - Simplify the transform braodcasting by having a single transform braodcaster and improve readability
+  - Properly handle the template specialization of the add_parameter function
+  - Add the to_std_vector() function
+  - Move the parameter handling to the constructor instead of the configure
+  - Handle parameters and communication with the parameter server in background
+  - Parameter update add all parameter types
+  - Parameters update: Add different types and derive constructors
+  - Clean unnecessary files
+  - Correct example due to changes
+  - Tentative to add parameter handlers
+  - Remove the shared_ptr calls and correct the float issue
+  - Clean the library and add a Blending dynamical system
+  - Split StateConversion in WriteStateConversion and ReadStateConversion
+  - Remove the lock from the on_X functions
+  - Send CartesianState instead of Pose in the send transforms
+  - Add test std vector
+  - Add random constructor
+  - Specify that it overides
+  - Add to std_vector as a virtual function of the base class
+  - Add a not implemented exception
+  - Slowly move to #pragma once
+  - Remove unused example
+  - Clean by removing Actions and SML that are to be included in the state machine
+  - Add override keyword
+  - Add conversion from and to std vector for the pose
+  - Push googletest updates
+  - Push googletest updates
+  - Remove sml from the base library
+  - Merge branch 'develop' of github.com:epfl-lasa/modulo into develop
+  - Corrected time_from_start when adding point in trajectory
+  - Passes the active, configured and shutdown boolean as public instead of protected
+  - Remove parameters from the Cell
+  - Test for state machine with better implementation
+  - Test for state machine (Problem of warning with inconsistent states)
+  - Changes related to polishing demo
+  - Correct buggy tests
+  - Include SML in the installation process
+  - Add guard functions for SML integration
+  - Rearrange the calls to avoid having to reset in case of errors
+  - Install rviz2 that is not included (anymore?)
+  - Move the dist function to state instead of pose
+  - Remove controller and sensor_interface. They are now included in hardware_interface package
+  - Major change: Add possibilities to configure type functions to fail
+  - implementation and update python library
+  - add dynamical system functions
+  - Update circular ds
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Build on top of eloquent
+  - Add software property commons to be able to use ppa
+  - Add write_msgs functions with new msg types
+  - Merge branch 'master' into develop
+  - Minor changes
+  - Remove the RobotInterface to build it in a different package
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Added functions to Trajectory class
+  - Add missing eigen3 dependency that was downloaded by default in ROS2 image
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Completed Trajectory class and implemented corresponding unitary tests
+  - Merge branch 'master' into develop
+  - Remove include
+  - Merge branch 'hotfix-0.1.3' into develop
+  - Merge branch 'hotfix-0.1.2' into develop
+  - Merge branch 'release-0.1.2' into develop
+  - Merge branch 'master' of github.com:epfl-lasa/modulo
+  - Added scaling
+
 ## 0.1.4 (febbraio 26, 2020)
   - Merge branch 'master' of github.com:epfl-lasa/modulo
   - Testing of Trajectory (publish JointTrajectory message)
