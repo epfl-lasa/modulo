@@ -1,20 +1,22 @@
 /**
- * @class CartesianState
- * @brief Class to represent a state in Cartesian space
  * @author Baptiste Busch
  * @date 2019/04/16
  */
 
-#ifndef STATEREPRESENTATION_CARTESIAN_CARTESIANSTATE_H_
-#define STATEREPRESENTATION_CARTESIAN_CARTESIANSTATE_H_
+#pragma once
 
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
 #include <iostream>
 #include "state_representation/Space/SpatialState.hpp"
+#include "state_representation/Exceptions/IncompatibleSizeException.hpp"
 
 namespace StateRepresentation
 {
+	/**
+	 * @class CartesianState
+	 * @brief Class to represent a state in Cartesian space
+	 */
 	class CartesianState: public SpatialState
 	{
 	private:
@@ -107,6 +109,11 @@ namespace StateRepresentation
 		void set_position(const Eigen::Vector3d& position);
 
 		/**
+	 	 * @brief Setter of the position from a std vector
+	     */
+		void set_position(const std::vector<double>& position);
+
+		/**
 	 	 * @brief Setter of the position from three scalar coordinates
 	     */
 		void set_position(const double& x, const double& y, const double& z);
@@ -115,6 +122,11 @@ namespace StateRepresentation
 	 	 * @brief Setter of the orientation
 	     */
 		void set_orientation(const Eigen::Quaterniond& orientation);
+
+		/**
+	 	 * @brief Setter of the orientation from a std vector
+	     */
+		void set_orientation(const std::vector<double>& orientation);
 
 		/**
 		 * @brief Setter of the pose from both position and orientation
@@ -310,6 +322,13 @@ namespace StateRepresentation
 		this->position = position;
 	}
 
+	inline void CartesianState::set_position(const std::vector<double>& position)
+	{
+		if (position.size() != 3) throw Exceptions::IncompatibleSizeException("The input vector is not of size 3 required for position");
+		this->set_filled();
+		this->position = Eigen::Vector3d::Map(position.data(), 3);
+	}
+
 	inline void CartesianState::set_position(const double& x, const double& y, const double& z)
 	{
 		this->set_filled();
@@ -320,6 +339,14 @@ namespace StateRepresentation
 	{
 		this->set_filled();
 		this->orientation = orientation.normalized();
+	}
+
+	inline void CartesianState::set_orientation(const std::vector<double>& orientation)
+	{
+		if (orientation.size() != 4) throw Exceptions::IncompatibleSizeException("The input vector is not of size 4 required for orientation");
+		this->set_filled();
+		this->orientation = Eigen::Quaterniond(orientation[0], orientation[1], orientation[2], orientation[3]);
+		this->orientation.normalize();
 	}
 
 	inline void CartesianState::set_pose(const Eigen::Vector3d& position, const Eigen::Quaterniond& orientation)
@@ -337,6 +364,7 @@ namespace StateRepresentation
 
 	inline void CartesianState::set_pose(const std::vector<double>& pose)
 	{
+		if (pose.size() != 7) throw Exceptions::IncompatibleSizeException("The input vector is not of size 7 required for pose");
 		this->set_filled();
 		this->position = Eigen::Vector3d::Map(pose.data(), 3);
 		this->orientation = Eigen::Quaterniond(pose[3], pose[4], pose[5], pose[6]);
@@ -392,5 +420,3 @@ namespace StateRepresentation
 		this->torque = wrench.tail(3);
 	}
 }
-
-#endif

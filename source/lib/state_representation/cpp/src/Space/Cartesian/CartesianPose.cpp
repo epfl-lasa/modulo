@@ -2,6 +2,7 @@
 #include "state_representation/Exceptions/IncompatibleReferenceFramesException.hpp"
 #include "state_representation/Exceptions/IncompatibleStatesException.hpp"
 #include "state_representation/Exceptions/EmptyStateException.hpp"
+#include "state_representation/Exceptions/IncompatibleSizeException.hpp"
 
 using namespace StateRepresentation::Exceptions;
 
@@ -248,6 +249,21 @@ namespace StateRepresentation
 
 	void CartesianPose::from_std_vector(const std::vector<double>& value)
 	{
-		this->set_pose(value);
+		if (value.size() == 3)
+		{
+			this->set_position(value);
+		}
+		else if (value.size() == 4)
+		{
+			this->set_orientation(value);
+		}
+		else if (value.size() == 7)
+		{
+			this->set_pose(value);
+		}
+		else
+		{
+			throw IncompatibleSizeException("The input vector is of incorrect size");
+		}
 	}
 }
