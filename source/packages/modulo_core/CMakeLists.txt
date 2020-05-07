@@ -25,11 +25,8 @@ set(CORE_SOURCES
     src/Communication/MessagePassing/WriteStateConversion.cpp
     src/Communication/MessagePassing/TransformListenerHandler.cpp
     src/Cell.cpp
-    src/MotionGenerator.cpp
-    src/Visualizer.cpp
-    src/Modulator.cpp
-    src/Recorder.cpp
     src/Monitor.cpp
+    src/Recorder.cpp
 )
 
 ament_auto_add_library(${PROJECT_NAME} SHARED ${CORE_SOURCES})
@@ -42,12 +39,6 @@ target_link_libraries(${PROJECT_NAME}_test_cartesian ${PROJECT_NAME})
 
 ament_auto_add_executable(${PROJECT_NAME}_test_joints tests/testJoints.cpp)
 target_link_libraries(${PROJECT_NAME}_test_joints ${PROJECT_NAME})
-
-ament_auto_add_executable(${PROJECT_NAME}_test_dual_quaternions tests/testDualQuaternions.cpp)
-target_link_libraries(${PROJECT_NAME}_test_dual_quaternions ${PROJECT_NAME})
-
-ament_auto_add_executable(${PROJECT_NAME}_test_mixed tests/testMixed.cpp)
-target_link_libraries(${PROJECT_NAME}_test_mixed ${PROJECT_NAME})
 
 ament_auto_package()
 
