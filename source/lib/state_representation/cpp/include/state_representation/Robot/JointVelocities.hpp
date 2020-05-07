@@ -1,12 +1,9 @@
 /**
- * @class JointVelocities
- * @brief Class to define velocities of the joints
  * @author Baptiste Busch
  * @date 2019/09/09
  */
 
-#ifndef STATEREPRESENTATION_ROBOT_JOINTVELOCITIES_H_
-#define STATEREPRESENTATION_ROBOT_JOINTVELOCITIES_H_
+#pragma once
 
 #include "state_representation/Robot/JointState.hpp"
 #include "state_representation/Robot/JointPositions.hpp"
@@ -15,6 +12,10 @@ namespace StateRepresentation
 {
 	class JointPositions;
 	
+	/**
+	 * @class JointVelocities
+	 * @brief Class to define velocities of the joints
+	 */
 	class JointVelocities: public JointState
 	{
 	public:
@@ -227,4 +228,3 @@ namespace StateRepresentation
 		friend const JointVelocities operator/(const JointVelocities& positions, const Eigen::ArrayXd& lambda);
 	};
 }
-#endif

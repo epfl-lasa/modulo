@@ -1,12 +1,9 @@
 /**
- * @class JointPositions
- * @brief Class to define a positions of the joints
  * @author Baptiste Busch
  * @date 2019/09/09
  */
 
-#ifndef STATEREPRESENTATION_ROBOT_JOINTPOSITIONS_H_
-#define STATEREPRESENTATION_ROBOT_JOINTPOSITIONS_H_
+#pragma once
 
 #include "state_representation/Robot/JointState.hpp"
 #include "state_representation/Robot/JointVelocities.hpp"
@@ -15,6 +12,10 @@ namespace StateRepresentation
 {
 	class JointVelocities;
 	
+	/**
+	 * @class JointPositions
+	 * @brief Class to define a positions of the joints
+	 */
 	class JointPositions: public JointState
 	{
 	public:
@@ -207,4 +208,3 @@ namespace StateRepresentation
 		const std::vector<double> to_std_vector() const;
 	};
 }
-#endif

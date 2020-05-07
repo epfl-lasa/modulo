@@ -1,17 +1,18 @@
 /**
- * @class JointTorques
- * @brief Class to define torques of the joints
  * @author Baptiste Busch
  * @date 2019/09/13
  */
 
-#ifndef STATEREPRESENTATION_ROBOT_JOINTTORQUES_H_
-#define STATEREPRESENTATION_ROBOT_JOINTTORQUES_H_
+#pragma once
 
 #include "state_representation/Robot/JointState.hpp"
 
 namespace StateRepresentation 
 {
+	/**
+	 * @class JointTorques
+	 * @brief Class to define torques of the joints
+	 */
 	class JointTorques: public JointState
 	{
 	public:
@@ -203,4 +204,3 @@ namespace StateRepresentation
 		friend const JointTorques operator/(const JointTorques& torques, const Eigen::ArrayXd& lambda);
 	};
 }
-#endif

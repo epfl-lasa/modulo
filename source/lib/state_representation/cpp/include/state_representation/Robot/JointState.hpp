@@ -1,12 +1,9 @@
 /**
- * @class JointState
- * @brief Class to define a state in joint space
  * @author Baptiste Busch
  * @date 2019/04/16
  */
 
-#ifndef STATEREPRESENTATION_ROBOT_JOINTSTATE_H_
-#define STATEREPRESENTATION_ROBOT_JOINTSTATE_H_
+#pragma once
 
 #include <eigen3/Eigen/Core>
 #include <vector>
@@ -20,6 +17,10 @@ using namespace StateRepresentation::Exceptions;
 
 namespace StateRepresentation 
 {
+	/**
+	 * @class JointState
+	 * @brief Class to define a state in joint space
+	 */
 	class JointState: public State
 	{
 	private:
@@ -274,5 +275,3 @@ namespace StateRepresentation
 		this->torques = torques;
 	}
 }
-
-#endif

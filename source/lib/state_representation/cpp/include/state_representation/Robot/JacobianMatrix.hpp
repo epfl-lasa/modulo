@@ -1,12 +1,9 @@
 /**
- * @class JacobianMatrix
- * @brief Class to define a robot Jacobian matrix
  * @author Baptiste Busch
  * @date 2019/09/09
  */
 
-#ifndef STATEREPRESENTATION_ROBOT_JACOBIANMATRIX_H_
-#define STATEREPRESENTATION_ROBOT_JACOBIANMATRIX_H_
+#pragma once
 
 #include <eigen3/Eigen/Core>
 #include "state_representation/State.hpp"
@@ -28,6 +25,10 @@ namespace StateRepresentation
 
 	class JointTorques;	
 
+	/**
+	 * @class JacobianMatrix
+	 * @brief Class to define a robot Jacobian matrix
+	 */
 	class JacobianMatrix: public State
 	{
 	private:
@@ -289,4 +290,3 @@ namespace StateRepresentation
 		return this->data(row, col);
 	}
 }
-#endif

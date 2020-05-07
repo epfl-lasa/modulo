@@ -1,5 +1,4 @@
-#ifndef STATEREPRESENTATION_TRAJECTORIES_TRAJECTORY_H_
-#define STATEREPRESENTATION_TRAJECTORIES_TRAJECTORY_H_
+#pragma once
 
 #include <chrono>
 #include <deque>
@@ -256,5 +255,3 @@ namespace StateRepresentation
 		return std::make_pair(this->points[idx], this->times[idx]);
 	}
 }
-
-#endif

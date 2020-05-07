@@ -1,17 +1,18 @@
 /**
- * @class CartesianWrench
- * @brief Class to define wrench in cartesian space as 3D force and torque vectors
  * @author Baptiste Busch
  * @date 2019/09/13
  */
 
-#ifndef STATEREPRESENTATION_CARTESIANWRENCH_H_
-#define STATEREPRESENTATION_CARTESIANWRENCH_H_
+#pragma once
 
 #include "state_representation/Space/Cartesian/CartesianState.hpp"
 
 namespace StateRepresentation 
 {
+	/**
+	 * @class CartesianWrench
+	 * @brief Class to define wrench in cartesian space as 3D force and torque vectors
+	 */
 	class CartesianWrench: public CartesianState
 	{
 	public:
@@ -195,5 +196,3 @@ namespace StateRepresentation
 		friend const CartesianWrench operator*(double lambda, const CartesianWrench& wrench);
 	};
 }
-
-#endif

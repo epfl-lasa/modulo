@@ -14,13 +14,13 @@ namespace StateRepresentation
 		/**
 		 * @brief Empty constructor
 		 */
-		Parameter(const std::string& name);
+		explicit Parameter(const std::string& name);
 		
 		/**
 		 * @brief Constructor with a value
 		 * @param value value of the parameter
 		 */
-		Parameter(const std::string& name, const T& value);
+		explicit Parameter(const std::string& name, const T& value);
 
 		/**
 		 * @brief Copy constructor

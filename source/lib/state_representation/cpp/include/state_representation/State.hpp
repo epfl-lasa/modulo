@@ -1,12 +1,9 @@
 /**
- * @class State
- * @brief Abstract class to represent a state
  * @author Baptiste Busch
  * @date 2019/04/16
  */
 
-#ifndef STATEREPRESENTATION_STATE_H_
-#define STATEREPRESENTATION_STATE_H_
+#pragma once
 
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
@@ -38,6 +35,10 @@ namespace StateRepresentation
 		PARAMETER_JOINTPOSITIONS
 	};
 
+	/**
+	 * @class State
+	 * @brief Abstract class to represent a state
+	 */
 	class State
 	{
 	private:
@@ -197,5 +198,3 @@ namespace StateRepresentation
 		this->empty = true;
 	}
 }
-
-#endif

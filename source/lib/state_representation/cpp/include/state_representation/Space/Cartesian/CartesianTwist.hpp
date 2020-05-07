@@ -1,12 +1,9 @@
 /**
- * @class CartesianTwist
- * @brief Class to define twist in cartesian space as 3D linear and angular velocity vectors
  * @author Baptiste Busch
  * @date 2019/06/07
  */
 
-#ifndef STATEREPRESENTATION_SPACE_CARTESIAN_CARTESIANTWIST_H_
-#define STATEREPRESENTATION_SPACE_CARTESIAN_CARTESIANTWIST_H_
+#pragma once
 
 #include "state_representation/Space/Cartesian/CartesianState.hpp"
 #include "state_representation/Space/Cartesian/CartesianPose.hpp"
@@ -15,6 +12,10 @@ namespace StateRepresentation
 {
 	class CartesianPose;
 
+	/**
+	 * @class CartesianTwist
+	 * @brief Class to define twist in cartesian space as 3D linear and angular velocity vectors
+	 */
 	class CartesianTwist: public CartesianState
 	{
 	public:
@@ -227,5 +228,3 @@ namespace StateRepresentation
 		friend const CartesianPose operator*(const CartesianTwist& twist, const std::chrono::nanoseconds& dt);
 	};
 }
-
-#endif
