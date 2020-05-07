@@ -162,22 +162,11 @@ namespace StateRepresentation
 		if(this->get_angular_velocity().norm() > max_angular) this->set_angular_velocity(max_angular * this->get_angular_velocity().normalized());
 	}
 
-	void CartesianTwist::scale(double gain_linear)
-	{	
-		this->set_linear_velocity(gain_linear*this->get_linear_velocity());
-	}	
-
 	const CartesianTwist CartesianTwist::clamped(double max_linear, double max_angular, double linear_noise_ratio, double angular_noise_ratio) const
 	{
 		CartesianTwist result(*this);
 		result.clamp(max_linear, max_angular, linear_noise_ratio, angular_noise_ratio);
 		return result;
-	}
-
-
-	void CartesianTwist::scale(double gain_linear)
-	{	
-		this->set_linear_velocity(gain_linear*this->get_linear_velocity());
 	}
 
 	const CartesianTwist CartesianTwist::copy() const

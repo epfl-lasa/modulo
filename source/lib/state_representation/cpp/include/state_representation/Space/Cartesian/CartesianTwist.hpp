@@ -162,20 +162,12 @@ namespace StateRepresentation
 		 * the velocity will be set to 0
 		 * @return the clamped velocity
 		 */
-		void scale(double gain_linear);
-
 		const CartesianTwist clamped(double max_linear, double max_angular, double noise_ratio=0, double angular_noise_ratio=0) const;
 
 		/**
 		 * @brief Return a copy of the CartesianTwist
 		 * @return the copy
 		 */
-
-		void scale(double gain_linear);
-		/**
-		 * @brief Scale the velocity to avoid slowing down when approaching attractor
-		 */		
-
 		const CartesianTwist copy() const;
 
 		/**
