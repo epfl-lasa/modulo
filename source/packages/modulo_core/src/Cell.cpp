@@ -420,7 +420,6 @@ namespace Modulo
 							default:
 							{
 								throw UnrecognizedParameterTypeException("The Parameter type is not available");
-								break;
 							}
 						}
 					}
