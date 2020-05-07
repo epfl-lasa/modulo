@@ -29,6 +29,7 @@ namespace Modulo
 		template <typename T>
 		void Cell::add_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter, const std::string& prefix)
 		{
+			std::lock_guard<std::mutex> lock(*this->mutex_);
 			std::string tprefix = (prefix != "") ? prefix + "_" : "";
 			parameter->set_name(tprefix + parameter->get_name());
 			this->parameters_.push_back(parameter);
@@ -50,6 +51,7 @@ namespace Modulo
 		template <>
 		void Cell::add_parameter<StateRepresentation::CartesianState>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::CartesianState>>& parameter, const std::string& prefix)
 		{
+			std::lock_guard<std::mutex> lock(*this->mutex_);
 			std::string tprefix = (prefix != "") ? prefix + "_" : "";
 			parameter->set_name(tprefix + parameter->get_name());
 			this->parameters_.push_back(parameter);
@@ -59,6 +61,7 @@ namespace Modulo
 		template <>
 		void Cell::add_parameter<StateRepresentation::CartesianPose>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>& parameter, const std::string& prefix)
 		{
+			std::lock_guard<std::mutex> lock(*this->mutex_);
 			std::string tprefix = (prefix != "") ? prefix + "_" : "";
 			parameter->set_name(tprefix + parameter->get_name());
 			this->parameters_.push_back(parameter);
@@ -68,6 +71,7 @@ namespace Modulo
 		template<>
 		void Cell::add_parameter<StateRepresentation::JointState>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::JointState>>& parameter, const std::string& prefix)
 		{
+			std::lock_guard<std::mutex> lock(*this->mutex_);
 			std::string tprefix = (prefix != "") ? prefix + "_" : "";
 			parameter->set_name(tprefix + parameter->get_name());
 			this->parameters_.push_back(parameter);
@@ -77,6 +81,7 @@ namespace Modulo
 		template<>
 		void Cell::add_parameter<StateRepresentation::JointPositions>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::JointPositions>>& parameter, const std::string& prefix)
 		{
+			std::lock_guard<std::mutex> lock(*this->mutex_);
 			std::string tprefix = (prefix != "") ? prefix + "_" : "";
 			parameter->set_name(tprefix + parameter->get_name());
 			this->parameters_.push_back(parameter);
