@@ -124,9 +124,9 @@ int main(int argc, char * argv[])
 
 	rclcpp::executors::SingleThreadedExecutor exe;
 
-	std::shared_ptr<LinearMotionGenerator> lmg = std::make_shared<LinearMotionGenerator>("linear_motion_generator", 1ms);
-	std::shared_ptr<ConsoleVisualizer> cv = std::make_shared<ConsoleVisualizer>("console_visualizer", 100ms);
-	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("simulated_robot_interface", 1ms);
+	std::shared_ptr<LinearMotionGenerator> lmg = std::make_shared<LinearMotionGenerator>("motion_generator", 1ms);
+	std::shared_ptr<ConsoleVisualizer> cv = std::make_shared<ConsoleVisualizer>("visualizer", 100ms);
+	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", 1ms);
 
 	exe.add_node(lmg->get_node_base_interface());
 	exe.add_node(cv->get_node_base_interface());
