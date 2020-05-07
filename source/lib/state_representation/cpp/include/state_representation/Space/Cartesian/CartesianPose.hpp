@@ -1,12 +1,9 @@
 /**
- * @class CartesianPose
- * @brief Class to define CartesianPose in cartesian space as 3D position and quaternion based orientation
  * @author Baptiste Busch
  * @date 2019/06/07
  */
 
-#ifndef STATEREPRESENTATION_SPACE_CARTESIAN_CARTESIANPOSE_H_
-#define STATEREPRESENTATION_SPACE_CARTESIAN_CARTESIANPOSE_H_
+#pragma once
 
 #include "state_representation/Space/Cartesian/CartesianState.hpp"
 #include "state_representation/Space/Cartesian/CartesianTwist.hpp"
@@ -16,6 +13,10 @@ namespace StateRepresentation
 {
 	class CartesianTwist;
 	
+	/**
+	 * @class CartesianPose
+	 * @brief Class to define CartesianPose in cartesian space as 3D position and quaternion based orientation
+	 */
 	class CartesianPose: public CartesianState
 	{
 	public:
@@ -26,8 +27,8 @@ namespace StateRepresentation
 
 		/**
 	 	 * @brief Constructor with name and reference frame provided
-	 	 * @brief name the name of the state
-	 	 * @brief reference the name of the reference frame
+	 	 * @param name the name of the state
+	 	 * @param reference the name of the reference frame
 	     */
 		explicit CartesianPose(const std::string& name, const std::string& reference="world");
 
@@ -60,6 +61,26 @@ namespace StateRepresentation
 	 	 * @brief Construct a CartesianPose from a position given as a vector of coordinates and a quaternion.
 	     */
 		explicit CartesianPose(const std::string& name, const Eigen::Vector3d& position, const Eigen::Quaterniond& orientation, const std::string& reference="world");
+
+		/**
+		 * @brief Constructor for a random pose
+		 * @param name the name of the state
+		 * @param the name of the reference frame
+		 * @return CartesianPose random pose
+		 */
+		static const CartesianPose Random(const std::string& name, const std::string& reference="world");
+
+		/**
+		 * @brief Set the values of the 6D pose from a 7D Eigen Vector (3 for position, 4 for quaternion)
+		 * @param pose the pose as an Eigen Vector
+		 */
+		CartesianPose& operator=(const Eigen::Matrix<double, 7, 1>& pose);
+
+		/**
+		 * @brief Set the values of the 6D pose from a 7D std vector (3 for position, 4 for quaternion)
+		 * @param pose the pose as an Eigen Vector
+		 */
+		CartesianPose& operator=(const std::vector<double>& pose);
 
 		/**
 	 	 * @brief Overload the *= operator
@@ -144,13 +165,6 @@ namespace StateRepresentation
 		const CartesianPose copy() const;
 
 		/**
-		 * @brief compute the distance between current CartesianPose and the one given in argument
-		 * @param the second CartesianPose
-		 * @return the distance beteen the two poses both in position and orientation
-		 */
-		const Eigen::Array2d dist(const CartesianPose& pose) const;
-
-		/**
 	 	 * @brief Overload the ostream operator for printing
 	 	 * @param os the ostream to happend the string representing the CartesianPose to
 	 	 * @param CartesianPose the CartesianPose to print
@@ -173,13 +187,15 @@ namespace StateRepresentation
 		friend const CartesianTwist operator/(const CartesianPose& pose, const std::chrono::nanoseconds& dt);
 
 		/**
-		 * @brief compute the distance between two CartesianPose
-		 * @brief the second CartesianPose
-		 * @param the second CartesianPose
-		 * @return the distance beteen the two poses both in position and orientation
+		 * @brief Return the pose as a std vector of floats
+		 * @return std::vector<float> the pose vector as a 7 elements vector
 		 */
-		friend const Eigen::Array2d dist(const CartesianPose& p1, const CartesianPose& p2);
+		const std::vector<double> to_std_vector() const override;
+
+		/**
+		 * @brief Set the value from a std vector
+		 * @param value the value as a std vector
+		 */
+		void from_std_vector(const std::vector<double>& value);
 	};
 }
-
-#endif

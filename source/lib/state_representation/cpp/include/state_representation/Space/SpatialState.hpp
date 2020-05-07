@@ -1,5 +1,4 @@
-#ifndef STATEREPRESENTATION_SPATIALSTATE_H_
-#define STATEREPRESENTATION_SPATIALSTATE_H_
+#pragma once
 
 #include "state_representation/State.hpp"
 
@@ -63,5 +62,3 @@ namespace StateRepresentation
 		return compatible;
 	}
 }
-
-#endif

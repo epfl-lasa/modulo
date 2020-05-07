@@ -1,12 +1,9 @@
 /**
- * @class State
- * @brief Abstract class to represent a state
  * @author Baptiste Busch
  * @date 2019/04/16
  */
 
-#ifndef STATEREPRESENTATION_STATE_H_
-#define STATEREPRESENTATION_STATE_H_
+#pragma once
 
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
@@ -21,15 +18,27 @@ namespace StateRepresentation
 	enum class StateType
 	{
 		STATE,
-		PARAMETER,
 		CARTESIANSTATE,
 		DUALQUATERNIONSTATE,
 		JOINTSTATE,
 		JACOBIANMATRIX,
-		TRAJECTORY
-
+		TRAJECTORY,
+		PARAMETER_DOUBLE,
+		PARAMETER_DOUBLE_ARRAY,
+		PARAMETER_BOOL,
+		PARAMETER_BOOL_ARRAY,
+		PARAMETER_STRING,
+		PARAMETER_STRING_ARRAY,
+		PARAMETER_CARTESIANSTATE,
+		PARAMETER_CARTESIANPOSE,
+		PARAMETER_JOINTSTATE,
+		PARAMETER_JOINTPOSITIONS
 	};
 
+	/**
+	 * @class State
+	 * @brief Abstract class to represent a state
+	 */
 	class State
 	{
 	private:
@@ -189,5 +198,3 @@ namespace StateRepresentation
 		this->empty = true;
 	}
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef STATEREPRESENTATION_MATHTOOLS_H_
-#define STATEREPRESENTATION_MATHTOOLS_H_
+#pragma once
 
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
@@ -23,4 +22,3 @@ namespace StateRepresentation
 		Eigen::Quaterniond exp(const Eigen::Quaterniond & q, double lambda=1);
 	}
 }
-#endif

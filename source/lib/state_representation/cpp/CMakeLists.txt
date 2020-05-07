@@ -42,6 +42,8 @@ set(CORE_SOURCES
   src/Space/DualQuaternion/DualQuaternionState.cpp
   src/Space/DualQuaternion/DualQuaternionPose.cpp
   src/Space/DualQuaternion/DualQuaternionTwist.cpp
+  src/Parameters/ParameterInterface.cpp
+  src/Parameters/Parameter.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED 
@@ -119,5 +121,13 @@ if (runtests)
       ${PROJECT_NAME}
     )
     add_test(NAME runTestTrajectory COMMAND runTestTrajectory)
+
+    add_executable(runTestParameter tests/testParameter.cpp)
+    target_link_libraries(runTestParameter
+      gtest 
+      gtest_main
+      ${PROJECT_NAME}
+    )
+    add_test(NAME runTestParameter COMMAND runTestParameter)
 
 endif()

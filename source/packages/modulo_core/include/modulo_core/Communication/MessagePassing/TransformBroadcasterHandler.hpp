@@ -8,7 +8,7 @@
 
 #include <tf2_msgs/msg/tf_message.hpp>
 #include "modulo_core/Communication/MessagePassing/PublisherHandler.hpp"
-#include "state_representation/Space/Cartesian/CartesianPose.hpp"
+#include "state_representation/Space/Cartesian/CartesianState.hpp"
 
 namespace Modulo
 {
@@ -22,7 +22,7 @@ namespace Modulo
 				 * @class TransformBroadcasterHandler
 				 * @brief Class to define a transform broadcaster
 				 */
-				class TransformBroadcasterHandler: public PublisherHandler<StateRepresentation::CartesianPose, tf2_msgs::msg::TFMessage>
+				class TransformBroadcasterHandler: public PublisherHandler<StateRepresentation::CartesianState, tf2_msgs::msg::TFMessage>
 				{
 				public:
 					/**
@@ -33,7 +33,7 @@ namespace Modulo
 					 * @param  mutex     reference to the Cell mutex
 					 */
 					template <typename DurationT>
-					explicit TransformBroadcasterHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
+					explicit TransformBroadcasterHandler(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
 
 					/**
 					 * @brief Constructor for TransformBroadcaster handler without an associated recipient
@@ -48,20 +48,20 @@ namespace Modulo
 					 * @brief Function to send a transform over the network
 					 * @param transform the transformation to send
 					 */
-					void send_transform(const StateRepresentation::CartesianPose& transform);
+					void send_transform(const StateRepresentation::CartesianState& transform);
 			    };
 
 			    template <typename DurationT>
-			    TransformBroadcasterHandler::TransformBroadcasterHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-				PublisherHandler<StateRepresentation::CartesianPose, tf2_msgs::msg::TFMessage>(recipient, timeout, clock, mutex)
+			    TransformBroadcasterHandler::TransformBroadcasterHandler(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
+				PublisherHandler<StateRepresentation::CartesianState, tf2_msgs::msg::TFMessage>(recipient, timeout, clock, mutex)
 				{}
 
 				template <typename DurationT>
 				TransformBroadcasterHandler::TransformBroadcasterHandler(const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-				PublisherHandler<StateRepresentation::CartesianPose, tf2_msgs::msg::TFMessage>(std::make_shared<StateRepresentation::CartesianPose>(), timeout, clock, mutex)
+				PublisherHandler<StateRepresentation::CartesianState, tf2_msgs::msg::TFMessage>(std::make_shared<StateRepresentation::CartesianState>(), timeout, clock, mutex)
 				{}
 
-				inline void TransformBroadcasterHandler::send_transform(const StateRepresentation::CartesianPose& transform)
+				inline void TransformBroadcasterHandler::send_transform(const StateRepresentation::CartesianState& transform)
 				{
 					this->publish(transform);
 				}

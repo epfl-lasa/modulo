@@ -19,6 +19,9 @@ RUN apt update && apt install -y \
   iputils-ping \
   mesa-utils \
   libeigen3-dev \
+  software-properties-common \
+  libboost-all-dev \
+  ros-eloquent-rviz2 \
   && rm -rf /var/lib/apt/lists/*
 
 ENV QT_X11_NO_MITSHM 1
@@ -42,13 +45,13 @@ ENV HOME /home/${USER}
 RUN mkdir -p ${HOME}/modulo_lib
 WORKDIR ${HOME}/modulo_lib/
 COPY --chown=${USER} ./source/lib/ .
-
 # build packages and libraries
 RUN sh build.sh
 
 # build ROS workspace
 RUN mkdir -p ${HOME}/ros2_ws/src
 WORKDIR ${HOME}/ros2_ws/
+RUN rosdep update
 COPY --chown=${USER} ./source/packages/ ./src/
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build --symlink-install"

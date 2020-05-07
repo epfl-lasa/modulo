@@ -1,16 +1,16 @@
 /**
- * @class Linear
- * @brief Class to implement a Linear DynamicalSystem
  * @author Baptiste Busch
  * @date 2019/07/18
  *
  */
 
-#ifndef DYNAMICAL_SYSTEMS_LINEAR_H_
-#define DYNAMICAL_SYSTEMS_LINEAR_H_
-
+#pragma once
 
 #include "dynamical_systems/DynamicalSystem.hpp"
+#include "state_representation/Space/Cartesian/CartesianState.hpp"
+#include "state_representation/Space/Cartesian/CartesianPose.hpp"
+#include "state_representation/Space/Cartesian/CartesianTwist.hpp"
+#include "state_representation/Robot/JointState.hpp"
 
 namespace DynamicalSystems
 {
@@ -23,14 +23,14 @@ namespace DynamicalSystems
 	class Linear: public DynamicalSystem<S>
 	{
 	private:
-		std::shared_ptr<S> attractor_; //< attractor of the dynamical system in the space
-
+		std::shared_ptr<StateRepresentation::Parameter<S>> attractor_; ///< attractor of the dynamical system in the space
+		std::shared_ptr<StateRepresentation::Parameter<double>> gain_; ///< gain associate to the system
+	
 	public:
 		/**
-		 * @brief Constructor with a provided gain 
-		 * @param  gain the gain of the dynamical system (default = 1)
+		 * @brief Empty constructor
 		 */
-		explicit Linear(double gain=1);
+		explicit Linear(const S& attractor, double gain=1.0);
 
 		/**
 		 * @brief Getter of the attractor
@@ -39,54 +39,73 @@ namespace DynamicalSystems
 		const S& get_attractor() const;
 
 		/**
-		 * @brief Setter of the attractor as a new shared_ptr
-		 * @param attractor the new attractor
-		 */
-		void set_attractor(const std::shared_ptr<S>& attractor);
-
-		/**
 		 * @brief Setter of the attractor as a new value
 		 * @param attractor the new attractor
 		 */
 		void set_attractor(const S& attractor);
 
 		/**
+		 * @brief Getter of the gain attribute
+		 * @return The gain value 
+		 */
+		double get_gain() const;
+
+		/**
+		 * @brief Getter of the gain attribute
+		 * @return The gain value 
+		 */
+		void set_gain(double gain);
+
+		/**
 		 * @brief Evaluate the value of the dynamical system at a given state
 		 * @param state state at wich to perform the evaluation
 		 * @return the state (velocity) to move toward the attractor
 		 */
-		const S evaluate(const S& state) const;
+		const S evaluate(const S& state) const override;
 
 		/**
-		 * @brief Evaluate the value of the dynamical system at a given state
-		 * @param state state at wich to perform the evaluation (given as a shared_ptr)
-		 * @return the state (velocity) to move toward the attractor
+		 * @brief Return a list of all the parameters of the dynamical system
+		 * @return the list of parameters
 		 */
-		const S evaluate(const std::shared_ptr<S>& state) const;
+		const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> get_parameters() const;
 	};
 
-	template<class S>
-	Linear<S>::Linear(double gain):
-	DynamicalSystem<S>(gain),
-	attractor_(std::make_shared<S>())
+	template<>
+	Linear<StateRepresentation::CartesianState>::Linear(const StateRepresentation::CartesianState& attractor, double gain):
+	DynamicalSystem<StateRepresentation::CartesianState>(),
+	attractor_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::CartesianState>>(StateRepresentation::Parameter<StateRepresentation::CartesianPose>("attractor", attractor))),
+	gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain))
+	{}
+
+	template<>
+	Linear<StateRepresentation::JointState>::Linear(const StateRepresentation::JointState& attractor, double gain):
+	DynamicalSystem<StateRepresentation::JointState>(),
+	attractor_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::JointState>>(StateRepresentation::Parameter<StateRepresentation::JointPositions>("attractor", attractor))),
+	gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain))
 	{}
 
 	template<class S>
 	inline const S& Linear<S>::get_attractor() const
 	{
-		return *this->attractor_;
-	}
-
-	template<class S>
-	inline void Linear<S>::set_attractor(const std::shared_ptr<S>& attractor)
-	{
-		this->attractor_ = attractor;
+		return this->attractor_->get_value();
 	}
 
 	template<class S>
 	inline void Linear<S>::set_attractor(const S& attractor)
 	{
-		*this->attractor_ = attractor;
+		this->attractor_->set_value(attractor);
+	}
+
+	template<class S>
+	inline double Linear<S>::get_gain() const
+	{
+		return this->gain_->get_value();
+	}
+
+	template<class S>
+	inline void Linear<S>::set_gain(double gain)
+	{
+		this->gain_->set_value(gain);
 	}
 
 	template<>
@@ -98,12 +117,6 @@ namespace DynamicalSystems
 	}
 
 	template<>
-	const StateRepresentation::CartesianState Linear<StateRepresentation::CartesianState>::evaluate(const std::shared_ptr<StateRepresentation::CartesianState>& state) const
-	{
-		return this->evaluate(*state);
-	}
-
-	template<>
 	const StateRepresentation::JointState Linear<StateRepresentation::JointState>::evaluate(const StateRepresentation::JointState& state) const
 	{
 		StateRepresentation::JointState positions = - this->get_gain() * (state - this->get_attractor());
@@ -112,10 +125,12 @@ namespace DynamicalSystems
 		return velocities;
 	}
 
-	template<>
-	const StateRepresentation::JointState Linear<StateRepresentation::JointState>::evaluate(const std::shared_ptr<StateRepresentation::JointState>& state) const
+	template<class S>
+	const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> Linear<S>::get_parameters() const
 	{
-		return this->evaluate(*state);
+		std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> param_list;
+		param_list.push_back(this->attractor_);
+		param_list.push_back(this->gain_);
+		return param_list;
 	}
 }
-#endif

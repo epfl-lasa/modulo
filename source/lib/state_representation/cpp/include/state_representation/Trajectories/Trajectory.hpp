@@ -1,5 +1,4 @@
-#ifndef STATEREPRESENTATION_TRAJECTORIES_TRAJECTORY_H_
-#define STATEREPRESENTATION_TRAJECTORIES_TRAJECTORY_H_
+#pragma once
 
 #include <chrono>
 #include <deque>
@@ -50,6 +49,11 @@ namespace StateRepresentation
 	 	 * @brief Setter of the names attribute from the number of joints
 	     */
 		void set_joint_names(unsigned int nb_joints);
+
+		/**
+	 	 * @brief Setter of the names attribute from the joints names
+	     */
+		void set_joint_names(const std::vector<std::string>& joint_names);
 
 		/**
 		* @brief Initialize trajectory
@@ -148,6 +152,12 @@ namespace StateRepresentation
 	}
 
 	template <class StateT>
+	inline void Trajectory<StateT>::set_joint_names(const std::vector<std::string>& joint_names)
+	{
+		this->joint_names = joint_names;
+	}
+
+	template <class StateT>
 	void Trajectory<StateT>::initialize()
 	{
 		this->State::initialize();
@@ -161,9 +171,10 @@ namespace StateRepresentation
 	{
 		this->set_filled();
 		this->points.push_back(new_point);
+
 		if(!this->times.empty())
 		{
-			auto previous_time = this->times.back();
+			auto const previous_time = this->times.back();
 			this->times.push_back(previous_time + new_time);
 		}
 		else
@@ -244,5 +255,3 @@ namespace StateRepresentation
 		return std::make_pair(this->points[idx], this->times[idx]);
 	}
 }
-
-#endif

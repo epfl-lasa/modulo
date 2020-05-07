@@ -1,5 +1,7 @@
 #include "state_representation/Space/Cartesian/CartesianState.hpp"
 #include "state_representation/Exceptions/EmptyStateException.hpp"
+#include "state_representation/Exceptions/IncompatibleReferenceFramesException.hpp"
+#include "state_representation/Exceptions/NotImplementedException.hpp"
 
 using namespace StateRepresentation::Exceptions;
 
@@ -71,6 +73,31 @@ namespace StateRepresentation
 		return result;
 	}
 
+	double CartesianState::dist(const CartesianState& state) const
+	{
+		// sanity check
+		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
+		if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+		if(!(this->get_reference_frame() == state.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
+		// calculation
+		double result = 0;
+		// euclidean distance for position
+		result += (this->get_position() - state.get_position()).norm();
+		// https://math.stackexchange.com/questions/90081/quaternion-distance for orientation
+		double inner_product = this->get_orientation().dot(state.get_orientation());
+		result += acos(2 * inner_product * inner_product - 1);
+		// distance for velocity
+		result += (this->get_linear_velocity() - state.get_linear_velocity()).norm();
+		result += (this->get_angular_velocity() - state.get_angular_velocity()).norm();
+		// distance for acceleration
+		result += (this->get_linear_acceleration() - state.get_linear_acceleration()).norm();
+		result += (this->get_angular_acceleration() - state.get_angular_acceleration()).norm();
+		// distance for force
+		result += (this->get_force() - state.get_force()).norm();
+		result += (this->get_torque() - state.get_torque()).norm();
+		return result;
+	}
+
 	std::ostream& operator<<(std::ostream& os, const CartesianState& state) 
 	{ 
 		if(state.is_empty())
@@ -117,5 +144,21 @@ namespace StateRepresentation
 	const CartesianState operator*(double lambda, const CartesianState& state)
 	{
 		return state * lambda;
+	}
+
+	double dist(const CartesianState& s1, const CartesianState& s2)
+	{
+		return s1.dist(s2);
+	}
+
+	const std::vector<double> CartesianState::to_std_vector() const
+	{
+		throw(NotImplementedException("to_std_vector() is not implemented for the base CartesianState class"));
+		return std::vector<double>();
+	}
+
+	void CartesianState::from_std_vector(const std::vector<double>&)
+	{
+		throw(NotImplementedException("from_std_vector() is not implemented for the base CartesianState class"));
 	}
 }

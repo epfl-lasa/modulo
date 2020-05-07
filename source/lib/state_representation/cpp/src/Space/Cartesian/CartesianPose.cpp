@@ -2,6 +2,7 @@
 #include "state_representation/Exceptions/IncompatibleReferenceFramesException.hpp"
 #include "state_representation/Exceptions/IncompatibleStatesException.hpp"
 #include "state_representation/Exceptions/EmptyStateException.hpp"
+#include "state_representation/Exceptions/IncompatibleSizeException.hpp"
 
 using namespace StateRepresentation::Exceptions;
 
@@ -44,6 +45,23 @@ namespace StateRepresentation
 	CartesianPose::CartesianPose(const CartesianTwist& twist):
 	CartesianState(std::chrono::seconds(1) * twist)
 	{}
+
+	const CartesianPose CartesianPose::Random(const std::string& name, const std::string& reference)
+	{
+		return CartesianPose(name, Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom(), reference);
+	}
+
+	CartesianPose& CartesianPose::operator=(const Eigen::Matrix<double, 7, 1>& pose)
+	{
+		this->set_pose(pose);
+		return (*this);
+	}
+
+	CartesianPose& CartesianPose::operator=(const std::vector<double>& pose)
+	{
+		this->set_pose(pose);
+		return (*this);
+	}
 
 	CartesianPose& CartesianPose::operator*=(const CartesianPose& pose)
 	{
@@ -171,22 +189,6 @@ namespace StateRepresentation
 		return result;
 	}
 
-	const Eigen::Array2d CartesianPose::dist(const CartesianPose& pose) const
-	{
-		// sanity check
-		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
-		if(pose.is_empty()) throw EmptyStateException(pose.get_name() + " state is empty");
-		if(!(this->get_reference_frame() == pose.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
-		// calculation
-		Eigen::Array2d result;
-		// euclidean distance for position
-		result(0) = (this->get_position() - pose.get_position()).norm();
-		// https://math.stackexchange.com/questions/90081/quaternion-distance for orientation
-		double inner_product = this->get_orientation().dot(pose.get_orientation());
-		result(1) = acos(2 * inner_product * inner_product - 1);
-		return result;
-	}
-
 	std::ostream& operator<<(std::ostream& os, const CartesianPose& pose) 
 	{
 		if(pose.is_empty())
@@ -217,11 +219,6 @@ namespace StateRepresentation
 		return pose * lambda;
 	}
 
-	const Eigen::Array2d dist(const CartesianPose& p1, const CartesianPose& p2)
-	{
-		return p1.dist(p2);
-	}
-
 	const CartesianTwist operator/(const CartesianPose& pose, const std::chrono::nanoseconds& dt)
 	{
 		// sanity check
@@ -237,5 +234,36 @@ namespace StateRepresentation
 		Eigen::Quaterniond log_q = MathTools::log(pose.get_orientation());
 		twist.set_angular_velocity(2 * log_q.vec() / period);
 		return twist;
+	}
+
+	const std::vector<double> CartesianPose::to_std_vector() const
+	{
+		std::vector<double> pose = std::vector<double>(this->get_position().data(), this->get_position().data() + 3);
+		pose.resize(7);
+		pose[3] = this->get_orientation().w();
+		pose[4] = this->get_orientation().x();
+		pose[5] = this->get_orientation().y();
+		pose[6] = this->get_orientation().z();
+		return pose;
+	}
+
+	void CartesianPose::from_std_vector(const std::vector<double>& value)
+	{
+		if (value.size() == 3)
+		{
+			this->set_position(value);
+		}
+		else if (value.size() == 4)
+		{
+			this->set_orientation(value);
+		}
+		else if (value.size() == 7)
+		{
+			this->set_pose(value);
+		}
+		else
+		{
+			throw IncompatibleSizeException("The input vector is of incorrect size");
+		}
 	}
 }

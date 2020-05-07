@@ -1,7 +1,4 @@
-
-
-#ifndef DYNAMICALSYSTEMS_EXCEPTIONS_NOTIMPLEMENTEDEXCEPTION_H_
-#define DYNAMICALSYSTEMS_EXCEPTIONS_NOTIMPLEMENTEDEXCEPTION_H_
+#pragma once
 
 #include <iostream>
 #include <exception>
@@ -18,4 +15,3 @@ namespace DynamicalSystems
 		};
 	}
 }
-#endif

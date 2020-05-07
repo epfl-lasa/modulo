@@ -33,3 +33,4 @@ class JointPositions(JointState):
             res += "names: [" + " ".join(self.names) + "]\n"
             res += "positions: [" + " ".join([str(x) for x in self.positions]) + "]\n"
         return res
+

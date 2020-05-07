@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include <iostream>
@@ -9,10 +7,10 @@ namespace StateRepresentation
 {
 	namespace Exceptions
 	{
-		class EmptyStateException: public std::runtime_error
+		class NotImplementedException: public std::logic_error
 		{
 		public:
-			explicit EmptyStateException(const std::string& msg) : runtime_error(msg)
+			explicit NotImplementedException(const std::string& msg) : logic_error(msg)
 			{};
 		};
 	}

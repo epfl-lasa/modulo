@@ -92,45 +92,45 @@ TEST(OverloadIndex, PositiveNos)
 	EXPECT_TRUE(point1.second == 2*period);
 }
 
-TEST(InsertPoint, PositiveNos)
-{
-	StateRepresentation::Trajectory<StateRepresentation::JointState> trajectory;
-	StateRepresentation::JointState point("robot", 1);
+// TEST(InsertPoint, PositiveNos)
+// {
+// 	StateRepresentation::Trajectory<StateRepresentation::JointState> trajectory;
+// 	StateRepresentation::JointState point("robot", 1);
 
-	std::chrono::milliseconds period(100);
-	Eigen::ArrayXd positions(1);
-	positions << 0.2;
-	point.set_positions(positions);
-	trajectory.add_point(point, period);
-	positions << 0.7;
-	point.set_positions(positions);
-	trajectory.add_point(point, period);
+// 	std::chrono::milliseconds period(100);
+// 	Eigen::ArrayXd positions(1);
+// 	positions << 0.2;
+// 	point.set_positions(positions);
+// 	trajectory.add_point(point, period);
+// 	positions << 0.7;
+// 	point.set_positions(positions);
+// 	trajectory.add_point(point, period);
 
-	std::pair<StateRepresentation::JointState, std::chrono::milliseconds> last_point = trajectory[1];
-	std::deque<StateRepresentation::JointState> points = trajectory.get_points();
-	std::deque<std::chrono::milliseconds> times = trajectory.get_times();
+// 	std::pair<StateRepresentation::JointState, std::chrono::milliseconds> last_point = trajectory[1];
+// 	std::deque<StateRepresentation::JointState> points = trajectory.get_points();
+// 	std::deque<std::chrono::milliseconds> times = trajectory.get_times();
 
-	EXPECT_TRUE(points.size() == 2);
-	EXPECT_TRUE(times.size() == 2);
-	EXPECT_TRUE(last_point.first.get_positions()[0] == 0.7);
-	EXPECT_TRUE(last_point.second == 2*period);
+// 	EXPECT_TRUE(points.size() == 2);
+// 	EXPECT_TRUE(times.size() == 2);
+// 	EXPECT_TRUE(last_point.first.get_positions()[0] == 0.7);
+// 	EXPECT_TRUE(last_point.second == 2*period);
 
-	positions << 0.8;
-	point.set_positions(positions);
-	trajectory.insert_point(point, period, 1);
+// 	positions << 0.8;
+// 	point.set_positions(positions);
+// 	trajectory.insert_point(point, period, 1);
 
-	std::pair<StateRepresentation::JointState, std::chrono::milliseconds> inserted_point = trajectory[1];
-	last_point = trajectory[2];
-	points = trajectory.get_points();
-	times = trajectory.get_times();
+// 	std::pair<StateRepresentation::JointState, std::chrono::milliseconds> inserted_point = trajectory[1];
+// 	last_point = trajectory[2];
+// 	points = trajectory.get_points();
+// 	times = trajectory.get_times();
 
-	EXPECT_TRUE(points.size() == 3);
-	EXPECT_TRUE(times.size() == 3);
-	EXPECT_TRUE(inserted_point.first.get_positions()[0] == 0.8);
-	EXPECT_TRUE(inserted_point.second == 2*period);
-	EXPECT_TRUE(last_point.first.get_positions()[0] == 0.7);
-	EXPECT_TRUE(last_point.second == 3*period);
-}
+// 	EXPECT_TRUE(points.size() == 3);
+// 	EXPECT_TRUE(times.size() == 3);
+// 	EXPECT_TRUE(inserted_point.first.get_positions()[0] == 0.8);
+// 	EXPECT_TRUE(inserted_point.second == 2*period);
+// 	EXPECT_TRUE(last_point.first.get_positions()[0] == 0.7);
+// 	EXPECT_TRUE(last_point.second == 3*period);
+// }
 
 int main(int argc, char **argv) 
 {

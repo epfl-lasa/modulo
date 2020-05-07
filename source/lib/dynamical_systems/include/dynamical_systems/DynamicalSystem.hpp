@@ -1,73 +1,60 @@
 /**
- * @class DynamicalSystem
- * @brief Abstract class to define a DynamicalSystem
  * @author Baptiste Busch
  * @date 2019/07/18
  *
  */
 
-#ifndef DYNAMICAL_SYSTEMS_DYNAMICAL_SYSTEM_H_
-#define DYNAMICAL_SYSTEMS_DYNAMICAL_SYSTEM_H_
+#pragma once
 
-
-#include "state_representation/Space/Cartesian/CartesianState.hpp"
-#include "state_representation/Space/Cartesian/CartesianPose.hpp"
-#include "state_representation/Space/Cartesian/CartesianTwist.hpp"
-#include "state_representation/Robot/JointState.hpp"
 #include "dynamical_systems/Exceptions/NotImplementedException.hpp"
+#include "state_representation/Parameters/ParameterInterface.hpp"
 #include <memory>
-
-using namespace DynamicalSystems::Exceptions;
 
 namespace DynamicalSystems
 {
+	/**
+	 * @class DynamicalSystem
+	 * @brief Abstract class to define a DynamicalSystem either in joint or cartesian spaces
+	 */
 	template<class S>
 	class DynamicalSystem 
 	{
-	private:
-		double gain_;
-
 	public:
-		explicit DynamicalSystem(double gain=1);
+		/**
+		 * @brief Constructor with a provided gain
+		 * @param attractor attractor of the dynamical system
+		 */
+		explicit DynamicalSystem();
 
-		double get_gain() const;
+		/**
+		 * @brief Evaluate the value of the dynamical system at a given state
+		 * @param state state at wich to perform the evaluation
+		 * @return the state (velocity) to move toward the attractor
+		 */
+		virtual const S evaluate(const S& state) const=0;
 
-		void set_gain(double gain);
-
-		virtual const S evaluate(const S& state) const;
-
-		virtual const S evaluate(const std::shared_ptr<S>& state) const;
+		/**
+		 * @brief Return a list of all the parameters of the dynamical system
+		 * @return the list of parameters
+		 */
+		virtual const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> get_parameters() const;
 	};
 
 	template<class S>
-	DynamicalSystem<S>::DynamicalSystem(double gain):
-	gain_(gain)
+	DynamicalSystem<S>::DynamicalSystem()
 	{}
 
-	template<class S>
-	inline double DynamicalSystem<S>::get_gain() const
-	{
-		return this->gain_;
-	}
-
-	template<class S>
-	inline void DynamicalSystem<S>::set_gain(double gain)
-	{
-		this->gain_ = gain;
-	}
-
-	template<class S>
+	/*template<class S>
 	const S DynamicalSystem<S>::evaluate(const S& state) const
 	{
-		throw NotImplementedException("This method is not implemented for abstract base class");
+		throw Exceptions::NotImplementedException("This method is not implemented for abstract base class");
 		return state;
-	}
+	}*/
 
 	template<class S>
-	const S DynamicalSystem<S>::evaluate(const std::shared_ptr<S>& state) const
+	const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> DynamicalSystem<S>::get_parameters() const
 	{
-		throw NotImplementedException("This method is not implemented for abstract base class");
-		return *state;
+		std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> param_list;
+		return param_list;
 	}
 }
-#endif

@@ -1,12 +1,9 @@
 /**
- * @class JointPositions
- * @brief Class to define a positions of the joints
  * @author Baptiste Busch
  * @date 2019/09/09
  */
 
-#ifndef STATEREPRESENTATION_ROBOT_JOINTPOSITIONS_H_
-#define STATEREPRESENTATION_ROBOT_JOINTPOSITIONS_H_
+#pragma once
 
 #include "state_representation/Robot/JointState.hpp"
 #include "state_representation/Robot/JointVelocities.hpp"
@@ -15,6 +12,10 @@ namespace StateRepresentation
 {
 	class JointVelocities;
 	
+	/**
+	 * @class JointPositions
+	 * @brief Class to define a positions of the joints
+	 */
 	class JointPositions: public JointState
 	{
 	public:
@@ -199,6 +200,17 @@ namespace StateRepresentation
 	 	 * @return the JointVelocities corresponding to the velocities over the time period
 	     */
 		friend const JointVelocities operator/(const JointPositions& positions, const std::chrono::nanoseconds& dt);
+
+		/**
+		 * @brief Return the joint positions as a std vector of floats
+		 * @return std::vector<float> the joint positions vector as a std vector
+		 */
+		const std::vector<double> to_std_vector() const;
+
+		/**
+		 * @brief Set the value from a std vector
+		 * @param value the value as a std vector
+		 */
+		void from_std_vector(const std::vector<double>& value);
 	};
 }
-#endif

@@ -10,13 +10,13 @@ import time
 import quaternion
 
 class CartesianWrench(CartesianState):
+    ''' Force & Torque '''
     def __init__(self, *args, name=None, reference="world",
                  force=None, torque=None,
-                 wrench_vector=None,
-                 state=None)
+                 wrench_vector=None, state=None):
 
         if len(args):
-            if isinstance(args[0], (CartesianState, CartesianPose, CartesianTwist):
+            if isinstance(args[0], (CartesianState, CartesianPose, CartesianTwist)):
                 state = args[0]
             elif  isinstance(args[0], str):
                 name = args[0]
@@ -64,27 +64,21 @@ class CartesianWrench(CartesianState):
         else:
             super().__init__()
 
-    # MAYBE - This linear/angular property replace the rest
     @property
     def linear(self):
-        self._linear = self._force
-        return self._linear
+        return self.force
 
     @linear.setter
     def linear(self, value):
-        self._linear = value
-        self._force = self._linear
+        self.force = value
         
     @property
     def angular(self):
-        self._angular = self._torque
-        return self._angular
+        return self.torque
 
     @angular.setter
     def angular(self, value):
-        self._angular = value
-        self._torque = self._angular
-
+        self.torque = value
     
     def set_wrench(self, other):
         self.force = other[:3]
@@ -93,15 +87,14 @@ class CartesianWrench(CartesianState):
     def get_wrench(self):
         return np.hstack((self.force, self.torque))
 
-    def get_wrench(self):
-        return self.get_wrench()
-    
+    # def get_wrench(self):
+        # return self.get_wrench()
 
     def __iadd__(self, other):
         if self.is_empty:
             RuntimeError("State is empty")
 
-        if isinstance(other, CartesianTwist):
+        if isinstance(other, CartesianWrench):
             if other.is_empty:
                 RuntimeError("State is empty")
 
@@ -114,7 +107,7 @@ class CartesianWrench(CartesianState):
         elif isinstance(other, (list, np.ndarray)):
             other = np.squeeze(other)
             if other.shape == (3,):
-                self.set_twist(self.get_twist + other)
+                self.set_wrench(self.get_wrench + other)
             else:
                 TypeError("Wrong array size --- dim = {}".format(np.array(other)))
             
@@ -132,7 +125,7 @@ class CartesianWrench(CartesianState):
         if self.is_empty:
             RuntimeError("State is empty")
 
-        if isinstance(other, CartesianTwist):
+        if isinstance(other, CartesianWrench):
             if other.is_empty:
                 RuntimeError("State is empty")
 
@@ -145,7 +138,7 @@ class CartesianWrench(CartesianState):
         elif isinstance(other, (list, np.ndarray)):
             other = np.squeeze(other)
             if other.shape == (3,):
-                self.set_twist(self.get_twist - other)
+                self.set_wrench(self.get_wrench - other)
             else:
                 TypeError("Wrong array size --- dim = {}".format(np.array(other)))
         else:

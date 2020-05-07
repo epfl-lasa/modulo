@@ -1,7 +1,6 @@
 
 
-#ifndef STATEREPRESENTATION_EXCEPTIONS_INCOMPATIBLEREFERENCEFRAMESEXCEPTION_H_
-#define STATEREPRESENTATION_EXCEPTIONS_INCOMPATIBLEREFERENCEFRAMESEXCEPTION_H_
+#pragma once
 
 #include <iostream>
 #include <exception>
@@ -18,4 +17,3 @@ namespace StateRepresentation
 		};
 	}
 }
-#endif
