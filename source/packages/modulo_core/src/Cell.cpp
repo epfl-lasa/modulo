@@ -127,21 +127,9 @@ namespace Modulo
 						break;
 					}
 
-					case StateType::PARAMETER_CARTESIANSTATE:
-					{
-						this->add_parameter(std::static_pointer_cast<Parameter<CartesianState>>(param), prefix);
-						break;
-					}
-
 					case StateType::PARAMETER_CARTESIANPOSE:
 					{
 						this->add_parameter(std::static_pointer_cast<Parameter<CartesianPose>>(param), prefix);
-						break;
-					}
-
-					case StateType::PARAMETER_JOINTSTATE:
-					{
-						this->add_parameter(std::static_pointer_cast<Parameter<JointState>>(param), prefix);
 						break;
 					}
 
@@ -411,15 +399,6 @@ namespace Modulo
 								break;
 							}
 
-							case StateType::PARAMETER_CARTESIANSTATE:
-							{
-								std::unique_lock<std::mutex> lck(*this->mutex_);
-								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-								static_cast<Parameter<CartesianState>&>(*param).get_value().CartesianState::from_std_vector(value);
-								lck.unlock();
-								break;
-							}
-
 							case StateType::PARAMETER_CARTESIANPOSE:
 							{
 								std::unique_lock<std::mutex> lck(*this->mutex_);
@@ -429,14 +408,14 @@ namespace Modulo
 								break;
 							}
 
-							/*case StateType::PARAMETER_JOINTPOSITIONS:
+							case StateType::PARAMETER_JOINTPOSITIONS:
 							{
 								std::unique_lock<std::mutex> lck(*this->mutex_);
 								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-								static_cast<Parameter<JointPositions>&>(*param).set_value(value);
+								static_cast<Parameter<JointPositions>&>(*param).get_value().JointPositions::from_std_vector(value);
 								lck.unlock();
 								break;
-							}*/
+							}
 
 							default:
 							{
