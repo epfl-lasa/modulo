@@ -6,9 +6,10 @@
 
 #pragma once
 
-#include "dynamical_systems/Exceptions/NotImplementedException.hpp"
-#include "state_representation/Parameters/ParameterInterface.hpp"
+#include <list>
 #include <memory>
+#include "state_representation/Parameters/ParameterInterface.hpp"
+
 
 namespace DynamicalSystems
 {
@@ -43,13 +44,6 @@ namespace DynamicalSystems
 	template<class S>
 	DynamicalSystem<S>::DynamicalSystem()
 	{}
-
-	/*template<class S>
-	const S DynamicalSystem<S>::evaluate(const S& state) const
-	{
-		throw Exceptions::NotImplementedException("This method is not implemented for abstract base class");
-		return state;
-	}*/
 
 	template<class S>
 	const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> DynamicalSystem<S>::get_parameters() const

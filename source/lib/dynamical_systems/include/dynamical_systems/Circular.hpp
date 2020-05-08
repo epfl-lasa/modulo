@@ -5,25 +5,27 @@
 
 #pragma once
 
+#include <cmath>
+#include <list>
 #include "dynamical_systems/DynamicalSystem.hpp"
+#include "state_representation/Parameters/Parameter.hpp"
 #include "state_representation/Space/Cartesian/CartesianState.hpp"
 #include "state_representation/Space/Cartesian/CartesianPose.hpp"
 #include "state_representation/Space/Cartesian/CartesianTwist.hpp"
-#include "state_representation/Robot/JointState.hpp"
-#include <cmath>
+
 
 namespace DynamicalSystems
 {
 	/**
 	 * @class Circular
-	 * @brief Represent a Circular dynamical system to move around an attractor
+	 * @brief Represent a Circular dynamical system to move around an center
 	 * @tparam S the type of space of the dynamical system (e.g. Cartesian or Joint)
 	 */
 	template<class S>
 	class Circular: public DynamicalSystem<S>
 	{
 	private:
-		std::shared_ptr<StateRepresentation::Parameter<S>> center_; ///< attractor of the dynamical system in the space
+		std::shared_ptr<StateRepresentation::Parameter<S>> center_; ///< center of the dynamical system in the space
 		std::shared_ptr<StateRepresentation::Parameter<double>> gain_; ///< gain associate to the system
 		std::shared_ptr<StateRepresentation::Parameter<double>> radius_; ///< radius of the limit circle
 		std::shared_ptr<StateRepresentation::Parameter<double>> circular_velocity_; ///< velocity at wich to navigate the limit circle
@@ -35,16 +37,16 @@ namespace DynamicalSystems
 		explicit Circular(const S& center, double gain=1.0, double radius=1.0, double circular_velocity=M_PI/2);
 
 		/**
-		 * @brief Getter of the attractor
-		 * @return the attractor as a const reference
+		 * @brief Getter of the center
+		 * @return the center as a const reference
 		 */
 		const S& get_center() const;
 
 		/**
-		 * @brief Setter of the attractor as a new value
-		 * @param attractor the new attractor
+		 * @brief Setter of the center as a new value
+		 * @param center the new center
 		 */
-		void set_center(const S& attractor);
+		void set_center(const S& center);
 
 		/**
 		 * @brief Getter of the gain attribute
@@ -85,7 +87,7 @@ namespace DynamicalSystems
 		/**
 		 * @brief Evaluate the value of the dynamical system at a given state
 		 * @param state state at wich to perform the evaluation
-		 * @return the state (velocity) to move toward the attractor
+		 * @return the state (velocity) to move toward the center
 		 */
 		const S evaluate(const S& state) const override;
 
@@ -97,9 +99,9 @@ namespace DynamicalSystems
 	};
 
 	template<>
-	Circular<StateRepresentation::CartesianState>::Circular(const StateRepresentation::CartesianState& center, double gain, double radius=1.0, double circular_velocity=M_PI/2):
+	Circular<StateRepresentation::CartesianState>::Circular(const StateRepresentation::CartesianState& center, double gain, double radius, double circular_velocity):
 	DynamicalSystem<StateRepresentation::CartesianState>(),
-	center_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>(StateRepresentation::Parameter<StateRepresentation::CartesianPose>("center", center))),
+	center_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::CartesianState>>(StateRepresentation::Parameter<StateRepresentation::CartesianPose>("center", center))),
 	gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain)),
 	radius_(std::make_shared<StateRepresentation::Parameter<double>>("radius", radius)),
 	circular_velocity_(std::make_shared<StateRepresentation::Parameter<double>>("circular_velocity", circular_velocity))
@@ -112,9 +114,9 @@ namespace DynamicalSystems
 	}
 
 	template<class S>
-	inline void Circular<S>::set_center(const S& attractor)
+	inline void Circular<S>::set_center(const S& center)
 	{
-		this->attractor_->set_center(attractor);
+		this->center_->set_center(center);
 	}
 
 	template<class S>
@@ -142,18 +144,6 @@ namespace DynamicalSystems
 	}
 
 	template<class S>
-	inline double Circular<S>::get_elevation() const
-	{
-		return this->elevation_->get_value();
-	}
-
-	template<class S>
-	inline void Circular<S>::set_elevation(double elevation)
-	{
-		this->elevation_->set_value(elevation);
-	}
-
-	template<class S>
 	inline double Circular<S>::get_circular_velocity() const
 	{
 		return this->circular_velocity_->get_value();
@@ -168,7 +158,7 @@ namespace DynamicalSystems
 	template<>
 	const StateRepresentation::CartesianState Circular<StateRepresentation::CartesianState>::evaluate(const StateRepresentation::CartesianState& state) const
 	{
-		StateRepresentation::CartesianPose pose = static_cast<const StateRepresentation::CartesianPose&>(state) - static_cast<const StateRepresentation::CartesianPose&>(this->get_attractor());
+		StateRepresentation::CartesianPose pose = static_cast<const StateRepresentation::CartesianPose&>(state) - static_cast<const StateRepresentation::CartesianPose&>(this->get_center());
 		StateRepresentation::CartesianTwist velocity(state.get_name(), state.get_reference_frame());
 		Eigen::Vector3d linear_velocity;
 		// linear_velocity(2) = -this->get_gain() * pose.get_position()(2);
@@ -176,10 +166,10 @@ namespace DynamicalSystems
 
 		float R = sqrt(pose.get_position()(0) * pose.get_position()(0) + pose.get_position()(1) * pose.get_position()(1));
 		float T = atan2(pose.get_position()(1), pose.get_position()(0));
-		float omega = this->circular_velocity_;
+		float omega = this->get_circular_velocity();
 
-		linear_velocity(0) = -this->get_gain()*(R-this->radius_) * cos(T) - R * omega * sin(T);
-		linear_velocity(1) = -this->get_gain()*(R-this->radius_) * sin(T) + R * omega * cos(T);
+		linear_velocity(0) = -this->get_gain()*(R-this->get_radius()) * cos(T) - R * omega * sin(T);
+		linear_velocity(1) = -this->get_gain()*(R-this->get_radius()) * sin(T) + R * omega * cos(T);
 
 		velocity.set_linear_velocity(linear_velocity);
 		return velocity;
@@ -188,10 +178,11 @@ namespace DynamicalSystems
 	template<class S>
 	const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> Circular<S>::get_parameters() const
 	{
-		std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> param_list = this->DynamicalSystem<S>::get_param_list();
+		std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> param_list;
 		param_list.push_back(this->center_);
 		param_list.push_back(this->gain_);
 		param_list.push_back(this->radius_);
 		param_list.push_back(this->circular_velocity_);
 		return param_list;
 	}
+}
