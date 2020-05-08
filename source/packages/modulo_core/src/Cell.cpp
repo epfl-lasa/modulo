@@ -153,10 +153,12 @@ namespace Modulo
 			}
 		}
 
-		void Cell::send_transform(const StateRepresentation::CartesianState& transform)
+		void Cell::send_transform(const StateRepresentation::CartesianState& transform, const std::string& name)
 		{
 			if (!this->configured_) throw Exceptions::UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
-			static_cast<Communication::MessagePassing::TransformBroadcasterHandler&>(*this->handlers_["tf_broadcaster"]).send_transform(transform);
+			StateRepresentation::CartesianState transform_copy(transform);
+			if (name != "") transform_copy.set_name(name);
+			static_cast<Communication::MessagePassing::TransformBroadcasterHandler&>(*this->handlers_["tf_broadcaster"]).send_transform(transform_copy);
 		}
 
 		const StateRepresentation::CartesianPose Cell::lookup_transform(const std::string& frame_name, const std::string& reference_frame)

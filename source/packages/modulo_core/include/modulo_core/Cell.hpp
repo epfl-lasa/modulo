@@ -269,8 +269,9 @@ namespace Modulo
 			/**
 			 * @brief Function to send a transform using the generic transform broadcaster
 			 * @param transform the transformation to send
+			 * @param name the new name to give to the transform. If empty it will use the name provided in transform
 			 */
-			void send_transform(const StateRepresentation::CartesianState& transform);
+			void send_transform(const StateRepresentation::CartesianState& transform, const std::string& name="");
 
 			/**
 			 * @brief Send a request to the server and wait for its response
