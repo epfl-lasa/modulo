@@ -1,3 +1,8 @@
+## 0.2.2 (mai 08, 2020)
+  - Merge branch 'develop'
+  - Correct all the problems of Circular and some linking errors that could arise
+  - Add -j argument to speed up building
+
 ## 0.2.1 (mai 07, 2020)
   - Correct synchronization with mutex
 
