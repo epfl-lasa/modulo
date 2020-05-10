@@ -22,7 +22,7 @@ docker volume create --driver local \
 
 xhost +
 docker run \
-    --runtime=nvidia \
+    --gpus all \
     --privileged \
 	--net=host \
 	-it \
