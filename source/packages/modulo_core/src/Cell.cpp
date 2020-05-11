@@ -153,18 +153,18 @@ namespace Modulo
 			}
 		}
 
-		void Cell::send_transform(const StateRepresentation::CartesianState& transform, const std::string& name)
+		void Cell::send_transform(const StateRepresentation::CartesianState& transform, const std::string& name) const
 		{
 			if (!this->configured_) throw Exceptions::UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
 			StateRepresentation::CartesianState transform_copy(transform);
 			if (name != "") transform_copy.set_name(name);
-			static_cast<Communication::MessagePassing::TransformBroadcasterHandler&>(*this->handlers_["tf_broadcaster"]).send_transform(transform_copy);
+			std::static_pointer_cast<Communication::MessagePassing::TransformBroadcasterHandler>(this->handlers_.at("tf_broadcaster"))->send_transform(transform_copy);
 		}
 
-		const StateRepresentation::CartesianPose Cell::lookup_transform(const std::string& frame_name, const std::string& reference_frame)
+		const StateRepresentation::CartesianPose Cell::lookup_transform(const std::string& frame_name, const std::string& reference_frame) const
 		{
 			if (!this->configured_) throw Exceptions::UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
-			return static_cast<Communication::MessagePassing::TransformListenerHandler&>(*this->handlers_["tf_listener"]).lookup_transform(frame_name, reference_frame);
+			return std::static_pointer_cast<Communication::MessagePassing::TransformListenerHandler>(this->handlers_.at("tf_listener"))->lookup_transform(frame_name, reference_frame);
 		}
 
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_configure(const rclcpp_lifecycle::State &) 
@@ -356,7 +356,7 @@ namespace Modulo
 							{
 								std::unique_lock<std::mutex> lck(*this->mutex_);
 								double value = this->get_parameter(param->get_name()).as_double();
-								static_cast<Parameter<double>&>(*param).set_value(value);
+								std::static_pointer_cast<Parameter<double>>(param)->set_value(value);
 								lck.unlock();
 								break;
 							}
@@ -365,7 +365,7 @@ namespace Modulo
 							{
 								std::unique_lock<std::mutex> lck(*this->mutex_);
 								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-								static_cast<Parameter<std::vector<double>>&>(*param).set_value(value);
+								std::static_pointer_cast<Parameter<std::vector<double>>>(param)->set_value(value);
 								lck.unlock();
 								break;
 							}
@@ -374,7 +374,7 @@ namespace Modulo
 							{
 								std::unique_lock<std::mutex> lck(*this->mutex_);
 								bool value = this->get_parameter(param->get_name()).as_bool();
-								static_cast<Parameter<bool>&>(*param).set_value(value);
+								std::static_pointer_cast<Parameter<bool>>(param)->set_value(value);
 								lck.unlock();
 								break;
 							}
@@ -383,7 +383,7 @@ namespace Modulo
 							{
 								std::unique_lock<std::mutex> lck(*this->mutex_);
 								std::vector<bool> value = this->get_parameter(param->get_name()).as_bool_array();
-								static_cast<Parameter<std::vector<bool>>&>(*param).set_value(value);
+								std::static_pointer_cast<Parameter<std::vector<bool>>>(param)->set_value(value);
 								lck.unlock();
 								break;
 							}
@@ -392,7 +392,7 @@ namespace Modulo
 							{
 								std::unique_lock<std::mutex> lck(*this->mutex_);
 								std::string value = this->get_parameter(param->get_name()).as_string();
-								static_cast<Parameter<std::string>&>(*param).set_value(value);
+								std::static_pointer_cast<Parameter<std::string>>(param)->set_value(value);
 								lck.unlock();
 								break;
 							}
@@ -401,7 +401,7 @@ namespace Modulo
 							{
 								std::unique_lock<std::mutex> lck(*this->mutex_);
 								std::vector<std::string> value = this->get_parameter(param->get_name()).as_string_array();
-								static_cast<Parameter<std::vector<std::string>>&>(*param).set_value(value);
+								std::static_pointer_cast<Parameter<std::vector<std::string>>>(param)->set_value(value);
 								lck.unlock();
 								break;
 							}
@@ -410,7 +410,7 @@ namespace Modulo
 							{
 								std::unique_lock<std::mutex> lck(*this->mutex_);
 								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-								static_cast<Parameter<CartesianPose>&>(*param).get_value().CartesianPose::from_std_vector(value);
+								std::static_pointer_cast<Parameter<CartesianPose>>(param)->get_value().CartesianPose::from_std_vector(value);
 								lck.unlock();
 								break;
 							}
@@ -419,7 +419,7 @@ namespace Modulo
 							{
 								std::unique_lock<std::mutex> lck(*this->mutex_);
 								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-								static_cast<Parameter<JointPositions>&>(*param).get_value().JointPositions::from_std_vector(value);
+								std::static_pointer_cast<Parameter<JointPositions>>(param)->get_value().JointPositions::from_std_vector(value);
 								lck.unlock();
 								break;
 							}
