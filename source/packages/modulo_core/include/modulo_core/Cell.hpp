@@ -271,7 +271,7 @@ namespace Modulo
 			 * @param transform the transformation to send
 			 * @param name the new name to give to the transform. If empty it will use the name provided in transform
 			 */
-			void send_transform(const StateRepresentation::CartesianState& transform, const std::string& name="");
+			void send_transform(const StateRepresentation::CartesianState& transform, const std::string& name="") const;
 
 			/**
 			 * @brief Send a request to the server and wait for its response
@@ -297,7 +297,7 @@ namespace Modulo
 			 * @param the frame in wich to express the transform
 			 * @return the CartesianPose representing the transformation
 			 */
-			const StateRepresentation::CartesianPose lookup_transform(const std::string& frame_name, const std::string& reference_frame="world");
+			const StateRepresentation::CartesianPose lookup_transform(const std::string& frame_name, const std::string& reference_frame="world") const;
 
 			/**
 			 * @brief Transition callback for state configuring
