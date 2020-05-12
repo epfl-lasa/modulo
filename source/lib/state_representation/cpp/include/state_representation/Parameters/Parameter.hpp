@@ -12,12 +12,13 @@ namespace StateRepresentation
 
 	public:
 		/**
-		 * @brief Empty constructor
+		 * @brief Constructor with name of the parameter
 		 */
 		explicit Parameter(const std::string& name);
 		
 		/**
 		 * @brief Constructor with a value
+		 * @param name the name of the parameter
 		 * @param value value of the parameter
 		 */
 		explicit Parameter(const std::string& name, const T& value);
