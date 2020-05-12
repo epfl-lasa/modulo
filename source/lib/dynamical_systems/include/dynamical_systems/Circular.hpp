@@ -116,7 +116,7 @@ namespace DynamicalSystems
 	template<class S>
 	inline void Circular<S>::set_center(const S& center)
 	{
-		this->center_->set_center(center);
+		this->center_->set_value(center);
 	}
 
 	template<class S>
