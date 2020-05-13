@@ -7,6 +7,7 @@ ENV USER ros2
 
 RUN apt update && apt install -y \
   sudo \
+  gdb \
   autoconf \
   automake \
   libtool \
