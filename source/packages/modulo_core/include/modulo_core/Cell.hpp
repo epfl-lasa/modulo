@@ -271,13 +271,13 @@ namespace Modulo
 			 * @param parameter the new value of the parameter
 			 */
 			template <typename T>
-			void set_parameter_value(const StateRepresentation::Parameter<T>& parameter);
+			void set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter);
 
 			/**
 			 * @brief Set the value of a declared parameter
 			 * @param parameter the new value of the parameter
 			 */
-			void set_parameter_value(const StateRepresentation::ParameterInterface& parameter);
+			void set_parameter_value(const std::shared_ptr<StateRepresentation::ParameterInterface>& parameter);
 
 			/**
 			 * @brief Function to send a transform using the generic transform broadcaster

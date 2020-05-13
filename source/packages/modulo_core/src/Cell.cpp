@@ -153,88 +153,88 @@ namespace Modulo
 		}
 
 		template <typename T>
-		void Cell::set_parameter_value(const StateRepresentation::Parameter<T>& parameter)
+		void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter)
 		{
-			this->set_parameter(rclcpp::Parameter(parameter.get_name(), parameter.get_value()));
+			this->set_parameter(rclcpp::Parameter(parameter->get_name(), parameter->get_value()));
 		}
 
-		template void Cell::set_parameter_value(const StateRepresentation::Parameter<double>& parameter);
+		template void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<double>>& parameter);
 
-		template void Cell::set_parameter_value(const StateRepresentation::Parameter<std::vector<double>>& parameter);
+		template void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<std::vector<double>>>& parameter);
 
-		template void Cell::set_parameter_value(const StateRepresentation::Parameter<bool>& parameter);
+		template void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<bool>>& parameter);
 
-		template void Cell::set_parameter_value(const StateRepresentation::Parameter<std::vector<bool>>& parameter);
+		template void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<std::vector<bool>>>& parameter);
 
-		template void Cell::set_parameter_value(const StateRepresentation::Parameter<std::string>& parameter);
+		template void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<std::string>>& parameter);
 
-		template void Cell::set_parameter_value(const StateRepresentation::Parameter<std::vector<std::string>>& parameter);
+		template void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<std::vector<std::string>>>& parameter);
 
 		template <>
-		void Cell::set_parameter_value(const StateRepresentation::Parameter<StateRepresentation::CartesianPose>& parameter)
+		void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>& parameter)
 		{
-			std::vector<double> value = parameter.get_value().StateRepresentation::CartesianPose::to_std_vector();
-			this->set_parameter(rclcpp::Parameter(parameter.get_name(), value));
+			std::vector<double> value = parameter->get_value().StateRepresentation::CartesianPose::to_std_vector();
+			this->set_parameter(rclcpp::Parameter(parameter->get_name(), value));
 		}
 
 		template <>
-		void Cell::set_parameter_value(const StateRepresentation::Parameter<StateRepresentation::JointPositions>& parameter)
+		void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::JointPositions>>& parameter)
 		{
-			std::vector<double> value = parameter.get_value().StateRepresentation::JointPositions::to_std_vector();
-			this->set_parameter(rclcpp::Parameter(parameter.get_name(), value));
+			std::vector<double> value = parameter->get_value().StateRepresentation::JointPositions::to_std_vector();
+			this->set_parameter(rclcpp::Parameter(parameter->get_name(), value));
 		}
 
-		void Cell::set_parameter_value(const StateRepresentation::ParameterInterface& parameter)
+		void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::ParameterInterface>& parameter)
 		{
 			using namespace StateRepresentation;
 			using namespace StateRepresentation::Exceptions;
-			switch (parameter.get_type())
+			switch (parameter->get_type())
 			{
 				case StateType::PARAMETER_DOUBLE:
 				{
-					this->set_parameter_value(static_cast<const Parameter<double>&>(parameter));
+					this->set_parameter_value(std::static_pointer_cast<Parameter<double>>(parameter));
 					break;
 				}
 
 				case StateType::PARAMETER_DOUBLE_ARRAY:
 				{
-					this->set_parameter_value(static_cast<const Parameter<std::vector<double>>&>(parameter));
+					this->set_parameter_value(std::static_pointer_cast<Parameter<std::vector<double>>>(parameter));
 					break;
 				}
 
 				case StateType::PARAMETER_BOOL:
 				{
-					this->set_parameter_value(static_cast<const Parameter<bool>&>(parameter));
+					this->set_parameter_value(std::static_pointer_cast<Parameter<bool>>(parameter));
 					break;
 				}
 
 				case StateType::PARAMETER_BOOL_ARRAY:
 				{
-					this->set_parameter_value(static_cast<const Parameter<std::vector<double>>&>(parameter));
+					this->set_parameter_value(std::static_pointer_cast<Parameter<std::vector<double>>>(parameter));
 					break;
 				}
 
 				case StateType::PARAMETER_STRING:
 				{
-					this->set_parameter_value(static_cast<const Parameter<std::string>&>(parameter));
+					this->set_parameter_value(std::static_pointer_cast<Parameter<std::string>>(parameter));
 					break;
 				}
 
 				case StateType::PARAMETER_STRING_ARRAY:
 				{
-					this->set_parameter_value(static_cast<const Parameter<std::vector<std::string>>&>(parameter));
+					this->set_parameter_value(std::static_pointer_cast<Parameter<std::vector<std::string>>>(parameter));
 					break;
 				}
 
 				case StateType::PARAMETER_CARTESIANPOSE:
 				{
-					this->set_parameter_value(static_cast<const Parameter<CartesianPose>&>(parameter));
+					this->set_parameter_value(std::static_pointer_cast<Parameter<CartesianPose>>(parameter));
 					break;
 				}
 
 				case StateType::PARAMETER_JOINTPOSITIONS:
 				{
-					this->set_parameter_value(static_cast<const Parameter<JointPositions>&>(parameter));
+					this->set_parameter_value(std::static_pointer_cast<Parameter<JointPositions>>(parameter));
 					break;
 				}
 
