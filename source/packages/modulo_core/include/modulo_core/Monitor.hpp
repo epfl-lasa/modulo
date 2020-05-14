@@ -3,8 +3,7 @@
  * @date 2019/02/14
  */
 
-#ifndef MODULO_CONTROLLER_H_
-#define MODULO_CONTROLLER_H_
+#pragma once
 
 #include <lifecycle_msgs/srv/get_state.hpp>
 #include <list>
@@ -92,4 +91,3 @@ namespace Modulo
 
 	}
 }
-#endif

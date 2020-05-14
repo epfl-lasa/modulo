@@ -7,9 +7,7 @@
  * A Recorder is used to listen on specific topics and record
  * the received data.
  */
-
-#ifndef MODULO_RECORDER_H_
-#define MODULO_RECORDER_H_
+#pragma once
 
 #include "modulo_core/Cell.hpp"
 #include <typeinfo>
@@ -138,4 +136,3 @@ namespace Modulo
 		}
 	}
 }
-#endif

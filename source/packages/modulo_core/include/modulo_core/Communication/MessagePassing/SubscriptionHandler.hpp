@@ -3,9 +3,7 @@
  * @date 2019/06/14
  *
  */
-
-#ifndef MODULO_COMMUNICATION_SUBSCRIPTION_HANDLER_H_
-#define MODULO_COMMUNICATION_SUBSCRIPTION_HANDLER_H_
+#pragma once
 
 #include "modulo_core/Communication/MessagePassing/MessagePassingHandler.hpp"
 
@@ -109,4 +107,3 @@ namespace Modulo
 		}
 	}
 }
-#endif

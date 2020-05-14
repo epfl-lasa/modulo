@@ -2,9 +2,7 @@
  * @author Baptiste Busch
  * @date 2019/06/14
  */
-
-#ifndef MODULO_COMMUNICATION_COMMUNICATION_HANDLER_H_
-#define MODULO_COMMUNICATION_COMMUNICATION_HANDLER_H_
+#pragma once
 
 #include <iostream>
 #include <memory>
@@ -116,4 +114,3 @@ namespace Modulo
 		}
 	}
 }
-#endif

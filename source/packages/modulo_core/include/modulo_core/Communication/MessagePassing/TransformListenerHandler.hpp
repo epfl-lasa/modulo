@@ -2,9 +2,7 @@
  * @author Baptiste Busch
  * @date 2019/06/14
  */
-
-#ifndef MODULO_COMMUNICATION_TRANSFORMLISTENERHANDLER_H_
-#define MODULO_COMMUNICATION_TRANSFORMLISTENERHANDLER_H_
+#pragma once
 
 #include <tf2_ros/transform_listener.h>
 #include "modulo_core/Communication/MessagePassing/MessagePassingHandler.hpp"
@@ -75,4 +73,3 @@ namespace Modulo
 		}
 	}
 }
-#endif

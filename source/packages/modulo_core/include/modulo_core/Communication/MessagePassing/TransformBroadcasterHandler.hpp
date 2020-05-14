@@ -2,9 +2,7 @@
  * @author Baptiste Busch
  * @date 2019/06/14
  */
-
-#ifndef MODULO_COMMUNICATION_TRANSFORMBROADCASTERHANDLER_H_
-#define MODULO_COMMUNICATION_TRANSFORMBROADCASTERHANDLER_H_
+#pragma once
 
 #include <tf2_msgs/msg/tf_message.hpp>
 #include "modulo_core/Communication/MessagePassing/PublisherHandler.hpp"
@@ -69,4 +67,3 @@ namespace Modulo
 		}
 	}
 }
-#endif

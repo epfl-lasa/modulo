@@ -2,9 +2,7 @@
  * @author Baptiste Busch
  * @date 2019/06/14
  */
-
-#ifndef MODULO_COMMUNICATION_PUBLISHER_HANDLER_H_
-#define MODULO_COMMUNICATION_PUBLISHER_HANDLER_H_
+#pragma once
 
 #include <tuple>
 #include <rclcpp/publisher.hpp>
@@ -178,4 +176,3 @@ namespace Modulo
 		}
 	}
 }
-#endif

@@ -5,8 +5,7 @@
  * @date 2019/09/20
  */
 
-#ifndef MODULOCORE_EXCEPTIONS_UNSUPPORTEDCONTROLLEREXCEPTION_H_
-#define MODULOCORE_EXCEPTIONS_UNSUPPORTEDCONTROLLEREXCEPTION_H_
+#pragma once
 
 #include <iostream>
 #include <exception>
@@ -23,4 +22,3 @@ namespace Modulo
 		};
 	}
 }
-#endif

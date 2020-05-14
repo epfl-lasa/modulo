@@ -2,9 +2,7 @@
  * @author Baptiste Busch
  * @date 2020/02/13
  */
-
-#ifndef MODULO_COMMUNICATION_MESSAGEPASSINGCOMMUNICATION_H_
-#define MODULO_COMMUNICATION_MESSAGEPASSINGCOMMUNICATION_H_
+#pragma once
 
 #include <iostream>
 #include <memory>
@@ -74,4 +72,3 @@ namespace Modulo
 		}
 	}
 }
-#endif

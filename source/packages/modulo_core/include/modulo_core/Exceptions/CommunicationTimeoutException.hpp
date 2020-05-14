@@ -3,8 +3,7 @@
  * @date 2020/02/14
  *
  */
-#ifndef MODULOCORE_EXCEPTIONS_COMMUNICATIONTIMEOUTEXCEPTION_H_
-#define MODULOCORE_EXCEPTIONS_COMMUNICATIONTIMEOUTEXCEPTION_H_
+#pragma once
 
 #include <iostream>
 #include <exception>
@@ -22,4 +21,3 @@ namespace Modulo
 		};
 	}
 }
-#endif

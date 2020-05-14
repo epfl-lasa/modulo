@@ -3,8 +3,7 @@
  * @date 2019/06/14
  *
  */
-#ifndef MODULO_COMMUNICATION_SERVICECLIENT_CLIENTHANDLER_H_
-#define MODULO_COMMUNICATION_SERVICECLIENT_CLIENTHANDLER_H_
+#pragma once
 
 #include "modulo_core/Communication/CommunicationHandler.hpp"
 #include "modulo_core/Exceptions/CommunicationTimeoutException.hpp"
@@ -129,4 +128,3 @@ namespace Modulo
 		}
 	}
 }
-#endif

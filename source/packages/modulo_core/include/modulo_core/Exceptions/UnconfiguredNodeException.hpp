@@ -1,7 +1,4 @@
-
-
-#ifndef MODULOCORE_EXCEPTIONS_UNCONFIGUREDNODEEXCEPTION_H_
-#define MODULOCORE_EXCEPTIONS_UNCONFIGUREDNODEEXCEPTION_H_
+#pragma once
 
 #include <iostream>
 #include <exception>
@@ -18,4 +15,3 @@ namespace Modulo
 		};
 	}
 }
-#endif
