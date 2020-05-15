@@ -153,35 +153,37 @@ namespace Modulo
 		}
 
 		template <typename T>
-		void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter)
+		void Cell::set_parameter_value(const std::string& parameter_name, const T& value)
 		{
-			this->set_parameter(rclcpp::Parameter(parameter->get_name(), parameter->get_value()));
+			this->set_parameter(rclcpp::Parameter(parameter_name, value));
 		}
 
-		template void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<double>>& parameter);
+		template void Cell::set_parameter_value(const std::string& parameter_name, const double& value);
 
-		template void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<std::vector<double>>>& parameter);
+		template void Cell::set_parameter_value(const std::string& parameter_name, const std::vector<double>& value);
 
-		template void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<bool>>& parameter);
+		template void Cell::set_parameter_value(const std::string& parameter_name, const bool& value);
 
-		template void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<std::vector<bool>>>& parameter);
+		template void Cell::set_parameter_value(const std::string& parameter_name, const std::vector<bool>& value);
 
-		template void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<std::string>>& parameter);
+		template void Cell::set_parameter_value(const std::string& parameter_name, const char* const& value);
 
-		template void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<std::vector<std::string>>>& parameter);
+		template void Cell::set_parameter_value(const std::string& parameter_name, const std::string& value);
+
+		template void Cell::set_parameter_value(const std::string& parameter_name, const std::vector<std::string>& value);
 
 		template <>
-		void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>& parameter)
+		void Cell::set_parameter_value(const std::string& parameter_name, const StateRepresentation::CartesianPose& value)
 		{
-			std::vector<double> value = parameter->get_value().StateRepresentation::CartesianPose::to_std_vector();
-			this->set_parameter(rclcpp::Parameter(parameter->get_name(), value));
+			std::vector<double> vector_value = value.StateRepresentation::CartesianPose::to_std_vector();
+			this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 		}
 
 		template <>
-		void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::JointPositions>>& parameter)
+		void Cell::set_parameter_value(const std::string& parameter_name, const StateRepresentation::JointPositions& value)
 		{
-			std::vector<double> value = parameter->get_value().StateRepresentation::JointPositions::to_std_vector();
-			this->set_parameter(rclcpp::Parameter(parameter->get_name(), value));
+			std::vector<double> vector_value = value.StateRepresentation::JointPositions::to_std_vector();
+			this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 		}
 
 		void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::ParameterInterface>& parameter)

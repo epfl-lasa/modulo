@@ -271,6 +271,13 @@ namespace Modulo
 			 * @param parameter the new value of the parameter
 			 */
 			template <typename T>
+			void set_parameter_value(const std::string& parameter_name, const T& value);
+
+			/**
+			 * @brief Set the value of a declared parameter
+			 * @param parameter the new value of the parameter
+			 */
+			template <typename T>
 			void set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter);
 
 			/**
@@ -484,6 +491,12 @@ namespace Modulo
 		inline const std::chrono::nanoseconds& Cell::get_period() const
 		{
 			return this->period_;
+		}
+
+		template <typename T>
+		void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter)
+		{
+			this->set_parameter_value<T>(parameter->get_name(), parameter->get_value());
 		}
 
 		template <typename MsgT, class RecT, typename DurationT1, typename DurationT2>
