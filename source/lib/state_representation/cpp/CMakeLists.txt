@@ -45,6 +45,7 @@ set(CORE_SOURCES
   src/Parameters/ParameterInterface.cpp
   src/Parameters/Parameter.cpp
   src/Parameters/Predicate.cpp
+  src/Parameters/Event.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED 

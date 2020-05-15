@@ -52,7 +52,7 @@ namespace StateRepresentation
 		 * @brief Setter of the value attribute
 		 * @param the new value attribute
 		 */
-		void set_value(const T& value);
+		virtual void set_value(const T& value);
 
 		/**
 	 	 * @brief Overload the ostream operator for printing

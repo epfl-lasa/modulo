@@ -4,6 +4,10 @@
 
 namespace StateRepresentation
 {
+	/**
+	 * @class Predicate
+	 * @brief A predicate is a boolean parameter as in the logic formalism.
+	 */
 	class Predicate : public Parameter<bool>
 	{
 	public:
