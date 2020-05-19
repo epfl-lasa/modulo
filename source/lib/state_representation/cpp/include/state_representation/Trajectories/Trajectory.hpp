@@ -10,11 +10,10 @@ namespace StateRepresentation
 	class Trajectory : public State
 	{
 	private:
-		std::deque<StateT> points;
-		std::deque<std::chrono::milliseconds> times;
-		std::string reference_frame; ///< name of the reference frame
-		std::vector<std::string> joint_names; ///< names of the joints
-		int trajectory_size;
+		std::deque<StateT> points_;
+		std::deque<std::chrono::nanoseconds> times_;
+		std::string reference_frame_; ///< name of the reference frame
+		std::vector<std::string> joint_names_; ///< names of the joints
 
 	public:
 
@@ -28,7 +27,7 @@ namespace StateRepresentation
 	 	 * @brief name the name of the state
 	 	 * @brief reference the name of the reference frame
 	     */
-		explicit Trajectory(const std::string& name, const std::string& reference="world");
+		explicit Trajectory(const std::string& name);
 
 		/**
 	 	 * @brief Getter of the reference frame as const reference
@@ -38,7 +37,7 @@ namespace StateRepresentation
 		/**
 	 	 * @brief Setter of the reference frame
 	     */
-		virtual void set_reference_frame(const std::string& reference);
+		virtual void set_reference_frame(const std::string& reference_frame);
 
 		/**
 	 	 * @brief Getter of the names attribute
@@ -56,56 +55,68 @@ namespace StateRepresentation
 		void set_joint_names(const std::vector<std::string>& joint_names);
 
 		/**
-		* @brief Initialize trajectory
-		*/
+		 * @brief Initialize trajectory
+		 */
 		void initialize();
 
 		/**
-		* @brief Add new point and corresponding time to trajectory
-		*/
+		 * @brief Add new point and corresponding time to trajectory
+		 */
 		template <typename DurationT>
 		void add_point(const StateT& new_point, const std::chrono::duration<int64_t, DurationT>& new_time);
 
 		/**
-		* @brief Insert new point and corresponding time to trajectory between two already existing points
-		*/
+		 * @brief Insert new point and corresponding time to trajectory between two already existing points
+		 */
 		template <typename DurationT>
 		void insert_point(const StateT& new_point, const std::chrono::duration<int64_t, DurationT>& new_time, int pos);
 
 		/**
-		* @brief Delete last point and corresponding time from trajectory
-		*/
+		 * @brief Delete last point and corresponding time from trajectory
+		 */
 		void delete_point();
 
 		/**
-		* @brief Clear trajectory
-		*/
+		 * @brief Clear trajectory
+		 */
 		void clear();
 
 		/**
-		* @brief Get attribute list of trajectory points
-		*/
+		 * @brief Get attribute list of trajectory points
+		 */
 		const std::deque<StateT>& get_points() const;
 
 		/**
-		* @brief Get attribute list of trajectory times
-		*/
-		const std::deque<std::chrono::milliseconds>& get_times() const;
+		 * @brief Get the trajectory point at given index
+		 * @param index the index
+		 */
+		const StateT& get_point(unsigned int index) const;
 
 		/**
-		* @brief Get attribute number of point in trajectory
-		*/
-		int get_trajectory_size() const;
+		 * @brief Get the trajectory point at given index
+		 * @param index the index
+		 */
+		StateT& get_point(unsigned int index);
 
 		/**
-		* @brief Operator overload for returning a single trajectory point and corresponding time
-		*/
-		const std::pair<StateT, std::chrono::milliseconds> operator[](unsigned int idx) const;
+		 * @brief Get attribute list of trajectory times
+		 */
+		const std::deque<std::chrono::nanoseconds>& get_times() const;
 
 		/**
-		* @brief Operator overload for returning a single trajectory point and corresponding time
-		*/
-		std::pair<StateT, std::chrono::milliseconds> operator[](unsigned int idx);
+		 * @brief Get attribute number of point in trajectory
+		 */
+		int get_size() const;
+
+		/**
+		 * @brief Operator overload for returning a single trajectory point and corresponding time
+		 */
+		const std::pair<StateT, std::chrono::nanoseconds> operator[](unsigned int idx) const;
+
+		/**
+		 * @brief Operator overload for returning a single trajectory point and corresponding time
+		 */
+		std::pair<StateT, std::chrono::nanoseconds> operator[](unsigned int idx);
 
 	};
 	
@@ -117,8 +128,9 @@ namespace StateRepresentation
 	}
 
 	template <class StateT> 
-	Trajectory<StateT>::Trajectory(const std::string& name, const std::string& reference):
-	State(StateType::TRAJECTORY, name, reference)
+	Trajectory<StateT>::Trajectory(const std::string& name):
+	State(StateType::TRAJECTORY, name),
+	reference_frame_("")
 	{
 		this->initialize();
 	}
@@ -126,61 +138,60 @@ namespace StateRepresentation
 	template <class StateT>
 	inline const std::string Trajectory<StateT>::get_reference_frame() const
 	{ 
-		return this->reference_frame;
+		return this->reference_frame_;
 	}
 
 	template <class StateT>
-	inline void Trajectory<StateT>::set_reference_frame(const std::string& reference)
+	inline void Trajectory<StateT>::set_reference_frame(const std::string& reference_frame)
 	{
-		this->reference_frame = reference;
+		this->reference_frame_ = reference_frame;
 	}
 
 	template <class StateT>
 	inline const std::vector<std::string>& Trajectory<StateT>::get_joint_names() const
 	{
-		return this->joint_names;
+		return this->joint_names_;
 	}
 
 	template <class StateT>
 	inline void Trajectory<StateT>::set_joint_names(unsigned int nb_joints)
 	{
-		this->joint_names.resize(nb_joints);
+		this->joint_names_.resize(nb_joints);
 		for(unsigned int i=0; i<nb_joints; i++)
 		{
-			this->joint_names[i] = "joint_" + std::to_string(i+1);
+			this->joint_names_[i] = "joint_" + std::to_string(i+1);
 		}
 	}
 
 	template <class StateT>
 	inline void Trajectory<StateT>::set_joint_names(const std::vector<std::string>& joint_names)
 	{
-		this->joint_names = joint_names;
+		this->joint_names_ = joint_names;
 	}
 
 	template <class StateT>
 	void Trajectory<StateT>::initialize()
 	{
 		this->State::initialize();
-		this->points.clear();
-		this->times.clear();
-		this->trajectory_size = 0;
+		this->points_.clear();
+		this->times_.clear();
 	}
 
 	template <class StateT> template <typename DurationT>
 	void Trajectory<StateT>::add_point(const StateT& new_point, const std::chrono::duration<int64_t, DurationT>& new_time)
 	{
 		this->set_filled();
-		this->points.push_back(new_point);
+		this->points_.push_back(new_point);
 
-		if(!this->times.empty())
+		if(!this->times_.empty())
 		{
-			auto const previous_time = this->times.back();
-			this->times.push_back(previous_time + new_time);
+			auto const previous_time = this->times_.back();
+			this->times_.push_back(previous_time + new_time);
 		}
 		else
-			this->times.push_back(new_time);
-
-		this->trajectory_size++;
+		{
+			this->times_.push_back(new_time);
+		}
 	}
 
 	template <class StateT> template <typename DurationT>
@@ -188,70 +199,83 @@ namespace StateRepresentation
 	{
 		this->set_filled();
 
-		auto it_points = this->points.begin();
-		auto it_times = this->times.begin();
+		auto it_points = this->points_.begin();
+		auto it_times = this->times_.begin();
 		std::advance(it_points, pos);
 		std::advance(it_times, pos);
 		
-		this->points.insert(it_points, new_point);
+		this->points_.insert(it_points, new_point);
 
-		auto previous_time = this->times[pos-1];
-		this->times.insert(it_times, previous_time + new_time);
+		auto previous_time = this->times_[pos-1];
+		this->times_.insert(it_times, previous_time + new_time);
 
-		for(unsigned int i = pos+1; i <= points.size(); i++)
-			this->times[i] = times[i] + new_time;
-
-		this->trajectory_size++;
+		for(unsigned int i = pos+1; i <= this->points_.size(); i++)
+		{
+			this->times_[i] += new_time;
+		}
 	}
 
 	template <class StateT>
 	void Trajectory<StateT>::delete_point()
 	{
 		this->set_filled();
-		if(!this->points.empty())
-			this->points.pop_back();
-		if(!this->times.empty())
-			this->times.pop_back();
-
-		this->trajectory_size--;
+		if(!this->points_.empty())
+		{
+			this->points_.pop_back();
+		}
+		if(!this->times_.empty())
+		{
+			this->times_.pop_back();
+		}
 	}
 
 	template <class StateT>
 	void Trajectory<StateT>::clear()
 	{
-		this->points.clear();
-		this->times.clear();
-		this->trajectory_size = 0;
+		this->points_.clear();
+		this->times_.clear();
 	}
 
 	template <class StateT> 
 	inline const std::deque<StateT>& Trajectory<StateT>::get_points() const
 	{
-		return this->points;
+		return this->points_;
 	}
 
 	template <class StateT> 
-	inline const std::deque<std::chrono::milliseconds>& Trajectory<StateT>::get_times() const 
+	const StateT& Trajectory<StateT>::get_point(unsigned int index) const
 	{
-		return this->times;
+		return this->points_[index];
 	}
 
 	template <class StateT> 
-	int Trajectory<StateT>::get_trajectory_size() const
+	StateT& Trajectory<StateT>::get_point(unsigned int index)
 	{
-		return this->trajectory_size;
+		return this->points_[index];
+	}
+
+	template <class StateT> 
+	inline const std::deque<std::chrono::nanoseconds>& Trajectory<StateT>::get_times() const 
+	{
+		return this->times_;
+	}
+
+	template <class StateT> 
+	int Trajectory<StateT>::get_size() const
+	{
+		return this->points_.size();
 	}
 
 	template <class StateT>
-	const std::pair<StateT, std::chrono::milliseconds> Trajectory<StateT>::operator[](unsigned int idx) const
+	const std::pair<StateT, std::chrono::nanoseconds> Trajectory<StateT>::operator[](unsigned int idx) const
 	{
-		return std::make_pair(this->points[idx], this->times[idx]);
+		return std::make_pair(this->points_[idx], this->times_[idx]);
 	}
 
 	template <class StateT>
-	std::pair<StateT, std::chrono::milliseconds> Trajectory<StateT>::operator[](unsigned int idx)
+	std::pair<StateT, std::chrono::nanoseconds> Trajectory<StateT>::operator[](unsigned int idx)
 	{
 		this->set_filled();
-		return std::make_pair(this->points[idx], this->times[idx]);
+		return std::make_pair(this->points_[idx], this->times_[idx]);
 	}
 }

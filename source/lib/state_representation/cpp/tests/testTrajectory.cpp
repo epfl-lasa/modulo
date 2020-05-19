@@ -9,7 +9,7 @@ TEST(CreateTrajectory, PositiveNos)
 {
 	StateRepresentation::Trajectory<StateRepresentation::JointState> trajectory;
 	std::deque<StateRepresentation::JointState> points = trajectory.get_points();
-	std::deque<std::chrono::milliseconds> times = trajectory.get_times();
+	std::deque<std::chrono::nanoseconds> times = trajectory.get_times();
 	EXPECT_TRUE(points.empty());
 	EXPECT_TRUE(times.empty());
 }
@@ -20,12 +20,12 @@ TEST(AddPoint, PositiveNos)
 	StateRepresentation::JointState point("robot", 1);
 
 	std::deque<StateRepresentation::JointState> points = trajectory.get_points();
-	std::deque<std::chrono::milliseconds> times = trajectory.get_times();
+	std::deque<std::chrono::nanoseconds> times = trajectory.get_times();
 
 	unsigned int prev_size_points = points.size();
 	unsigned int prev_size_times = times.size();
 
-	std::chrono::milliseconds period(100);
+	std::chrono::nanoseconds period(100);
 	Eigen::ArrayXd positions(1);
 	positions << 0.2;
 	point.set_positions(positions);
@@ -46,14 +46,14 @@ TEST(ClearPoint, PositiveNos)
 	StateRepresentation::Trajectory<StateRepresentation::JointState> trajectory;
 	StateRepresentation::JointState point("robot", 1);
 
-	std::chrono::milliseconds period(100);
+	std::chrono::nanoseconds period(100);
 	Eigen::ArrayXd positions(1);
 	positions << 0.2;
 	point.set_positions(positions);
 	trajectory.add_point(point, period);
 	
 	std::deque<StateRepresentation::JointState> points = trajectory.get_points();
-	std::deque<std::chrono::milliseconds> times = trajectory.get_times();
+	std::deque<std::chrono::nanoseconds> times = trajectory.get_times();
 
 	unsigned int size_points = points.size();
 	unsigned int size_times = times.size();
@@ -74,7 +74,7 @@ TEST(OverloadIndex, PositiveNos)
 	StateRepresentation::Trajectory<StateRepresentation::JointState> trajectory;
 	StateRepresentation::JointState point("robot", 1);
 
-	std::chrono::milliseconds period(100);
+	std::chrono::nanoseconds period(100);
 	Eigen::ArrayXd positions(1);
 	positions << 0.2;
 	point.set_positions(positions);
@@ -83,8 +83,8 @@ TEST(OverloadIndex, PositiveNos)
 	point.set_positions(positions);
 	trajectory.add_point(point, period);
 
-	std::pair<StateRepresentation::JointState, std::chrono::milliseconds> point0 = trajectory[0];
-	std::pair<StateRepresentation::JointState, std::chrono::milliseconds> point1 = trajectory[1];
+	std::pair<StateRepresentation::JointState, std::chrono::nanoseconds> point0 = trajectory[0];
+	std::pair<StateRepresentation::JointState, std::chrono::nanoseconds> point1 = trajectory[1];
 
 	EXPECT_TRUE(point0.first.get_positions()[0] == 0.2);
 	EXPECT_TRUE(point1.first.get_positions()[0] == 0.7);
@@ -97,7 +97,7 @@ TEST(OverloadIndex, PositiveNos)
 // 	StateRepresentation::Trajectory<StateRepresentation::JointState> trajectory;
 // 	StateRepresentation::JointState point("robot", 1);
 
-// 	std::chrono::milliseconds period(100);
+// 	std::chrono::nanoseconds period(100);
 // 	Eigen::ArrayXd positions(1);
 // 	positions << 0.2;
 // 	point.set_positions(positions);
@@ -106,9 +106,9 @@ TEST(OverloadIndex, PositiveNos)
 // 	point.set_positions(positions);
 // 	trajectory.add_point(point, period);
 
-// 	std::pair<StateRepresentation::JointState, std::chrono::milliseconds> last_point = trajectory[1];
+// 	std::pair<StateRepresentation::JointState, std::chrono::nanoseconds> last_point = trajectory[1];
 // 	std::deque<StateRepresentation::JointState> points = trajectory.get_points();
-// 	std::deque<std::chrono::milliseconds> times = trajectory.get_times();
+// 	std::deque<std::chrono::nanoseconds> times = trajectory.get_times();
 
 // 	EXPECT_TRUE(points.size() == 2);
 // 	EXPECT_TRUE(times.size() == 2);
@@ -119,7 +119,7 @@ TEST(OverloadIndex, PositiveNos)
 // 	point.set_positions(positions);
 // 	trajectory.insert_point(point, period, 1);
 
-// 	std::pair<StateRepresentation::JointState, std::chrono::milliseconds> inserted_point = trajectory[1];
+// 	std::pair<StateRepresentation::JointState, std::chrono::nanoseconds> inserted_point = trajectory[1];
 // 	last_point = trajectory[2];
 // 	points = trajectory.get_points();
 // 	times = trajectory.get_times();

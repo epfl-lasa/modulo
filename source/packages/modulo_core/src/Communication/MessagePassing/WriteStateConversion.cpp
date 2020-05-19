@@ -207,7 +207,6 @@ namespace Modulo
 
 					void write_msg(trajectory_msgs::msg::JointTrajectoryPoint & msg, const StateRepresentation::JointState & state, const rclcpp::Time &)
 					{
-						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 						msg.positions = std::vector<double>(state.get_positions().data(), state.get_positions().data() + state.get_positions().size());
 						msg.velocities = std::vector<double>(state.get_velocities().data(), state.get_velocities().data() + state.get_velocities().size());
 						msg.accelerations = std::vector<double>(state.get_accelerations().data(), state.get_accelerations().data() + state.get_accelerations().size());
@@ -217,10 +216,10 @@ namespace Modulo
 					void write_msg(trajectory_msgs::msg::JointTrajectory & msg, const StateRepresentation::Trajectory<StateRepresentation::JointState> & state, const rclcpp::Time & time)
 					{
 						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
-						msg.header.frame_id = state.get_reference_frame();
+						msg.header.frame_id = state.get_name();
 						msg.joint_names = state.get_joint_names();
 
-						int trajectory_size = state.get_trajectory_size();
+						int trajectory_size = state.get_size();
 						msg.points.resize(trajectory_size);
 
 						for(int i = 0; i < trajectory_size; i++)
