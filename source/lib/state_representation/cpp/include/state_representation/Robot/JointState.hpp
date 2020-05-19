@@ -132,6 +132,11 @@ namespace StateRepresentation
 		void initialize();
 
 		/**
+	 	 * @brief Set the State to a zero value
+	     */
+		void set_zero();
+
+		/**
 		 * @brief Return a copy of the JointState
 		 * @return the copy
 		 */

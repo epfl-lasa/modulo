@@ -38,6 +38,11 @@ namespace StateRepresentation
 		this->accelerations.resize(size);
 		this->torques.resize(size);
 		// set to zeros
+		this->set_zero();
+	}
+
+	void JointState::set_zero()
+	{
 		this->positions.setZero();
 		this->velocities.setZero();
 		this->accelerations.setZero();

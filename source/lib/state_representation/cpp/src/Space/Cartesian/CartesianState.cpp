@@ -30,6 +30,11 @@ namespace StateRepresentation
 	void CartesianState::initialize()
 	{
 		this->State::initialize();
+		this->set_zero();
+	}
+
+	void CartesianState::set_zero()
+	{
 		this->position.setZero();
 		this->orientation.setIdentity();
 		this->linear_velocity.setZero();
