@@ -88,6 +88,17 @@ namespace Modulo
 			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().StateRepresentation::JointPositions::to_std_vector());
 		}
 
+		template<>
+		void Cell::add_parameter<Eigen::MatrixXd>(const std::shared_ptr<StateRepresentation::Parameter<Eigen::MatrixXd>>& parameter, const std::string& prefix)
+		{
+			std::lock_guard<std::mutex> lock(*this->mutex_);
+			std::string tprefix = (prefix != "") ? prefix + "_" : "";
+			parameter->set_name(tprefix + parameter->get_name());
+			this->parameters_.push_back(parameter);
+			std::vector<double> value = std::vector<double>(parameter->get_value().data(), parameter->get_value().data() + parameter->get_value().size());
+			this->declare_parameter<std::vector<double>>(parameter->get_name(), value);
+		}
+
 		void Cell::add_parameters(const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>>& parameters, const std::string& prefix)
 		{
 			using namespace StateRepresentation;
@@ -144,6 +155,12 @@ namespace Modulo
 						break;
 					}
 
+					case StateType::PARAMETER_MATRIX:
+					{
+						this->add_parameter(std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param), prefix);
+						break;
+					}
+
 					default:
 					{
 						throw UnrecognizedParameterTypeException("The Parameter type is not available");
@@ -183,6 +200,13 @@ namespace Modulo
 		void Cell::set_parameter_value(const std::string& parameter_name, const StateRepresentation::JointPositions& value)
 		{
 			std::vector<double> vector_value = value.StateRepresentation::JointPositions::to_std_vector();
+			this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
+		}
+
+		template <>
+		void Cell::set_parameter_value(const std::string& parameter_name, const Eigen::MatrixXd& value)
+		{
+			std::vector<double> vector_value = std::vector<double>(value.data(), value.data() + value.size());
 			this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 		}
 
@@ -237,6 +261,12 @@ namespace Modulo
 				case StateType::PARAMETER_JOINTPOSITIONS:
 				{
 					this->set_parameter_value(std::static_pointer_cast<Parameter<JointPositions>>(parameter));
+					break;
+				}
+
+				case StateType::PARAMETER_MATRIX:
+				{
+					this->set_parameter_value(std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(parameter));
 					break;
 				}
 
@@ -514,6 +544,37 @@ namespace Modulo
 								std::unique_lock<std::mutex> lck(*this->mutex_);
 								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
 								std::static_pointer_cast<Parameter<JointPositions>>(param)->get_value().JointPositions::from_std_vector(value);
+								lck.unlock();
+								break;
+							}
+
+							case StateType::PARAMETER_MATRIX:
+							{
+								std::unique_lock<std::mutex> lck(*this->mutex_);
+								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+								size_t rows = std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->get_value().rows();
+								size_t cols = std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->get_value().cols();
+								size_t size = std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->get_value().size();
+								// depending on the size of the received parameter produce a different matrix
+								Eigen::MatrixXd matrix_value(rows, cols);
+								if(value.size() == size) // equal size direct copy
+								{
+									matrix_value = Eigen::MatrixXd::Map(value.data(), rows, cols);
+								}
+								else if(value.size() == rows && value.size() == cols) // diagonal matrix with only diagonal values set
+								{
+									Eigen::VectorXd diagonal_coefficients = Eigen::VectorXd::Map(value.data(), value.size());
+									matrix_value = diagonal_coefficients.asDiagonal();
+								}
+								else if(value.size() == 1) // single element means iso diagonal matrix
+								{
+									matrix_value = value[0] * Eigen::MatrixXd::Identity(rows, cols);
+								}
+								else // any other sizes generates an error
+								{
+									throw IncompatibleSizeException("The value set does not have the correct expected size of " + std::to_string(rows) + "x" + std::to_string(cols) + "elements");
+								}
+								std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->set_value(matrix_value);
 								lck.unlock();
 								break;
 							}
