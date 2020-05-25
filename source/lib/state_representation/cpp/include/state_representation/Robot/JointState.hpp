@@ -171,6 +171,13 @@ namespace StateRepresentation
 		const JointState operator-(const JointState& js) const;
 
 		/**
+	 	 * @brief Overload the -= operator with a matrix of gains
+	 	 * @param lambda the matrix to multiply with
+	 	 * @return the JointState multiplied by lambda
+	     */
+		JointState& operator*=(const Eigen::MatrixXd& lambda);
+
+		/**
 	 	 * @brief Overload the ostream operator for printing
 	 	 * @param os the ostream to append the string representing the state
 	 	 * @param state the state to print
@@ -186,11 +193,11 @@ namespace StateRepresentation
 		friend const JointState operator*(double lambda, const JointState& state);
 
 		/**
-	 	 * @brief Overload the * operator with an array of gains
-	 	 * @param lambda the array to multiply with
+	 	 * @brief Overload the * operator with a matrix of gains
+	 	 * @param lambda the matrix to multiply with
 	 	 * @return the JointState provided multiply by lambda
 	     */
-		friend const JointState operator*(const Eigen::ArrayXd& lambda, const JointState& state);
+		friend const JointState operator*(const Eigen::MatrixXd& lambda, const JointState& state);
 
 		/**
 		 * @brief Return the joint state as a std vector of floats

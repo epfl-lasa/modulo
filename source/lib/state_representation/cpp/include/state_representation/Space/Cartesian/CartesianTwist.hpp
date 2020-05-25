@@ -130,16 +130,23 @@ namespace StateRepresentation
 		/**
 	 	 * @brief Overload the *= operator with a scalar
 	 	 * @param lambda the scalar to multiply with
-	 	 * @return the CartesianTwist multiply by lambda
+	 	 * @return the CartesianTwist multiplied by lambda
 	     */
 		CartesianTwist& operator*=(double lambda);
 
 		/**
 	 	 * @brief Overload the * operator with a scalar
 	 	 * @param lambda the scalar to multiply with
-	 	 * @return the CartesianTwist multiply by lambda
+	 	 * @return the CartesianTwist multiplied by lambda
 	     */
 		const CartesianTwist operator*(double lambda) const;
+
+		/**
+	 	 * @brief Overload the *= operator with a matrix
+	 	 * @param lambda the matrix to multiply with
+	 	 * @return the CartesianTwist multiplied by lambda
+	     */
+		CartesianTwist& operator*=(const Eigen::Matrix<double, 6, 6>& lambda);
 
 		/**
 		 * @brief Clamp inplace the magnitude of the velocity to the values in argument
@@ -203,9 +210,16 @@ namespace StateRepresentation
 		/**
 	 	 * @brief Overload the * operator with a scalar
 	 	 * @param lambda the scalar to multiply with
-	 	 * @return the CartesianTwist provided multiply by lambda
+	 	 * @return the CartesianTwist provided multiplied by lambda
 	     */
 		friend const CartesianTwist operator*(double lambda, const CartesianTwist& twist);
+
+		/**
+	 	 * @brief Overload the * operator with a matrix
+	 	 * @param lambda the matrix to multiply with
+	 	 * @return the CartesianTwist provided multiplied by lambda
+	     */
+		friend const CartesianTwist operator*(const Eigen::Matrix<double, 6, 6>& lambda, const CartesianTwist& twist);
 
 		/**
 	 	 * @brief Overload the * operator with a time period

@@ -146,6 +146,16 @@ namespace StateRepresentation
 		return result;
 	}
 
+	CartesianTwist& CartesianTwist::operator*=(const Eigen::Matrix<double, 6, 6>& lambda)
+	{
+		// sanity check
+		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
+		// operation
+		this->set_linear_velocity(lambda.block<3,3>(0, 0) * this->get_linear_velocity());
+		this->set_angular_velocity(lambda.block<3,3>(3, 3) * this->get_angular_velocity());
+		return (*this);
+	}
+
 	void CartesianTwist::clamp(double max_linear, double max_angular, double linear_noise_ratio, double angular_noise_ratio)
 	{	
 		if(linear_noise_ratio != 0 || angular_noise_ratio != 0)
@@ -212,6 +222,13 @@ namespace StateRepresentation
 	const CartesianTwist operator*(double lambda, const CartesianTwist& twist)
 	{
 		return twist * lambda;
+	}
+
+	const CartesianTwist operator*(const Eigen::Matrix<double, 6, 6>& lambda, const CartesianTwist& twist)
+	{
+		CartesianTwist result(twist);
+		result *= lambda;
+		return result;
 	}
 
 	const CartesianPose operator*(const std::chrono::nanoseconds& dt, const CartesianTwist& twist)

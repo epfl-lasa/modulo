@@ -91,6 +91,17 @@ namespace StateRepresentation
 		return result;
 	}
 
+	JointState& JointState::operator*=(const Eigen::MatrixXd& lambda)
+	{
+		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
+		if(lambda.rows() != this->get_size() || lambda.cols() != this->get_size()) throw IncompatibleSizeException("Gain matrix is of incorrect size: expected " + std::to_string(this->get_size()) + "x" + std::to_string(this->get_size()) + ", given " + std::to_string(lambda.cols()) + "x" + std::to_string(lambda.cols()));
+		this->set_positions(lambda * this->get_positions());
+		this->set_velocities(lambda * this->get_velocities());
+		this->set_accelerations(lambda * this->get_accelerations());
+		this->set_torques(lambda * this->get_torques());
+		return (*this);
+	}
+
 	const JointState JointState::copy() const
 	{
 		JointState result(*this);
@@ -136,15 +147,10 @@ namespace StateRepresentation
 		return result;
 	}
 
-	const JointState operator*(const Eigen::ArrayXd& lambda, const JointState& state)
+	const JointState operator*(const Eigen::MatrixXd& lambda, const JointState& state)
 	{
-		if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
-		if(lambda.size() != state.get_size()) throw IncompatibleSizeException("Gain vector is of incorrect size: expected " + std::to_string(state.get_size()) + + ", given " + std::to_string(lambda.size()));
 		JointState result(state);
-		result.set_positions(lambda * state.get_positions().array());
-		result.set_velocities(lambda * state.get_velocities().array());
-		result.set_accelerations(lambda * state.get_accelerations().array());
-		result.set_torques(lambda * state.get_torques().array());
+		result *= lambda;
 		return result;
 	}
 
