@@ -125,4 +125,96 @@ namespace StateRepresentation
 	{
 		this->set_filled();
 	}
+
+	template <>
+	Parameter<Eigen::MatrixXd>::Parameter(const std::string& name):
+	ParameterInterface(StateType::PARAMETER_MATRIX, name)
+	{}
+
+	template <>
+	Parameter<Eigen::MatrixXd>::Parameter(const std::string& name, const Eigen::MatrixXd& value):
+	ParameterInterface(StateType::PARAMETER_MATRIX, name), value(value)
+	{
+		this->set_filled();
+	}
+
+	template <typename T>
+	std::ostream& operator<<(std::ostream& os, const Parameter<T>& parameter)
+	{
+		if(parameter.is_empty())
+		{
+			os << " Parameter " << parameter.get_name() << " is empty" << std::endl;
+		}
+		else
+		{
+			os << " Parameter " << parameter.get_name() << ": " << parameter.value << std::endl;
+		}
+  		return os;
+	}
+
+	template std::ostream& operator<<(std::ostream& os, const Parameter<double>& parameter);
+	template std::ostream& operator<<(std::ostream& os, const Parameter<bool>& parameter);
+	template std::ostream& operator<<(std::ostream& os, const Parameter<std::string>& parameter);
+	template std::ostream& operator<<(std::ostream& os, const Parameter<StateRepresentation::CartesianState>& parameter);
+	template std::ostream& operator<<(std::ostream& os, const Parameter<StateRepresentation::CartesianPose>& parameter);
+	template std::ostream& operator<<(std::ostream& os, const Parameter<StateRepresentation::JointState>& parameter);
+	template std::ostream& operator<<(std::ostream& os, const Parameter<StateRepresentation::JointPositions>& parameter);
+	template std::ostream& operator<<(std::ostream& os, const Parameter<Eigen::MatrixXd>& parameter);
+
+	template<>
+	std::ostream& operator<<(std::ostream& os, const Parameter<std::vector<double>>& parameter)
+	{
+		if(parameter.is_empty())
+		{
+			os << " Parameter " << parameter.get_name() << " is empty" << std::endl;
+		}
+		else
+		{
+			os << " Parameter " << parameter.get_name() << ": ";
+			for (auto& v: parameter.value)
+			{
+				os << v << " | ";	
+			}
+			os << std::endl;
+		}
+  		return os;
+	}
+
+	template<>
+	std::ostream& operator<<(std::ostream& os, const Parameter<std::vector<bool>>& parameter)
+	{
+		if(parameter.is_empty())
+		{
+			os << " Parameter " << parameter.get_name() << " is empty" << std::endl;
+		}
+		else
+		{
+			os << " Parameter " << parameter.get_name() << ": ";
+			for (auto v: parameter.value)
+			{
+				os << v << " | ";	
+			}
+			os << std::endl;
+		}
+  		return os;
+	}
+
+	template<>
+	std::ostream& operator<<(std::ostream& os, const Parameter<std::vector<std::string>>& parameter)
+	{
+		if(parameter.is_empty())
+		{
+			os << " Parameter " << parameter.get_name() << " is empty" << std::endl;
+		}
+		else
+		{
+			os << " Parameter " << parameter.get_name() << ": ";
+			for (auto& v: parameter.value)
+			{
+				os << v << " | ";	
+			}
+			os << std::endl;
+		}
+  		return os;
+	}
 }

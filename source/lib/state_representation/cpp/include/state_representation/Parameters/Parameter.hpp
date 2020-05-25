@@ -95,18 +95,4 @@ namespace StateRepresentation
 		this->set_filled();
 		this->value = value; 
 	}
-
-	template <typename T>
-	std::ostream& operator<<(std::ostream& os, const Parameter<T>& parameter)
-	{
-		if(parameter.is_empty())
-		{
-			os << " Parameter " << parameter.get_name() << " is empty" << std::endl;
-		}
-		else
-		{
-			os << " Parameter " << parameter.get_name() << ": " << parameter.value << std::endl;
-		}
-  		return os;
-	}
 }
