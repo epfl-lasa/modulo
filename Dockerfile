@@ -17,6 +17,7 @@ RUN apt update && apt install -y \
   unzip \
   libzmq3-dev \
   python3-setuptools \
+  python3-pip \
   iputils-ping \
   mesa-utils \
   libeigen3-dev \

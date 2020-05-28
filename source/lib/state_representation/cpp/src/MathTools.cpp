@@ -4,7 +4,7 @@ namespace StateRepresentation
 {
 	namespace MathTools
 	{
-		Eigen::Quaterniond log(const Eigen::Quaterniond & q)
+		const Eigen::Quaterniond log(const Eigen::Quaterniond & q)
 		{
 			Eigen::Quaterniond log_q = Eigen::Quaterniond(0,0,0,0);
 			double q_norm = q.vec().norm();
@@ -12,7 +12,7 @@ namespace StateRepresentation
 			return log_q;
 		}
 
-		Eigen::Quaterniond exp(const Eigen::Quaterniond & q, double lambda)
+		const Eigen::Quaterniond exp(const Eigen::Quaterniond & q, double lambda)
 		{
 			Eigen::Quaterniond exp_q = Eigen::Quaterniond::Identity();
 			double q_norm = q.vec().norm();
@@ -23,5 +23,27 @@ namespace StateRepresentation
 			}
 			return exp_q;
 		}
+
+		const std::vector<double> linspace(double start, double end, unsigned int number_of_points)
+		{
+	        // catch rarely, throw often
+	        if (number_of_points < 2) 
+	        {
+	            throw new std::exception();
+	        }
+	        int partitions = number_of_points - 1;
+	        std::vector<double> pts;
+	        // length of each segment    
+	        double length = (end - start) / partitions; 
+	        // first, not to change
+	        pts.push_back(start);
+	        for (unsigned int i = 1; i < number_of_points - 1; i ++) 
+	        {
+	            pts.push_back(start + i * length);
+	        }
+	        // last, not to change
+	        pts.push_back(end);
+	        return pts;
+	    }
 	}
 }

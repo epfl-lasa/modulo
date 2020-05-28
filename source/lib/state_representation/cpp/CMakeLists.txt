@@ -46,6 +46,8 @@ set(CORE_SOURCES
   src/Parameters/Parameter.cpp
   src/Parameters/Predicate.cpp
   src/Parameters/Event.cpp
+  src/Geometry/Shape.cpp
+  src/Geometry/Ellipsoid.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED 
@@ -131,5 +133,14 @@ if (runtests)
       ${PROJECT_NAME}
     )
     add_test(NAME runTestParameter COMMAND runTestParameter)
+
+    add_executable(runTestEllipsoid tests/testEllipsoid.cpp)
+    target_link_libraries(runTestEllipsoid
+      gtest 
+      gtest_main
+      ${PROJECT_NAME}
+    )
+    add_test(NAME runTestEllipsoid COMMAND runTestEllipsoid)
+
 
 endif()

@@ -56,7 +56,7 @@ namespace StateRepresentation
 
 		/**
 	 	 * @brief Overload the ostream operator for printing
-	 	 * @param os the ostream to happend the string representing the State to
+	 	 * @param os the ostream to append the string representing the State to
 	 	 * @param parameter the Parameter to print
 	 	 * @return the appended ostream
 	     */
