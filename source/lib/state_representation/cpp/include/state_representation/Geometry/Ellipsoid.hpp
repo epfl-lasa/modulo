@@ -119,11 +119,13 @@ namespace StateRepresentation
 	inline void Ellipsoid::set_axis_lengths(const std::vector<double>& axis_lengths)
 	{
 		this->axis_lengths_ = axis_lengths;
+		this->set_filled();
 	}
 
 	inline void Ellipsoid::set_axis_lengths(unsigned int index, double axis_length)
 	{
 		this->axis_lengths_[index] = axis_length;
+		this->set_filled();
 	}
 
 	inline double Ellipsoid::get_rotation_angle() const
@@ -137,5 +139,6 @@ namespace StateRepresentation
 		this->set_center_orientation(Eigen::Quaterniond(Eigen::AngleAxisd(this->rotation_angle_, Eigen::Vector3d::UnitZ())).conjugate() * this->get_center_orientation());
 		this->set_center_orientation(this->get_center_orientation() * Eigen::Quaterniond(Eigen::AngleAxisd(rotation_angle, Eigen::Vector3d::UnitZ())));
 		this->rotation_angle_ = rotation_angle;
+		this->set_filled();
 	}
 }

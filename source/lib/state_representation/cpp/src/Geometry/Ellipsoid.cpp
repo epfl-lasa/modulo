@@ -6,12 +6,16 @@ namespace StateRepresentation
 	Ellipsoid::Ellipsoid(const std::string& name, const std::string& reference_frame):
 	Shape(StateType::GEOMETRY_ELLIPSOID, name, reference_frame),
 	axis_lengths_({1., 1.})
-	{}
+	{
+		this->set_filled();
+	}
 
 	Ellipsoid::Ellipsoid(const Ellipsoid& ellipsoid):
 	Shape(ellipsoid),
 	axis_lengths_(ellipsoid.axis_lengths_)
-	{}
+	{
+		this->set_filled();
+	}
 
 	const std::list<CartesianPose> Ellipsoid::sample_from_parameterization(unsigned int nb_samples) const
 	{
