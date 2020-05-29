@@ -23,7 +23,7 @@ namespace DynamicalSystems
 		StateRepresentation::CartesianPose pose = static_cast<const StateRepresentation::CartesianPose&>(state);
 		pose = this->get_center().inverse() * pose;
 
-		StateRepresentation::CartesianTwist velocity(state.get_name(), state.get_reference_frame());
+		StateRepresentation::CartesianTwist velocity(pose.get_name(), pose.get_reference_frame());
 		Eigen::Vector3d linear_velocity;
 		linear_velocity(2) = -this->get_gain() * pose.get_position()(2);
 
