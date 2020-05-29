@@ -98,6 +98,18 @@ namespace StateRepresentation
 		static const Ellipsoid fit(const std::string& name, const std::list<CartesianPose>& points, const std::string& reference_frame="world", double noise_level=0.01);
 
 		/**
+		 * @brief Convert the ellipse to an std vector representation of its parameter
+		 * @return an std vector with [center_position, rotation_angle, axis_lengths]
+		 */
+		const std::vector<double> to_std_vector() const;
+
+		/**
+		 * @brief Create an ellipsoid from an std vector representaiton of its parameter
+		 * @param an std vector with [center_position, rotation_angle, axis_lengths]
+		 */
+		void from_std_vector(const std::vector<double>& parameters);
+
+		/**
 	 	 * @brief Overload the ostream operator for printing
 	 	 * @param os the ostream to happend the string representing the Ellipsoid to
 	 	 * @param ellipsoid the Ellipsoid to print
@@ -140,5 +152,27 @@ namespace StateRepresentation
 		this->set_center_orientation(this->get_center_orientation() * Eigen::Quaterniond(Eigen::AngleAxisd(rotation_angle, Eigen::Vector3d::UnitZ())));
 		this->rotation_angle_ = rotation_angle;
 		this->set_filled();
+	}
+
+	inline const std::vector<double> Ellipsoid::to_std_vector() const
+	{
+		std::vector<double> representation(6);
+		// position
+		representation[0] = this->get_center_position()(0);
+		representation[1] = this->get_center_position()(1);
+		representation[2] = this->get_center_position()(2);
+		// rotation angle
+		representation[3] = this->get_rotation_angle();
+		// axis lengths
+		representation[4] = this->get_axis_length(0);
+		representation[5] = this->get_axis_length(1);
+		return representation;
+	}
+
+	inline void Ellipsoid::from_std_vector(const std::vector<double>& parameters)
+	{
+		this->set_center_position(Eigen::Vector3d(parameters[0], parameters[1], parameters[2]));
+		this->set_rotation_angle(parameters[3]);
+		this->set_axis_lengths({parameters[4], parameters[5]});
 	}
 }
