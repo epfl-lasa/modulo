@@ -23,27 +23,27 @@ namespace DynamicalSystems
 	class Circular: public DynamicalSystem<StateRepresentation::CartesianState>
 	{
 	private:
-		std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::Ellipsoid>> limit_circle_; ///< limit_cirlcle of the dynamical system
+		std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::Ellipsoid>> limit_cycle_; ///< limit_cycle of the dynamical system
 		std::shared_ptr<StateRepresentation::Parameter<double>> gain_; ///< gain associate to the system
-		std::shared_ptr<StateRepresentation::Parameter<double>> circular_velocity_; ///< velocity at wich to navigate the limit circle
+		std::shared_ptr<StateRepresentation::Parameter<double>> circular_velocity_; ///< velocity at wich to navigate the limit cycle
 
 	public:
 		/**
 		 * @brief Default constructor with center and fixed radius
-		 * @param center the center of the limit circle
-		 * @param radius radius of the limit circle (default=1.)
+		 * @param center the center of the limit cycle
+		 * @param radius radius of the limit cycle (default=1.)
 		 * @param gain gain of the dynamical system (default=1.)
-		 * @param circular_velocity circular velocity to move around the limit circle
+		 * @param circular_velocity circular velocity to move around the limit cycle
 		 */
 		explicit Circular(const StateRepresentation::CartesianState& center, double radius=1.0, double gain=1.0, double circular_velocity=M_PI/2);
 
 		/**
-		 * @brief Cnstructor with an elliptic limit circle
-		 * @param limit_circle the limit circle as an ellipsoid
+		 * @brief Cnstructor with an elliptic limit cycle
+		 * @param limit_cycle the limit cycle as an ellipsoid
 		 * @param gain gain of the dynamical system (default=1.)
-		 * @param circular_velocity circular velocity to move around the limit circle
+		 * @param circular_velocity circular velocity to move around the limit cycle
 		 */
-		explicit Circular(const StateRepresentation::Ellipsoid& limit_circle, double gain=1.0, double circular_velocity=M_PI/2);
+		explicit Circular(const StateRepresentation::Ellipsoid& limit_cycle, double gain=1.0, double circular_velocity=M_PI/2);
 
 		/**
 		 * @brief Getter of the center
@@ -70,19 +70,19 @@ namespace DynamicalSystems
 		void set_gain(double gain);
 
 		/**
-		 * @brief Getter of the radiuses of the limit circle
+		 * @brief Getter of the radiuses of the limit cycle
 		 * @return the radius value
 		 */
 		const std::vector<double>& get_radiuses() const;
 
 		/**
-		 * @brief Setter of the radiuses of the limit circle
+		 * @brief Setter of the radiuses of the limit cycle
 		 * @param radiuses the new radiuses values
 		 */
 		void set_radiuses(const std::vector<double>& radiuses);
 
 		/**
-		 * @brief Setter of the radius of the limit circle as a single value, i.e. perfect circle
+		 * @brief Setter of the radius of the limit cycle as a single value, i.e. perfect cycle
 		 * @param radiuses the new radiuses values
 		 */
 		void set_radius(double radius);
@@ -100,16 +100,16 @@ namespace DynamicalSystems
 		void set_circular_velocity(double circular_velocity);
 
 		/**
-		 * @brief Getter of the limit circle attribute
-		 * @return the limit circle
+		 * @brief Getter of the limit cycle attribute
+		 * @return the limit cycle
 		 */
-		const StateRepresentation::Ellipsoid& get_limit_circle() const;
+		const StateRepresentation::Ellipsoid& get_limit_cycle() const;
 
 		/**
-		 * @brief Setter of the limit circle attribute
-		 * @param the limit circle value
+		 * @brief Setter of the limit cycle attribute
+		 * @param the limit cycle value
 		 */
-		void set_limit_circle(const StateRepresentation::Ellipsoid& limit_circle);
+		void set_limit_cycle(const StateRepresentation::Ellipsoid& limit_cycle);
 
 		/**
 		 * @brief Evaluate the value of the dynamical system at a given state
@@ -127,12 +127,12 @@ namespace DynamicalSystems
 
 	inline const StateRepresentation::CartesianPose& Circular::get_center() const
 	{
-		return this->limit_circle_->get_value().get_center_pose();
+		return this->limit_cycle_->get_value().get_center_pose();
 	}
 
 	inline void Circular::set_center(const StateRepresentation::CartesianPose& center)
 	{
-		this->limit_circle_->get_value().set_center_pose(center);
+		this->limit_cycle_->get_value().set_center_pose(center);
 	}
 
 	inline double Circular::get_gain() const
@@ -147,17 +147,17 @@ namespace DynamicalSystems
 
 	inline const std::vector<double>& Circular::get_radiuses() const
 	{
-		return this->limit_circle_->get_value().get_axis_lengths();
+		return this->limit_cycle_->get_value().get_axis_lengths();
 	}
 
 	inline void Circular::set_radiuses(const std::vector<double>& radiuses)
 	{
-		this->limit_circle_->get_value().set_axis_lengths(radiuses);
+		this->limit_cycle_->get_value().set_axis_lengths(radiuses);
 	}
 
 	inline void Circular::set_radius(double radius)
 	{
-		this->limit_circle_->get_value().set_axis_lengths({radius, radius});
+		this->limit_cycle_->get_value().set_axis_lengths({radius, radius});
 	}
 
 	inline double Circular::get_circular_velocity() const
@@ -170,13 +170,13 @@ namespace DynamicalSystems
 		this->circular_velocity_->set_value(circular_velocity);
 	}
 
-	inline const StateRepresentation::Ellipsoid& Circular::get_limit_circle() const
+	inline const StateRepresentation::Ellipsoid& Circular::get_limit_cycle() const
 	{
-		return this->limit_circle_->get_value();
+		return this->limit_cycle_->get_value();
 	}
 
-	inline void Circular::set_limit_circle(const StateRepresentation::Ellipsoid& limit_circle)
+	inline void Circular::set_limit_cycle(const StateRepresentation::Ellipsoid& limit_cycle)
 	{
-		this->limit_circle_->set_value(limit_circle);
+		this->limit_cycle_->set_value(limit_cycle);
 	}
 }

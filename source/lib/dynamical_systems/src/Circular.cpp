@@ -3,16 +3,16 @@
 namespace DynamicalSystems
 {
 	Circular::Circular(const StateRepresentation::CartesianState& center, double radius, double gain, double circular_velocity):
-	limit_circle_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::Ellipsoid>>("limit_circle", StateRepresentation::Ellipsoid(center.get_name(), center.get_reference_frame()))),
+	limit_cycle_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::Ellipsoid>>("limit_cycle", StateRepresentation::Ellipsoid(center.get_name(), center.get_reference_frame()))),
 	gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain)),
 	circular_velocity_(std::make_shared<StateRepresentation::Parameter<double>>("circular_velocity", circular_velocity))
 	{
-		this->limit_circle_->get_value().set_center_state(center);
-		this->limit_circle_->get_value().set_axis_lengths({radius, radius});
+		this->limit_cycle_->get_value().set_center_state(center);
+		this->limit_cycle_->get_value().set_axis_lengths({radius, radius});
 	}
 
-	Circular::Circular(const StateRepresentation::Ellipsoid& limit_circle, double gain, double circular_velocity):
-	limit_circle_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::Ellipsoid>>(" limit_circle", limit_circle)),
+	Circular::Circular(const StateRepresentation::Ellipsoid& limit_cycle, double gain, double circular_velocity):
+	limit_cycle_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::Ellipsoid>>(" limit_cycle", limit_cycle)),
 	gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain)),
 	circular_velocity_(std::make_shared<StateRepresentation::Parameter<double>>("circular_velocity", circular_velocity))
 	{}
@@ -47,7 +47,7 @@ namespace DynamicalSystems
 	const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> Circular::get_parameters() const
 	{
 		std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> param_list;
-		param_list.push_back(this->limit_circle_);
+		param_list.push_back(this->limit_cycle_);
 		param_list.push_back(this->gain_);
 		param_list.push_back(this->circular_velocity_);
 		return param_list;
