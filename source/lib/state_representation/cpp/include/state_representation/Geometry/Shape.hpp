@@ -133,13 +133,9 @@ namespace StateRepresentation
 
 	inline void Shape::set_center_pose(const CartesianPose& pose)
 	{
-		if (this->center_state_.get_name() != pose.get_name())
-		{
-			throw Exceptions::IncompatibleStatesException("The ellipse state and the given pose do not have the same name");
-		}
 		if (this->center_state_.get_reference_frame() != pose.get_reference_frame())
 		{
-			throw Exceptions::IncompatibleReferenceFramesException("The ellipse state and the given pose are not expressed in the same reference frame");
+			throw Exceptions::IncompatibleReferenceFramesException("The shape state and the given pose are not expressed in the same reference frame");
 		}
 		this->center_state_.set_pose(pose.get_position(), pose.get_orientation());	
 	}
