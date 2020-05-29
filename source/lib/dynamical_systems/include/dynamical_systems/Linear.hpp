@@ -12,6 +12,7 @@
 #include "state_representation/Space/Cartesian/CartesianPose.hpp"
 #include "state_representation/Space/Cartesian/CartesianTwist.hpp"
 #include "state_representation/Robot/JointState.hpp"
+#include "state_representation/Robot/JointPositions.hpp"
 #include "dynamical_systems/Exceptions/IncompatibleSizeException.hpp"
 
 namespace DynamicalSystems
@@ -110,7 +111,7 @@ namespace DynamicalSystems
 	template<>
 	inline void Linear<StateRepresentation::JointState>::set_gain(double iso_gain)
 	{
-		size_t nb_joints = this->get_attractor().get_size();
+		int nb_joints = this->get_attractor().get_size();
 		this->gain_->set_value(iso_gain * Eigen::MatrixXd::Identity(nb_joints, nb_joints));
 	}
 
@@ -150,7 +151,7 @@ namespace DynamicalSystems
 	template<>
 	inline void Linear<StateRepresentation::JointState>::set_gain(const Eigen::MatrixXd& gain_matrix)
 	{
-		size_t nb_joints = this->get_attractor().get_size();
+		int nb_joints = this->get_attractor().get_size();
 		if(gain_matrix.rows() != nb_joints && gain_matrix.cols() != nb_joints)
 		{
 			throw Exceptions::IncompatibleSizeException("The provided gain matrix do not have the expected size of " + std::to_string(nb_joints) + "x" + std::to_string(nb_joints) + " elements");

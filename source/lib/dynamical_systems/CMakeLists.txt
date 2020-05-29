@@ -27,7 +27,13 @@ include_directories(
   	${Eigen3_INCLUDE_DIRS}
 )
 
-add_library(${PROJECT_NAME} INTERFACE)
+set(CORE_SOURCES
+  src/Circular.cpp
+)
+
+add_library(${PROJECT_NAME} SHARED 
+  ${CORE_SOURCES}
+)
 
 install(DIRECTORY include/
   	DESTINATION include)

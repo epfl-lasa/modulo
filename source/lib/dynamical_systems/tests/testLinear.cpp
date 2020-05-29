@@ -1,4 +1,5 @@
 #include "dynamical_systems/Linear.hpp"
+#include <vector>
 #include <gtest/gtest.h>
 #include <zmq.hpp>
 #include <unistd.h>
@@ -6,10 +7,9 @@
 
 TEST(EvaluateDynamicalSystemPositionOnly, PositiveNos)
 {
-	DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(1);
 	StateRepresentation::CartesianPose current_pose("robot", 10 * Eigen::Vector3d::Random());
 	StateRepresentation::CartesianPose target_pose("robot", 10 * Eigen::Vector3d::Random());
-	linearDS.set_attractor(target_pose);
+	DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(target_pose);
 
 	unsigned int nb_steps = 100;
 	double dt = 0.1;
@@ -33,13 +33,11 @@ TEST(EvaluateDynamicalSystemOrientationOnly, PositiveNos)
 {
 	srand (time(NULL));
 
-	DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(1);
-
 	StateRepresentation::CartesianPose current_pose("robot", Eigen::Vector3d(0,0,0));
 	Eigen::Array4d orientation = Eigen::Array4d::Random();
 	StateRepresentation::CartesianPose target_pose("robot", Eigen::Vector3d(0,0,0), Eigen::Quaterniond(orientation(0), orientation(1), orientation(2), orientation(3)));
 
-	linearDS.set_attractor(target_pose);
+	DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(target_pose);
 
 	unsigned int nb_steps = 100;
 	double dt = 0.1;
@@ -62,13 +60,11 @@ TEST(EvaluateDynamicalSystem, PositiveNos)
 {
 	srand (time(NULL));
 
-	DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(1);
-
 	StateRepresentation::CartesianPose current_pose("robot", 10 * Eigen::Vector3d::Random());
 	Eigen::Array4d orientation = Eigen::Array4d::Random();
 	StateRepresentation::CartesianPose target_pose("robot", 10 * Eigen::Vector3d::Random(), Eigen::Quaterniond(orientation(0), orientation(1), orientation(2), orientation(3)));
 
-	linearDS.set_attractor(target_pose);
+	DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(target_pose);
 
 	unsigned int nb_steps = 500;
 	double dt = 0.1;
