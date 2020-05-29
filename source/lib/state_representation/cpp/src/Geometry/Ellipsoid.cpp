@@ -78,7 +78,7 @@ namespace StateRepresentation
 			phi = M_PI_2;
 		}
 		if (r1<r2) phi +=  M_PI_2;
-		result.set_center_orientation(Eigen::Quaterniond(Eigen::AngleAxisd(phi, Eigen::Vector3d::UnitZ())));
+		result.set_rotation_angle(phi);
 
 		return result;
 	}

@@ -21,7 +21,8 @@ namespace StateRepresentation
 	class Ellipsoid: public Shape 
 	{
 	private:
-		std::vector<double> axis_lengths_; //< axis lenghts in x,y directions
+		std::vector<double> axis_lengths_; ///< axis lenghts in x,y directions
+		double rotation_angle_; ///< angle of rotation around z axis of the reference frame
 		
 	public:
 		/**
@@ -62,6 +63,18 @@ namespace StateRepresentation
 		 * @param axis_length the new length
 		 */
 		void set_axis_lengths(unsigned int index, double axis_length);
+
+		/**
+		 * @brief Getter of the rotation angle
+		 * @return the rotation angle
+		 */
+		double get_rotation_angle() const;
+
+		/**
+		 * @brief Seetter of the rotation angle
+		 * @param rotation_angle the rotation angle
+		 */
+		void set_rotation_angle(double rotation_angle);
 
 		/**
 		 * @brief Function to sample an obstacle from its parameterization
@@ -110,7 +123,19 @@ namespace StateRepresentation
 
 	inline void Ellipsoid::set_axis_lengths(unsigned int index, double axis_length)
 	{
-		this->axis_lengths_[index] = axis_length;	
+		this->axis_lengths_[index] = axis_length;
 	}
 
+	double Ellipsoid::get_rotation_angle() const
+	{
+		return this->rotation_angle_;
+	}
+
+	void Ellipsoid::set_rotation_angle(double rotation_angle)
+	{
+		// changing the angle changes the orientation of the center so first rotate it back from the previous value
+		this->set_center_orientation(Eigen::Quaterniond(Eigen::AngleAxisd(this->rotation_angle_, Eigen::Vector3d::UnitZ())).conjugate() * this->get_center_orientation());
+		this->set_center_orientation(this->get_center_orientation() * Eigen::Quaterniond(Eigen::AngleAxisd(rotation_angle, Eigen::Vector3d::UnitZ())));
+		this->rotation_angle_ = rotation_angle;
+	}
 }
