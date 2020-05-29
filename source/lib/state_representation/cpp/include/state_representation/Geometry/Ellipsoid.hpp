@@ -126,12 +126,12 @@ namespace StateRepresentation
 		this->axis_lengths_[index] = axis_length;
 	}
 
-	double Ellipsoid::get_rotation_angle() const
+	inline double Ellipsoid::get_rotation_angle() const
 	{
 		return this->rotation_angle_;
 	}
 
-	void Ellipsoid::set_rotation_angle(double rotation_angle)
+	inline void Ellipsoid::set_rotation_angle(double rotation_angle)
 	{
 		// changing the angle changes the orientation of the center so first rotate it back from the previous value
 		this->set_center_orientation(Eigen::Quaterniond(Eigen::AngleAxisd(this->rotation_angle_, Eigen::Vector3d::UnitZ())).conjugate() * this->get_center_orientation());
