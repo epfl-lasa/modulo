@@ -27,6 +27,7 @@
 #include "state_representation/Space/DualQuaternion/DualQuaternionTwist.hpp"
 #include "state_representation/Parameters/Parameter.hpp"
 #include "state_representation/Trajectories/Trajectory.hpp"
+#include "state_representation/Geometry/Ellipsoid.hpp"
 #include "state_representation/Exceptions/EmptyStateException.hpp"
 
 namespace Modulo
