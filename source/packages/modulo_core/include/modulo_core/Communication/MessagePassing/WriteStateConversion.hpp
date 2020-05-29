@@ -224,6 +224,14 @@ namespace Modulo
 					void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::JointVelocities & state, const rclcpp::Time & );
 				
 					/**
+					 * @brief Convert a JointVelocities to a ROS std_msgs::msg::Float64MultiArray
+					 * @param msg The ROS msg to populate
+					 * @param state The state to read from
+					 * @param time The time of the message
+					 */
+					void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::Ellipsoid & state, const rclcpp::Time & );
+
+					/**
 					 * @brief Convert a Parameter<double> to a ROS std_msgs::msg::Float64
 					 * @param msg The ROS msg to populate
 					 * @param state The state to read from
