@@ -234,29 +234,19 @@ namespace Modulo
 					void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::JointPositions & state, const rclcpp::Time &)
 					{
 						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
-						msg.data = std::vector<double>(state.get_positions().data(), state.get_positions().data() + state.get_positions().size());
+						msg.data = state.to_std_vector();
 					}	
 
 					void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::JointVelocities & state, const rclcpp::Time &)
 					{
 						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
-						msg.data = std::vector<double>(state.get_velocities().data(), state.get_velocities().data() + state.get_velocities().size());
+						msg.data = state.to_std_vector();
 					}
 
 					void write_msg(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::Ellipsoid & state, const rclcpp::Time &)
 					{
 						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
-						// store the parameters as [position, rotation_angle, axis_lengths]
-						msg.data.resize(6);
-						// position
-						msg.data[0] = state.get_center_position()(0);
-						msg.data[1] = state.get_center_position()(1);
-						msg.data[2] = state.get_center_position()(2);
-						// rotation angle
-						msg.data[3] = state.get_rotation_angle();
-						// axis lengths
-						msg.data[4] = state.get_axis_length(0);
-						msg.data[5] = state.get_axis_length(1);
+						msg.data = state.to_std_vector();
 					}
 				}
 			}

@@ -89,6 +89,16 @@ namespace Modulo
 		}
 
 		template<>
+		void Cell::add_parameter<StateRepresentation::Ellipsoid>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::Ellipsoid>>& parameter, const std::string& prefix)
+		{
+			std::lock_guard<std::mutex> lock(*this->mutex_);
+			std::string tprefix = (prefix != "") ? prefix + "_" : "";
+			parameter->set_name(tprefix + parameter->get_name());
+			this->parameters_.push_back(parameter);
+			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
+		}
+
+		template<>
 		void Cell::add_parameter<Eigen::MatrixXd>(const std::shared_ptr<StateRepresentation::Parameter<Eigen::MatrixXd>>& parameter, const std::string& prefix)
 		{
 			std::lock_guard<std::mutex> lock(*this->mutex_);
@@ -155,6 +165,12 @@ namespace Modulo
 						break;
 					}
 
+					case StateType::PARAMETER_ELLIPSOID:
+					{
+						this->add_parameter(std::static_pointer_cast<Parameter<Ellipsoid>>(param), prefix);
+						break;
+					}
+
 					case StateType::PARAMETER_MATRIX:
 					{
 						this->add_parameter(std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param), prefix);
@@ -200,6 +216,13 @@ namespace Modulo
 		void Cell::set_parameter_value(const std::string& parameter_name, const StateRepresentation::JointPositions& value)
 		{
 			std::vector<double> vector_value = value.StateRepresentation::JointPositions::to_std_vector();
+			this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
+		}
+
+		template <>
+		void Cell::set_parameter_value(const std::string& parameter_name, const StateRepresentation::Ellipsoid& value)
+		{
+			std::vector<double> vector_value = value.to_std_vector();
 			this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 		}
 
@@ -261,6 +284,12 @@ namespace Modulo
 				case StateType::PARAMETER_JOINTPOSITIONS:
 				{
 					this->set_parameter_value(std::static_pointer_cast<Parameter<JointPositions>>(parameter));
+					break;
+				}
+
+				case StateType::PARAMETER_ELLIPSOID:
+				{
+					this->set_parameter_value(std::static_pointer_cast<Parameter<Ellipsoid>>(parameter));
 					break;
 				}
 
@@ -544,6 +573,15 @@ namespace Modulo
 								std::unique_lock<std::mutex> lck(*this->mutex_);
 								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
 								std::static_pointer_cast<Parameter<JointPositions>>(param)->get_value().JointPositions::from_std_vector(value);
+								lck.unlock();
+								break;
+							}
+
+							case StateType::PARAMETER_ELLIPSOID:
+							{
+								std::unique_lock<std::mutex> lck(*this->mutex_);
+								std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+								std::static_pointer_cast<Parameter<Ellipsoid>>(param)->get_value().from_std_vector(value);
 								lck.unlock();
 								break;
 							}

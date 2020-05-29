@@ -32,10 +32,14 @@ set(CORE_SOURCES
 ament_auto_add_library(${PROJECT_NAME} SHARED ${CORE_SOURCES})
 target_link_libraries(${PROJECT_NAME}
   state_representation
+  dynamical_systems
 )
 
 ament_auto_add_executable(${PROJECT_NAME}_test_cartesian tests/testCartesian.cpp)
 target_link_libraries(${PROJECT_NAME}_test_cartesian ${PROJECT_NAME})
+
+ament_auto_add_executable(${PROJECT_NAME}_test_cartesian_circular tests/testCartesianCircular.cpp)
+target_link_libraries(${PROJECT_NAME}_test_cartesian_circular ${PROJECT_NAME})
 
 ament_auto_add_executable(${PROJECT_NAME}_test_joints tests/testJoints.cpp)
 target_link_libraries(${PROJECT_NAME}_test_joints ${PROJECT_NAME})
