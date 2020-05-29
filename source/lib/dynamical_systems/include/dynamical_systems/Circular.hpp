@@ -94,10 +94,22 @@ namespace DynamicalSystems
 		double get_circular_velocity() const;
 
 		/**
-		 *@brief Setter of the circular_velocity attribute
+		 * @brief Setter of the circular_velocity attribute
 		 * @param circular_velocity the new circular_velocity value
 		 */
 		void set_circular_velocity(double circular_velocity);
+
+		/**
+		 * @brief Getter of the limit circle attribute
+		 * @return the limit circle
+		 */
+		const StateRepresentation::Ellipsoid& get_limit_circle() const;
+
+		/**
+		 * @brief Setter of the limit circle attribute
+		 * @param the limit circle value
+		 */
+		void set_limit_circle(const StateRepresentation::Ellipsoid& limit_circle);
 
 		/**
 		 * @brief Evaluate the value of the dynamical system at a given state
@@ -156,5 +168,15 @@ namespace DynamicalSystems
 	inline void Circular::set_circular_velocity(double circular_velocity)
 	{
 		this->circular_velocity_->set_value(circular_velocity);
+	}
+
+	inline const StateRepresentation::Ellipsoid& Circular::get_limit_circle() const
+	{
+		return this->limit_circle_->get_value();
+	}
+
+	inline void Circular::set_limit_circle(const StateRepresentation::Ellipsoid& limit_circle)
+	{
+		this->limit_circle_->set_value(limit_circle);
 	}
 }
