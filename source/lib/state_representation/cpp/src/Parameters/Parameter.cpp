@@ -1,6 +1,7 @@
 #include "state_representation/Parameters/Parameter.hpp"
 #include "state_representation/Space/Cartesian/CartesianPose.hpp"
 #include "state_representation/Robot/JointPositions.hpp"
+#include "state_representation/Geometry/Ellipsoid.hpp"
 
 namespace StateRepresentation
 {
@@ -127,6 +128,13 @@ namespace StateRepresentation
 	}
 
 	template <>
+	Parameter<Ellipsoid>::Parameter(const std::string& name, const Ellipsoid& value):
+	ParameterInterface(StateType::PARAMETER_ELLIPSOID, name), value(value)
+	{
+		this->set_filled();
+	}
+
+	template <>
 	Parameter<Eigen::MatrixXd>::Parameter(const std::string& name):
 	ParameterInterface(StateType::PARAMETER_MATRIX, name)
 	{}
@@ -155,10 +163,11 @@ namespace StateRepresentation
 	template std::ostream& operator<<(std::ostream& os, const Parameter<double>& parameter);
 	template std::ostream& operator<<(std::ostream& os, const Parameter<bool>& parameter);
 	template std::ostream& operator<<(std::ostream& os, const Parameter<std::string>& parameter);
-	template std::ostream& operator<<(std::ostream& os, const Parameter<StateRepresentation::CartesianState>& parameter);
-	template std::ostream& operator<<(std::ostream& os, const Parameter<StateRepresentation::CartesianPose>& parameter);
-	template std::ostream& operator<<(std::ostream& os, const Parameter<StateRepresentation::JointState>& parameter);
-	template std::ostream& operator<<(std::ostream& os, const Parameter<StateRepresentation::JointPositions>& parameter);
+	template std::ostream& operator<<(std::ostream& os, const Parameter<CartesianState>& parameter);
+	template std::ostream& operator<<(std::ostream& os, const Parameter<CartesianPose>& parameter);
+	template std::ostream& operator<<(std::ostream& os, const Parameter<JointState>& parameter);
+	template std::ostream& operator<<(std::ostream& os, const Parameter<JointPositions>& parameter);
+	template std::ostream& operator<<(std::ostream& os, const Parameter<Ellipsoid>& parameter);
 	template std::ostream& operator<<(std::ostream& os, const Parameter<Eigen::MatrixXd>& parameter);
 
 	template<>
