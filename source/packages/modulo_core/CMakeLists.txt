@@ -25,6 +25,8 @@ set(CORE_SOURCES
     src/Communication/MessagePassing/WriteStateConversion.cpp
     src/Communication/MessagePassing/TransformListenerHandler.cpp
     src/Communication/MessagePassing/TransformBroadcasterHandler.cpp
+    src/Communication/MessagePassing/MessagePassingHandler.cpp
+    src/Communication/CommunicationHandler.cpp
     src/Cell.cpp
     src/Monitor.cpp
     src/Recorder.cpp

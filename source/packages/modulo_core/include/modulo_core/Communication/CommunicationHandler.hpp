@@ -42,12 +42,22 @@ namespace Modulo
 				/**
 				 * @brief Constructor for a CommunicationHandler
 				 * @param  type      the type of CommunicationHandler from the CommunicationType enumeration
+				 * @param  clock     reference to the Cell clock
+				 * @param  mutex     reference to the Cell mutex
+				 */
+				explicit CommunicationHandler(const CommunicationType& type, const std::shared_ptr<std::mutex>& mutex);
+
+				/**
+				 * @brief Constructor for a CommunicationHandler  with a timeout
+				 * @param  type      the type of CommunicationHandler from the CommunicationType enumeration
 				 * @param  timeout   period before considered time out
 				 * @param  clock     reference to the Cell clock
 				 * @param  mutex     reference to the Cell mutex
 				 */
 				template <typename DurationT>
-				explicit CommunicationHandler(const CommunicationType& type, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<std::mutex>& mutex);
+				explicit CommunicationHandler(const CommunicationType& type,
+					                          const std::chrono::duration<int64_t, DurationT>& timeout,
+					                          const std::shared_ptr<std::mutex>& mutex);
 
 				/**
 				 * @brief Getter of the CommunicationType

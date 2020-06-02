@@ -9,8 +9,6 @@
 #include <rclcpp_lifecycle/lifecycle_publisher.hpp>
 #include "modulo_core/Communication/MessagePassing/MessagePassingHandler.hpp"
 
-using namespace std::chrono_literals;
-
 namespace Modulo
 {
 	namespace Core
@@ -50,6 +48,13 @@ namespace Modulo
 					 * @param  mutex     reference to the Cell mutex
 					 */
 					explicit PublisherHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
+
+					/**
+					 * @brief Constructor of a PublisherHandler without a recipient for one-shot publishing
+					 * @param  clock     reference to the Cell clock
+					 * @param  mutex     reference to the Cell mutex
+					 */
+					explicit PublisherHandler(const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
 					
 					/**
 					 * @brief Function to publish periodically 
@@ -93,7 +98,14 @@ namespace Modulo
 
 				template <class RecT, typename MsgT>
 				PublisherHandler<RecT, MsgT>::PublisherHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-				MessagePassingHandler(CommunicationType::PUBLISHER, recipient, 0us, mutex),
+				MessagePassingHandler(CommunicationType::PUBLISHER, recipient, mutex),
+				clock_(clock),
+				activated_(false)
+				{}
+
+				template <class RecT, typename MsgT>
+				PublisherHandler<RecT, MsgT>::PublisherHandler(const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
+				MessagePassingHandler(CommunicationType::PUBLISHER, mutex),
 				clock_(clock),
 				activated_(false)
 				{}
@@ -110,7 +122,7 @@ namespace Modulo
 				void PublisherHandler<RecT, MsgT>::publish_callback()
 				{
 					std::lock_guard<std::mutex> guard(this->get_mutex());
-					if(!this->get_recipient().is_empty() && this->activated_)
+					if(this->is_asynchronous() && this->activated_ && !this->get_recipient().is_empty())
 					{	
 						this->publish(static_cast<RecT&>(this->get_recipient()));
 					}
