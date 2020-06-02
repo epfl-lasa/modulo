@@ -35,7 +35,7 @@ namespace DynamicalSystems
 		double radius_desired = (radiuses[0] * radiuses[1]) / sqrt(radiuses[0]*radiuses[0]*sin(theta)*sin(theta) + radiuses[1]*radiuses[1]*cos(theta)*cos(theta));
 
 		double dradius = -this->get_gain() * (radius - radius_desired);
-		double dtheta = -angular_gain * exp(-dradius * dradius);
+		double dtheta = -angular_gain * exp(-dradius * dradius) / radius_desired;
 
 		linear_velocity(0) = dradius * cos(theta) - radius * dtheta * sin(theta);
 		linear_velocity(1) = dradius * sin(theta) + radius * dtheta * cos(theta);
