@@ -9,6 +9,8 @@
 #include <rclcpp_lifecycle/lifecycle_publisher.hpp>
 #include "modulo_core/Communication/MessagePassing/MessagePassingHandler.hpp"
 
+using namespace std::chrono_literals;
+
 namespace Modulo
 {
 	namespace Core
@@ -17,8 +19,6 @@ namespace Modulo
 		{
 			namespace MessagePassing
 			{
-				using PublisherParameters = std::tuple<StateRepresentation::StateType, std::string, std::chrono::milliseconds>;
-
 				/**
 	 		 	 * @class PublisherHandler
 	 		     * @brief Class to define a publisher
@@ -46,12 +46,10 @@ namespace Modulo
 					/**
 					 * @brief Constructor of a PublisherHandler
 					 * @param  recipient the recipent associated to the publisher
-					 * @param  timeout   period before timeout
 					 * @param  clock     reference to the Cell clock
 					 * @param  mutex     reference to the Cell mutex
 					 */
-					template <typename DurationT>
-					explicit PublisherHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
+					explicit PublisherHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
 					
 					/**
 					 * @brief Function to publish periodically 
@@ -91,16 +89,11 @@ namespace Modulo
 					 * @brief Function to deactivate the publisher
 					 */
 					void deactivate();
-
-					/**
-					 * @brief Function to check if the publisher is timed out
-					 */
-					virtual void check_timeout();
 				};
 
-				template <class RecT, typename MsgT> template <typename DurationT>
-				PublisherHandler<RecT, MsgT>::PublisherHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::chrono::duration<int64_t, DurationT>& timeout, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-				MessagePassingHandler(CommunicationType::PUBLISHER, recipient, timeout, mutex),
+				template <class RecT, typename MsgT>
+				PublisherHandler<RecT, MsgT>::PublisherHandler(const std::shared_ptr<StateRepresentation::State>& recipient, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
+				MessagePassingHandler(CommunicationType::PUBLISHER, recipient, 0us, mutex),
 				clock_(clock),
 				activated_(false)
 				{}
@@ -159,18 +152,6 @@ namespace Modulo
 				{
 					this->activated_ = false;
 					this->publisher_->on_deactivate();
-				}
-
-				template <class RecT, typename MsgT>
-				inline void PublisherHandler<RecT, MsgT>::check_timeout()
-				{
-					if(this->get_timeout() != std::chrono::nanoseconds::zero())
-					{
-						if(this->get_recipient().is_deprecated(this->get_timeout()))
-						{
-							this->get_recipient().initialize();
-						}
-					}
 				}
 			}
 		}

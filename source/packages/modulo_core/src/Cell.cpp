@@ -337,7 +337,7 @@ namespace Modulo
 			std::function<void(void)> run_fnc = std::bind(&Cell::run, this);
 			this->run_thread_ = std::thread(run_fnc);
 			// add default transform broadcaster and transform listener
-			this->add_transform_broadcaster(this->period_, 10*this->period_);
+			this->add_transform_broadcaster(this->period_);
 			this->add_transform_listener(10*this->period_);
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
