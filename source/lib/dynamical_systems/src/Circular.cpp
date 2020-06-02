@@ -27,17 +27,21 @@ namespace DynamicalSystems
 		Eigen::Vector3d linear_velocity;
 		linear_velocity(2) = -this->get_gain() * pose.get_position()(2);
 
-		float R = sqrt(pose.get_position()(0) * pose.get_position()(0) + pose.get_position()(1) * pose.get_position()(1));
-		float T = atan2(pose.get_position()(1), pose.get_position()(0));
-		float omega = this->get_circular_velocity();
+		float radius = sqrt(pose.get_position()(0) * pose.get_position()(0) + pose.get_position()(1) * pose.get_position()(1));
+		float theta = atan2(pose.get_position()(1), pose.get_position()(0));
+		float angular_gain = this->get_circular_velocity();
 
 		std::vector<double> radiuses = this->get_radiuses();
-		double radius = sqrt((radiuses[0]*cos(T))*(radiuses[0]*cos(T)) + (radiuses[1]*sin(T))*(radiuses[1]*sin(T)));
+		double radius_desired = (radiuses[0] * radiuses[1]) / sqrt(radiuses[0]*radiuses[0]*sin(theta)*sin(theta) + radiuses[1]*radiuses[1]*cos(theta)*cos(theta));
 
-		linear_velocity(0) = -this->get_gain()*(R-radius) * cos(T) - R * omega * sin(T);
-		linear_velocity(1) = -this->get_gain()*(R-radius) * sin(T) + R * omega * cos(T);
+		double dradius = -this->get_gain() * (radius - radius_desired);
+		double dtheta = -angular_gain * exp(-dradius * dradius);
+
+		linear_velocity(0) = dradius * cos(theta) - radius * dtheta * sin(theta);
+		linear_velocity(1) = dradius * sin(theta) + radius * dtheta * cos(theta);
 
 		velocity.set_linear_velocity(linear_velocity);
+		velocity.set_angular_velocity(Eigen::Vector3d::Zero());
 
 		//compute back the linear velocity in the desired frame
 		velocity = this->get_center() * velocity;

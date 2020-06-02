@@ -19,7 +19,7 @@ namespace
 		Cell(node_name, period),
 		current_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
 		desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
-		motion_generator(StateRepresentation::CartesianPose::Random("robot_test"))
+		motion_generator(StateRepresentation::CartesianPose("robot_test", 0., 0., 0.))
 		{
 			this->add_parameters(this->motion_generator.get_parameters());
 		}
