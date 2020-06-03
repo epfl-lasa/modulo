@@ -23,10 +23,11 @@ RUN apt update && apt install -y \
   libeigen3-dev \
   software-properties-common \
   libboost-all-dev \
-  ros-eloquent-rviz2 \
+  ros-${ROS_DISTRO}-rviz2 \
   && rm -rf /var/lib/apt/lists/*
 
 ENV QT_X11_NO_MITSHM 1
+RUN echo "Set disable_coredump false" >> /etc/sudo.conf
 
 # Now create the same user as the host itself
 ARG UID=1000
