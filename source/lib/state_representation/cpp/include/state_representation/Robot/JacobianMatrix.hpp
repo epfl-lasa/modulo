@@ -73,6 +73,13 @@ namespace StateRepresentation
 		JacobianMatrix(const JacobianMatrix& jacobian);
 
 		/**
+		 * @brief Copy assignement operator that have to be defined to the custom assignement operator
+		 * @param matrix the matrix with value to assign
+		 * @return reference to the current matrix with new values
+		 */
+		JacobianMatrix& operator=(const JacobianMatrix& matrix);
+
+		/**
 	 	 * @brief Getter of the nb_rows from the attributes
 	     */
 		unsigned int get_nb_rows() const;
@@ -201,6 +208,16 @@ namespace StateRepresentation
 	     */
 		friend std::ostream& operator<<(std::ostream& os, const JacobianMatrix& matrix);
 	};
+
+	inline JacobianMatrix& JacobianMatrix::operator=(const JacobianMatrix& matrix)
+	{
+		State::operator=(matrix);
+		this->joint_names = matrix.joint_names;
+		this->nb_cols = matrix.nb_cols;
+		this->nb_rows = matrix.nb_rows;
+		this->data = matrix.data;
+		return (*this);
+	}
 
 	inline unsigned int JacobianMatrix::get_nb_rows() const
 	{

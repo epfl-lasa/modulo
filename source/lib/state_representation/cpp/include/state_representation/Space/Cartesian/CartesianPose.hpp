@@ -71,6 +71,13 @@ namespace StateRepresentation
 		static const CartesianPose Random(const std::string& name, const std::string& reference="world");
 
 		/**
+		 * @brief Copy assignement operator that have to be defined to the custom assignement operator
+		 * @param pose the pose with value to assign
+		 * @return reference to the current pose with new values
+		 */
+		CartesianPose& operator=(const CartesianPose& pose);
+
+		/**
 		 * @brief Set the values of the 6D pose from a 7D Eigen Vector (3 for position, 4 for quaternion)
 		 * @param pose the pose as an Eigen Vector
 		 */
@@ -198,4 +205,10 @@ namespace StateRepresentation
 		 */
 		void from_std_vector(const std::vector<double>& value);
 	};
+
+	inline CartesianPose& CartesianPose::operator=(const CartesianPose& pose)
+	{
+		CartesianState::operator=(pose);
+		return (*this);
+	}
 }

@@ -65,7 +65,7 @@ TEST(MultiplyByScalar, PositiveNos)
 TEST(MultiplyByArray, PositiveNos)
 {
 	Eigen::VectorXd pos1 = Eigen::VectorXd::Random(4);
-	Eigen::ArrayXd gain = Eigen::ArrayXd::Random(4);
+	Eigen::MatrixXd gain = Eigen::VectorXd::Random(4).asDiagonal();
 
 	StateRepresentation::JointState j1("test_robot", 4);
 	j1.set_positions(pos1);

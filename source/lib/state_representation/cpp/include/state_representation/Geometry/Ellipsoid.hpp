@@ -39,6 +39,13 @@ namespace StateRepresentation
 		Ellipsoid(const Ellipsoid& ellipsoid);
 
 		/**
+		 * @brief Copy assignement operator that have to be defined to the custom assignement operator
+		 * @param state the state with value to assign
+		 * @return reference to the current state with new values
+		 */
+		Ellipsoid& operator=(const Ellipsoid& state);
+
+		/**
 		 * @brief Getter of the axis lengths
 		 * @return the axis lengths
 		 */
@@ -117,6 +124,14 @@ namespace StateRepresentation
 	     */
 		friend std::ostream& operator<<(std::ostream& os, const Ellipsoid& ellipsoid);
 	};
+
+	inline Ellipsoid& Ellipsoid::operator=(const Ellipsoid& state)
+	{
+		Shape::operator=(state);
+		this->set_axis_lengths(state.get_axis_lengths());
+		this->set_rotation_angle(state.get_rotation_angle());
+		return (*this);
+	}
 
 	inline const std::vector<double>& Ellipsoid::get_axis_lengths() const 
 	{ 

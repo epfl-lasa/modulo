@@ -56,6 +56,13 @@ namespace StateRepresentation
 		JointState(const JointState& state);
 
 		/**
+		 * @brief Copy assignement operator that have to be defined to the custom assignement operator
+		 * @param state the state with value to assign
+		 * @return reference to the current state with new values
+		 */
+		JointState& operator=(const JointState& state);
+
+		/**
 	 	 * @brief Getter of the size from the attributes
 	     */
 		unsigned int get_size() const;
@@ -211,6 +218,17 @@ namespace StateRepresentation
 		 */
 		virtual void from_std_vector(const std::vector<double>& value);
 	};
+
+	inline JointState& JointState::operator=(const JointState& state)
+	{
+		State::operator=(state);
+		this->set_names(state.get_names());
+		this->set_positions(state.get_positions());
+		this->set_velocities(state.get_velocities());
+		this->set_accelerations(state.get_accelerations());
+		this->set_torques(state.get_torques());
+		return (*this);
+	}
 
 	inline bool JointState::is_compatible(const State& state) const
 	{

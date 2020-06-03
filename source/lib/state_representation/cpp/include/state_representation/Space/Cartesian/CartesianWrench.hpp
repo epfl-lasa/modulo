@@ -52,6 +52,13 @@ namespace StateRepresentation
 		explicit CartesianWrench(const std::string& name, const Eigen::Matrix<double, 6, 1>& wrench, const std::string& reference="world");
 
 		/**
+		 * @brief Copy assignement operator that have to be defined to the custom assignement operator
+		 * @param pose the pose with value to assign
+		 * @return reference to the current pose with new values
+		 */
+		CartesianWrench& operator=(const CartesianWrench& pose);
+
+		/**
 		 * @brief Set the values of the 6D wrench from a 6D Eigen Vector
 		 * @param wrench the wrench as an Eigen Vector
 		 */
@@ -195,4 +202,10 @@ namespace StateRepresentation
 	     */
 		friend const CartesianWrench operator*(double lambda, const CartesianWrench& wrench);
 	};
+
+	inline CartesianWrench& CartesianWrench::operator=(const CartesianWrench& wrench)
+	{
+		CartesianState::operator=(wrench);
+		return (*this);
+	}
 }

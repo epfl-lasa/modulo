@@ -3,19 +3,19 @@
 namespace StateRepresentation
 {
 	State::State():
-	type(StateType::STATE), name("none"), empty(true)
+	type_(StateType::STATE), name_("none"), empty_(true)
 	{}
 
 	State::State(const StateType& type):
-	type(type), name("none"), empty(true)
+	type_(type), name_("none"), empty_(true)
 	{}
 
 	State::State(const StateType& type, const std::string& name, const bool& empty):
-	type(type), name(name), empty(empty), timestamp(std::chrono::steady_clock::now())
+	type_(type), name_(name), empty_(empty), timestamp_(std::chrono::steady_clock::now())
 	{}
 
 	State::State(const State& state):
-	type(state.type), name(state.name), empty(state.empty), timestamp(std::chrono::steady_clock::now())
+	type_(state.type_), name_(state.name_), empty_(state.empty_), timestamp_(std::chrono::steady_clock::now())
 	{}
 
 	std::ostream& operator<<(std::ostream& os, const State& state) 

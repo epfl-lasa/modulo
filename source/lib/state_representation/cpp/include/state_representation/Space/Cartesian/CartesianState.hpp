@@ -49,6 +49,13 @@ namespace StateRepresentation
 		CartesianState(const CartesianState& state);
 
 		/**
+		 * @brief Copy assignement operator that have to be defined to the custom assignement operator
+		 * @param state the state with value to assign
+		 * @return reference to the current state with new values
+		 */
+		CartesianState& operator=(const CartesianState& state);
+
+		/**
 	 	 * @brief Getter of the posistion attribute
 	     */
 		const Eigen::Vector3d& get_position() const;
@@ -260,6 +267,20 @@ namespace StateRepresentation
 		 */
 		virtual void from_std_vector(const std::vector<double>& value);
 	};
+
+	inline CartesianState& CartesianState::operator=(const CartesianState& state)
+	{
+		SpatialState::operator=(state);
+		this->set_position(state.get_position());
+		this->set_orientation(state.get_orientation());
+		this->set_linear_velocity(state.get_linear_velocity());
+		this->set_angular_velocity(state.get_angular_velocity());
+		this->set_linear_acceleration(state.get_linear_acceleration());
+		this->set_angular_acceleration(state.get_angular_acceleration());
+		this->set_force(state.get_force());
+		this->set_torque(state.get_torque());
+		return (*this);
+	}
 
 	inline const Eigen::Vector3d& CartesianState::get_position() const
 	{ 

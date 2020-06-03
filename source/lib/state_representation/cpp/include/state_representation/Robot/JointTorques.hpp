@@ -61,6 +61,13 @@ namespace StateRepresentation
 		JointTorques(const JointState& state);
 
 		/**
+		 * @brief Copy assignement operator that have to be defined to the custom assignement operator
+		 * @param state the state with value to assign
+		 * @return reference to the current state with new values
+		 */
+		JointTorques& operator=(const JointTorques& state);
+
+		/**
 		 * @brief Set the values of the  torques from an Eigen Vector
 		 * @param torques the torques as an Eigen Vector
 		 */
@@ -203,4 +210,10 @@ namespace StateRepresentation
 	     */
 		friend const JointTorques operator/(const JointTorques& torques, const Eigen::ArrayXd& lambda);
 	};
+
+	inline JointTorques& JointTorques::operator=(const JointTorques& state)
+	{
+		JointState::operator=(state);
+		return (*this);
+	}
 }

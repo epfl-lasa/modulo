@@ -31,7 +31,11 @@ namespace StateRepresentation
 	}
 
 	JacobianMatrix::JacobianMatrix(const JacobianMatrix& jacobian):
-	State(jacobian), joint_names(jacobian.joint_names), data(jacobian.data)
+	State(jacobian),
+	joint_names(jacobian.joint_names),
+	nb_rows(jacobian.nb_rows),
+	nb_cols(jacobian.nb_cols),
+	data(jacobian.data)
 	{}
 
 	void JacobianMatrix::initialize()

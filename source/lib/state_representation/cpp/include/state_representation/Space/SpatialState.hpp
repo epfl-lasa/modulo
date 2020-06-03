@@ -30,6 +30,13 @@ namespace StateRepresentation
 		SpatialState(const SpatialState& state);
 
 		/**
+		 * @brief Copy assignement operator that have to be defined to the custom assignement operator
+		 * @param state the state with value to assign
+		 * @return reference to the current state with new values
+		 */
+		SpatialState& operator=(const SpatialState& state);
+
+		/**
 	 	 * @brief Getter of the reference frame as const reference
 	     */
 		const std::string get_reference_frame() const;
@@ -45,6 +52,13 @@ namespace StateRepresentation
 	     */
 		virtual bool is_compatible(const State& state) const;
 	};
+
+	inline SpatialState& SpatialState::operator=(const SpatialState& state)
+	{
+		State::operator=(state);
+		this->set_reference_frame(state.get_reference_frame());
+		return (*this);
+	}
 
 	inline const std::string SpatialState::get_reference_frame() const
 	{ 

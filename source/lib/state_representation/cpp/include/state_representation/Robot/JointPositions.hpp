@@ -69,6 +69,13 @@ namespace StateRepresentation
 		JointPositions(const JointVelocities& positions);
 
 		/**
+		 * @brief Copy assignement operator that have to be defined to the custom assignement operator
+		 * @param state the state with value to assign
+		 * @return reference to the current state with new values
+		 */
+		JointPositions& operator=(const JointPositions& state);
+
+		/**
 		 * @brief Set the values of the  positions from an Eigen Vector
 		 * @param positions the positions as an Eigen Vector
 		 */
@@ -213,4 +220,10 @@ namespace StateRepresentation
 		 */
 		void from_std_vector(const std::vector<double>& value);
 	};
+
+	inline JointPositions& JointPositions::operator=(const JointPositions& state)
+	{
+		JointState::operator=(state);
+		return (*this);
+	}
 }

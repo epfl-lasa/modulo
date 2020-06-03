@@ -50,7 +50,7 @@ TEST(EllipsoidFitting, PositiveNos)
 	// more complex
 	ellipse.set_center_position(Eigen::Vector3d(-1, 2.5, 0));
 	ellipse.set_center_orientation(Eigen::Quaterniond(Eigen::AngleAxisd(0.56, Eigen::Vector3d::UnitZ())));
-	ellipse.set_axis_lengths({3, 1, 0});
+	ellipse.set_axis_lengths({3, 1});
 
 	points = ellipse.sample_from_parameterization(100);
 	fitted_ellipse = Ellipsoid::fit("fitted_test", points);

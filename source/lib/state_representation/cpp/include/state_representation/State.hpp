@@ -46,10 +46,10 @@ namespace StateRepresentation
 	class State
 	{
 	private:
-		StateType type; ///< type of the State
-		std::string name; ///< name of the state
-		bool empty;  ///< indicate if the state is empty
-		std::chrono::time_point<std::chrono::steady_clock> timestamp;  ///< time since last modification made to the state
+		StateType type_; ///< type of the State
+		std::string name_; ///< name of the state
+		bool empty_;  ///< indicate if the state is empty
+		std::chrono::time_point<std::chrono::steady_clock> timestamp_;  ///< time since last modification made to the state
 	
 	public:
 		/**
@@ -75,6 +75,13 @@ namespace StateRepresentation
 	 	 * @brief Copy constructor from another State
 	     */
 		State(const State& state);
+
+		/**
+		 * @brief Copy assignement operator that have to be defined to the custom assignement operator
+		 * @param state the state with value to assign
+		 * @return reference to the current state with new values
+		 */
+		State& operator=(const State& state);
 
 		/**
 	 	 * @brief Getter of the type attribute
@@ -144,61 +151,70 @@ namespace StateRepresentation
 		friend std::ostream& operator<<(std::ostream& os, const State& state);
 	};
 
+	inline State& State::operator=(const State& state)
+	{
+		this->type_ = state.type_;
+		this->name_ = state.name_;
+		this->empty_ = state.empty_;
+		this->timestamp_ = std::chrono::steady_clock::now();
+		return (*this);
+	}
+
 	inline const StateType& State::get_type() const
 	{
-		return this->type;
+		return this->type_;
 	}
 
 	inline bool State::is_empty() const
 	{
-		return this->empty;
+		return this->empty_;
 	}
 
 	inline void State::set_empty()
 	{
-		this->empty = true;
+		this->empty_ = true;
 	}
 
 	inline void State::set_filled()
 	{
-		this->empty = false;
+		this->empty_ = false;
 		this->reset_timestamp();
 	}
 
 	inline const std::chrono::time_point<std::chrono::steady_clock>& State::get_timestamp() const
 	{
-		return this->timestamp;
+		return this->timestamp_;
 	}
 
 	inline void State::reset_timestamp()
 	{
-		this->timestamp = std::chrono::steady_clock::now();
+		this->timestamp_ = std::chrono::steady_clock::now();
 	}
 
 	template <typename DurationT>
 	inline bool State::is_deprecated(const std::chrono::duration<int64_t, DurationT>& time_delay)
 	{
-		return ((std::chrono::steady_clock::now() - this->timestamp) > time_delay);
+		return ((std::chrono::steady_clock::now() - this->timestamp_) > time_delay);
 	}
 
 	inline const std::string& State::get_name() const
 	{ 
-		return this->name;
+		return this->name_;
 	}
 
 	inline void State::set_name(const std::string& name)
 	{
-		this->name = name;
+		this->name_ = name;
 	}
 
 	inline bool State::is_compatible(const State& state) const
 	{
-		bool compatible = (this->name == state.name);
+		bool compatible = (this->name_ == state.name_);
 		return compatible;
 	}
 
 	inline void State::initialize()
 	{
-		this->empty = true;
+		this->empty_ = true;
 	}
 }

@@ -19,5 +19,18 @@ namespace StateRepresentation
 		 * @param parameter the parameter to copy
 		 */
 		ParameterInterface(const ParameterInterface& parameter);
+
+		/**
+		 * @brief Copy assignement operator that have to be defined to the custom assignement operator
+		 * @param state the state with value to assign
+		 * @return reference to the current state with new values
+		 */
+		ParameterInterface& operator=(const ParameterInterface& state);
 	};
+
+	inline ParameterInterface& ParameterInterface::operator=(const ParameterInterface& state)
+	{
+		State::operator=(state);
+		return (*this);
+	}
 }

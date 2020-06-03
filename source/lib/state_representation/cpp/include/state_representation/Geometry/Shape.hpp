@@ -39,6 +39,13 @@ namespace StateRepresentation
 		explicit Shape(const Shape& shape);
 
 		/**
+		 * @brief Copy assignement operator that have to be defined to the custom assignement operator
+		 * @param state the state with value to assign
+		 * @return reference to the current state with new values
+		 */
+		Shape& operator=(const Shape& state);
+
+		/**
 		 * @brief Getter of the state
 		 * @return the state
 		 */
@@ -100,6 +107,13 @@ namespace StateRepresentation
 	     */
 		friend std::ostream& operator<<(std::ostream& os, const Shape& shape);
 	};
+
+	inline Shape& Shape::operator=(const Shape& state)
+	{
+		State::operator=(state);
+		this->center_state_ = state.center_state_;
+		return (*this);
+	}
 
 	inline const CartesianState& Shape::get_center_state() const
 	{

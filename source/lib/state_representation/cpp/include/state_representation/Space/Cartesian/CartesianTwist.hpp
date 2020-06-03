@@ -60,6 +60,13 @@ namespace StateRepresentation
 		explicit CartesianTwist(const std::string& name, const Eigen::Matrix<double, 6, 1>& twist, const std::string& reference="world");
 
 		/**
+		 * @brief Copy assignement operator that have to be defined to the custom assignement operator
+		 * @param twist the twist with value to assign
+		 * @return reference to the current twist with new values
+		 */
+		CartesianTwist& operator=(const CartesianTwist& twist);
+
+		/**
 	 	 * @brief Overload the = operator from a CartesianState
 	 	 * @param state CartesianState to get velocity from
 	     */
@@ -235,4 +242,10 @@ namespace StateRepresentation
 	     */
 		friend const CartesianPose operator*(const CartesianTwist& twist, const std::chrono::nanoseconds& dt);
 	};
+
+	inline CartesianTwist& CartesianTwist::operator=(const CartesianTwist& twist)
+	{
+		CartesianState::operator=(twist);
+		return (*this);
+	}
 }
