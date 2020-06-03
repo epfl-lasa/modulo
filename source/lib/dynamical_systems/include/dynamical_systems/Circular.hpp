@@ -73,6 +73,20 @@ namespace DynamicalSystems
 		 * @brief Getter of the radiuses of the limit cycle
 		 * @return the radius value
 		 */
+
+		double get_rotation_angle() const;
+
+		/**
+		 * @brief Getter of the rotation angle attribute
+		 * @return The rotation agnle value 
+		 */
+		void set_rotation_angle(double gain);
+
+		/**
+		 * @brief Setterthe rotation angle attribute
+		 * @param The rotation agnle value 
+		 */
+
 		const std::vector<double>& get_radiuses() const;
 
 		/**
@@ -143,6 +157,16 @@ namespace DynamicalSystems
 	inline void Circular::set_gain(double gain)
 	{
 		this->gain_->set_value(gain);
+	}
+
+	inline double Circular::get_rotation_angle() const
+	{
+		return this->limit_cycle_->get_value().get_rotation_angle();
+	}
+
+	inline void Circular::set_rotation_angle(double angle)
+	{
+		 this->limit_cycle_->get_value().set_rotation_angle(angle);
 	}
 
 	inline const std::vector<double>& Circular::get_radiuses() const
