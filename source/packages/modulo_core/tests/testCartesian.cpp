@@ -19,7 +19,11 @@ namespace
 		Cell(node_name, period),
 		current_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
 		desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
-		motion_generator(StateRepresentation::CartesianPose::Random("robot_test"))
+		//motion_generator(StateRepresentation::CartesianPose::Random("robot_test"))
+		motion_generator(StateRepresentation::CartesianPose("robot_test",
+			                                                Eigen::Vector3d(1.5, 0, 0.5),
+			                                                Eigen::Quaterniond(Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitY()))),
+		                 {0.5, 0.5, 0.5, 0.5, 0.5, 0.5})
 		{
 			this->add_parameters(this->motion_generator.get_parameters());
 		}
@@ -86,7 +90,7 @@ namespace
 	public:
 		explicit SimulatedRobotInterface(const std::string & node_name, const std::chrono::milliseconds & period):
 		Cell(node_name, period),
-		robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom())),
+		robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d(1.18, 0, 1.6), Eigen::Quaterniond(0.73, 0, 0.68, 0))),
 		desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
 		dt(period)
 		{}
@@ -105,6 +109,8 @@ namespace
 				*this->robot_pose = dt * *this->desired_twist + *this->robot_pose;
 			}
 			this->send_transform(*this->robot_pose);
+			StateRepresentation::CartesianPose base("base_link", 0, 0, 0, "world");
+			this->send_transform(base);
 		}
 	};
 }
