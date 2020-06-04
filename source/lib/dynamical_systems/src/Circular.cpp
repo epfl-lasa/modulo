@@ -21,7 +21,7 @@ namespace DynamicalSystems
 	{
 		// put the point in the reference of the center
 		StateRepresentation::CartesianPose pose = static_cast<const StateRepresentation::CartesianPose&>(state);
-		pose = this->get_center().inverse() * pose;
+		pose = this->get_limit_cycle().get_rotation().inverse() * this->get_center().inverse() * pose;
 
 		StateRepresentation::CartesianTwist velocity(pose.get_name(), pose.get_reference_frame());
 		Eigen::Vector3d linear_velocity;
@@ -42,7 +42,7 @@ namespace DynamicalSystems
 		velocity.set_angular_velocity(Eigen::Vector3d::Zero());
 
 		//compute back the linear velocity in the desired frame
-		velocity = this->get_center() * velocity;
+		velocity = this->get_center() * this->get_limit_cycle().get_rotation() * velocity;
 		return velocity;
 	}
 

@@ -83,6 +83,8 @@ namespace StateRepresentation
 		 */
 		void set_rotation_angle(double rotation_angle);
 
+		const CartesianPose get_rotation() const;
+
 		/**
 		 * @brief Function to sample an obstacle from its parameterization
 		 * @param nb_samples the number of sample points to generate 
@@ -162,9 +164,6 @@ namespace StateRepresentation
 
 	inline void Ellipsoid::set_rotation_angle(double rotation_angle)
 	{
-		// changing the angle changes the orientation of the center so first rotate it back from the previous value
-		this->set_center_orientation(Eigen::Quaterniond(Eigen::AngleAxisd(this->rotation_angle_, Eigen::Vector3d::UnitZ())).conjugate() * this->get_center_orientation());
-		this->set_center_orientation(this->get_center_orientation() * Eigen::Quaterniond(Eigen::AngleAxisd(rotation_angle, Eigen::Vector3d::UnitZ())));
 		this->rotation_angle_ = rotation_angle;
 		this->set_filled();
 	}
@@ -189,5 +188,11 @@ namespace StateRepresentation
 		this->set_center_position(Eigen::Vector3d(parameters[0], parameters[1], parameters[2]));
 		this->set_rotation_angle(parameters[3]);
 		this->set_axis_lengths({parameters[4], parameters[5]});
+	}
+
+	inline const CartesianPose get_rotation() const
+	{
+		Eigen::Quaterniond rotation(Eigen::AxisAngled(this->rotation_angle, Eigen::Vector3d::UnitZ()));
+		return CartesianPose(this->get_center_pose().get_name() + "_rotation", Eigen::Vector3d::Zero(), rotation, this->get_center_pose().get_name());
 	}
 }
