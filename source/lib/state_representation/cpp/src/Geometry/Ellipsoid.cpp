@@ -25,14 +25,14 @@ namespace StateRepresentation
 		std::list<CartesianPose> samples;
 		for(unsigned int i=0; i<nb_samples; ++i)
 		{
-			CartesianPose point(this->get_name() + "_point" + std::to_string(i), this->get_center_state().get_name());
+			CartesianPose point(this->get_name() + "_point" + std::to_string(i), this->get_rotation().get_name());
 			double a = alpha.at(i);
 			Eigen::Vector3d position;
 			position(0) = this->get_axis_length(0) * cos(a);
 			position(1) = this->get_axis_length(1) * sin(a);
 			position(2) = 0;
 			point.set_position(position);
-			samples.push_back(this->get_center_pose() * point);
+			samples.push_back(this->get_center_pose() * this->get_rotation() * point);
 		}
 		return samples;
 	}

@@ -190,9 +190,9 @@ namespace StateRepresentation
 		this->set_axis_lengths({parameters[4], parameters[5]});
 	}
 
-	inline const CartesianPose get_rotation() const
+	inline const CartesianPose Ellipsoid::get_rotation() const
 	{
-		Eigen::Quaterniond rotation(Eigen::AxisAngled(this->rotation_angle, Eigen::Vector3d::UnitZ()));
-		return CartesianPose(this->get_center_pose().get_name() + "_rotation", Eigen::Vector3d::Zero(), rotation, this->get_center_pose().get_name());
+		Eigen::Quaterniond rotation(Eigen::AngleAxisd(this->rotation_angle_, Eigen::Vector3d::UnitZ()));
+		return CartesianPose(this->get_center_pose().get_name() + "_rotated", Eigen::Vector3d::Zero(), rotation, this->get_center_pose().get_name());
 	}
 }
