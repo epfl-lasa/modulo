@@ -16,6 +16,7 @@ done
 shift "$(( OPTIND - 1 ))"
 
 NAME=$(echo "${PWD##*/}" | tr _ -)
+TAG="latest"
 
 UID="$(id -u "${USER}")"
 GID="$(id -g "${USER}")"
