@@ -1,14 +1,6 @@
 #!/bin/bash
 BASE_IMAGE=ros
-BASE_TAG=eloquent
-
-if [ -z "$1" ]; then
-    TAG="latest"
-else
-    TAG=$1
-    BASE_IMAGE=osrf/ros
-    BASE_TAG=$1-desktop
-fi
+BASE_TAG=foxy
 
 docker pull "${BASE_IMAGE}:${BASE_TAG}"
 
@@ -36,11 +28,11 @@ if [ "$REBUILD" -eq 1 ]; then
  		--build-arg UID="${UID}" \
  		--build-arg GID="${GID}" \
  		-t "${NAME}:${TAG}" .
- else
+else
 	docker build \
 	    --build-arg BASE_IMAGE="${BASE_IMAGE}" \
 	    --build-arg BASE_TAG="${BASE_TAG}" \
  		--build-arg UID="${UID}" \
  		--build-arg GID="${GID}" \
  		-t "${NAME}:${TAG}" .
- fi
+fi
