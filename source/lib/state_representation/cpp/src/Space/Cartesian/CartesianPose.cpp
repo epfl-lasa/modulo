@@ -71,7 +71,9 @@ namespace StateRepresentation
 		if(this->get_name() != pose.get_reference_frame()) throw IncompatibleReferenceFramesException("Expected " + this->get_name() + ", got " + pose.get_reference_frame());
 		// operation
 		this->set_position(this->get_position() + this->get_orientation() * pose.get_position());
-		this->set_orientation(this->get_orientation() * pose.get_orientation());
+		Eigen::Quaterniond qres = this->get_orientation() * pose.get_orientation();
+		if(this->get_orientation().dot(qres) < 0) qres = Eigen::Quaterniond(-qres.coeffs());
+		this->set_orientation(qres);
 		this->set_name(pose.get_name());
 		return (*this);
 	}
@@ -83,29 +85,21 @@ namespace StateRepresentation
 		return result;
 	}
 
+	const Eigen::Vector3d CartesianPose::operator*(const Eigen::Vector3d& vector) const
+	{
+        return this->get_orientation() * vector + this->get_position();
+	}
+
 	const CartesianState CartesianPose::operator*(const CartesianState& state) const
 	{
-		// sanity check
-		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
-		if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
-		if(this->get_name() != state.get_reference_frame()) throw IncompatibleReferenceFramesException("Expected " + this->get_name() + ", got " + state.get_reference_frame());
-		// operation
-		CartesianState result(*this);
-		result.set_position(this->get_position() + this->get_orientation() * state.get_position());
-		result.set_orientation(this->get_orientation() * state.get_orientation());
+		CartesianState result = *this * static_cast<CartesianPose>(state);
 		result.set_linear_velocity(*this * state.get_linear_velocity());
 		result.set_angular_velocity(*this * state.get_angular_velocity());
 		result.set_linear_acceleration(*this * state.get_linear_acceleration());
 		result.set_angular_acceleration(*this * state.get_angular_acceleration());
 		result.set_force(*this * state.get_force());
 		result.set_torque(*this * state.get_torque());
-		result.set_name(state.get_name());
 		return result;
-	}
-
-	const Eigen::Vector3d CartesianPose::operator*(const Eigen::Vector3d& vector) const
-	{
-          return this->get_orientation() * vector + this->get_position();
 	}
 
 	CartesianPose& CartesianPose::operator+=(const CartesianPose& pose)
@@ -159,7 +153,9 @@ namespace StateRepresentation
 		// calculate the scaled rotation as a displacement from identity
 		Eigen::Quaterniond w = MathTools::log(this->get_orientation());
 		// calculate the orientation corresponding to the scaled velocity
-		this->set_orientation(MathTools::exp(w, lambda / 2.));
+		Eigen::Quaterniond qres = MathTools::exp(w, lambda / 2.);
+		if(this->get_orientation().dot(qres) < 0) qres = Eigen::Quaterniond(-qres.coeffs());
+		this->set_orientation(qres);
 		return (*this);
 	}
 
@@ -173,7 +169,9 @@ namespace StateRepresentation
 	const CartesianPose CartesianPose::inverse() const
 	{
 		CartesianPose result(*this);
-		result.set_orientation(this->get_orientation().conjugate());
+		Eigen::Quaterniond qres = this->get_orientation().conjugate();
+		if(this->get_orientation().dot(qres) < 0) qres = Eigen::Quaterniond(-qres.coeffs());
+		result.set_orientation(qres);
 		result.set_position(result.get_orientation() * (- this->get_position()));
 		// inverse name and reference frame
 		std::string ref = result.get_reference_frame();
@@ -232,6 +230,7 @@ namespace StateRepresentation
 		twist.set_linear_velocity(pose.get_position() / period);
 		// set angular velocity from the log of the quaternion error
 		Eigen::Quaterniond log_q = MathTools::log(pose.get_orientation());
+		if(pose.get_orientation().dot(log_q) < 0) log_q = Eigen::Quaterniond(-log_q.coeffs());
 		twist.set_angular_velocity(2 * log_q.vec() / period);
 		return twist;
 	}
