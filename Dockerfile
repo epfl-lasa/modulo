@@ -26,7 +26,6 @@ RUN apt update && apt install -y \
   ros-${ROS_DISTRO}-rviz2 \
   && rm -rf /var/lib/apt/lists/*
 
-ENV QT_X11_NO_MITSHM 1
 RUN echo "Set disable_coredump false" >> /etc/sudo.conf
 
 # Now create the same user as the host itself
@@ -74,12 +73,6 @@ WORKDIR ${HOME}
 
 # Clean image
 RUN sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
-
-# nvidia-container-runtime
-ENV NVIDIA_VISIBLE_DEVICES \
-    ${NVIDIA_VISIBLE_DEVICES:-all}
-ENV NVIDIA_DRIVER_CAPABILITIES \
-    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
 
 ENTRYPOINT ["/ros_entrypoint.sh"]
 CMD ["bash"]
