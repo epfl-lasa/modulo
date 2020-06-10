@@ -19,11 +19,7 @@ namespace
 		Cell(node_name, period),
 		current_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
 		desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
-		//motion_generator(StateRepresentation::CartesianPose::Random("robot_test"))
-		motion_generator(StateRepresentation::CartesianPose("robot_test",
-			                                                Eigen::Vector3d(1.5, 0, 0.5),
-			                                                Eigen::Quaterniond(Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitY()))),
-		                 {0.5, 0.5, 0.5, 0.5, 0.5, 0.5})
+		motion_generator(StateRepresentation::CartesianPose::Random("robot_test"), 1.0)
 		{
 			this->add_parameters(this->motion_generator.get_parameters());
 		}
@@ -40,11 +36,17 @@ namespace
 			if(!this->current_pose->is_empty())
 			{
 				*this->desired_twist = this->motion_generator.evaluate(*this->current_pose);
+				// change attractor if previous was reached
+				if(this->current_pose->dist(this->motion_generator.get_attractor()) < 1e-3)
+				{
+					this->set_parameter_value("attractor", StateRepresentation::CartesianPose::Random("robot_test"));
+				}
 			}
 			else
 			{
 				this->desired_twist->initialize();
 			}
+			this->send_transform(this->motion_generator.get_attractor(), "attractor");
 		}
 	};
 
@@ -109,8 +111,6 @@ namespace
 				*this->robot_pose = dt * *this->desired_twist + *this->robot_pose;
 			}
 			this->send_transform(*this->robot_pose);
-			StateRepresentation::CartesianPose base("base_link", 0, 0, 0, "world");
-			this->send_transform(base);
 		}
 	};
 }
@@ -130,7 +130,7 @@ int main(int argc, char * argv[])
 
 	rclcpp::init(argc, argv);
 
-	rclcpp::executors::MultiThreadedExecutor exe;
+	rclcpp::executors::SingleThreadedExecutor exe;
 
 	std::shared_ptr<LinearMotionGenerator> lmg = std::make_shared<LinearMotionGenerator>("motion_generator", 1ms);
 	std::shared_ptr<ConsoleVisualizer> cv = std::make_shared<ConsoleVisualizer>("visualizer", 100ms);
