@@ -358,22 +358,19 @@ namespace StateRepresentation
 
 	inline void CartesianState::set_position(const double& x, const double& y, const double& z)
 	{
-		this->set_filled();
 		this->set_position(Eigen::Vector3d(x, y, z));
 	}
 
 	inline void CartesianState::set_orientation(const Eigen::Quaterniond& orientation)
 	{
 		this->set_filled();
-		this->orientation = orientation.normalized();
+		this->orientation = (orientation.w() > 0) ? orientation.normalized() : Eigen::Quaterniond(-orientation.coeffs()).normalized();
 	}
 
 	inline void CartesianState::set_orientation(const std::vector<double>& orientation)
 	{
 		if (orientation.size() != 4) throw Exceptions::IncompatibleSizeException("The input vector is not of size 4 required for orientation");
-		this->set_filled();
-		this->orientation = Eigen::Quaterniond(orientation[0], orientation[1], orientation[2], orientation[3]);
-		this->orientation.normalize();
+		this->set_orientation(Eigen::Quaterniond(orientation[0], orientation[1], orientation[2], orientation[3]));
 	}
 
 	inline void CartesianState::set_pose(const Eigen::Vector3d& position, const Eigen::Quaterniond& orientation)
@@ -384,17 +381,15 @@ namespace StateRepresentation
 
 	inline void CartesianState::set_pose(const Eigen::Matrix<double, 7, 1>& pose)
 	{
-		this->set_filled();
-		this->position = pose.head(3);
-		this->orientation = Eigen::Quaterniond(pose(3), pose(4), pose(5), pose(6));
+		this->set_position(pose.head(3));
+		this->set_orientation(Eigen::Quaterniond(pose(3), pose(4), pose(5), pose(6)));
 	}
 
 	inline void CartesianState::set_pose(const std::vector<double>& pose)
 	{
 		if (pose.size() != 7) throw Exceptions::IncompatibleSizeException("The input vector is not of size 7 required for pose");
-		this->set_filled();
-		this->position = Eigen::Vector3d::Map(pose.data(), 3);
-		this->orientation = Eigen::Quaterniond(pose[3], pose[4], pose[5], pose[6]);
+		this->set_position(Eigen::Vector3d::Map(pose.data(), 3));
+		this->set_orientation(Eigen::Quaterniond(pose[3], pose[4], pose[5], pose[6]));
 	}
 
 	inline void CartesianState::set_linear_velocity(const Eigen::Vector3d& linear_velocity)
