@@ -71,9 +71,8 @@ namespace StateRepresentation
 		if(this->get_name() != pose.get_reference_frame()) throw IncompatibleReferenceFramesException("Expected " + this->get_name() + ", got " + pose.get_reference_frame());
 		// operation
 		this->set_position(this->get_position() + this->get_orientation() * pose.get_position());
-		Eigen::Quaterniond qres = this->get_orientation() * pose.get_orientation();
-		if(this->get_orientation().dot(qres) < 0) qres = Eigen::Quaterniond(-qres.coeffs());
-		this->set_orientation(qres);
+		Eigen::Quaterniond orientation = (this->get_orientation().dot(pose.get_orientation()) > 0) ? pose.get_orientation() : Eigen::Quaterniond(-pose.get_orientation().coeffs());
+		this->set_orientation(this->get_orientation() * orientation);
 		this->set_name(pose.get_name());
 		return (*this);
 	}
@@ -110,9 +109,8 @@ namespace StateRepresentation
 		if(!(this->get_reference_frame() == pose.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
 		// operation
 		this->set_position(this->get_position() + pose.get_position());
-		Eigen::Quaterniond qres = this->get_orientation() * pose.get_orientation();
-		if(this->get_orientation().dot(qres) < 0) qres = Eigen::Quaterniond(-qres.coeffs());
-		this->set_orientation(qres);
+		Eigen::Quaterniond orientation = (this->get_orientation().dot(pose.get_orientation()) > 0) ? pose.get_orientation() : Eigen::Quaterniond(-pose.get_orientation().coeffs());
+		this->set_orientation(this->get_orientation() * orientation);
 		return (*this);
 	}
 
@@ -131,9 +129,8 @@ namespace StateRepresentation
 		if(!(this->get_reference_frame() == pose.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
 		// operation
 		this->set_position(this->get_position() - pose.get_position());
-		Eigen::Quaterniond qres = this->get_orientation() * pose.get_orientation().conjugate();
-		if(this->get_orientation().dot(qres) < 0) qres = Eigen::Quaterniond(-qres.coeffs());
-		this->set_orientation(qres);
+		Eigen::Quaterniond orientation = (this->get_orientation().dot(pose.get_orientation()) > 0) ? pose.get_orientation() : Eigen::Quaterniond(-pose.get_orientation().coeffs());
+		this->set_orientation(this->get_orientation() * orientation.conjugate());
 		return (*this);
 	}
 
@@ -169,9 +166,7 @@ namespace StateRepresentation
 	const CartesianPose CartesianPose::inverse() const
 	{
 		CartesianPose result(*this);
-		Eigen::Quaterniond qres = this->get_orientation().conjugate();
-		if(this->get_orientation().dot(qres) < 0) qres = Eigen::Quaterniond(-qres.coeffs());
-		result.set_orientation(qres);
+		result.set_orientation(this->get_orientation().conjugate());
 		result.set_position(result.get_orientation() * (- this->get_position()));
 		// inverse name and reference frame
 		std::string ref = result.get_reference_frame();
