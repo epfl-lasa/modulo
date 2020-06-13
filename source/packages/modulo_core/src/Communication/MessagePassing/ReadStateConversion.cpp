@@ -130,7 +130,7 @@ namespace Modulo
 						state.set_torques(Eigen::VectorXd::Map(msg.effort.data(), msg.effort.size()));
 					}
 
-					void read_msg(StateRepresentation::JacobianMatrix & state, const modulo_msgs::msg::JacobianMatrix & msg)
+					void read_msg(StateRepresentation::Jacobian & state, const modulo_msgs::msg::Jacobian & msg)
 					{
 						state.set_nb_rows(msg.nb_dimensions);
 						state.set_nb_cols(msg.nb_joints);

@@ -136,7 +136,7 @@ namespace Modulo
 						msg.effort = std::vector<double>(state.get_torques().data(), state.get_torques().data() + state.get_torques().size());
 					}
 
-					void write_msg(modulo_msgs::msg::JacobianMatrix & msg, const StateRepresentation::JacobianMatrix & state, const rclcpp::Time & time)
+					void write_msg(modulo_msgs::msg::Jacobian & msg, const StateRepresentation::Jacobian & state, const rclcpp::Time & time)
 					{
 						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 						msg.header.stamp = time;
