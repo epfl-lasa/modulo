@@ -175,7 +175,7 @@ namespace StateRepresentation
 	{
 		if(velocities.is_empty()) throw EmptyStateException(velocities.get_name() + " state is empty");
 		// operations
-		JointPositions displacement(velocities.get_name(), velocities.get_size());
+		JointPositions displacement(velocities.get_name(), velocities.get_names());
 		// convert the period to a double with the second as reference
 		double period = dt.count();
 		period /= 1e9;
