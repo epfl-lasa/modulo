@@ -63,6 +63,14 @@ namespace StateRepresentation
 		explicit CartesianPose(const std::string& name, const Eigen::Vector3d& position, const Eigen::Quaterniond& orientation, const std::string& reference="world");
 
 		/**
+		 * @brief Constructor for the identity pose
+		 * @param name the name of the state
+		 * @param the name of the reference frame
+		 * @return CartesianPose identity pose
+		 */
+		static const CartesianPose Identity(const std::string& name, const std::string& reference="world");
+
+		/**
 		 * @brief Constructor for a random pose
 		 * @param name the name of the state
 		 * @param the name of the reference frame
