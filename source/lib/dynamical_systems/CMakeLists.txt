@@ -29,6 +29,7 @@ include_directories(
 
 set(CORE_SOURCES
   src/Circular.cpp
+  src/Linear.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED 
