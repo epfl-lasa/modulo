@@ -39,6 +39,12 @@ namespace DynamicalSystems
 		 * @return the list of parameters
 		 */
 		virtual const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> get_parameters() const;
+
+		/**
+		 * @brief Get the reference frame in wich the dynamic is expressed,
+		 * default world, not relevent for dynamic in joint state
+		 */
+		virtual const std::string get_reference_frame() const;
 	};
 
 	template<class S>
@@ -50,5 +56,11 @@ namespace DynamicalSystems
 	{
 		std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> param_list;
 		return param_list;
+	}
+
+	template<class S>
+	inline const std::string DynamicalSystem<S>::get_reference_frame() const
+	{
+		return "world";
 	}
 }

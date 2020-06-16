@@ -137,6 +137,12 @@ namespace DynamicalSystems
 		 * @return the list of parameters
 		 */
 		const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> get_parameters() const override;
+
+		/**
+		 * @brief Get the reference frame in wich the dynamic is expressed,
+		 * default world, not relevent for dynamic in joint state
+		 */
+		const std::string get_reference_frame() const override;
 	};
 
 	inline const StateRepresentation::CartesianPose& Circular::get_center() const
@@ -202,5 +208,10 @@ namespace DynamicalSystems
 	inline void Circular::set_limit_cycle(const StateRepresentation::Ellipsoid& limit_cycle)
 	{
 		this->limit_cycle_->set_value(limit_cycle);
+	}
+
+	inline const std::string Circular::get_reference_frame() const
+	{
+		return this->get_center().get_reference_frame();
 	}
 }

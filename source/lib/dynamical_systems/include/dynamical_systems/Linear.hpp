@@ -99,6 +99,12 @@ namespace DynamicalSystems
 		 * @return the list of parameters
 		 */
 		const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> get_parameters() const;
+
+		/**
+		 * @brief Get the reference frame in wich the dynamic is expressed,
+		 * default world, not relevent for dynamic in joint state
+		 */
+		const std::string get_reference_frame() const override;
 	};
 
 	template<class S>
@@ -126,5 +132,17 @@ namespace DynamicalSystems
 		param_list.push_back(this->attractor_);
 		param_list.push_back(this->gain_);
 		return param_list;
+	}
+
+	template<>
+	inline const std::string Linear<StateRepresentation::CartesianState>::get_reference_frame() const
+	{
+		return this->get_attractor().get_reference_frame();
+	}
+
+	template<>
+	inline const std::string Linear<StateRepresentation::JointState>::get_reference_frame() const
+	{
+		return "";
 	}
 }
