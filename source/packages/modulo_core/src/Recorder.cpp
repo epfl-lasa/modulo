@@ -40,9 +40,9 @@ namespace Modulo
 		{
 			for (auto &h : this->get_handlers())
 			{
-				if(h.second->get_type() == Core::Communication::CommunicationType::SUBSCRIPTION)
+				if(h.second.first->get_type() == Core::Communication::CommunicationType::SUBSCRIPTION)
 				{
-					const Core::Communication::MessagePassing::MessagePassingHandler& subscription = static_cast<const Core::Communication::MessagePassing::MessagePassingHandler&>(*h.second);
+					const Core::Communication::MessagePassing::MessagePassingHandler& subscription = static_cast<const Core::Communication::MessagePassing::MessagePassingHandler&>(*h.second.first);
 					if(!this->record(subscription.get_recipient())) RCLCPP_ERROR(this->get_logger(), "Unable to record " + subscription.get_recipient().get_name());
 				}
 			}

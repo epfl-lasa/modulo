@@ -306,18 +306,33 @@ namespace Modulo
 			}
 		}
 
+		void Cell::add_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient,
+				                            bool always_active,
+				                            int queue_size)
+		{
+			this->add_transform_broadcaster(recipient, this->get_period(), always_active, queue_size);
+		}
+
+
+		void Cell::add_transform_broadcaster(const StateRepresentation::CartesianPose& recipient,
+				                             bool always_active,
+				                             int queue_size)
+		{
+			this->add_transform_broadcaster(recipient, this->get_period(), always_active, queue_size);
+		}
+
 		void Cell::send_transform(const StateRepresentation::CartesianState& transform, const std::string& name) const
 		{
 			if (!this->configured_) throw Exceptions::UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
 			StateRepresentation::CartesianState transform_copy(transform);
 			if (name != "") transform_copy.set_name(name);
-			std::static_pointer_cast<Communication::MessagePassing::TransformBroadcasterHandler>(this->handlers_.at("tf_broadcaster"))->send_transform(transform_copy);
+			std::static_pointer_cast<Communication::MessagePassing::TransformBroadcasterHandler>(this->handlers_.at("tf_broadcaster").first)->send_transform(transform_copy);
 		}
 
 		const StateRepresentation::CartesianPose Cell::lookup_transform(const std::string& frame_name, const std::string& reference_frame) const
 		{
 			if (!this->configured_) throw Exceptions::UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
-			return std::static_pointer_cast<Communication::MessagePassing::TransformListenerHandler>(this->handlers_.at("tf_listener"))->lookup_transform(frame_name, reference_frame);
+			return std::static_pointer_cast<Communication::MessagePassing::TransformListenerHandler>(this->handlers_.at("tf_listener").first)->lookup_transform(frame_name, reference_frame);
 		}
 
 		rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_configure(const rclcpp_lifecycle::State &) 
@@ -337,8 +352,13 @@ namespace Modulo
 			std::function<void(void)> run_fnc = std::bind(&Cell::run, this);
 			this->run_thread_ = std::thread(run_fnc);
 			// add default transform broadcaster and transform listener
-			this->add_transform_broadcaster(this->period_);
+			this->add_transform_broadcaster(this->period_, true);
 			this->add_transform_listener(10*this->period_);
+			// set all always active handlers to be activated
+			for (auto &h : this->handlers_)
+			{
+				if (h.second.second) h.second.first->activate();
+			}
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
 
@@ -361,7 +381,7 @@ namespace Modulo
 			this->active_ = true;
 			for (auto &h : this->handlers_)
 			{
-				h.second->activate();
+				h.second.first->activate();
 			}
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
@@ -385,7 +405,7 @@ namespace Modulo
 			this->active_ = false;
 			for (auto &h : this->handlers_)
 			{
-				h.second->deactivate();
+				if (!h.second.second) h.second.first->deactivate();
 			}
 			return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 		}
@@ -445,7 +465,7 @@ namespace Modulo
 				std::unique_lock<std::mutex> lck(*this->mutex_);
 				for (auto &h : this->handlers_)
 				{
-					h.second->check_timeout();
+					h.second.first->check_timeout();
 				}
 				if(this->active_)
 				{
