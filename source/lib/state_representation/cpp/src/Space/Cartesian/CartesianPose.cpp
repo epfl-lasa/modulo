@@ -97,12 +97,12 @@ namespace StateRepresentation
 	const CartesianState CartesianPose::operator*(const CartesianState& state) const
 	{
 		CartesianState result = *this * static_cast<CartesianPose>(state);
-		result.set_linear_velocity(*this * state.get_linear_velocity());
-		result.set_angular_velocity(*this * state.get_angular_velocity());
-		result.set_linear_acceleration(*this * state.get_linear_acceleration());
-		result.set_angular_acceleration(*this * state.get_angular_acceleration());
-		result.set_force(*this * state.get_force());
-		result.set_torque(*this * state.get_torque());
+		result.set_linear_velocity(this->get_orientation() * state.get_linear_velocity());
+		result.set_angular_velocity(this->get_orientation() * state.get_angular_velocity());
+		result.set_linear_acceleration(this->get_orientation() * state.get_linear_acceleration());
+		result.set_angular_acceleration(this->get_orientation() * state.get_angular_acceleration());
+		result.set_force(this->get_orientation() * state.get_force());
+		result.set_torque(this->get_orientation() * state.get_torque());
 		return result;
 	}
 
