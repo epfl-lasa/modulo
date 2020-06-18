@@ -248,6 +248,40 @@ namespace Modulo
 						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
 						msg.data = state.to_std_vector();
 					}
+
+					template <typename U, typename T>
+					void write_msg(U & msg, const StateRepresentation::Parameter<T> & state, const rclcpp::Time &)
+					{
+						using namespace StateRepresentation::Exceptions;
+						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+						msg.data = state.get_value();
+					}
+
+					template void write_msg<std_msgs::msg::Float64, double>(std_msgs::msg::Float64 & msg, const StateRepresentation::Parameter<double> & state, const rclcpp::Time &);
+
+					template void write_msg<std_msgs::msg::Float64MultiArray, std::vector<double>>(std_msgs::msg::Float64MultiArray & msg, const StateRepresentation::Parameter<std::vector<double>> & state, const rclcpp::Time &);
+
+					template void write_msg<std_msgs::msg::Bool, bool>(std_msgs::msg::Bool & msg, const StateRepresentation::Parameter<bool> & state, const rclcpp::Time &);
+
+					template void write_msg<std_msgs::msg::String, std::string>(std_msgs::msg::String & msg, const StateRepresentation::Parameter<std::string> & state, const rclcpp::Time &);
+
+					template<>
+					void write_msg(geometry_msgs::msg::Transform & msg, const StateRepresentation::Parameter<StateRepresentation::CartesianPose> & state, const rclcpp::Time & time)
+					{
+						write_msg(msg, state.get_value(), time);
+					}
+
+					template <>
+					void write_msg(geometry_msgs::msg::TransformStamped & msg, const StateRepresentation::Parameter<StateRepresentation::CartesianPose> & state, const rclcpp::Time & time)
+					{
+						write_msg(msg, state.get_value(), time);
+					}
+
+					template <>
+					void write_msg(tf2_msgs::msg::TFMessage & msg, const StateRepresentation::Parameter<StateRepresentation::CartesianPose> & state, const rclcpp::Time & time)
+					{
+						write_msg(msg, state.get_value(), time);
+					}
 				}
 			}
 		}

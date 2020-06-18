@@ -56,7 +56,7 @@ namespace Modulo
 			std::shared_ptr<std::mutex> mutex_; ///< a mutex to use when modifying messages between functions
 			std::chrono::nanoseconds period_;  ///< rate of the publisher functions in nanoseconds
 			std::list<std::thread> active_threads_; ///< list of active threads for periodic calling
-			std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> parameters_; ///< list for storing parameters
+			std::map<std::string, std::shared_ptr<StateRepresentation::ParameterInterface>> parameters_; ///< list for storing parameters
 			std::map<std::string, std::pair<std::shared_ptr<Communication::CommunicationHandler>, bool>> handlers_; ///< map for storing publishers, subscriptions and tf 
 
 			/**
@@ -100,6 +100,12 @@ namespace Modulo
 			 * @return Reference to the mutex attribute
 			 */
 			std::mutex & get_mutex();
+
+			/**
+			 * @brief Get the pointer to the desired parameter
+			 * @param parameter_name the name of the desired parameter
+			 */
+			const std::shared_ptr<StateRepresentation::ParameterInterface> get_parameter_pointer(const std::string& parameter_name) const;
 
 		public:
 			
@@ -233,18 +239,39 @@ namespace Modulo
 			/**
 			 * @brief Function to add a generic transform broadcaster to the map of handlers
 			 * @param recipient the state that contain the data to be published
+			 * @param period the period to wait between two publishing
+			 * @param always_active if true, always publish the transform as soon as the node is configured
+			 */
+			template <typename DurationT>
+			void add_transform_broadcaster(const std::shared_ptr<StateRepresentation::ParameterInterface>& recipient,
+				                           const std::chrono::duration<int64_t, DurationT>& period,
+				                           bool always_active=false,
+				                           int queue_size=10);
+
+			/**
+			 * @brief Function to add a generic transform broadcaster to the map of handlers
+			 * @param recipient the state that contain the data to be published
 			 * @param always_active if true, always publish the transform as soon as the node is configured
 			 */
 			void add_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient,
 				                           bool always_active=false,
 				                           int queue_size=10);
 
-						/**
+			/**
 			 * @brief Function to add a generic transform broadcaster to the map of handlers
 			 * @param recipient the state that contain the data to be published
 			 * @param always_active if true, always publish the transform as soon as the node is configured
 			 */
 			void add_transform_broadcaster(const StateRepresentation::CartesianPose& recipient,
+				                           bool always_active=false,
+				                           int queue_size=10);
+
+			/**
+			 * @brief Function to add a generic transform broadcaster to the map of handlers
+			 * @param recipient the state that contain the data to be published
+			 * @param always_active if true, always publish the transform as soon as the node is configured
+			 */
+			void add_transform_broadcaster(const std::shared_ptr<StateRepresentation::ParameterInterface>& recipient,
 				                           bool always_active=false,
 				                           int queue_size=10);
 
@@ -490,6 +517,11 @@ namespace Modulo
 			return this->period_;
 		}
 
+		inline const std::shared_ptr<StateRepresentation::ParameterInterface> Cell::get_parameter_pointer(const std::string& parameter_name) const
+		{
+			return this->parameters_.at(parameter_name);
+		}
+
 		template <typename T>
 		void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter)
 		{
@@ -568,6 +600,21 @@ namespace Modulo
 			                                 int queue_size)
 		{
 			this->add_transform_broadcaster(std::make_shared<StateRepresentation::CartesianPose>(recipient), period, always_active, queue_size);
+		}
+
+		template <typename DurationT>
+		void Cell::add_transform_broadcaster(const std::shared_ptr<StateRepresentation::ParameterInterface>& recipient,
+			                                 const std::chrono::duration<int64_t, DurationT>& period,
+			                                 bool always_active,
+			                                 int queue_size)
+		{
+			using namespace Communication::MessagePassing;
+			using namespace StateRepresentation;
+			auto parameter = std::static_pointer_cast<Parameter<CartesianPose>>(recipient);
+			auto handler = std::make_shared<PublisherHandler<Parameter<CartesianPose>, tf2_msgs::msg::TFMessage>>(parameter, this->get_clock(), this->mutex_);
+			handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
+			handler->set_timer(this->create_wall_timer(period, std::bind(&PublisherHandler<Parameter<CartesianPose>, tf2_msgs::msg::TFMessage>::publish_callback, handler)));
+			this->handlers_.insert(std::make_pair(parameter->get_value().get_name() + "_in_" + parameter->get_value().get_reference_frame() + "_broadcaster", std::make_pair(handler, always_active)));
 		}
 
 		template <typename DurationT>

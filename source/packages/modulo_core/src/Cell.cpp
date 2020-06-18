@@ -32,7 +32,7 @@ namespace Modulo
 			std::lock_guard<std::mutex> lock(*this->mutex_);
 			std::string tprefix = (prefix != "") ? prefix + "_" : "";
 			parameter->set_name(tprefix + parameter->get_name());
-			this->parameters_.push_back(parameter);
+			this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
 			this->declare_parameter(parameter->get_name(), parameter->get_value());
 		}
 
@@ -54,7 +54,7 @@ namespace Modulo
 			std::lock_guard<std::mutex> lock(*this->mutex_);
 			std::string tprefix = (prefix != "") ? prefix + "_" : "";
 			parameter->set_name(tprefix + parameter->get_name());
-			this->parameters_.push_back(parameter);
+			this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
 			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().StateRepresentation::CartesianState::to_std_vector());
 		}
 
@@ -64,7 +64,7 @@ namespace Modulo
 			std::lock_guard<std::mutex> lock(*this->mutex_);
 			std::string tprefix = (prefix != "") ? prefix + "_" : "";
 			parameter->set_name(tprefix + parameter->get_name());
-			this->parameters_.push_back(parameter);
+			this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
 			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().StateRepresentation::CartesianPose::to_std_vector());
 		}
 
@@ -74,7 +74,7 @@ namespace Modulo
 			std::lock_guard<std::mutex> lock(*this->mutex_);
 			std::string tprefix = (prefix != "") ? prefix + "_" : "";
 			parameter->set_name(tprefix + parameter->get_name());
-			this->parameters_.push_back(parameter);
+			this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
 			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().StateRepresentation::JointState::to_std_vector());
 		}
 
@@ -84,7 +84,7 @@ namespace Modulo
 			std::lock_guard<std::mutex> lock(*this->mutex_);
 			std::string tprefix = (prefix != "") ? prefix + "_" : "";
 			parameter->set_name(tprefix + parameter->get_name());
-			this->parameters_.push_back(parameter);
+			this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
 			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().StateRepresentation::JointPositions::to_std_vector());
 		}
 
@@ -94,7 +94,7 @@ namespace Modulo
 			std::lock_guard<std::mutex> lock(*this->mutex_);
 			std::string tprefix = (prefix != "") ? prefix + "_" : "";
 			parameter->set_name(tprefix + parameter->get_name());
-			this->parameters_.push_back(parameter);
+			this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
 			this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
 		}
 
@@ -104,7 +104,7 @@ namespace Modulo
 			std::lock_guard<std::mutex> lock(*this->mutex_);
 			std::string tprefix = (prefix != "") ? prefix + "_" : "";
 			parameter->set_name(tprefix + parameter->get_name());
-			this->parameters_.push_back(parameter);
+			this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
 			std::vector<double> value = std::vector<double>(parameter->get_value().data(), parameter->get_value().data() + parameter->get_value().size());
 			this->declare_parameter<std::vector<double>>(parameter->get_name(), value);
 		}
@@ -321,6 +321,13 @@ namespace Modulo
 			this->add_transform_broadcaster(recipient, this->get_period(), always_active, queue_size);
 		}
 
+		void Cell::add_transform_broadcaster(const std::shared_ptr<StateRepresentation::ParameterInterface>& recipient,
+			                                 bool always_active,
+			                                 int queue_size)
+		{
+			this->add_transform_broadcaster(recipient, this->get_period(), always_active, queue_size);
+		}
+
 		void Cell::send_transform(const StateRepresentation::CartesianState& transform, const std::string& name) const
 		{
 			if (!this->configured_) throw Exceptions::UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
@@ -521,7 +528,7 @@ namespace Modulo
 				auto start = std::chrono::steady_clock::now();
 				try
 				{
-					for (auto& param : this->parameters_)
+					for (auto& [key, param] : this->parameters_)
 					{
 						switch (param->get_type())
 						{

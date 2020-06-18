@@ -13,6 +13,8 @@
 #include <modulo_msgs/msg/jacobian.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <std_msgs/msg/float64.hpp>
+#include <std_msgs/msg/bool.hpp>
+#include <std_msgs/msg/string.hpp>
 #include <tf2_msgs/msg/tf_message.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <rcutils/logging_macros.h>
@@ -238,13 +240,8 @@ namespace Modulo
 					 * @param state The state to read from
 					 * @param time The time of the message
 					 */
-					template <typename T, typename U>
-					void write_msg(U & msg, const StateRepresentation::Parameter<T> & state, const rclcpp::Time &)
-					{
-						using namespace StateRepresentation::Exceptions;
-						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
-						msg.data = state.get_value();
-					}
+					template <typename U, typename T>
+					void write_msg(U & msg, const StateRepresentation::Parameter<T> & state, const rclcpp::Time &);
 				}
 			}
 		}
