@@ -451,7 +451,7 @@ namespace Modulo
 			/**
 			 * @brief Function computing one step of calculation. It is called periodically in the run function.
 			 */
-			virtual void step() = 0;
+			virtual void step();
 
 			/**
 			 * @brief Main loop that will be executed in parallel of the rest. At each time step it calls the step function.
