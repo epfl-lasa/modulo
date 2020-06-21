@@ -212,6 +212,20 @@ namespace StateRepresentation
 		const CartesianState copy() const;
 
 		/**
+	 	 * @brief Overload the *= operator with another state by deriving the equations of motions
+	 	 * @param state the state to compose with corresponding to b_S_c
+	 	 * @return the CartesianState corresponding f_S_c = f_S_b * b_S_c (assuming this is f_S_b)
+	     */
+		CartesianState& operator*=(const CartesianState& state);
+
+		/**
+	 	 * @brief Overload the * operator with another state by deriving the equations of motions
+	 	 * @param state the state to compose with corresponding to b_S_c
+	 	 * @return the CartesianState corresponding f_S_c = f_S_b * b_S_c (assuming this is f_S_b)
+	     */
+		const CartesianState operator*(const CartesianState& state) const;
+
+		/**
 	 	 * @brief Overload the *= operator with a scalar
 	 	 * @param lambda the scalar to multiply with
 	 	 * @return the CartesianState multiply by lambda
@@ -224,6 +238,12 @@ namespace StateRepresentation
 	 	 * @return the CartesianState multiply by lambda
 	     */
 		const CartesianState operator*(double lambda) const;
+
+		/**
+		 * @brief compute the inverse of the current CartesianState
+		 * @return the inverse corresponding to b_S_f (assuming this is f_S_b) 
+		 */
+		const CartesianState inverse() const;
 
 		/**
 		 * @brief Compute the distance between two states as the sum of distances between each features

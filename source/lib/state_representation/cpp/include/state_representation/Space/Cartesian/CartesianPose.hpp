@@ -112,9 +112,9 @@ namespace StateRepresentation
 		const CartesianPose operator*(const CartesianPose& pose) const;
 
 		/**
-	 	 * @brief Overload the *= operator with a CartesianState
-	 	 * @param state CartesianState to multiply with
-	 	 * @return the current CartesianPose multiply by the CartesianState given in argument
+	 	 * @brief Overload the * operator
+	 	 * @param pose CartesianPose to multiply with
+	 	 * @return the current CartesianPose multiply by the CartesianPose given in argument
 	     */
 		const CartesianState operator*(const CartesianState& state) const;
 
@@ -166,12 +166,6 @@ namespace StateRepresentation
 	 	 * @return the CartesianPose multiply by lambda
 	     */
 		const CartesianPose operator*(double lambda) const;
-
-		/**
-		 * @brief compute the inverse of the current CartesianPose
-		 * @return the inverse
-		 */
-		const CartesianPose inverse() const;
 
 		/**
 		 * @brief Return a copy of the CartesianPose

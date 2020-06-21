@@ -70,40 +70,23 @@ namespace StateRepresentation
 
 	CartesianPose& CartesianPose::operator*=(const CartesianPose& pose)
 	{
-		// sanity check
-		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
-		if(pose.is_empty()) throw EmptyStateException(pose.get_name() + " state is empty");
-		if(this->get_name() != pose.get_reference_frame()) throw IncompatibleReferenceFramesException("Expected " + this->get_name() + ", got " + pose.get_reference_frame());
-		// operation
-		this->set_position(this->get_position() + this->get_orientation() * pose.get_position());
-		Eigen::Quaterniond orientation = (this->get_orientation().dot(pose.get_orientation()) > 0) ? pose.get_orientation() : Eigen::Quaterniond(-pose.get_orientation().coeffs());
-		this->set_orientation(this->get_orientation() * orientation);
-		this->set_name(pose.get_name());
+		this->CartesianState::operator*=(pose);
 		return (*this);
 	}
 
 	const CartesianPose CartesianPose::operator*(const CartesianPose& pose) const
 	{
-		CartesianPose result(*this);
-		result *= pose;
-		return result;
+		return this->CartesianState::operator*(pose);
+	}
+
+	const CartesianState CartesianPose::operator*(const CartesianState& state) const
+	{
+		return this->CartesianState::operator*(state);	
 	}
 
 	const Eigen::Vector3d CartesianPose::operator*(const Eigen::Vector3d& vector) const
 	{
         return this->get_orientation() * vector + this->get_position();
-	}
-
-	const CartesianState CartesianPose::operator*(const CartesianState& state) const
-	{
-		CartesianState result = *this * static_cast<CartesianPose>(state);
-		result.set_linear_velocity(this->get_orientation() * state.get_linear_velocity());
-		result.set_angular_velocity(this->get_orientation() * state.get_angular_velocity());
-		result.set_linear_acceleration(this->get_orientation() * state.get_linear_acceleration());
-		result.set_angular_acceleration(this->get_orientation() * state.get_angular_acceleration());
-		result.set_force(this->get_orientation() * state.get_force());
-		result.set_torque(this->get_orientation() * state.get_torque());
-		return result;
 	}
 
 	CartesianPose& CartesianPose::operator+=(const CartesianPose& pose)
@@ -165,19 +148,6 @@ namespace StateRepresentation
 	{
 		CartesianPose result(*this);
 		result *= lambda;
-		return result;
-	}
-
-	const CartesianPose CartesianPose::inverse() const
-	{
-		CartesianPose result(*this);
-		result.set_orientation(this->get_orientation().conjugate());
-		result.set_position(result.get_orientation() * (- this->get_position()));
-		// inverse name and reference frame
-		std::string ref = result.get_reference_frame();
-		std::string name = result.get_name();
-		result.set_reference_frame(name);
-		result.set_name(ref);
 		return result;
 	}
 
