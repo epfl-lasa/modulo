@@ -103,11 +103,11 @@ namespace StateRepresentation
 		this->set_position(f_P_b + f_R_b * b_P_c);
 		this->set_orientation(f_R_b * b_R_c);
 		// twist
-		this->set_linear_velocity(f_v_b + f_R_b * b_v_c + f_omega_b.cross(b_P_c));
+		this->set_linear_velocity(f_v_b + f_R_b * b_v_c + f_omega_b.cross(f_R_b * b_P_c));
 		this->set_angular_velocity(f_omega_b + f_R_b * b_omega_c);
 		// acceleration
-		this->set_linear_acceleration(f_a_b + f_R_b * b_a_c + f_alpha_b.cross(b_P_c) + 2 * f_omega_b.cross(b_v_c) + f_omega_b.cross(f_omega_b.cross(b_P_c)));
-		this->set_angular_acceleration(f_alpha_b + f_R_b * b_alpha_c + f_omega_b.cross(b_omega_c));
+		this->set_linear_acceleration(f_a_b + f_R_b * b_a_c + f_alpha_b.cross(f_R_b * b_P_c) + 2 * f_omega_b.cross(f_R_b * b_v_c) + f_omega_b.cross(f_omega_b.cross(f_R_b * b_P_c)));
+		this->set_angular_acceleration(f_alpha_b + f_R_b * b_alpha_c + f_omega_b.cross(f_R_b * b_omega_c));
 		// wrench
 		//TODO
 		return (*this);
