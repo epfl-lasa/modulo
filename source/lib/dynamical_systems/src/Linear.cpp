@@ -62,7 +62,7 @@ namespace DynamicalSystems
 
 	template<>
 	Linear<StateRepresentation::CartesianState>::Linear(const StateRepresentation::CartesianState& attractor, double iso_gain):
-	DynamicalSystem<StateRepresentation::CartesianState>(),
+	DynamicalSystem<StateRepresentation::CartesianState>(StateRepresentation::CartesianPose::Identity(attractor.get_reference_frame())),
 	attractor_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::CartesianState>>(StateRepresentation::Parameter<StateRepresentation::CartesianPose>("attractor", attractor))),
 	gain_(std::make_shared<StateRepresentation::Parameter<Eigen::MatrixXd>>("gain"))
 	{
@@ -80,7 +80,7 @@ namespace DynamicalSystems
 
 	template<>
 	Linear<StateRepresentation::CartesianState>::Linear(const StateRepresentation::CartesianState& attractor, const std::vector<double>& diagonal_coefficients):
-	DynamicalSystem<StateRepresentation::CartesianState>(),
+	DynamicalSystem<StateRepresentation::CartesianState>(StateRepresentation::CartesianPose::Identity(attractor.get_reference_frame())),
 	attractor_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::CartesianState>>(StateRepresentation::Parameter<StateRepresentation::CartesianPose>("attractor", attractor))),
 	gain_(std::make_shared<StateRepresentation::Parameter<Eigen::MatrixXd>>("gain"))
 	{
@@ -98,7 +98,7 @@ namespace DynamicalSystems
 
 	template<>
 	Linear<StateRepresentation::CartesianState>::Linear(const StateRepresentation::CartesianState& attractor, const Eigen::MatrixXd& gain_matrix):
-	DynamicalSystem<StateRepresentation::CartesianState>(),
+	DynamicalSystem<StateRepresentation::CartesianState>(StateRepresentation::CartesianPose::Identity(attractor.get_reference_frame())),
 	attractor_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::CartesianState>>(StateRepresentation::Parameter<StateRepresentation::CartesianPose>("attractor", attractor))),
 	gain_(std::make_shared<StateRepresentation::Parameter<Eigen::MatrixXd>>("gain"))
 	{
