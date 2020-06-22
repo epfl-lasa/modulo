@@ -20,19 +20,38 @@ namespace DynamicalSystems
 	template<class S>
 	class DynamicalSystem 
 	{
+	private:
+		S reference_frame_;
+
+	protected:
+		/**
+		 * @brief Compute the dynamics of the input state.
+		 * Internal function, to be redefined based on the
+		 * type of dynamical system, called by the evaluate
+		 * function
+		 * @param state the input state
+		 * @return the output state
+		 */
+		virtual const S compute_dynamics(const S& state) const=0;
+
 	public:
 		/**
-		 * @brief Constructor with a provided gain
-		 * @param attractor attractor of the dynamical system
+		 * @brief Empty constructor
 		 */
 		explicit DynamicalSystem();
+
+		/**
+		 * @brief Constructor with a provided reference frame
+		 * @param reference_frame the reference frame in which the dynamics is computed
+		 */
+		explicit DynamicalSystem(const S& reference_frame);
 
 		/**
 		 * @brief Evaluate the value of the dynamical system at a given state
 		 * @param state state at wich to perform the evaluation
 		 * @return the state (velocity) to move toward the attractor
 		 */
-		virtual const S evaluate(const S& state) const=0;
+		const S evaluate(const S& state) const;
 
 		/**
 		 * @brief Return a list of all the parameters of the dynamical system
@@ -40,15 +59,14 @@ namespace DynamicalSystems
 		 */
 		virtual const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> get_parameters() const;
 
-		/**
-		 * @brief Get the reference frame in wich the dynamic is expressed,
-		 * default world, not relevent for dynamic in joint state
-		 */
-		virtual const std::string get_reference_frame() const;
+		const S& get_reference_frame() const;
+
+		void set_reference_frame(const S& reference_frame);
 	};
 
 	template<class S>
-	DynamicalSystem<S>::DynamicalSystem()
+	DynamicalSystem<S>::DynamicalSystem(const S& reference_frame):
+	reference_frame_(reference_frame)
 	{}
 
 	template<class S>
@@ -59,8 +77,14 @@ namespace DynamicalSystems
 	}
 
 	template<class S>
-	inline const std::string DynamicalSystem<S>::get_reference_frame() const
+	inline const S& DynamicalSystem<S>::get_reference_frame() const
 	{
-		return "world";
+		return this->reference_frame_;
+	}
+
+	template<class S>
+	inline void DynamicalSystem<S>::set_reference_frame(const S& reference_frame)
+	{
+		this->reference_frame_ = reference_frame;
 	}
 }

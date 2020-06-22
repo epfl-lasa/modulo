@@ -27,6 +27,17 @@ namespace DynamicalSystems
 		std::shared_ptr<StateRepresentation::Parameter<double>> gain_; ///< gain associate to the system
 		std::shared_ptr<StateRepresentation::Parameter<double>> circular_velocity_; ///< velocity at wich to navigate the limit cycle
 
+	protected:
+		/**
+		 * @brief Compute the dynamics of the input state.
+		 * Internal function, to be redefined based on the 
+		 * type of dynamical system, called by the evaluate
+		 * function
+		 * @param state the input state
+		 * @return the output state
+		 */
+		const StateRepresentation::CartesianState compute_dynamics(const StateRepresentation::CartesianState& state) const;
+
 	public:
 		/**
 		 * @brief Default constructor with center and fixed radius
@@ -126,23 +137,10 @@ namespace DynamicalSystems
 		void set_limit_cycle(const StateRepresentation::Ellipsoid& limit_cycle);
 
 		/**
-		 * @brief Evaluate the value of the dynamical system at a given state
-		 * @param state state at wich to perform the evaluation
-		 * @return the state (velocity) to move toward the center
-		 */
-		const StateRepresentation::CartesianState evaluate(const StateRepresentation::CartesianState& state) const override;
-
-		/**
 		 * @brief Return a list of all the parameters of the dynamical system
 		 * @return the list of parameters
 		 */
 		const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> get_parameters() const override;
-
-		/**
-		 * @brief Get the reference frame in wich the dynamic is expressed,
-		 * default world, not relevent for dynamic in joint state
-		 */
-		const std::string get_reference_frame() const override;
 	};
 
 	inline const StateRepresentation::CartesianPose& Circular::get_center() const
@@ -208,10 +206,5 @@ namespace DynamicalSystems
 	inline void Circular::set_limit_cycle(const StateRepresentation::Ellipsoid& limit_cycle)
 	{
 		this->limit_cycle_->set_value(limit_cycle);
-	}
-
-	inline const std::string Circular::get_reference_frame() const
-	{
-		return this->get_center().get_reference_frame();
 	}
 }

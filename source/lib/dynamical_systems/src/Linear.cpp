@@ -115,7 +115,7 @@ namespace DynamicalSystems
 	}
 
 	template<>
-	const StateRepresentation::CartesianState Linear<StateRepresentation::CartesianState>::evaluate(const StateRepresentation::CartesianState& state) const
+	const StateRepresentation::CartesianState Linear<StateRepresentation::CartesianState>::compute_dynamics(const StateRepresentation::CartesianState& state) const
 	{
 		StateRepresentation::CartesianTwist twist = static_cast<const StateRepresentation::CartesianPose&>(state) - static_cast<const StateRepresentation::CartesianPose&>(this->get_attractor());
 		twist *= -this->get_gain();
@@ -123,7 +123,7 @@ namespace DynamicalSystems
 	}
 
 	template<>
-	const StateRepresentation::JointState Linear<StateRepresentation::JointState>::evaluate(const StateRepresentation::JointState& state) const
+	const StateRepresentation::JointState Linear<StateRepresentation::JointState>::compute_dynamics(const StateRepresentation::JointState& state) const
 	{
 		StateRepresentation::JointState positions = - this->get_gain() * (state - this->get_attractor());
 		StateRepresentation::JointState velocities(state.get_name(), state.get_names());

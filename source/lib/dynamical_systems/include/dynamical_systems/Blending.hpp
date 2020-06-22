@@ -32,6 +32,17 @@ namespace DynamicalSystems
 		 */
 		void normalize_weights();
 
+	protected:
+		/**
+		 * @brief Compute the dynamics of the input state.
+		 * Internal function, to be redefined based on the 
+		 * type of dynamical system, called by the evaluate
+		 * function
+		 * @param state the input state
+		 * @return the output state
+		 */
+		const S compute_dynamics(const S& state) const;
+
 	public:
 		/**
 		 * @brief Empty coinstructor 
@@ -82,20 +93,6 @@ namespace DynamicalSystems
 		 * @normalize_weights if true normalize the weight vector after adding the system
 		 */
 		void set_weights(const std::vector<unsigned int>& idx, const std::vector<double>& weights, bool normalize_weights=true);
-
-		/**
-		 * @brief Evaluate the value of the dynamical system at a given state
-		 * @param state state at wich to perform the evaluation
-		 * @return the state (velocity) to move toward the attractor
-		 */
-		const S evaluate(const S& state) const override;
-
-		/**
-		 * @brief Evaluate the value of the dynamical system at a given state
-		 * @param state state at wich to perform the evaluation
-		 * @return the state (velocity) to move toward the attractor
-		 */
-		const S evaluate(const std::shared_ptr<S>& state) const override;
 	};
 
 	template <class S>
@@ -163,7 +160,7 @@ namespace DynamicalSystems
 	}
 
 	template <class S>
-	const S Blending<S>::evaluate(const S& state) const
+	const S Blending<S>::compute_dynamics(const S& state) const
 	{
 		S output;
 		for (unsigned int i=0; i<ds.size(); ++i)

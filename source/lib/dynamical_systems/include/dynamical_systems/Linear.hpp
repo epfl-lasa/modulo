@@ -29,6 +29,17 @@ namespace DynamicalSystems
 		std::shared_ptr<StateRepresentation::Parameter<S>> attractor_; ///< attractor of the dynamical system in the space
 		std::shared_ptr<StateRepresentation::Parameter<Eigen::MatrixXd>> gain_; ///< gain associate to the system
 	
+	protected:
+		/**
+		 * @brief Compute the dynamics of the input state.
+		 * Internal function, to be redefined based on the 
+		 * type of dynamical system, called by the evaluate
+		 * function
+		 * @param state the input state
+		 * @return the output state
+		 */
+		const S compute_dynamics(const S& state) const;
+
 	public:
 		/**
 		 * @brief Constructor with specified attractor and iso gain
@@ -88,23 +99,10 @@ namespace DynamicalSystems
 		void set_gain(const Eigen::MatrixXd& gain_matrix);
 
 		/**
-		 * @brief Evaluate the value of the dynamical system at a given state
-		 * @param state state at wich to perform the evaluation
-		 * @return the state (velocity) to move toward the attractor
-		 */
-		const S evaluate(const S& state) const override;
-
-		/**
 		 * @brief Return a list of all the parameters of the dynamical system
 		 * @return the list of parameters
 		 */
 		const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> get_parameters() const;
-
-		/**
-		 * @brief Get the reference frame in wich the dynamic is expressed,
-		 * default world, not relevent for dynamic in joint state
-		 */
-		const std::string get_reference_frame() const override;
 	};
 
 	template<class S>
@@ -132,17 +130,5 @@ namespace DynamicalSystems
 		param_list.push_back(this->attractor_);
 		param_list.push_back(this->gain_);
 		return param_list;
-	}
-
-	template<>
-	inline const std::string Linear<StateRepresentation::CartesianState>::get_reference_frame() const
-	{
-		return this->get_attractor().get_reference_frame();
-	}
-
-	template<>
-	inline const std::string Linear<StateRepresentation::JointState>::get_reference_frame() const
-	{
-		return "";
 	}
 }
