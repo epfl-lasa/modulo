@@ -14,6 +14,18 @@
 
 namespace StateRepresentation
 {
+	class CartesianState;
+
+	/**
+	 * @brief compute the distance between two CartesianStates
+	 * @param s1 the first CartesianState
+	 * @param s2 the second CartesianState
+	 * @param type of the distance between position, orientation, linear_velocity, etc...
+	 * default all for full distance across all dimensions
+	 * @return the distance beteen the two states
+	 */
+	double dist(const CartesianState& s1, const CartesianState& s2, const std::string& distance_type="all");
+
 	/**
 	 * @class CartesianState
 	 * @brief Class to represent a state in Cartesian space
@@ -248,9 +260,11 @@ namespace StateRepresentation
 		/**
 		 * @brief Compute the distance between two states as the sum of distances between each features
 		 * @param state the second state
+		 * @param type of the distance between position, orientation, linear_velocity, etc...
+		 * default all for full distance across all dimensions
 		 * @return dist the distance value as a double
 		 */
-		double dist(const CartesianState& state) const;
+		double dist(const CartesianState& state, const std::string& distance_type="all") const;
 
 		/**
 	 	 * @brief Overload the ostream operator for printing
@@ -271,9 +285,11 @@ namespace StateRepresentation
 		 * @brief compute the distance between two CartesianStates
 		 * @param s1 the first CartesianState
 		 * @param s2 the second CartesianState
+		 * @param type of the distance between position, orientation, linear_velocity, etc...
+		 * default all for full distance across all dimensions
 		 * @return the distance beteen the two states
 		 */
-		friend double dist(const CartesianState& s1, const CartesianState& s2);
+		friend double dist(const CartesianState& s1, const CartesianState& s2, const std::string& distance_type);
 
 		/**
 		 * @brief Return the state as a std vector of floats
