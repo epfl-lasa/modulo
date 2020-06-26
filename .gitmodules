@@ -5,7 +5,7 @@
 	path = source/lib/protocol_buffers/lib/googletest
 	url = https://github.com/google/googletest.git
 [submodule "source/lib/state_representation/cpp/lib/googletest"]
-	path = source/lib/state_representation/cpp/lib/googletest
+	path = source/lib/state_representation/lib/googletest
 	url = https://github.com/google/googletest.git
 [submodule "source/lib/machine_learning_tools/lib/googletest"]
 	path = source/lib/machine_learning_tools/lib/googletest
