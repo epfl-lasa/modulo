@@ -3,7 +3,6 @@
 #include "state_representation/Space/Cartesian/CartesianWrench.hpp"
 #include <gtest/gtest.h>
 #include <fstream>
-#include <zmq.hpp>
 #include <unistd.h>
 
 using namespace StateRepresentation;

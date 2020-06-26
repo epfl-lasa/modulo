@@ -1,7 +1,6 @@
 #include "dynamical_systems/Linear.hpp"
 #include <vector>
 #include <gtest/gtest.h>
-#include <zmq.hpp>
 #include <unistd.h>
 
 

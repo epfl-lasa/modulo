@@ -1,6 +1,5 @@
 #include "dynamical_systems/Circular.hpp"
 #include <gtest/gtest.h>
-#include <zmq.hpp>
 #include <unistd.h>
 
 
