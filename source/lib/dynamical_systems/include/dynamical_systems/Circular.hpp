@@ -80,7 +80,7 @@ namespace DynamicalSystems
 		 * @brief Getter of the rotation angle attribute
 		 * @return The rotation agnle value 
 		 */
-		void set_rotation_angle(double gain);
+		void set_rotation_angle(double angle);
 
 		/**
 		 * @brief Setterthe rotation angle attribute
