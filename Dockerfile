@@ -1,6 +1,6 @@
-ARG BASE_DISTRIB=foxy
+ARG ROS_VERSION=foxy
 
-FROM ros2_ws:${BASE_DISTRIB}
+FROM ros2_ws:${ROS_VERSION}
 
 # import previously downloaded packages
 RUN mkdir -p ${HOME}/modulo_lib
