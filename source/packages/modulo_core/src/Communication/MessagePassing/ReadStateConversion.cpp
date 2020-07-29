@@ -107,9 +107,9 @@ namespace Modulo
 					void read_msg(StateRepresentation::JointState & state, const sensor_msgs::msg::JointState & msg)
 					{
 						state.set_names(msg.name);
-						state.set_positions(Eigen::VectorXd::Map(msg.position.data(), msg.position.size()));
-						state.set_velocities(Eigen::VectorXd::Map(msg.velocity.data(), msg.velocity.size()));
-						state.set_torques(Eigen::VectorXd::Map(msg.effort.data(), msg.effort.size()));
+						if (!msg.position.empty()) state.set_positions(Eigen::VectorXd::Map(msg.position.data(), msg.position.size()));
+						if (!msg.velocity.empty()) state.set_velocities(Eigen::VectorXd::Map(msg.velocity.data(), msg.velocity.size()));
+						if (!msg.effort.empty()) state.set_torques(Eigen::VectorXd::Map(msg.effort.data(), msg.effort.size()));
 					}
 
 					void read_msg(StateRepresentation::Jacobian & state, const modulo_msgs::msg::Jacobian & msg)
