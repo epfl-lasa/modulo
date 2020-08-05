@@ -78,7 +78,83 @@ namespace StateRepresentation
 		return result;
 	}
 
-	double CartesianState::dist(const CartesianState& state) const
+	CartesianState& CartesianState::operator*=(const CartesianState& state)
+	{
+		// sanity check
+		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
+		if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty");
+		if(this->get_name() != state.get_reference_frame()) throw IncompatibleReferenceFramesException("Expected " + this->get_name() + ", got " + state.get_reference_frame());
+		this->set_name(state.get_name());
+		// intermediate variables for f_S_b
+		Eigen::Vector3d f_P_b = this->get_position();
+		Eigen::Quaterniond f_R_b = this->get_orientation();
+		Eigen::Vector3d f_v_b = this->get_linear_velocity();
+		Eigen::Vector3d f_omega_b = this->get_angular_velocity();
+		Eigen::Vector3d f_a_b = this->get_linear_acceleration();
+		Eigen::Vector3d f_alpha_b = this->get_angular_acceleration();
+		// intermediate variables for b_S_c
+		Eigen::Vector3d b_P_c = state.get_position();
+		Eigen::Quaterniond b_R_c = (this->get_orientation().dot(state.get_orientation()) > 0) ? state.get_orientation() : Eigen::Quaterniond(-state.get_orientation().coeffs());
+		Eigen::Vector3d b_v_c = state.get_linear_velocity();
+		Eigen::Vector3d b_omega_c = state.get_angular_velocity();
+		Eigen::Vector3d b_a_c = state.get_linear_acceleration();
+		Eigen::Vector3d b_alpha_c = state.get_angular_acceleration();
+		// pose
+		this->set_position(f_P_b + f_R_b * b_P_c);
+		this->set_orientation(f_R_b * b_R_c);
+		// twist
+		this->set_linear_velocity(f_v_b + f_R_b * b_v_c + f_omega_b.cross(f_R_b * b_P_c));
+		this->set_angular_velocity(f_omega_b + f_R_b * b_omega_c);
+		// acceleration
+		this->set_linear_acceleration(f_a_b + f_R_b * b_a_c + f_alpha_b.cross(f_R_b * b_P_c) + 2 * f_omega_b.cross(f_R_b * b_v_c) + f_omega_b.cross(f_omega_b.cross(f_R_b * b_P_c)));
+		this->set_angular_acceleration(f_alpha_b + f_R_b * b_alpha_c + f_omega_b.cross(f_R_b * b_omega_c));
+		// wrench
+		//TODO
+		return (*this);
+	}
+
+	const CartesianState CartesianState::operator*(const CartesianState& state) const
+	{
+		CartesianState result(*this);
+		result *= state;
+		return result;
+	}
+
+	const CartesianState CartesianState::inverse() const
+	{
+		CartesianState result(*this);
+		// inverse name and reference frame
+		std::string ref = result.get_reference_frame();
+		std::string name = result.get_name();
+		result.set_reference_frame(name);
+		result.set_name(ref);
+		// intermediate variables for f_S_b
+		Eigen::Vector3d f_P_b = this->get_position();
+		Eigen::Quaterniond f_R_b = this->get_orientation();
+		Eigen::Vector3d f_v_b = this->get_linear_velocity();
+		Eigen::Vector3d f_omega_b = this->get_angular_velocity();
+		Eigen::Vector3d f_a_b = this->get_linear_acceleration();
+		Eigen::Vector3d f_alpha_b = this->get_angular_acceleration();
+		// computation for b_S_f
+		Eigen::Quaterniond b_R_f = f_R_b.conjugate();
+		Eigen::Vector3d b_P_f = b_R_f * (-f_P_b);
+		Eigen::Vector3d b_v_f = b_R_f * (-f_v_b);
+		Eigen::Vector3d b_omega_f = b_R_f * (-f_omega_b);
+		Eigen::Vector3d b_a_f = b_R_f * f_a_b; // not sure if minus is needed
+		Eigen::Vector3d b_alpha_f = b_R_f * f_alpha_b; // no minus for sure
+		// wrench
+		//TODO
+		// collect the results
+		result.set_position(b_P_f);
+		result.set_orientation(b_R_f);
+		result.set_linear_velocity(b_v_f);
+		result.set_angular_velocity(b_omega_f);
+		result.set_linear_acceleration(b_a_f);
+		result.set_angular_acceleration(b_alpha_f);
+		return result;
+	}
+
+	double CartesianState::dist(const CartesianState& state, const std::string& distance_type) const
 	{
 		// sanity check
 		if(this->is_empty()) throw EmptyStateException(this->get_name() + " state is empty");
@@ -86,20 +162,40 @@ namespace StateRepresentation
 		if(!(this->get_reference_frame() == state.get_reference_frame())) throw IncompatibleReferenceFramesException("The two states do not have the same reference frame");
 		// calculation
 		double result = 0;
-		// euclidean distance for position
-		result += (this->get_position() - state.get_position()).norm();
-		// https://math.stackexchange.com/questions/90081/quaternion-distance for orientation
-		double inner_product = this->get_orientation().dot(state.get_orientation());
-		result += acos(2 * inner_product * inner_product - 1);
-		// distance for velocity
-		result += (this->get_linear_velocity() - state.get_linear_velocity()).norm();
-		result += (this->get_angular_velocity() - state.get_angular_velocity()).norm();
-		// distance for acceleration
-		result += (this->get_linear_acceleration() - state.get_linear_acceleration()).norm();
-		result += (this->get_angular_acceleration() - state.get_angular_acceleration()).norm();
-		// distance for force
-		result += (this->get_force() - state.get_force()).norm();
-		result += (this->get_torque() - state.get_torque()).norm();
+		if (distance_type == "position" || distance_type == "pose" || distance_type == "all")
+		{
+			result += (this->get_position() - state.get_position()).norm();
+		}
+		if (distance_type == "orientation" || distance_type == "pose" || distance_type == "all")
+		{
+			// https://math.stackexchange.com/questions/90081/quaternion-distance for orientation
+			double inner_product = this->get_orientation().dot(state.get_orientation());
+			result += acos(2 * inner_product * inner_product - 1);
+		}
+		if (distance_type == "linear_velocity" || distance_type == "twist" || distance_type == "all")
+		{
+			result += (this->get_linear_velocity() - state.get_linear_velocity()).norm();
+		}
+		if (distance_type == "angular_velocity" || distance_type == "twist" || distance_type == "all")
+		{
+			result += (this->get_angular_velocity() - state.get_angular_velocity()).norm();
+		}
+		if (distance_type == "linear_acceleration" || distance_type == "acceleration" || distance_type == "all")
+		{
+			result += (this->get_linear_acceleration() - state.get_linear_acceleration()).norm();
+		}
+		if (distance_type == "angular_acceleration" || distance_type == "acceleration" || distance_type == "all")
+		{
+			result += (this->get_angular_acceleration() - state.get_angular_acceleration()).norm();
+		}
+		if (distance_type == "force" || distance_type == "wrench" || distance_type == "all")
+		{
+			result += (this->get_force() - state.get_force()).norm();
+		}
+		if (distance_type == "torque" || distance_type == "wrench" || distance_type == "all")
+		{
+			result += (this->get_torque() - state.get_torque()).norm();
+		}
 		return result;
 	}
 
@@ -151,9 +247,9 @@ namespace StateRepresentation
 		return state * lambda;
 	}
 
-	double dist(const CartesianState& s1, const CartesianState& s2)
+	double dist(const CartesianState& s1, const CartesianState& s2, const std::string& distance_type)
 	{
-		return s1.dist(s2);
+		return s1.dist(s2, distance_type);
 	}
 
 	const std::vector<double> CartesianState::to_std_vector() const

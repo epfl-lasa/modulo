@@ -1,4 +1,8 @@
 #include "modulo_core/Cell.hpp"
+#include "state_representation/Space/Cartesian/CartesianState.hpp"
+#include "state_representation/Space/Cartesian/CartesianPose.hpp"
+#include "state_representation/Space/Cartesian/CartesianTwist.hpp"
+#include "dynamical_systems/Circular.hpp"
 #include "dynamical_systems/Linear.hpp"
 #include "rcutils/cmdline_parser.h"
 #include <eigen3/Eigen/Core>
@@ -7,25 +11,29 @@
 
 namespace
 {	
-	class LinearMotionGenerator : public Modulo::Core::Cell
+	class MotionGenerator : public Modulo::Core::Cell
 	{
 	private:
+		std::shared_ptr<StateRepresentation::CartesianState> object_state;
 		std::shared_ptr<StateRepresentation::CartesianPose> current_pose;
 		std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
-		DynamicalSystems::Linear<StateRepresentation::CartesianState> motion_generator;
+		DynamicalSystems::Circular motion_generator;
 
 	public:
-		explicit LinearMotionGenerator(const std::string & node_name, const std::chrono::milliseconds & period) :
+		explicit MotionGenerator(const std::string & node_name, const std::chrono::milliseconds & period) :
 		Cell(node_name, period),
-		current_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
-		desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
-		motion_generator(StateRepresentation::CartesianPose::Random("robot_test"), 1.0)
+		object_state(std::make_shared<StateRepresentation::CartesianState>("object", "world")),
+		current_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", "world")),
+		desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test", "world")),
+		motion_generator(StateRepresentation::CartesianPose("robot_test_attractor", 0., 0., 0., "object"))
 		{
 			this->add_parameters(this->motion_generator.get_parameters());
 		}
 
 		bool on_configure()
 		{
+			this->add_subscription<geometry_msgs::msg::PoseStamped>("/object/pose", this->object_state);
+			this->add_subscription<geometry_msgs::msg::TwistStamped>("/object/twist", this->object_state);
 			this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->current_pose);
 			this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
 			return true;
@@ -36,17 +44,15 @@ namespace
 			if(!this->current_pose->is_empty())
 			{
 				*this->desired_twist = this->motion_generator.evaluate(*this->current_pose);
-				// change attractor if previous was reached
-				if(this->current_pose->dist(this->motion_generator.get_attractor()) < 1e-3)
-				{
-					this->set_parameter_value("attractor", StateRepresentation::CartesianPose::Random("robot_test"));
-				}
 			}
 			else
 			{
 				this->desired_twist->initialize();
 			}
-			this->send_transform(this->motion_generator.get_attractor(), "attractor");
+			if(!this->object_state->is_empty())
+			{
+				this->motion_generator.set_reference_frame(*this->object_state);
+			}
 		}
 	};
 
@@ -82,6 +88,52 @@ namespace
 		}
 	};
 
+	class SimulatedObject : public Modulo::Core::Cell
+	{
+	private:
+		std::shared_ptr<StateRepresentation::CartesianPose> object_pose;
+		std::shared_ptr<StateRepresentation::CartesianTwist> object_twist;
+		DynamicalSystems::Linear<StateRepresentation::CartesianState> motion_generator;
+		std::chrono::milliseconds dt;
+		double sign;
+
+	public:
+		explicit SimulatedObject(const std::string & node_name, const std::chrono::milliseconds & period):
+		Cell(node_name, period),
+		object_pose(std::make_shared<StateRepresentation::CartesianPose>(StateRepresentation::CartesianPose::Identity("object"))),
+		object_twist(std::make_shared<StateRepresentation::CartesianTwist>(StateRepresentation::CartesianTwist("object"))),
+		motion_generator(StateRepresentation::CartesianPose("object_attractor", 2., 0., 0.), 1.0),
+		dt(period),
+		sign(-1)
+		{
+			this->add_parameters(this->motion_generator.get_parameters());
+		}
+
+		bool on_configure()
+		{
+			this->add_publisher<geometry_msgs::msg::PoseStamped>("/object/pose", this->object_pose);
+			this->add_publisher<geometry_msgs::msg::TwistStamped>("/object/twist", this->object_twist);
+			return true;
+		}
+
+		void step()
+		{
+			// compute the dynamics of the object
+			*this->object_twist = this->motion_generator.evaluate(*this->object_pose);
+			this->object_twist->set_angular_velocity(Eigen::Vector3d(0.2, 0., 0.));
+			this->object_twist->clamp(0.5, 0.2);
+			*this->object_pose = dt * *this->object_twist + *this->object_pose;
+
+			// change attractor if previous was reached
+			if(this->object_pose->dist(this->motion_generator.get_attractor()) < 1e-3)
+			{
+				this->set_parameter_value("attractor", StateRepresentation::CartesianPose("object_attractor", sign * 2., 0., 0.));
+				sign *= -1;
+			}
+			this->send_transform(*this->object_pose, "object");
+		}
+	};
+
 	class SimulatedRobotInterface : public Modulo::Core::Cell
 	{
 	private:
@@ -92,7 +144,7 @@ namespace
 	public:
 		explicit SimulatedRobotInterface(const std::string & node_name, const std::chrono::milliseconds & period):
 		Cell(node_name, period),
-		robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d(1.18, 0, 1.6), Eigen::Quaterniond(0.73, 0, 0.68, 0))),
+		robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom())),
 		desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
 		dt(period)
 		{}
@@ -100,7 +152,7 @@ namespace
 		bool on_configure()
 		{
 			this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
-			this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose, 0);
+			this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose);
 			return true;
 		}
 
@@ -130,15 +182,17 @@ int main(int argc, char * argv[])
 
 	rclcpp::init(argc, argv);
 
-	rclcpp::executors::SingleThreadedExecutor exe;
+	rclcpp::executors::MultiThreadedExecutor exe;
 
-	std::shared_ptr<LinearMotionGenerator> lmg = std::make_shared<LinearMotionGenerator>("motion_generator", 1ms);
+	std::shared_ptr<MotionGenerator> lmg = std::make_shared<MotionGenerator>("motion_generator", 1ms);
 	std::shared_ptr<ConsoleVisualizer> cv = std::make_shared<ConsoleVisualizer>("visualizer", 100ms);
 	std::shared_ptr<SimulatedRobotInterface> sri = std::make_shared<SimulatedRobotInterface>("robot_interface", 1ms);
+	std::shared_ptr<SimulatedObject> so = std::make_shared<SimulatedObject>("simulated_object", 1ms);
 
 	exe.add_node(lmg->get_node_base_interface());
 	exe.add_node(cv->get_node_base_interface());
 	exe.add_node(sri->get_node_base_interface());
+	exe.add_node(so->get_node_base_interface());
 
 	exe.spin();
 

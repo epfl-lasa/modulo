@@ -10,9 +10,11 @@
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <modulo_msgs/msg/jacobian_matrix.hpp>
+#include <modulo_msgs/msg/jacobian.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <std_msgs/msg/float64.hpp>
+#include <std_msgs/msg/bool.hpp>
+#include <std_msgs/msg/string.hpp>
 #include <tf2_msgs/msg/tf_message.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <rcutils/logging_macros.h>
@@ -22,7 +24,7 @@
 #include "state_representation/Space/Cartesian/CartesianTwist.hpp"
 #include "state_representation/Space/Cartesian/CartesianWrench.hpp"
 #include "state_representation/Robot/JointState.hpp"
-#include "state_representation/Robot/JacobianMatrix.hpp"
+#include "state_representation/Robot/Jacobian.hpp"
 #include "state_representation/Space/DualQuaternion/DualQuaternionPose.hpp"
 #include "state_representation/Space/DualQuaternion/DualQuaternionTwist.hpp"
 #include "state_representation/Parameters/Parameter.hpp"
@@ -137,12 +139,12 @@ namespace Modulo
 					void write_msg(sensor_msgs::msg::JointState & msg, const StateRepresentation::JointState & state, const rclcpp::Time & time);
 
 					/**
-					 * @brief Convert a JacobianMatrix to a ROS modulo_msgs::msg::JacobianMatrix
+					 * @brief Convert a Jacobian to a ROS modulo_msgs::msg::Jacobian
 					 * @param msg The ROS msg to populate
 					 * @param state The state to read from
 					 * @param time The time of the message
 					 */
-					void write_msg(modulo_msgs::msg::JacobianMatrix & msg, const StateRepresentation::JacobianMatrix & state, const rclcpp::Time & time);
+					void write_msg(modulo_msgs::msg::Jacobian & msg, const StateRepresentation::Jacobian & state, const rclcpp::Time & time);
 
 					/**
 					 * @brief Convert a DualQuaternionPose to a ROS geometry_msgs::msg::Pose
@@ -238,13 +240,8 @@ namespace Modulo
 					 * @param state The state to read from
 					 * @param time The time of the message
 					 */
-					template <typename T, typename U>
-					void write_msg(U & msg, const StateRepresentation::Parameter<T> & state, const rclcpp::Time &)
-					{
-						using namespace StateRepresentation::Exceptions;
-						if(state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
-						msg.data = state.get_value();
-					}
+					template <typename U, typename T>
+					void write_msg(U & msg, const StateRepresentation::Parameter<T> & state, const rclcpp::Time &);
 				}
 			}
 		}

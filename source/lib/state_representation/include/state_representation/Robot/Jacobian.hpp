@@ -26,10 +26,10 @@ namespace StateRepresentation
 	class JointTorques;	
 
 	/**
-	 * @class JacobianMatrix
+	 * @class Jacobian
 	 * @brief Class to define a robot Jacobian matrix
 	 */
-	class JacobianMatrix: public State
+	class Jacobian: public State
 	{
 	private:
 		std::vector<std::string> joint_names; ///< names of the joints
@@ -39,25 +39,30 @@ namespace StateRepresentation
 
 	public:
 		/**
+	 	 * @brief Empty constructor for a Jacobian
+	     */
+		explicit Jacobian();
+
+		/**
 	 	 * @brief Constructor with name and number of joints provided
 	 	 * @brief name the name of the robot associated to
 	 	 * @brief nb_joints the number of joints
 	     */
-		explicit JacobianMatrix(const std::string& robot_name, unsigned int nb_joints=0);
+		explicit Jacobian(const std::string& robot_name, unsigned int nb_joints=0);
 
 		/**
 	 	 * @brief Constructor with name and list of joint names provided
 	 	 * @brief name the name of the robot associated to
 	 	 * @brief joint_names the list of joint names
 	     */
-		explicit JacobianMatrix(const std::string& robot_name, const std::vector<std::string>& joint_names);
+		explicit Jacobian(const std::string& robot_name, const std::vector<std::string>& joint_names);
 
 		/**
 	 	 * @brief Constructor with name and jacobian matrix as eigen matrix
 	 	 * @brief name the name of the robot associated to
 	 	 * @brief data the value of the jacobian matrix
 	     */
-		explicit JacobianMatrix(const std::string& robot_name, const Eigen::MatrixXd& data);
+		explicit Jacobian(const std::string& robot_name, const Eigen::MatrixXd& data);
 
 		/**
 	 	 * @brief Constructor with name, list of joint names and jacobian matrix as eigen matrix
@@ -65,19 +70,19 @@ namespace StateRepresentation
 	 	 * @brief joint_names the list of joint names
 	 	 * @brief data the value of the jacobian matrix
 	     */
-		explicit JacobianMatrix(const std::string& robot_name, const std::vector<std::string>& joint_names, const Eigen::MatrixXd& data);
+		explicit Jacobian(const std::string& robot_name, const std::vector<std::string>& joint_names, const Eigen::MatrixXd& data);
 
 		/**
-	 	 * @brief Copy constructor of a JacobianMatrix
+	 	 * @brief Copy constructor of a Jacobian
 	     */
-		JacobianMatrix(const JacobianMatrix& jacobian);
+		Jacobian(const Jacobian& jacobian);
 
 		/**
 		 * @brief Copy assignement operator that have to be defined to the custom assignement operator
 		 * @param matrix the matrix with value to assign
 		 * @return reference to the current matrix with new values
 		 */
-		JacobianMatrix& operator=(const JacobianMatrix& matrix);
+		Jacobian& operator=(const Jacobian& matrix);
 
 		/**
 	 	 * @brief Getter of the nb_rows from the attributes
@@ -137,9 +142,9 @@ namespace StateRepresentation
 
 		/**
 		 * @brief Return the transpose of the jacobian matrix
-		 * @return the JacobianMatrix transposed
+		 * @return the Jacobian transposed
 		 */
-		const JacobianMatrix transpose();
+		const Jacobian transpose();
 
 		/**
 	 	 * @brief Overload the * operator with an non specific matrix
@@ -198,7 +203,7 @@ namespace StateRepresentation
 		 * @brief Return a copy of the JointPositions
 		 * @return the copy
 		 */
-		const JacobianMatrix copy() const;
+		const Jacobian copy() const;
 
 		/**
 	 	 * @brief Overload the ostream operator for printing
@@ -206,10 +211,10 @@ namespace StateRepresentation
 	 	 * @param matrix the matrix to print
 	 	 * @return the appended ostream
 	     */
-		friend std::ostream& operator<<(std::ostream& os, const JacobianMatrix& matrix);
+		friend std::ostream& operator<<(std::ostream& os, const Jacobian& matrix);
 	};
 
-	inline JacobianMatrix& JacobianMatrix::operator=(const JacobianMatrix& matrix)
+	inline Jacobian& Jacobian::operator=(const Jacobian& matrix)
 	{
 		State::operator=(matrix);
 		this->joint_names = matrix.joint_names;
@@ -219,32 +224,32 @@ namespace StateRepresentation
 		return (*this);
 	}
 
-	inline unsigned int JacobianMatrix::get_nb_rows() const
+	inline unsigned int Jacobian::get_nb_rows() const
 	{
 		return this->nb_rows;
 	}
 
-	inline unsigned int JacobianMatrix::get_nb_cols() const
+	inline unsigned int Jacobian::get_nb_cols() const
 	{
 		return this->nb_cols;
 	}
 
-	inline void JacobianMatrix::set_nb_rows(unsigned int nb_rows)
+	inline void Jacobian::set_nb_rows(unsigned int nb_rows)
 	{
 		this->nb_rows = nb_rows;
 	}
 
-	inline void JacobianMatrix::set_nb_cols(unsigned int nb_cols)
+	inline void Jacobian::set_nb_cols(unsigned int nb_cols)
 	{
 		this->nb_cols = nb_cols;
 	}
 
-	inline const std::vector<std::string>& JacobianMatrix::get_joint_names() const
+	inline const std::vector<std::string>& Jacobian::get_joint_names() const
 	{
 		return this->joint_names;
 	}
 
-	inline void JacobianMatrix::set_joint_names(unsigned int nb_joints)
+	inline void Jacobian::set_joint_names(unsigned int nb_joints)
 	{
 		this->joint_names.resize(nb_joints);
 		this->nb_cols = nb_joints;
@@ -255,26 +260,26 @@ namespace StateRepresentation
 		this->initialize();
 	}
 
-	inline void JacobianMatrix::set_joint_names(const std::vector<std::string>& joint_names)
+	inline void Jacobian::set_joint_names(const std::vector<std::string>& joint_names)
 	{
 		this->joint_names = joint_names;
 		this->nb_cols = joint_names.size();
 		this->initialize();
 	}
 
-	inline const Eigen::MatrixXd& JacobianMatrix::get_data() const
+	inline const Eigen::MatrixXd& Jacobian::get_data() const
 	{
 		return this->data;
 	}
 
-	inline void JacobianMatrix::set_data(const Eigen::MatrixXd& data)
+	inline void Jacobian::set_data(const Eigen::MatrixXd& data)
 	{
 		if(this->get_nb_rows() != data.rows() || this->get_nb_cols() != data.cols()) throw IncompatibleSizeException("Input matrix is of incorrect size");
 		this->set_filled();
 		this->data = data;
 	}
 
-	inline bool JacobianMatrix::is_compatible(const State& state) const
+	inline bool Jacobian::is_compatible(const State& state) const
 	{
 		bool compatible = false;
 		if(state.get_type() == StateType::JOINTSTATE)
@@ -293,14 +298,14 @@ namespace StateRepresentation
 		return compatible;
 	}
 
-	inline double& JacobianMatrix::operator()(unsigned int row, unsigned int col)
+	inline double& Jacobian::operator()(unsigned int row, unsigned int col)
 	{
 		if(row > this->get_nb_rows()) throw std::out_of_range("Given row is out of range: number of rows = " + this->get_nb_rows());
 		if(col > this->get_nb_cols()) throw std::out_of_range("Given column is out of range: number of columns = " + this->get_nb_cols());
 		return this->data(row, col);
 	}
 
-	inline const double& JacobianMatrix::operator()(unsigned int row, unsigned int col) const
+	inline const double& Jacobian::operator()(unsigned int row, unsigned int col) const
 	{
 		if(row > this->get_nb_rows()) throw std::out_of_range("Given row is out of range: number of rows = " + this->get_nb_rows());
 		if(col > this->get_nb_cols()) throw std::out_of_range("Given column is out of range: number of columns = " + this->get_nb_cols());

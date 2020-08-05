@@ -42,6 +42,9 @@ target_link_libraries(${PROJECT_NAME}_test_cartesian_circular ${PROJECT_NAME})
 ament_auto_add_executable(${PROJECT_NAME}_test_joints tests/testJoints.cpp)
 target_link_libraries(${PROJECT_NAME}_test_joints ${PROJECT_NAME})
 
+ament_auto_add_executable(${PROJECT_NAME}_test_moving_reference_frame tests/testMovingReferenceFrame.cpp)
+target_link_libraries(${PROJECT_NAME}_test_moving_reference_frame ${PROJECT_NAME})
+
 ament_auto_package()
 
 # Install launch files.

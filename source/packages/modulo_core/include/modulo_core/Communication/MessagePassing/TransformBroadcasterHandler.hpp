@@ -29,8 +29,9 @@ namespace Modulo
 					 * @param  clock     reference to the Cell clock
 					 * @param  mutex     reference to the Cell mutex
 					 */
-					template <typename DurationT>
-					explicit TransformBroadcasterHandler(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
+					explicit TransformBroadcasterHandler(const std::shared_ptr<StateRepresentation::CartesianState>& recipient,
+						                                 const std::shared_ptr<rclcpp::Clock>& clock,
+						                                 const std::shared_ptr<std::mutex>& mutex);
 
 					/**
 					 * @brief Constructor for TransformBroadcaster handler without an associated recipient
@@ -45,11 +46,6 @@ namespace Modulo
 					 */
 					void send_transform(const StateRepresentation::CartesianState& transform);
 			    };
-
-			    template <typename DurationT>
-			    TransformBroadcasterHandler::TransformBroadcasterHandler(const std::shared_ptr<StateRepresentation::CartesianState>& recipient, const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex):
-				PublisherHandler<StateRepresentation::CartesianState, tf2_msgs::msg::TFMessage>(recipient, clock, mutex)
-				{}
 
 				inline void TransformBroadcasterHandler::send_transform(const StateRepresentation::CartesianState& transform)
 				{

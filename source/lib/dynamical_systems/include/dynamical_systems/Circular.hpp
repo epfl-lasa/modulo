@@ -27,6 +27,17 @@ namespace DynamicalSystems
 		std::shared_ptr<StateRepresentation::Parameter<double>> gain_; ///< gain associate to the system
 		std::shared_ptr<StateRepresentation::Parameter<double>> circular_velocity_; ///< velocity at wich to navigate the limit cycle
 
+	protected:
+		/**
+		 * @brief Compute the dynamics of the input state.
+		 * Internal function, to be redefined based on the 
+		 * type of dynamical system, called by the evaluate
+		 * function
+		 * @param state the input state
+		 * @return the output state
+		 */
+		const StateRepresentation::CartesianState compute_dynamics(const StateRepresentation::CartesianState& state) const;
+
 	public:
 		/**
 		 * @brief Default constructor with center and fixed radius
@@ -124,13 +135,6 @@ namespace DynamicalSystems
 		 * @param the limit cycle value
 		 */
 		void set_limit_cycle(const StateRepresentation::Ellipsoid& limit_cycle);
-
-		/**
-		 * @brief Evaluate the value of the dynamical system at a given state
-		 * @param state state at wich to perform the evaluation
-		 * @return the state (velocity) to move toward the center
-		 */
-		const StateRepresentation::CartesianState evaluate(const StateRepresentation::CartesianState& state) const override;
 
 		/**
 		 * @brief Return a list of all the parameters of the dynamical system

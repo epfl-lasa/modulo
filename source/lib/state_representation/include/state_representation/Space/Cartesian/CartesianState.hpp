@@ -14,6 +14,18 @@
 
 namespace StateRepresentation
 {
+	class CartesianState;
+
+	/**
+	 * @brief compute the distance between two CartesianStates
+	 * @param s1 the first CartesianState
+	 * @param s2 the second CartesianState
+	 * @param type of the distance between position, orientation, linear_velocity, etc...
+	 * default all for full distance across all dimensions
+	 * @return the distance beteen the two states
+	 */
+	double dist(const CartesianState& s1, const CartesianState& s2, const std::string& distance_type="all");
+
 	/**
 	 * @class CartesianState
 	 * @brief Class to represent a state in Cartesian space
@@ -212,6 +224,20 @@ namespace StateRepresentation
 		const CartesianState copy() const;
 
 		/**
+	 	 * @brief Overload the *= operator with another state by deriving the equations of motions
+	 	 * @param state the state to compose with corresponding to b_S_c
+	 	 * @return the CartesianState corresponding f_S_c = f_S_b * b_S_c (assuming this is f_S_b)
+	     */
+		CartesianState& operator*=(const CartesianState& state);
+
+		/**
+	 	 * @brief Overload the * operator with another state by deriving the equations of motions
+	 	 * @param state the state to compose with corresponding to b_S_c
+	 	 * @return the CartesianState corresponding f_S_c = f_S_b * b_S_c (assuming this is f_S_b)
+	     */
+		const CartesianState operator*(const CartesianState& state) const;
+
+		/**
 	 	 * @brief Overload the *= operator with a scalar
 	 	 * @param lambda the scalar to multiply with
 	 	 * @return the CartesianState multiply by lambda
@@ -226,11 +252,19 @@ namespace StateRepresentation
 		const CartesianState operator*(double lambda) const;
 
 		/**
+		 * @brief compute the inverse of the current CartesianState
+		 * @return the inverse corresponding to b_S_f (assuming this is f_S_b) 
+		 */
+		const CartesianState inverse() const;
+
+		/**
 		 * @brief Compute the distance between two states as the sum of distances between each features
 		 * @param state the second state
+		 * @param type of the distance between position, orientation, linear_velocity, etc...
+		 * default all for full distance across all dimensions
 		 * @return dist the distance value as a double
 		 */
-		double dist(const CartesianState& state) const;
+		double dist(const CartesianState& state, const std::string& distance_type="all") const;
 
 		/**
 	 	 * @brief Overload the ostream operator for printing
@@ -251,9 +285,11 @@ namespace StateRepresentation
 		 * @brief compute the distance between two CartesianStates
 		 * @param s1 the first CartesianState
 		 * @param s2 the second CartesianState
+		 * @param type of the distance between position, orientation, linear_velocity, etc...
+		 * default all for full distance across all dimensions
 		 * @return the distance beteen the two states
 		 */
-		friend double dist(const CartesianState& s1, const CartesianState& s2);
+		friend double dist(const CartesianState& s1, const CartesianState& s2, const std::string& distance_type);
 
 		/**
 		 * @brief Return the state as a std vector of floats
@@ -358,7 +394,6 @@ namespace StateRepresentation
 
 	inline void CartesianState::set_position(const double& x, const double& y, const double& z)
 	{
-		this->set_filled();
 		this->set_position(Eigen::Vector3d(x, y, z));
 	}
 
@@ -371,9 +406,7 @@ namespace StateRepresentation
 	inline void CartesianState::set_orientation(const std::vector<double>& orientation)
 	{
 		if (orientation.size() != 4) throw Exceptions::IncompatibleSizeException("The input vector is not of size 4 required for orientation");
-		this->set_filled();
-		this->orientation = Eigen::Quaterniond(orientation[0], orientation[1], orientation[2], orientation[3]);
-		this->orientation.normalize();
+		this->set_orientation(Eigen::Quaterniond(orientation[0], orientation[1], orientation[2], orientation[3]));
 	}
 
 	inline void CartesianState::set_pose(const Eigen::Vector3d& position, const Eigen::Quaterniond& orientation)
@@ -384,17 +417,15 @@ namespace StateRepresentation
 
 	inline void CartesianState::set_pose(const Eigen::Matrix<double, 7, 1>& pose)
 	{
-		this->set_filled();
-		this->position = pose.head(3);
-		this->orientation = Eigen::Quaterniond(pose(3), pose(4), pose(5), pose(6));
+		this->set_position(pose.head(3));
+		this->set_orientation(Eigen::Quaterniond(pose(3), pose(4), pose(5), pose(6)));
 	}
 
 	inline void CartesianState::set_pose(const std::vector<double>& pose)
 	{
 		if (pose.size() != 7) throw Exceptions::IncompatibleSizeException("The input vector is not of size 7 required for pose");
-		this->set_filled();
-		this->position = Eigen::Vector3d::Map(pose.data(), 3);
-		this->orientation = Eigen::Quaterniond(pose[3], pose[4], pose[5], pose[6]);
+		this->set_position(Eigen::Vector3d::Map(pose.data(), 3));
+		this->set_orientation(Eigen::Quaterniond(pose[3], pose[4], pose[5], pose[6]));
 	}
 
 	inline void CartesianState::set_linear_velocity(const Eigen::Vector3d& linear_velocity)

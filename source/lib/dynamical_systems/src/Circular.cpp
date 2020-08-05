@@ -3,6 +3,7 @@
 namespace DynamicalSystems
 {
 	Circular::Circular(const StateRepresentation::CartesianState& center, double radius, double gain, double circular_velocity):
+	DynamicalSystem(StateRepresentation::CartesianPose::Identity(center.get_reference_frame())),
 	limit_cycle_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::Ellipsoid>>("limit_cycle", StateRepresentation::Ellipsoid(center.get_name(), center.get_reference_frame()))),
 	gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain)),
 	circular_velocity_(std::make_shared<StateRepresentation::Parameter<double>>("circular_velocity", circular_velocity))
@@ -12,12 +13,13 @@ namespace DynamicalSystems
 	}
 
 	Circular::Circular(const StateRepresentation::Ellipsoid& limit_cycle, double gain, double circular_velocity):
+	DynamicalSystem(StateRepresentation::CartesianPose::Identity(limit_cycle.get_center_pose().get_reference_frame())),
 	limit_cycle_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::Ellipsoid>>(" limit_cycle", limit_cycle)),
 	gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain)),
 	circular_velocity_(std::make_shared<StateRepresentation::Parameter<double>>("circular_velocity", circular_velocity))
 	{}
 
-	const StateRepresentation::CartesianState Circular::evaluate(const StateRepresentation::CartesianState& state) const
+	const StateRepresentation::CartesianState Circular::compute_dynamics(const StateRepresentation::CartesianState& state) const
 	{
 		// put the point in the reference of the center
 		StateRepresentation::CartesianPose pose = static_cast<const StateRepresentation::CartesianPose&>(state);

@@ -25,11 +25,11 @@ find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
-set(MSG_CORE "msg/JacobianMatrix.msg")
+set(MSG_CORE "msg/Jacobian.msg")
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${MSG_CORE}
-  DEPENDENCIES geometry_msgs sensor_msgs std_msgs
+  DEPENDENCIES std_msgs
 )
 
 #rosidl_target_interfaces(${PROJECT_NAME}_lib ${PROJECT_NAME} "rosidl_typesupport_cpp")

@@ -38,7 +38,7 @@ set(CORE_SOURCES
   src/Robot/JointPositions.cpp
   src/Robot/JointVelocities.cpp
   src/Robot/JointTorques.cpp
-  src/Robot/JacobianMatrix.cpp
+  src/Robot/Jacobian.cpp
   src/Space/DualQuaternion/DualQuaternionState.cpp
   src/Space/DualQuaternion/DualQuaternionPose.cpp
   src/Space/DualQuaternion/DualQuaternionTwist.cpp
@@ -110,13 +110,13 @@ if (runtests)
     )
     add_test(NAME runTestDualQuaternionState COMMAND runTestDualQuaternionState)
 
-    add_executable(runTestJacobianMatrix tests/testJacobianMatrix.cpp)
-    target_link_libraries(runTestJacobianMatrix
+    add_executable(runTestJacobian tests/testJacobian.cpp)
+    target_link_libraries(runTestJacobian
       gtest 
       gtest_main
       ${PROJECT_NAME}
     )
-    add_test(NAME runTestJacobianMatrix COMMAND runTestJacobianMatrix)
+    add_test(NAME runTestJacobian COMMAND runTestJacobian)
 
     add_executable(runTestTrajectory tests/testTrajectory.cpp)
     target_link_libraries(runTestTrajectory

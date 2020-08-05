@@ -3,9 +3,9 @@
 #include "state_representation/Space/Cartesian/CartesianWrench.hpp"
 #include <gtest/gtest.h>
 #include <fstream>
-#include <zmq.hpp>
 #include <unistd.h>
 
+using namespace StateRepresentation;
 
 TEST(NegateQuaternion, PositiveNos)
 {
@@ -20,13 +20,13 @@ TEST(MultiplyTransformsBothOperators, PositiveNos)
 {
 	Eigen::Vector3d pos1(1,2,3);
 	Eigen::Quaterniond rot1(1,0,0,0);
-	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
+	CartesianPose tf1("t1", pos1, rot1);
 
 	Eigen::Vector3d pos2(4,5,6);
 	Eigen::Quaterniond rot2(1,0,0,0);
-	StateRepresentation::CartesianPose tf2("t2", pos2, rot2, "t1");
+	CartesianPose tf2("t2", pos2, rot2, "t1");
 
-	StateRepresentation::CartesianPose tf3 = tf1 * tf2;
+	CartesianPose tf3 = tf1 * tf2;
 	tf1 *= tf2;
 	
 	EXPECT_EQ(tf3.get_name(), "t2");
@@ -38,11 +38,11 @@ TEST(MultiplyTransformsSameOrientation, PositiveNos)
 {
 	Eigen::Vector3d pos1(1,2,3);
 	Eigen::Quaterniond rot1(1,0,0,0);
-	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
+	CartesianPose tf1("t1", pos1, rot1);
 
 	Eigen::Vector3d pos2(4,5,6);
 	Eigen::Quaterniond rot2(1,0,0,0);
-	StateRepresentation::CartesianPose tf2("t2", pos2, rot2, "t1");
+	CartesianPose tf2("t2", pos2, rot2, "t1");
 
 	tf1 *= tf2;
 	
@@ -54,11 +54,11 @@ TEST(MultiplyTransformsDifferentOrientation, PositiveNos)
 {
 	Eigen::Vector3d pos1(1,2,3);
 	Eigen::Quaterniond rot1(0.70710678, 0.70710678, 0., 0.);
-	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
+	CartesianPose tf1("t1", pos1, rot1);
 
 	Eigen::Vector3d pos2(4,5,6);
 	Eigen::Quaterniond rot2(0., 0., 0.70710678, 0.70710678);
-	StateRepresentation::CartesianPose tf2("t2", pos2, rot2, "t1");
+	CartesianPose tf2("t2", pos2, rot2, "t1");
 
 	tf1 *= tf2;
 	
@@ -78,7 +78,7 @@ TEST(TestInverseNullOrientation, PositiveNos)
 {
 	Eigen::Vector3d pos1(1,2,3);
 	Eigen::Quaterniond rot1(1., 0., 0., 0.);
-	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
+	CartesianPose tf1("t1", pos1, rot1);
 
 	tf1 = tf1.inverse();
 	
@@ -100,7 +100,7 @@ TEST(TestInverseNonNullOrientation, PositiveNos)
 {
 	Eigen::Vector3d pos1(1,2,3);
 	Eigen::Quaterniond rot1(0.70710678, 0.70710678, 0., 0.);
-	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
+	CartesianPose tf1("t1", pos1, rot1);
 
 	tf1 = tf1.inverse();
 	
@@ -120,7 +120,7 @@ TEST(TestMultiplyInverseNonNullOrientation, PositiveNos)
 {
 	Eigen::Vector3d pos1(1,2,3);
 	Eigen::Quaterniond rot1(0.70710678, 0.70710678, 0., 0.);
-	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
+	CartesianPose tf1("t1", pos1, rot1);
 
 	tf1 *= tf1.inverse();
 	
@@ -136,15 +136,27 @@ TEST(TestMultiplyInverseNonNullOrientation, PositiveNos)
     EXPECT_TRUE(abs(tf1.get_orientation().dot(rot_truth)) > 1-10E-4);
 }
 
+TEST(MultiplyPoseAndState, PositiveNos)
+{
+	CartesianPose p = CartesianPose::Random("test");
+	CartesianState s = CartesianPose::Random("test2", "test");
+
+	CartesianState res = p * s;
+	CartesianPose res2 = p * static_cast<CartesianPose>(s);
+
+	for(int i=0; i<res.get_position().size(); ++i) EXPECT_NEAR(res.get_position()(i), res2.get_position()(i), 0.00001);
+    EXPECT_TRUE(abs(res.get_orientation().dot(res2.get_orientation())) > 1-10E-4);
+}
+
 TEST(TestAddTwoPoses, PositiveNos)
 {
 	Eigen::Vector3d pos1 = Eigen::Vector3d::Zero();
 	Eigen::Quaterniond rot1 = Eigen::Quaterniond::Identity(); 
-	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
+	CartesianPose tf1("t1", pos1, rot1);
 
 	Eigen::Vector3d pos2(1,0,0);
 	Eigen::Quaterniond rot2(0,1,0,0); 
-	StateRepresentation::CartesianPose tf2("t1", pos2, rot2);
+	CartesianPose tf2("t1", pos2, rot2);
 
 	std::cout << tf1 + tf2 << std::endl;
 	std::cout << tf1 - tf2 << std::endl;
@@ -154,9 +166,9 @@ TEST(TestAddDisplacement, PositiveNos)
 {
 	Eigen::Vector3d pos1 = Eigen::Vector3d::Zero();
 	Eigen::Quaterniond rot1 = Eigen::Quaterniond::Identity(); 
-	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
+	CartesianPose tf1("t1", pos1, rot1);
 
-	StateRepresentation::CartesianTwist vel("t1");
+	CartesianTwist vel("t1");
 	vel.set_linear_velocity(Eigen::Vector3d(0.1,0.1,0.1));
 	vel.set_angular_velocity(Eigen::Vector3d(0.1,0.1,0));
 
@@ -174,11 +186,11 @@ TEST(TestPoseToVelocity, PositiveNos)
 {
 	Eigen::Vector3d pos1 = Eigen::Vector3d::Zero();
 	Eigen::Quaterniond rot1 = Eigen::Quaterniond::Identity(); 
-	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
+	CartesianPose tf1("t1", pos1, rot1);
 
 	Eigen::Vector3d pos2(1,0,0);
 	Eigen::Quaterniond rot2(0,1,0,0); 
-	StateRepresentation::CartesianPose tf2("t1", pos2, rot2);
+	CartesianPose tf2("t1", pos2, rot2);
 
 	std::chrono::seconds dt1(1);
 	std::cout << (tf1 - tf2) / dt1 << std::endl;
@@ -194,9 +206,9 @@ TEST(TestImplicitConversion, PositiveNos)
 {
 	Eigen::Vector3d pos1 = Eigen::Vector3d::Zero();
 	Eigen::Quaterniond rot1 = Eigen::Quaterniond::Identity(); 
-	StateRepresentation::CartesianPose tf1("t1", pos1, rot1);
+	CartesianPose tf1("t1", pos1, rot1);
 
-	StateRepresentation::CartesianTwist vel("t1");
+	CartesianTwist vel("t1");
 	vel.set_linear_velocity(Eigen::Vector3d(0.1,0.1,0.1));
 	vel.set_angular_velocity(Eigen::Vector3d(0.1,0.1,0));
 
@@ -207,7 +219,7 @@ TEST(TestImplicitConversion, PositiveNos)
 
 TEST(TestVelocityClamping, PositiveNos)
 {
-	StateRepresentation::CartesianTwist vel("test", Eigen::Vector3d(1,-2,3), Eigen::Vector3d(1,2,-3));
+	CartesianTwist vel("test", Eigen::Vector3d(1,-2,3), Eigen::Vector3d(1,2,-3));
 	vel.clamp(1, 0.5);
 
 	std::cout << vel << std::endl;
@@ -226,9 +238,9 @@ TEST(TestVelocityClamping, PositiveNos)
 
 TEST(TestPoseDistance, PositiveNos)
 {
-	StateRepresentation::CartesianPose p1("test", Eigen::Vector3d::Zero());
-	StateRepresentation::CartesianPose p2("test", Eigen::Vector3d(1,0,0));
-	StateRepresentation::CartesianPose p3("test", Eigen::Vector3d(1,0,0), Eigen::Quaterniond(0,1,0,0));
+	CartesianPose p1("test", Eigen::Vector3d::Zero());
+	CartesianPose p2("test", Eigen::Vector3d(1,0,0));
+	CartesianPose p3("test", Eigen::Vector3d(1,0,0), Eigen::Quaterniond(0,1,0,0));
 
 	double d1 = dist(p1, p2);
 	double d2 = p1.dist(p2);
@@ -243,7 +255,7 @@ TEST(TestPoseDistance, PositiveNos)
 TEST(TestTwistOperatorsWithEigen, PositiveNos)
 {
 	Eigen::Matrix<double, 6, 1> vec = Eigen::Matrix<double, 6, 1>::Random();
-	StateRepresentation::CartesianTwist twist("test");
+	CartesianTwist twist("test");
 	twist = vec;
 	EXPECT_TRUE((vec-twist.get_twist()).norm() < 1e-4);
 	twist = vec.array();
@@ -273,7 +285,7 @@ TEST(TestTwistOperatorsWithEigen, PositiveNos)
 TEST(TestWrenchOperatorsWithEigen, PositiveNos)
 {
 	Eigen::Matrix<double, 6, 1> vec = Eigen::Matrix<double, 6, 1>::Random();
-	StateRepresentation::CartesianWrench wrench("test");
+	CartesianWrench wrench("test");
 	wrench = vec;
 	EXPECT_TRUE((vec-wrench.get_wrench()).norm() < 1e-4);
 	wrench = vec.array();
@@ -302,12 +314,12 @@ TEST(TestWrenchOperatorsWithEigen, PositiveNos)
 
 TEST(TestFilter, PositiveNos)
 {
-	StateRepresentation::CartesianPose tf1("t1", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom());
-	StateRepresentation::CartesianPose tf2("t1", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom());
+	CartesianPose tf1("t1", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom());
+	CartesianPose tf2("t1", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom());
 
 	for (int i = 0; i <1000; ++i)
 	{
-		StateRepresentation::CartesianPose temp = tf1;
+		CartesianPose temp = tf1;
 
 		double alpha = 0.1;
 		tf1 = (1-alpha) * tf1 + alpha * tf2;
@@ -319,7 +331,7 @@ TEST(TestFilter, PositiveNos)
 
 TEST(TestToSTDVector, PositiveNos)
 {
-	StateRepresentation::CartesianPose p = StateRepresentation::CartesianPose::Random("t1");
+	CartesianPose p = CartesianPose::Random("t1");
 	std::vector<double> v = p.to_std_vector();
 	for(unsigned int i=0; i<3; ++i) EXPECT_NEAR(p.get_position()(i), v[i], 0.00001);
 	EXPECT_NEAR(p.get_orientation().w(), v[3], 0.00001);

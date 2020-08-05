@@ -63,6 +63,14 @@ namespace StateRepresentation
 		explicit CartesianPose(const std::string& name, const Eigen::Vector3d& position, const Eigen::Quaterniond& orientation, const std::string& reference="world");
 
 		/**
+		 * @brief Constructor for the identity pose
+		 * @param name the name of the state
+		 * @param the name of the reference frame
+		 * @return CartesianPose identity pose
+		 */
+		static const CartesianPose Identity(const std::string& name, const std::string& reference="world");
+
+		/**
 		 * @brief Constructor for a random pose
 		 * @param name the name of the state
 		 * @param the name of the reference frame
@@ -104,9 +112,9 @@ namespace StateRepresentation
 		const CartesianPose operator*(const CartesianPose& pose) const;
 
 		/**
-	 	 * @brief Overload the *= operator with a CartesianState
-	 	 * @param state CartesianState to multiply with
-	 	 * @return the current CartesianPose multiply by the CartesianState given in argument
+	 	 * @brief Overload the * operator
+	 	 * @param pose CartesianPose to multiply with
+	 	 * @return the current CartesianPose multiply by the CartesianPose given in argument
 	     */
 		const CartesianState operator*(const CartesianState& state) const;
 
@@ -158,12 +166,6 @@ namespace StateRepresentation
 	 	 * @return the CartesianPose multiply by lambda
 	     */
 		const CartesianPose operator*(double lambda) const;
-
-		/**
-		 * @brief compute the inverse of the current CartesianPose
-		 * @return the inverse
-		 */
-		const CartesianPose inverse() const;
 
 		/**
 		 * @brief Return a copy of the CartesianPose

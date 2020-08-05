@@ -26,10 +26,7 @@ namespace Modulo
 
 					void read_msg(StateRepresentation::CartesianState & state, const geometry_msgs::msg::PoseStamped & msg)
 					{
-						if(state.get_reference_frame() != msg.header.frame_id)
-						{
-							throw IncompatibleReferenceFramesException(state.get_name() + " expected in " + state.get_reference_frame() + ", got " + msg.header.frame_id);
-						}
+						state.set_reference_frame(msg.header.frame_id);
 						read_msg(state, msg.pose);
 					}
 
@@ -45,10 +42,7 @@ namespace Modulo
 
 					void read_msg(StateRepresentation::CartesianState & state, const geometry_msgs::msg::TransformStamped & msg)
 					{
-						if(state.get_reference_frame() != msg.header.frame_id)
-						{
-							throw IncompatibleReferenceFramesException(state.get_name() + " expected in " + state.get_reference_frame() + ", got " + msg.header.frame_id);
-						}
+						state.set_reference_frame(msg.header.frame_id);
 						state.set_name(msg.child_frame_id);
 						read_msg(state, msg.transform);
 					}
@@ -65,10 +59,7 @@ namespace Modulo
 
 					void read_msg(StateRepresentation::CartesianState & state, const geometry_msgs::msg::TwistStamped & msg)
 					{
-						if(state.get_reference_frame() != msg.header.frame_id)
-						{
-							throw IncompatibleReferenceFramesException(state.get_name() + " expected in " + state.get_reference_frame() + ", got " + msg.header.frame_id);
-						}
+						state.set_reference_frame(msg.header.frame_id);
 						read_msg(state, msg.twist);
 					}
 
@@ -84,10 +75,7 @@ namespace Modulo
 
 					void read_msg(StateRepresentation::CartesianState & state, const geometry_msgs::msg::AccelStamped & msg)
 					{
-						if(state.get_reference_frame() != msg.header.frame_id)
-						{
-							throw IncompatibleReferenceFramesException(state.get_name() + " expected in " + state.get_reference_frame() + ", got " + msg.header.frame_id);
-						}
+						state.set_reference_frame(msg.header.frame_id);
 						read_msg(state, msg.accel);
 					}
 
@@ -103,19 +91,13 @@ namespace Modulo
 
 					void read_msg(StateRepresentation::CartesianState & state, const geometry_msgs::msg::WrenchStamped & msg)
 					{
-						if(state.get_reference_frame() != msg.header.frame_id)
-						{
-							throw IncompatibleReferenceFramesException(state.get_name() + " expected in " + state.get_reference_frame() + ", got " + msg.header.frame_id);
-						}
+						state.set_reference_frame(msg.header.frame_id);
 						read_msg(state, msg.wrench);
 					}
 
 					void read_msg(StateRepresentation::CartesianState & state, const nav_msgs::msg::Odometry & msg)
 					{
-						if(state.get_reference_frame() != msg.header.frame_id)
-						{
-							throw IncompatibleReferenceFramesException(state.get_name() + " expected in " + state.get_reference_frame() + ", got " + msg.header.frame_id);
-						}
+						state.set_reference_frame(msg.header.frame_id);
 						// and odometry message contains a pose with uncertainty
 						read_msg(state, msg.pose.pose);
 						//and a twist with uncertainty
@@ -125,12 +107,12 @@ namespace Modulo
 					void read_msg(StateRepresentation::JointState & state, const sensor_msgs::msg::JointState & msg)
 					{
 						state.set_names(msg.name);
-						state.set_positions(Eigen::VectorXd::Map(msg.position.data(), msg.position.size()));
-						state.set_velocities(Eigen::VectorXd::Map(msg.velocity.data(), msg.velocity.size()));
-						state.set_torques(Eigen::VectorXd::Map(msg.effort.data(), msg.effort.size()));
+						if (!msg.position.empty()) state.set_positions(Eigen::VectorXd::Map(msg.position.data(), msg.position.size()));
+						if (!msg.velocity.empty()) state.set_velocities(Eigen::VectorXd::Map(msg.velocity.data(), msg.velocity.size()));
+						if (!msg.effort.empty()) state.set_torques(Eigen::VectorXd::Map(msg.effort.data(), msg.effort.size()));
 					}
 
-					void read_msg(StateRepresentation::JacobianMatrix & state, const modulo_msgs::msg::JacobianMatrix & msg)
+					void read_msg(StateRepresentation::Jacobian & state, const modulo_msgs::msg::Jacobian & msg)
 					{
 						state.set_nb_rows(msg.nb_dimensions);
 						state.set_nb_cols(msg.nb_joints);
@@ -148,10 +130,7 @@ namespace Modulo
 
 					void read_msg(StateRepresentation::DualQuaternionPose & state, const geometry_msgs::msg::PoseStamped & msg)
 					{
-						if(state.get_reference_frame() != msg.header.frame_id)
-						{
-							throw IncompatibleReferenceFramesException(state.get_name() + " expected in " + state.get_reference_frame() + ", got " + msg.header.frame_id);
-						}
+						state.set_reference_frame(msg.header.frame_id);
 						read_msg(state, msg.pose);
 					}
 
@@ -163,10 +142,7 @@ namespace Modulo
 
 					void read_msg(StateRepresentation::DualQuaternionTwist & state, const geometry_msgs::msg::TwistStamped & msg)
 					{
-						if(state.get_reference_frame() != msg.header.frame_id)
-						{
-							throw IncompatibleReferenceFramesException(state.get_name() + " expected in " + state.get_reference_frame() + ", got " + msg.header.frame_id);
-						}
+						state.set_reference_frame(msg.header.frame_id);
 						read_msg(state, msg.twist);
 					}
 				}

@@ -1,16 +1,5 @@
 #!/bin/bash
-BASE_IMAGE=ros
-BASE_TAG=eloquent
-
-if [ -z "$1" ]; then
-    TAG="latest"
-else
-    TAG=$1
-    BASE_IMAGE=osrf/ros
-    BASE_TAG=$1-desktop
-fi
-
-docker pull "${BASE_IMAGE}:${BASE_TAG}"
+ROS_VERSION=foxy
 
 REBUILD=0
 
@@ -24,23 +13,15 @@ done
 shift "$(( OPTIND - 1 ))"
 
 NAME=$(echo "${PWD##*/}" | tr _ -)
-
-UID="$(id -u "${USER}")"
-GID="$(id -g "${USER}")"
+TAG="latest"
 
 if [ "$REBUILD" -eq 1 ]; then
 	docker build \
     	--no-cache \
-    	--build-arg BASE_IMAGE="${BASE_IMAGE}" \
-    	--build-arg BASE_TAG="${BASE_TAG}" \
- 		--build-arg UID="${UID}" \
- 		--build-arg GID="${GID}" \
+    	--build-arg ROS_VERSION="${ROS_VERSION}" \
  		-t "${NAME}:${TAG}" .
- else
+else
 	docker build \
-	    --build-arg BASE_IMAGE="${BASE_IMAGE}" \
-	    --build-arg BASE_TAG="${BASE_TAG}" \
- 		--build-arg UID="${UID}" \
- 		--build-arg GID="${GID}" \
- 		-t "${NAME}:${TAG}" .
- fi
+	    --build-arg ROS_VERSION="${ROS_VERSION}" \
+	    -t "${NAME}:${TAG}" .
+fi

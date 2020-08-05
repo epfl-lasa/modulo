@@ -25,7 +25,6 @@ namespace StateRepresentation
 		/**
 	 	 * @brief Constructor with name and reference frame provided
 	 	 * @brief name the name of the state
-	 	 * @brief reference the name of the reference frame
 	     */
 		explicit Trajectory(const std::string& name);
 

@@ -8,7 +8,7 @@
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <modulo_msgs/msg/jacobian_matrix.hpp>
+#include <modulo_msgs/msg/jacobian.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <tf2_msgs/msg/tf_message.hpp>
@@ -20,7 +20,7 @@
 #include "state_representation/Space/Cartesian/CartesianTwist.hpp"
 #include "state_representation/Space/Cartesian/CartesianWrench.hpp"
 #include "state_representation/Robot/JointState.hpp"
-#include "state_representation/Robot/JacobianMatrix.hpp"
+#include "state_representation/Robot/Jacobian.hpp"
 #include "state_representation/Space/DualQuaternion/DualQuaternionPose.hpp"
 #include "state_representation/Space/DualQuaternion/DualQuaternionTwist.hpp"
 #include "state_representation/Parameters/Parameter.hpp"
@@ -122,11 +122,11 @@ namespace Modulo
 					void read_msg(StateRepresentation::JointState & state, const sensor_msgs::msg::JointState & msg);
 
 					/**
-					 * @brief Convert a ROS modulo_msgs::msg::JacobianMatrix to a JacobianMatrix
-					 * @param state The JacobianMatrix to populate
+					 * @brief Convert a ROS modulo_msgs::msg::Jacobian to a Jacobian
+					 * @param state The Jacobian to populate
 					 * @param msg The ROS msg to read from
 					 */
-					void read_msg(StateRepresentation::JacobianMatrix & state, const modulo_msgs::msg::JacobianMatrix & msg);
+					void read_msg(StateRepresentation::Jacobian & state, const modulo_msgs::msg::Jacobian & msg);
 
 					/**
 					 * @brief Convert a ROS geometry_msgs::msg::Pose to a DualQuaternionPose
