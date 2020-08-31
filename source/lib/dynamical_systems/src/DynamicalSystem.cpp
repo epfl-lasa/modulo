@@ -30,8 +30,15 @@ namespace DynamicalSystems
 	template <>
 	const CartesianState DynamicalSystem<CartesianState>::evaluate(const CartesianState& state) const
 	{
-		CartesianState result = this->get_reference_frame().inverse() * state;
-		result = this->compute_dynamics(result);
-		return this->get_reference_frame() * result;
+		if (this->get_reference_frame().get_name() == state.get_reference_frame())
+		{
+			CartesianState result = this->get_reference_frame().inverse() * state;
+			result = this->compute_dynamics(result);
+			return this->get_reference_frame() * result;
+		}
+		else
+		{
+			return this->compute_dynamics(state);
+		}
 	}
 }
