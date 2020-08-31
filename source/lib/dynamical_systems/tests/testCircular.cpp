@@ -6,11 +6,9 @@
 TEST(EvaluateDynamicalSystemPositionOnly, PositiveNos)
 {
 	StateRepresentation::CartesianPose current_pose("robot", 10 * Eigen::Vector3d::Random());
-	StateRepresentation::CartesianPose center("robot");
+	StateRepresentation::CartesianPose center = StateRepresentation::CartesianPose::Identity("robot");
 	DynamicalSystems::Circular circularDS(center);
 	double radius = 10;
-
-	circularDS.set_center(center);
 	circularDS.set_radius(radius);
 
 	unsigned int nb_steps = 100;
