@@ -124,6 +124,38 @@ namespace StateRepresentation
 		return this->get_velocities().array();
 	}
 
+	void JointVelocities::clamp(const std::vector<double>& max_values, const std::vector<double>& noise_ratio)
+	{
+		Eigen::VectorXd velocities(this->get_size());
+		for (unsigned int i; i<this->get_size(); ++i)
+		{
+			// apply a deadzone
+			if (!noise_ratio.empty() && abs(this->get_velocities()(i)) < noise_ratio[i]) velocities(i) = 0.0; 
+			// clamp the velocities to their maximum amplitude provided
+			if(abs(this->get_velocities()(i)) > max_values[i]) velocities(i) = copysign(1.0, this->get_velocities()(i)) * max_values[i];
+		}
+		this->set_velocities(velocities);
+	}
+
+	void JointVelocities::clamp(double max_value, double noise_ratio)
+	{
+		this->clamp(std::vector<double>(this->get_size(), max_value), std::vector<double>(this->get_size(), noise_ratio));
+	}
+
+	const JointVelocities JointVelocities::clamped(double max_value, double noise_ratio) const
+	{
+		JointVelocities result(*this);
+		result.clamp(max_value, noise_ratio);
+		return result;
+	}
+
+	const JointVelocities JointVelocities::clamped(const std::vector<double>& max_values, const std::vector<double>& noise_ratio) const
+	{
+		JointVelocities result(*this);
+		result.clamp(max_values, noise_ratio);
+		return result;
+	}
+
 	std::ostream& operator<<(std::ostream& os, const JointVelocities& velocities)
 	{
 		if(velocities.is_empty())

@@ -150,23 +150,38 @@ namespace StateRepresentation
 		const Eigen::ArrayXd array() const;
 
 		/**
-		 * @brief Clamp inplace the magnitude of the velocity to the values in argument
-		 * @param max_linear the maximum magnitude of the linear velocity
-		 * @param max_angular the maximum magnitude of the angular velocity
+		 * @brief Clamp inplace the magnitude of the joint velocities to the values in argument
+		 * @param max_value the maximum magnitude of the velocities
 		 * @param noise_ratio if provided, this value will be used to apply a deadzone under which
 		 * the velocity will be set to 0
 		 */
-		//void clamp(double max_linear, double max_angular, double noise_ratio=0);
+		void clamp(double max_value, double noise_ratio=0);
+
+		/**
+		 * @brief Clamp inplace the magnitude of the joint velocities to the values in argument
+		 * @param max_values the maximum magnitudes of the velocities for each join
+		 * @param noise_ratio if provided, this value will be used to apply a deadzone under which
+		 * the velocities will be set to 0
+		 */
+		void clamp(const std::vector<double>& max_values, const std::vector<double>& noise_ratio=std::vector<double>());
 
 		/**
 		 * @brief Return the clamped velocity
-		 * @param max_linear the maximum magnitude of the linear velocity
-		 * @param max_angular the maximum magnitude of the angular velocity
+		 * @param max_value the maximum magnitude of the velocities
 		 * @param noise_ratio if provided, this value will be used to apply a deadzone under which
 		 * the velocity will be set to 0
 		 * @return the clamped velocity
 		 */
-		//const CartesianVelocity clamped(double max_linear, double max_angular, double noise_ratio=0) const;
+		const JointVelocities clamped(double max_value, double noise_ratio=0) const;
+
+		/**
+		 * @brief Return the clamped velocity
+		 * @param max_value the maximum magnitude of the velocities
+		 * @param max_values the maximum magnitudes of the velocities for each join
+		 * @param noise_ratio if provided, this value will be used to apply a deadzone under which
+		 * the velocities will be set to 0
+		 */
+		const JointVelocities clamped(const std::vector<double>& max_values, const std::vector<double>& noise_ratio=std::vector<double>()) const;
 
 		/**
 	 	 * @brief Overload the ostream operator for printing
