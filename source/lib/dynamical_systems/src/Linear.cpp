@@ -117,8 +117,8 @@ namespace DynamicalSystems
 	template<>
 	const StateRepresentation::CartesianState Linear<StateRepresentation::CartesianState>::compute_dynamics(const StateRepresentation::CartesianState& state) const
 	{
-		StateRepresentation::CartesianTwist twist = static_cast<const StateRepresentation::CartesianPose&>(state) - static_cast<const StateRepresentation::CartesianPose&>(this->get_attractor());
-		twist *= -this->get_gain();
+		StateRepresentation::CartesianTwist twist = static_cast<const StateRepresentation::CartesianPose&>(this->get_attractor()) - static_cast<const StateRepresentation::CartesianPose&>(state);
+		twist *= this->get_gain();
 		return twist;
 	}
 
