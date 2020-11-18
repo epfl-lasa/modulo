@@ -29,7 +29,10 @@ namespace Modulo
 			 * @param period rate used by each publisher of the class
 			 */
 			template <typename DurationT> 
-			explicit Monitor(const std::string& node_name, const std::list<std::string>& monitored_node, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms = false);
+			explicit Monitor(const std::string& node_name,
+							 const std::list<std::string>& monitored_node,
+				  			 const std::chrono::duration<int64_t, DurationT>& period,
+				  			 bool intra_process_comms = false);
 
 			/**
 			 * @brief Destructor
