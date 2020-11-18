@@ -1,3 +1,105 @@
+## 0.3.0 (November 18, 2020)
+
+Latest version that fixes different bugs and add the possibility to isolate the containers to run them on dedicated network. Complete list of commits is:
+
+  - Add network isolation at runtime
+  - Merge branch 'develop' of github.com:epfl-lasa/modulo into develop
+  - visual indentation
+  - Merge branch 'develop' of github.com:epfl-lasa/modulo into develop
+  - bug in DynamicalSystem.cpp
+  - Correct the error of logic
+  - More efficient computation
+  - Changes the order of the attractor
+  - Ignore build files
+  - Add missing googletest dependency
+  - Add funtions to clamp the joint velocities
+  - Correct the test that was failing due to an exception
+  - Correct the problem of the reference frame if the state is already given in the correct frame
+  - Merge branch 'develop' of github.com:epfl-lasa/modulo into develop
+  - Add a security checking in case one of the value is not provided
+  - Changes buils script to adapt to base version
+  - Base the image on ros2_ws image
+  - Fixes bug in circular.hpp
+  - Remove non developed library
+  - Build with the correct path and remove the building of the python version
+  - Move everything back to the root directory
+  - Remove old dependency to zmq
+  - Put an argument to the distance function to specify the dimensions needed (default all)
+  - Correct the formula regarding angular velocity and acceleration
+  - Add the reference frame from the attractor
+  - Test the moving of reference frame of dynamical systems
+  - Move the operator* to the state base class
+  - Remove old parameter
+  - Remove the virtual pure in the step function
+  - Add the possibility to braodcast a transform from a Parameter<CartesianPose> pointer
+  - Correct the changing of reference for the full state
+  - Add a get_reference_frame function
+  - Remove the reference frame checking at message reading
+  - Add multiple definitions of add_transform_broadcaster and possibility to always publish
+  - Add Identity cartesian pose
+  - Move instantiation to cpp file
+  - Correct an error that was creating a result with wrong joint names
+  - Remove parameter from the doc
+  - Rename JacobianMatrix to just Jacobian
+  - Changes the way of handling the quaternion hemishpere problem
+  - Ensure that all quaternions are on the same hemisphere
+  - Add a random changing attractor when previous one is achieved
+  - Add quaternion hemishpere operation to all operations
+  - Remove all graphics options to leave it to specific images
+  - Correct the template deduction error by correctly removing DurationT
+  - Add missing tag
+  - CHange the base image to foxy LTS
+  - Correct errors and change name
+  - Separate the rotation from the orientation
+  - Merge branch 'develop' of github.com:epfl-lasa/modulo into develop
+  - Changes the way the ds is calculated
+  - Merge branch 'develop' of github.com:epfl-lasa/modulo into develop
+  - Added function for setting and getting rotation angle for circular DS
+  - Remove non ros libraries
+  - change to c++17
+  - CHange to ros_distro
+  - Add missing assignment operators that were generating warnings
+  - Create contrsuctor with not timeout and/or no recipients
+  - Remove the timeout from publihser and transform broadcaster
+  - Divide by the radius to get a constant velocity
+  - Correct problems with the circular dynamical system
+  - Correct error with the velocity not expressed in the correct frame
+  - changes limit_circle to limit_cycle
+  - Remove the testing on the center name
+  - Add setter and getters for the limit circle
+  - Add cpp source for the circular ds that is not template anymore
+  - Handle ellipsoid parameters
+  - Add possibility to declare an ellipsoid parameter
+  - Add missing include
+  - add from and to std vector converision
+  - Uses the ellipsoid as limit circle of the dynamical system
+  - set filled for publication
+  - Add missing inline keyword
+  - add missing include
+  - send the ellipsoid as float64 array
+  - Store the rotation angle and calculate orientation accordingly
+  - Add Geometrical states with Ellipses first
+  - Replace the scalar gain by a matrix gain
+  - Add the possibility to set and get matrix based parameters
+  - Add the operator for multiplication with an Eigen matrix
+  - Add the possibility to define parameters of eigen matrix
+  - Clean trajectory
+  - Add set_zero functions
+  - Add an Event class to represent predicate wiht memory
+  - Add the possibility to set the parameter from command with string and value
+  - Add an exception when looking for a unexistent parameter
+  - Clean the headers to have pragma once
+  - Add functions to set the parameter on the parameter server
+  - add gdb
+  - Add functions to set the parameter value from the node
+  - Correct the error in the set_center function
+  - Correct the documentation
+  - Add Predicate as a Parameter<bool>
+  - Change to const functions using at for the map and change static_cast to static_pointer_cast
+  - Change to const functions
+  - Update with the new syntax using nvidia-container-toolkit
+  - Add the possibility to rename the transform before publishing it
+
 ## 0.2.2 (mai 08, 2020)
   - Merge branch 'develop'
   - Correct all the problems of Circular and some linking errors that could arise
