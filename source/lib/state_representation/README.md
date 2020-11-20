@@ -28,11 +28,9 @@ $ world
 
 Joint space also includes additional verification such as joint ordering and names to ensure valid operations.
 
-
-
 ### Compile cpp library (for testing)
-```
-cd ~/modulo_lib/state_representation/cpp/
+```bash
+cd ~/modulo_lib/state_representation/
 mkdir build && cd build
 cmake -Druntests=ON
 make
@@ -41,24 +39,12 @@ sudo make install
 
 ### Run Test Library (CPP)
 Run extensive tests
-```
+```bash
 ctest --verbose
 ```
 
 Run specific test (here Cartesian).
 List other executables (in the build folder)
-```
+```bash
 ./runTestCartesianState
-```
-
-
-### Run Test Libraries (python)
-Go to the python repository
-```
-cd ~/modulo_lib/state_representation/python/tests/
-```
-
-Go to the desired testing folder
-```
-pytest
 ```
