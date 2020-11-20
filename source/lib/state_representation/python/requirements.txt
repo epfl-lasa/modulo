@@ -1,5 +1,0 @@
-pytest
-numpy
-numpy-quaternion
-numba
-scipy
