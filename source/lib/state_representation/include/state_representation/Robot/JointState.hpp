@@ -93,7 +93,7 @@ namespace StateRepresentation
 		void set_positions(const Eigen::VectorXd& positions);
 
 		/**
-	 	 * @brief Setter of the posistions attribute
+	 	 * @brief Setter of the posistions from std vector
 	     */
 		void set_positions(const std::vector<double>& positions);
 
@@ -108,6 +108,11 @@ namespace StateRepresentation
 		void set_velocities(const Eigen::VectorXd& velocities);
 
 		/**
+	 	 * @brief Setter of the velocities from std vector
+	     */
+		void set_velocities(const std::vector<double>& velocities);
+
+		/**
 	 	 * @brief Getter of the accelerations attribute
 	     */
 		const Eigen::VectorXd& get_accelerations() const;
@@ -118,6 +123,11 @@ namespace StateRepresentation
 		void set_accelerations(const Eigen::VectorXd& accelerations);
 
 		/**
+	 	 * @brief Setter of the accelerations from std vector
+	     */
+		void set_accelerations(const std::vector<double>& accelerations);
+
+		/**
 	 	 * @brief Getter of the torques attribute
 	     */
 		const Eigen::VectorXd& get_torques() const;
@@ -126,6 +136,11 @@ namespace StateRepresentation
 	 	 * @brief Setter of the torques attribute
 	     */
 		void set_torques(const Eigen::VectorXd& torques);
+
+		/**
+	 	 * @brief Setter of the torques from std vector
+	     */
+		void set_torques(const std::vector<double>& torques);
 
 		/**
 	 	 * @brief Check if the state is compatible for operations with the state given as argument
@@ -301,6 +316,13 @@ namespace StateRepresentation
 		this->velocities = velocities;
 	}
 
+	inline void JointState::set_velocities(const std::vector<double>& velocities)
+	{
+		if(velocities.size() != this->get_size()) throw IncompatibleSizeException("Input vector is of incorrect size: expected " + std::to_string(this->get_size()) + ", given " + std::to_string(velocities.size()));
+		this->set_filled();
+		this->velocities = Eigen::VectorXd::Map(velocities.data(), velocities.size());
+	}
+
 	inline const Eigen::VectorXd& JointState::get_accelerations() const
 	{
 		return this->accelerations;
@@ -313,6 +335,13 @@ namespace StateRepresentation
 		this->accelerations = accelerations;
 	}
 
+	inline void JointState::set_accelerations(const std::vector<double>& accelerations)
+	{
+		if(accelerations.size() != this->get_size()) throw IncompatibleSizeException("Input vector is of incorrect size: expected " + std::to_string(this->get_size()) + ", given " + std::to_string(accelerations.size()));
+		this->set_filled();
+		this->accelerations = Eigen::VectorXd::Map(accelerations.data(), accelerations.size());
+	}
+
 	inline const Eigen::VectorXd& JointState::get_torques() const
 	{
 		return this->torques;
@@ -323,5 +352,12 @@ namespace StateRepresentation
 		if(torques.size() != this->get_size()) throw IncompatibleSizeException("Input vector is of incorrect size: expected " + std::to_string(this->get_size()) + ", given " + std::to_string(torques.size()));
 		this->set_filled();
 		this->torques = torques;
+	}
+
+	inline void JointState::set_torques(const std::vector<double>& torques)
+	{
+		if(torques.size() != this->get_size()) throw IncompatibleSizeException("Input vector is of incorrect size: expected " + std::to_string(this->get_size()) + ", given " + std::to_string(torques.size()));
+		this->set_filled();
+		this->torques = Eigen::VectorXd::Map(torques.data(), torques.size());
 	}
 }
