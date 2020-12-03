@@ -31,7 +31,7 @@ set(CORE_SOURCES
   src/State.cpp
   src/Space/SpatialState.cpp
   src/Space/Cartesian/CartesianState.cpp
-	src/Space/Cartesian/CartesianPose.cpp
+  src/Space/Cartesian/CartesianPose.cpp
   src/Space/Cartesian/CartesianTwist.cpp
   src/Space/Cartesian/CartesianWrench.cpp
   src/Robot/JointState.cpp
@@ -65,12 +65,12 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 if (runtests)
-	  if (APPLE)
+    if (APPLE)
       add_definitions(-DGTEST_USE_OWN_TR1_TUPLE)
       add_definitions(-D__GLIBCXX__)
     endif (APPLE)
 
-    add_subdirectory(lib/googletest)
+#    add_subdirectory(lib/googletest)
 
     enable_testing()
 
@@ -82,6 +82,7 @@ if (runtests)
     target_link_libraries(runTestUnits
       gtest 
       gtest_main
+      pthread
       ${PROJECT_NAME}
     )
     add_test(NAME runTestUnits COMMAND runTestUnits)
@@ -90,6 +91,7 @@ if (runtests)
   	target_link_libraries(runTestCartesianState
   		gtest 
   		gtest_main
+        pthread
   		${PROJECT_NAME}
   	)
 	  add_test(NAME runTestCartesianState COMMAND runTestCartesianState)
@@ -98,6 +100,7 @@ if (runtests)
     target_link_libraries(runTestJointState
       gtest 
       gtest_main
+      pthread
       ${PROJECT_NAME}
     )
     add_test(NAME runTestJointState COMMAND runTestJointState)
@@ -106,6 +109,7 @@ if (runtests)
     target_link_libraries(runTestDualQuaternionState
       gtest 
       gtest_main
+      pthread
       ${PROJECT_NAME}
     )
     add_test(NAME runTestDualQuaternionState COMMAND runTestDualQuaternionState)
@@ -114,6 +118,7 @@ if (runtests)
     target_link_libraries(runTestJacobian
       gtest 
       gtest_main
+      pthread
       ${PROJECT_NAME}
     )
     add_test(NAME runTestJacobian COMMAND runTestJacobian)
@@ -122,6 +127,7 @@ if (runtests)
     target_link_libraries(runTestTrajectory
       gtest 
       gtest_main
+      pthread
       ${PROJECT_NAME}
     )
     add_test(NAME runTestTrajectory COMMAND runTestTrajectory)
@@ -130,6 +136,7 @@ if (runtests)
     target_link_libraries(runTestParameter
       gtest 
       gtest_main
+      pthread
       ${PROJECT_NAME}
     )
     add_test(NAME runTestParameter COMMAND runTestParameter)
@@ -138,6 +145,7 @@ if (runtests)
     target_link_libraries(runTestEllipsoid
       gtest 
       gtest_main
+      pthread
       ${PROJECT_NAME}
     )
     add_test(NAME runTestEllipsoid COMMAND runTestEllipsoid)

@@ -46,12 +46,12 @@ install(TARGETS ${PROJECT_NAME}
   	RUNTIME DESTINATION bin)
 
 if (runtests)
-	  if (APPLE)
+    if (APPLE)
       add_definitions(-DGTEST_USE_OWN_TR1_TUPLE)
       add_definitions(-D__GLIBCXX__)
     endif (APPLE)
 
-    add_subdirectory(lib/googletest)
+#    add_subdirectory(lib/googletest)
 
     enable_testing()
 
@@ -63,6 +63,7 @@ if (runtests)
   	target_link_libraries(runTestLinear
   		gtest 
   		gtest_main
+		pthread
   		${PROJECT_NAME}
       state_representation
   	)
@@ -72,6 +73,7 @@ if (runtests)
     target_link_libraries(runTestCircular
       gtest 
       gtest_main
+	  pthread
       ${PROJECT_NAME}
       state_representation
     )

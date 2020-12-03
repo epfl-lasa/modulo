@@ -1,0 +1,41 @@
+ARG IMAGE=modulo
+ARG TAG=latest
+FROM ${IMAGE}:${TAG}
+
+ARG SSH_USER=ros2
+ARG SSH_PASSWORD=password
+
+USER root
+
+RUN apt-get update \
+  && apt-get install -y ssh \
+    build-essential \
+    libssl-dev \
+    libgtest-dev \
+    gcc \
+    g++ \
+    gdb \
+    clang \
+    rsync \
+    tar \
+    python \
+    sudo \
+  && apt-get clean
+
+# build gtest
+RUN cd /usr/src/googletest \
+  && cmake . \
+  && cmake --build . --target install \
+  && cd ${HOME}
+
+RUN ( \
+    echo 'LogLevel DEBUG2'; \
+    echo 'PermitRootLogin yes'; \
+    echo 'PasswordAuthentication yes'; \
+    echo 'Subsystem sftp /usr/lib/openssh/sftp-server'; \
+  ) > /etc/ssh/sshd_config_development \
+  && mkdir /run/sshd
+
+RUN yes ${SSH_PASSWORD} | passwd ${SSH_USER}
+
+USER ${SSH_USER}

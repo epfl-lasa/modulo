@@ -2,3 +2,5 @@
 **/__pycache__/**
 **/.cache/**
 /source/lib/state_representation/build/*
+.idea
+cmake-build*
