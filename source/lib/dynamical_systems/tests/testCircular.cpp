@@ -1,31 +1,34 @@
 #include "dynamical_systems/Circular.hpp"
 #include <gtest/gtest.h>
-#include <unistd.h>
 
+class CircularDSTest : public testing::Test {
+protected:
+  void SetUp() override {
+    current_pose = StateRepresentation::CartesianPose("robot", 10 * Eigen::Vector3d::Random());
+    center = StateRepresentation::CartesianPose::Identity("robot");
+  }
 
-TEST(EvaluateDynamicalSystemPositionOnly, PositiveNos)
-{
-	StateRepresentation::CartesianPose current_pose("robot", 10 * Eigen::Vector3d::Random());
-	StateRepresentation::CartesianPose center = StateRepresentation::CartesianPose::Identity("robot");
-	DynamicalSystems::Circular circularDS(center);
-	double radius = 10;
-	circularDS.set_radius(radius);
+  StateRepresentation::CartesianPose current_pose;
+  StateRepresentation::CartesianPose center;
+  double radius = 10;
+  unsigned int nb_steps = 100;
+  double dt = 0.1;
+  double linear_tol = 1e-3;
+};
 
-	unsigned int nb_steps = 100;
-	double dt = 0.1;
+TEST_F(CircularDSTest, TestPositionOnRadius) {
+  DynamicalSystems::Circular circularDS(center);
+  circularDS.set_radius(radius);
 
-	for(unsigned int i=0; i<nb_steps; ++i)
-	{
-		StateRepresentation::CartesianTwist twist = circularDS.evaluate(current_pose);
-		current_pose += dt * twist;
-	}
+  for (unsigned int i = 0; i < nb_steps; ++i) {
+    StateRepresentation::CartesianTwist twist = circularDS.evaluate(current_pose);
+    current_pose += dt * twist;
+  }
 
-	//for(int i=0; i<3; ++i) ASSERT_NEAR(current_pose.get_position()(i), target_pose.get_position()(i), 0.001);
-	//ASSERT_NEAR(current_pose.get_orientation().w(), target_pose.get_orientation().w(), 0.001);
-	//for(int i=0; i<3; ++i) ASSERT_NEAR(current_pose.get_orientation().vec()(i), target_pose.get_orientation().vec()(i), 0.001);
+  EXPECT_NEAR((current_pose.get_position() - center.get_position()).norm(), radius, linear_tol);
 }
 
-int main(int argc, char **argv) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+int main(int argc, char** argv) {
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

@@ -1,88 +1,73 @@
 #include "dynamical_systems/Linear.hpp"
 #include <vector>
 #include <gtest/gtest.h>
-#include <unistd.h>
 
+class LinearDSTest : public testing::Test {
+protected:
+  void SetUp() override {
+    current_pose = StateRepresentation::CartesianPose("robot", 10 * Eigen::Vector3d::Random(),
+                                                      Eigen::Quaterniond::UnitRandom());
+    target_pose = StateRepresentation::CartesianPose("robot", 10 * Eigen::Vector3d::Random(),
+                                                     Eigen::Quaterniond::UnitRandom());
+  }
+  void print_current_and_target_pose() {
+    std::cout << current_pose << std::endl;
+    std::cout << target_pose << std::endl;
+    std::cout << abs(current_pose.get_orientation().dot(target_pose.get_orientation())) << std::endl;
+  }
 
-TEST(EvaluateDynamicalSystemPositionOnly, PositiveNos)
-{
-	StateRepresentation::CartesianPose current_pose("robot", 10 * Eigen::Vector3d::Random());
-	StateRepresentation::CartesianPose target_pose("robot", 10 * Eigen::Vector3d::Random());
-	DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(target_pose);
+  void test_closeness() {
+    print_current_and_target_pose();
+    EXPECT_NEAR((current_pose.get_position() - target_pose.get_position()).norm(), 0.0f, linear_tol);
+    EXPECT_NEAR(current_pose.get_orientation().angularDistance(target_pose.get_orientation()), 0.0f, angular_tol);
+  }
 
-	unsigned int nb_steps = 100;
-	double dt = 0.1;
+  StateRepresentation::CartesianPose current_pose;
+  StateRepresentation::CartesianPose target_pose;
+  unsigned int nb_steps = 100;
+  double dt = 0.1;
+  double linear_tol = 1e-3;
+  double angular_tol = 1e-3;
+};
 
-	for(unsigned int i=0; i<nb_steps; ++i)
-	{
-		StateRepresentation::CartesianTwist twist = linearDS.evaluate(current_pose);
-		current_pose += dt * twist;
-	}
+TEST_F(LinearDSTest, PositionOnly) {
+  current_pose.set_orientation(Eigen::Quaterniond::Identity());
+  target_pose.set_orientation(Eigen::Quaterniond::Identity());
+  DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(target_pose);
 
-	std::cout << current_pose << std::endl;
-	std::cout << target_pose << std::endl;
-	std::cout << abs(current_pose.get_orientation().dot(target_pose.get_orientation())) << std::endl;
+  for (unsigned int i = 0; i < nb_steps; ++i) {
+    StateRepresentation::CartesianTwist twist = linearDS.evaluate(current_pose);
+    current_pose += dt * twist;
+  }
 
-	for(int i=0; i<3; ++i) EXPECT_NEAR(current_pose.get_position()(i), target_pose.get_position()(i), 0.001);
-	EXPECT_TRUE(abs(current_pose.get_orientation().dot(target_pose.get_orientation())) > 1-10E-4);	
-
+  test_closeness();
 }
 
-TEST(EvaluateDynamicalSystemOrientationOnly, PositiveNos)
-{
-	srand (time(NULL));
+TEST_F(LinearDSTest, OrientationOnly) {
+  current_pose.set_position(Eigen::Vector3d::Zero());
+  target_pose.set_position(Eigen::Vector3d::Zero());
+  DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(target_pose);
 
-	StateRepresentation::CartesianPose current_pose("robot", Eigen::Vector3d(0,0,0));
-	Eigen::Array4d orientation = Eigen::Array4d::Random();
-	StateRepresentation::CartesianPose target_pose("robot", Eigen::Vector3d(0,0,0), Eigen::Quaterniond(orientation(0), orientation(1), orientation(2), orientation(3)));
+  for (unsigned int i = 0; i < nb_steps; ++i) {
+    StateRepresentation::CartesianTwist twist = linearDS.evaluate(current_pose);
+    current_pose = dt * twist + current_pose;
+  }
 
-	DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(target_pose);
-
-	unsigned int nb_steps = 100;
-	double dt = 0.1;
-
-	for(unsigned int i=0; i<nb_steps; ++i)
-	{
-		StateRepresentation::CartesianTwist twist = linearDS.evaluate(current_pose);
-		current_pose = dt * twist + current_pose;
-	}
-
-	std::cout << current_pose << std::endl;
-	std::cout << target_pose << std::endl;
-	std::cout << abs(current_pose.get_orientation().dot(target_pose.get_orientation())) << std::endl;
-
-	for(int i=0; i<3; ++i) EXPECT_NEAR(current_pose.get_position()(i), target_pose.get_position()(i), 0.01);
-	EXPECT_TRUE(abs(current_pose.get_orientation().dot(target_pose.get_orientation())) > 1-10E-4);
+  test_closeness();
 }
 
-TEST(EvaluateDynamicalSystem, PositiveNos)
-{
-	srand (time(NULL));
+TEST_F(LinearDSTest, PositionAndOrientation) {
+  DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(target_pose);
 
-	StateRepresentation::CartesianPose current_pose("robot", 10 * Eigen::Vector3d::Random());
-	Eigen::Array4d orientation = Eigen::Array4d::Random();
-	StateRepresentation::CartesianPose target_pose("robot", 10 * Eigen::Vector3d::Random(), Eigen::Quaterniond(orientation(0), orientation(1), orientation(2), orientation(3)));
+  for (unsigned int i = 0; i < nb_steps; ++i) {
+    StateRepresentation::CartesianTwist twist = linearDS.evaluate(current_pose);
+    current_pose += dt * twist;
+  }
 
-	DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(target_pose);
-
-	unsigned int nb_steps = 500;
-	double dt = 0.1;
-
-	for(unsigned int i=0; i<nb_steps; ++i)
-	{
-		StateRepresentation::CartesianTwist twist = linearDS.evaluate(current_pose);
-		current_pose = dt * twist + current_pose;
-	}
-
-	std::cout << current_pose << std::endl;
-	std::cout << target_pose << std::endl;
-	std::cout << abs(current_pose.get_orientation().dot(target_pose.get_orientation())) << std::endl;
-
-	for(int i=0; i<3; ++i) EXPECT_NEAR(current_pose.get_position()(i), target_pose.get_position()(i), 0.01);
-	EXPECT_TRUE(abs(current_pose.get_orientation().dot(target_pose.get_orientation())) > 1-10E-4);
+  test_closeness();
 }
 
-int main(int argc, char **argv) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+int main(int argc, char** argv) {
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
