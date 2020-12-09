@@ -1,14 +1,14 @@
 #include "dynamical_systems/Linear.hpp"
-#include <vector>
 #include <gtest/gtest.h>
+#include <vector>
+
+using namespace std::literals::chrono_literals;
 
 class LinearDSTest : public testing::Test {
 protected:
   void SetUp() override {
-    current_pose = StateRepresentation::CartesianPose("robot", 10 * Eigen::Vector3d::Random(),
-                                                      Eigen::Quaterniond::UnitRandom());
-    target_pose = StateRepresentation::CartesianPose("robot", 10 * Eigen::Vector3d::Random(),
-                                                     Eigen::Quaterniond::UnitRandom());
+    current_pose = StateRepresentation::CartesianPose::Random("robot");
+    target_pose = StateRepresentation::CartesianPose::Random("robot");
   }
   void print_current_and_target_pose() {
     std::cout << current_pose << std::endl;
@@ -24,8 +24,8 @@ protected:
 
   StateRepresentation::CartesianPose current_pose;
   StateRepresentation::CartesianPose target_pose;
-  unsigned int nb_steps = 100;
-  double dt = 0.1;
+  unsigned int nb_steps = 200;
+  std::chrono::milliseconds dt = 100ms;
   double linear_tol = 1e-3;
   double angular_tol = 1e-3;
 };
@@ -46,13 +46,13 @@ TEST_F(LinearDSTest, PositionOnly) {
 TEST_F(LinearDSTest, OrientationOnly) {
   current_pose.set_position(Eigen::Vector3d::Zero());
   target_pose.set_position(Eigen::Vector3d::Zero());
+
   DynamicalSystems::Linear<StateRepresentation::CartesianState> linearDS(target_pose);
 
   for (unsigned int i = 0; i < nb_steps; ++i) {
     StateRepresentation::CartesianTwist twist = linearDS.evaluate(current_pose);
     current_pose = dt * twist + current_pose;
   }
-
   test_closeness();
 }
 
@@ -61,7 +61,7 @@ TEST_F(LinearDSTest, PositionAndOrientation) {
 
   for (unsigned int i = 0; i < nb_steps; ++i) {
     StateRepresentation::CartesianTwist twist = linearDS.evaluate(current_pose);
-    current_pose += dt * twist;
+    current_pose = dt * twist + current_pose;
   }
 
   test_closeness();
