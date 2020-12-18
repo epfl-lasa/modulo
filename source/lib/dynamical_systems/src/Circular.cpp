@@ -11,6 +11,7 @@ Circular::Circular(const StateRepresentation::CartesianState& center,
                                                                                                       center.get_name(),
                                                                                                       center.get_reference_frame()))),
     planar_gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain)),
+    normal_gain_(std::make_shared<StateRepresentation::Parameter<double>>("normal_gain", gain)),
     circular_velocity_(std::make_shared<StateRepresentation::Parameter<double>>("circular_velocity",
                                                                                 circular_velocity)) {
   this->limit_cycle_->get_value().set_center_state(center);
@@ -22,6 +23,7 @@ Circular::Circular(const StateRepresentation::Ellipsoid& limit_cycle, double gai
     limit_cycle_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::Ellipsoid>>(" limit_cycle",
                                                                                                   limit_cycle)),
     planar_gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain)),
+    normal_gain_(std::make_shared<StateRepresentation::Parameter<double>>("normal_gain", gain)),
     circular_velocity_(std::make_shared<StateRepresentation::Parameter<double>>("circular_velocity",
                                                                                 circular_velocity)) {}
 
@@ -59,6 +61,7 @@ const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> Circul
   std::list<std::shared_ptr<StateRepresentation::ParameterInterface>> param_list;
   param_list.push_back(this->limit_cycle_);
   param_list.push_back(this->planar_gain_);
+  param_list.push_back(this->normal_gain_);
   param_list.push_back(this->circular_velocity_);
   return param_list;
 }
