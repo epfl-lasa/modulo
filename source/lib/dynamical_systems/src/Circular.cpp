@@ -7,10 +7,8 @@ Circular::Circular(const StateRepresentation::CartesianState& center,
                    double circular_velocity) :
     DynamicalSystem(StateRepresentation::CartesianPose::Identity(center.get_reference_frame())),
     limit_cycle_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::Ellipsoid>>("limit_cycle",
-                                                                                                  StateRepresentation::Ellipsoid(
-                                                                                                      center.get_name(),
-                                                                                                      center.get_reference_frame()))),
-    planar_gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain)),
+        StateRepresentation::Ellipsoid(center.get_name(), center.get_reference_frame()))),
+    planar_gain_(std::make_shared<StateRepresentation::Parameter<double>>("planar_gain", gain)),
     normal_gain_(std::make_shared<StateRepresentation::Parameter<double>>("normal_gain", gain)),
     circular_velocity_(std::make_shared<StateRepresentation::Parameter<double>>("circular_velocity",
                                                                                 circular_velocity)) {
@@ -20,9 +18,9 @@ Circular::Circular(const StateRepresentation::CartesianState& center,
 
 Circular::Circular(const StateRepresentation::Ellipsoid& limit_cycle, double gain, double circular_velocity) :
     DynamicalSystem(StateRepresentation::CartesianPose::Identity(limit_cycle.get_center_pose().get_reference_frame())),
-    limit_cycle_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::Ellipsoid>>(" limit_cycle",
+    limit_cycle_(std::make_shared<StateRepresentation::Parameter<StateRepresentation::Ellipsoid>>("limit_cycle",
                                                                                                   limit_cycle)),
-    planar_gain_(std::make_shared<StateRepresentation::Parameter<double>>("gain", gain)),
+    planar_gain_(std::make_shared<StateRepresentation::Parameter<double>>("planar_gain", gain)),
     normal_gain_(std::make_shared<StateRepresentation::Parameter<double>>("normal_gain", gain)),
     circular_velocity_(std::make_shared<StateRepresentation::Parameter<double>>("circular_velocity",
                                                                                 circular_velocity)) {}
@@ -38,11 +36,9 @@ const StateRepresentation::CartesianState Circular::compute_dynamics(const State
 
   std::vector<double> radiuses = this->get_radiuses();
 
-  double a2 = radiuses[0] * radiuses[0];
-  double b2 = radiuses[1] * radiuses[1];
-  double dradius = -this->get_planar_gain() * radiuses[0] * radiuses[1]
-      * (pose.get_position()[0] * pose.get_position()[0] / a2 + pose.get_position()[1] * pose.get_position()[1] / b2
-          - 1);
+  double a2ratio = (pose.get_position()[0] * pose.get_position()[0]) / (radiuses[0] * radiuses[0]);
+  double b2ratio = (pose.get_position()[1] * pose.get_position()[1]) / (radiuses[1] * radiuses[1]);
+  double dradius = -this->get_planar_gain() * radiuses[0] * radiuses[1] * (a2ratio + b2ratio - 1);
   double tangeant_velocity_x = -radiuses[0] / radiuses[1] * pose.get_position()[1];
   double tangeant_velocity_y = radiuses[1] / radiuses[0] * pose.get_position()[0];
 
