@@ -1,2 +1,0 @@
-# dynamical_systems
-
