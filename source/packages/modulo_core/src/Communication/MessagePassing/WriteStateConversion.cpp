@@ -121,7 +121,7 @@ void write_msg(modulo_msgs::msg::Jacobian& msg, const StateRepresentation::Jacob
   msg.nb_dimensions = state.get_nb_rows();
   msg.nb_joints = state.get_nb_cols();
   msg.joint_names = state.get_joint_names();
-  msg.data = std::vector<double>(state.get_data().data(), state.get_data().data() + state.get_data().size());
+  msg.data = std::vector<double>(state.data().data(), state.data().data() + state.data().size());
 }
 
 void write_msg(geometry_msgs::msg::Pose& msg, const StateRepresentation::DualQuaternionPose& state, const rclcpp::Time&) {
