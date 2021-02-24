@@ -15,6 +15,16 @@ find_package(ament_cmake_auto REQUIRED)
 
 ament_auto_find_build_dependencies()
 
+list(APPEND CMAKE_PREFIX_PATH /opt/openrobots)
+find_package(pinocchio REQUIRED)
+find_package(OsqpEigen REQUIRED)
+find_package(osqp REQUIRED)
+
+find_library(state_representation REQUIRED)
+find_library(dynamical_systems REQUIRED)
+find_library(controllers REQUIRED)
+find_library(robot_model REQUIRED)
+
 set(CORE_SOURCES
     src/Communication/MessagePassing/ReadStateConversion.cpp
     src/Communication/MessagePassing/WriteStateConversion.cpp
@@ -27,10 +37,26 @@ set(CORE_SOURCES
     src/Recorder.cpp
 )
 
+include_directories(
+  include
+  ${STATE_REPRESENTATION_INCLUDE_DIR}
+  ${DYNAMICAL_SYSTEMS_INCLUDE_DIR}
+  ${CONTROLLERS_INCLUDE_DIR}
+  ${ROBOT_MODEL_INCLUDE_DIR}
+  ${PINOCCHIO_INCLUDE_DIR}
+  ${OsqpEigen_INCLUDE_DIR}
+  /opt/openrobots/include
+)
+
 ament_auto_add_library(${PROJECT_NAME} SHARED ${CORE_SOURCES})
 target_link_libraries(${PROJECT_NAME}
+  ${PINOCCHIO_LIBRARIES}
+  OsqpEigen::OsqpEigen
+  osqp::osqp
   state_representation
   dynamical_systems
+  controllers
+  robot_model
 )
 
 ament_auto_add_executable(${PROJECT_NAME}_test_cartesian tests/testCartesian.cpp)
@@ -44,6 +70,9 @@ target_link_libraries(${PROJECT_NAME}_test_joints ${PROJECT_NAME})
 
 ament_auto_add_executable(${PROJECT_NAME}_test_moving_reference_frame tests/testMovingReferenceFrame.cpp)
 target_link_libraries(${PROJECT_NAME}_test_moving_reference_frame ${PROJECT_NAME})
+
+ament_auto_add_executable(${PROJECT_NAME}_test_controller tests/testController.cpp)
+target_link_libraries(${PROJECT_NAME}_test_controller ${PROJECT_NAME})
 
 ament_auto_package()
 
