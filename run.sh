@@ -14,13 +14,6 @@ if [ -z "$TAG" ]; then
 	TAG="latest"
 fi
 
-#create a shared volume to store the lib folder
-docker volume create --driver local \
-    --opt type="none" \
-    --opt device="${PWD}/source/lib/" \
-    --opt o="bind" \
-    "${NAME}_lib_vol"
-
 # create a shared volume to store the ros_ws
 docker volume create --driver local \
     --opt type="none" \
@@ -34,6 +27,5 @@ docker run \
 	--net="${NETWORK}" \
 	-it \
     --rm \
-	--volume="${NAME}_lib_vol:/home/ros2/modulo_lib/:rw" \
 	--volume="${NAME}_src_vol:/home/ros2/ros2_ws/src/:rw" \
 	"${NAME}:${TAG}"
