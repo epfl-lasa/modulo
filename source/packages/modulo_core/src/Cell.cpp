@@ -266,7 +266,6 @@ void Cell::set_parameter_value(const std::string& node_name,
   this->set_parameter_value<std::vector<double>>(node_name, parameter_name, vector_value);
 }
 
-
 void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::ParameterInterface>& parameter) {
   using namespace StateRepresentation;
   using namespace StateRepresentation::Exceptions;
