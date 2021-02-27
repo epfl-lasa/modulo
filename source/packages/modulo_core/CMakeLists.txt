@@ -72,6 +72,7 @@ target_link_libraries(${PROJECT_NAME}_test_moving_reference_frame ${PROJECT_NAME
 
 ament_auto_add_executable(${PROJECT_NAME}_test_controller tests/testController.cpp)
 target_link_libraries(${PROJECT_NAME}_test_controller ${PROJECT_NAME})
+target_compile_definitions(${PROJECT_NAME}_test_controller PRIVATE TEST_FIXTURES="${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures")
 
 ament_auto_package()
 

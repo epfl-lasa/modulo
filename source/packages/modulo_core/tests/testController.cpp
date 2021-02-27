@@ -6,12 +6,15 @@
 #include <exception>
 #include <iostream>
 
+using namespace StateRepresentation;
+
 namespace {
-class LinearMotionGenerator : public Modulo::Core::Cell {
+class LinearMotionGenerator : public modulo::core::Cell {
 private:
-  std::shared_ptr<StateRepresentation::CartesianPose> current_pose;
-  std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
-  DynamicalSystems::Linear<StateRepresentation::CartesianState> motion_generator;
+  std::shared_ptr<CartesianPose> current_pose;
+  std::shared_ptr<CartesianTwist> desired_twist;
+  std::shared_ptr<Trajectory<CartesianState>> desired_trajecory;
+  DynamicalSystems::Linear<CartesianState> motion_generator;
 
 public:
   explicit LinearMotionGenerator(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
@@ -22,81 +25,53 @@ public:
   }
 
   bool on_configure() {
-    this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->current_pose);
     this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
     return true;
   }
 
   void step() {
-    if (!this->current_pose->is_empty()) {
-      *this->desired_twist = this->motion_generator.evaluate(*this->current_pose);
-      // change attractor if previous was reached
-      if (this->current_pose->dist(this->motion_generator.get_attractor()) < 1e-3) {
-        this->set_parameter_value("attractor", StateRepresentation::CartesianPose::Random("robot_test"));
-      }
-    } else {
-      this->desired_twist->initialize();
-    }
-    this->send_transform(this->motion_generator.get_attractor(), "attractor");
+    // get the eef tranform
+
+    // compute the desired twist
+    *this->desired_twist = this->motion_generator.evaluate(*this->current_pose);
   }
 };
 
-class ConsoleVisualizer : public Modulo::Core::Cell {
+class RobotInterface : public modulo::core::Cell {
 private:
-  std::shared_ptr<StateRepresentation::CartesianPose> robot_pose;
-  std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
-
-public:
-  explicit ConsoleVisualizer(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
-                                                                                                      robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
-                                                                                                      desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")) {}
-
-  bool on_configure() {
-    this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose);
-    this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
-    return true;
-  }
-
-  void step() {
-    std::ostringstream os;
-    os << std::endl;
-    os << "##### ROBOT POSE #####" << std::endl;
-    os << *this->robot_pose << std::endl;
-    os << "##### DESIRED TWIST #####" << std::endl;
-    os << *this->desired_twist << std::endl;
-    RCLCPP_INFO(get_logger(), "%s", os.str().c_str());
-  }
-};
-
-class RobotInterface : public Modulo::Core::Cell {
-private:
-  std::shared_ptr<StateRepresentation::CartesianPose> robot_pose;
-  std::shared_ptr<StateRepresentation::CartesianTwist> robot_twist;
-  std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
-  controllers::impedance::Dissipative<StateRepresentation::CartesianState> controller;
-  std::chrono::milliseconds dt;
+  std::shared_ptr<StateRepresentation::CartesianPose> robot_pose_;
+  std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist_;
+  std::shared_ptr<StateRepresentation::JointState> current_robot_state_;
+  std::shared_ptr<StateRepresentation::JointTorques> torques_command_;
+  controllers::impedance::Dissipative<StateRepresentation::CartesianState> controller_;
+  RobotModel::Model iiwa_model_;
+  std::chrono::milliseconds dt_;
 
 public:
   explicit RobotInterface(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
-                                                                                                   robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d(1.18, 0, 1.6), Eigen::Quaterniond(0.73, 0, 0.68, 0))),
-                                                                                                   robot_twist(std::make_shared<StateRepresentation::CartesianTwist>(StateRepresentation::CartesianTwist::Zero("robot_test"))),
-                                                                                                   desired_twist(std::make_shared<StateRepresentation::CartesianTwist>(StateRepresentation::CartesianTwist::Zero("robot_test"))),
-                                                                                                   dt(period) {}
+                                                                                                   robot_pose_(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d(1.18, 0, 1.6), Eigen::Quaterniond(0.73, 0, 0.68, 0))),
+                                                                                                   desired_twist_(std::make_shared<StateRepresentation::CartesianTwist>(StateRepresentation::CartesianTwist::Zero("robot_test"))),
+                                                                                                   current_robot_state_(std::make_shared<StateRepresentation::JointState>(StateRepresentation::JointState::Zero("iiwa", 7))),
+                                                                                                   torques_command_(std::make_shared<StateRepresentation::JointTorques>(StateRepresentation::JointTorques::Zero("iiwa", 7))),
+                                                                                                   iiwa_model_("iiwa", std::string(TEST_FIXTURES) + "/iiwa7.urdf"),
+                                                                                                   dt_(period) {}
 
   bool on_configure() {
-    this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
-    this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose, 0);
+    this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist_);
+    this->add_subscription<sensor_msgs::msg::JointState>("robot/joints", this->current_robot_state_);
+    this->add_publisher<sensor_msgs::msg::JointState>("robot/command", this->torques_command_);
     return true;
   }
 
   void step() {
-    if (!this->desired_twist->is_empty()) {
+    if (!this->current_robot_state_->is_empty() && !this->desired_twist_->is_empty()) {
+      // use the model forward kinematic to extract eef CartesianTwist
+      StateRepresentation::Jacobian jacobian = this->iiwa_model_.compute_jacobian(*this->current_robot_state_);
+      // compute current twist
+      StateRepresentation::CartesianTwist current_twist = jacobian * static_cast<StateRepresentation::JointVelocities>(*this->current_robot_state_);
       //get the wrench command from the controller
-      StateRepresentation::CartesianWrench command = this->controller.compute_command(*this->desired_twist, *this->robot_twist);
-      // assume no mass and inertia
-      *this->robot_twist = *this->desired_twist;
+      *this->torques_command_ = this->controller_.compute_command(*this->desired_twist_, current_twist, jacobian);
     }
-    this->send_transform(*this->robot_pose);
   }
 };
 }// namespace
@@ -117,11 +92,9 @@ int main(int argc, char* argv[]) {
   rclcpp::executors::SingleThreadedExecutor exe;
 
   std::shared_ptr<LinearMotionGenerator> lmg = std::make_shared<LinearMotionGenerator>("motion_generator", 1ms);
-  std::shared_ptr<ConsoleVisualizer> cv = std::make_shared<ConsoleVisualizer>("visualizer", 100ms);
   std::shared_ptr<RobotInterface> sri = std::make_shared<RobotInterface>("robot_interface", 1ms);
 
   exe.add_node(lmg->get_node_base_interface());
-  exe.add_node(cv->get_node_base_interface());
   exe.add_node(sri->get_node_base_interface());
 
   exe.spin();
