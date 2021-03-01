@@ -119,4 +119,18 @@ void read_msg(StateRepresentation::DualQuaternionTwist& state, const geometry_ms
   state.set_reference_frame(msg.header.frame_id);
   read_msg(state, msg.twist);
 }
+
+void read_msg(StateRepresentation::Trajectory<StateRepresentation::CartesianState>& state,
+              const nav_msgs::msg::Path& msg) {
+  using namespace std::chrono_literals;
+  state.set_reference_frame(msg.header.frame_id);
+  for (auto& p : msg.poses) {
+    StateRepresentation::CartesianPose pose;
+    // extract the pose from the PoseStamped messsage
+    read_msg(pose, p);
+    // add it to the trajectory. The notion of time between
+    // points is inexistant in Path messages
+    state.add_point(pose, 0ms);
+  }
+}
 }// namespace modulo::core::communication::state_conversion
