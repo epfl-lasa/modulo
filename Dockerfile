@@ -3,7 +3,7 @@ ARG ROS_VERSION=foxy
 FROM ros2_ws:${ROS_VERSION}
 
 # import control library packages
-RUN git clone -b develop --single-branch https://github.com/epfl-lasa/control_libraries.git
+RUN git clone -b refactor/to_std_vector --single-branch https://github.com/epfl-lasa/control_libraries.git
 WORKDIR ${HOME}/control_libraries/source
 RUN sudo ./install.sh
 
@@ -14,6 +14,8 @@ RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"
 
 # change to the home root
 WORKDIR ${HOME}
+
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/openrobots/lib/
 
 # Clean image
 RUN sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
