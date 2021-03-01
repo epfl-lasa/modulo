@@ -24,14 +24,17 @@ find_package(rosidl_default_generators REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 
 set(MSG_CORE "msg/Jacobian.msg")
+set(SRV_CORE "srv/PlayTrajectory.srv")
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${MSG_CORE}
-  DEPENDENCIES std_msgs
+  ${SRV_CORE}
+  DEPENDENCIES
+  std_msgs
+  nav_msgs
 )
-
-#rosidl_target_interfaces(${PROJECT_NAME}_lib ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 ament_package()
