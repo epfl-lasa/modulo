@@ -17,6 +17,7 @@
 #include <geometry_msgs/msg/wrench_stamped.hpp>
 #include <modulo_msgs/msg/jacobian.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <nav_msgs/msg/path.hpp>
 #include <rclcpp/time.hpp>
 #include <rcutils/logging_macros.h>
 #include <sensor_msgs/msg/joint_state.hpp>
@@ -145,6 +146,14 @@ void read_msg(StateRepresentation::DualQuaternionTwist& state, const geometry_ms
  * @param msg The ROS msg to read from
  */
 void read_msg(StateRepresentation::DualQuaternionTwist& state, const geometry_msgs::msg::TwistStamped& msg);
+
+/**
+ * @brief Convert a ROS nav_msgs::msg::Path to a Trajectory<CartesianState>
+ * @param state The Trajectory<CartesianState> to populate
+ * @param msg The ROS msg to read from
+ */
+void read_msg(StateRepresentation::Trajectory<StateRepresentation::CartesianState>& state,
+              const nav_msgs::msg::Path& msg);
 
 /**
  * @brief Template function to convert a ROS std_msgs::msg::T to a Parameter<T>
