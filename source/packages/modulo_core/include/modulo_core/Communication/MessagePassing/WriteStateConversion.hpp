@@ -176,14 +176,6 @@ void write_msg(geometry_msgs::msg::TwistStamped& msg, const StateRepresentation:
 void write_msg(tf2_msgs::msg::TFMessage& msg, const StateRepresentation::CartesianState& state, const rclcpp::Time& time);
 
 /**
- * @brief Convert a CartesianTwist to a ROS std_msgs::msg::Float64MultiArray
- * @param msg The ROS msg to populate
- * @param state The state to read from
- * @param time The time of the message
- */
-void write_msg(std_msgs::msg::Float64MultiArray& msg, const StateRepresentation::CartesianTwist& state, const rclcpp::Time& time);
-
-/**
  * @brief Convert a JointState to a ROS trajectory_msgs::msg::JointTrajectoryPoint
  * @param msg The ROS msg to populate
  * @param state The state to read from
@@ -200,30 +192,6 @@ void write_msg(trajectory_msgs::msg::JointTrajectoryPoint& msg, const StateRepre
 void write_msg(trajectory_msgs::msg::JointTrajectory& msg, const StateRepresentation::Trajectory<StateRepresentation::JointState>& state, const rclcpp::Time& time);
 
 /**
- * @brief Convert a JointPositions to a ROS std_msgs::msg::Float64MultiArray
- * @param msg The ROS msg to populate
- * @param state The state to read from
- * @param time The time of the message
- */
-void write_msg(std_msgs::msg::Float64MultiArray& msg, const StateRepresentation::JointPositions& state, const rclcpp::Time&);
-
-/**
- * @brief Convert a JointVelocities to a ROS std_msgs::msg::Float64MultiArray
- * @param msg The ROS msg to populate
- * @param state The state to read from
- * @param time The time of the message
- */
-void write_msg(std_msgs::msg::Float64MultiArray& msg, const StateRepresentation::JointVelocities& state, const rclcpp::Time&);
-
-/**
- * @brief Convert a JointVelocities to a ROS std_msgs::msg::Float64MultiArray
- * @param msg The ROS msg to populate
- * @param state The state to read from
- * @param time The time of the message
- */
-void write_msg(std_msgs::msg::Float64MultiArray& msg, const StateRepresentation::Ellipsoid& state, const rclcpp::Time&);
-
-/**
  * @brief Convert a Parameter<double> to a ROS std_msgs::msg::Float64
  * @param msg The ROS msg to populate
  * @param state The state to read from
@@ -231,4 +199,16 @@ void write_msg(std_msgs::msg::Float64MultiArray& msg, const StateRepresentation:
  */
 template <typename U, typename T>
 void write_msg(U& msg, const StateRepresentation::Parameter<T>& state, const rclcpp::Time&);
+
+/**
+ * @brief Convert a state to a ROS std_msgs::msg::Float64MultiArray
+ * @param msg The ROS msg to populate
+ * @param state The state to read from
+ * @param time The time of the message
+ */
+template <typename T>
+void write_msg(std_msgs::msg::Float64MultiArray& msg, const T& state, const rclcpp::Time&) {
+  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  msg.data = state.to_std_vector();
+}
 }// namespace modulo::core::communication::state_conversion
