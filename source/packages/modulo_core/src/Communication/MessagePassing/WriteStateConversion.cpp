@@ -170,13 +170,6 @@ void write_msg(tf2_msgs::msg::TFMessage& msg, const StateRepresentation::Cartesi
   msg.transforms.push_back(transform);
 }
 
-void write_msg(std_msgs::msg::Float64MultiArray& msg, const StateRepresentation::CartesianTwist& state, const rclcpp::Time&) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
-  Eigen::Matrix<double, 6, 1> twist;
-  twist << state.get_angular_velocity(), state.get_linear_velocity();
-  msg.data = std::vector<double>(twist.data(), twist.data() + twist.size());
-}
-
 void write_msg(trajectory_msgs::msg::JointTrajectoryPoint& msg, const StateRepresentation::JointState& state, const rclcpp::Time&) {
   msg.positions = std::vector<double>(state.get_positions().data(), state.get_positions().data() + state.get_positions().size());
   msg.velocities = std::vector<double>(state.get_velocities().data(), state.get_velocities().data() + state.get_velocities().size());
@@ -197,21 +190,6 @@ void write_msg(trajectory_msgs::msg::JointTrajectory& msg, const StateRepresenta
     write_msg(msg.points[i], point.first, time);
     msg.points[i].time_from_start = rclcpp::Duration(point.second);
   }
-}
-
-void write_msg(std_msgs::msg::Float64MultiArray& msg, const StateRepresentation::JointPositions& state, const rclcpp::Time&) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
-  msg.data = state.to_std_vector();
-}
-
-void write_msg(std_msgs::msg::Float64MultiArray& msg, const StateRepresentation::JointVelocities& state, const rclcpp::Time&) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
-  msg.data = state.to_std_vector();
-}
-
-void write_msg(std_msgs::msg::Float64MultiArray& msg, const StateRepresentation::Ellipsoid& state, const rclcpp::Time&) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
-  msg.data = state.to_std_vector();
 }
 
 template <typename U, typename T>
