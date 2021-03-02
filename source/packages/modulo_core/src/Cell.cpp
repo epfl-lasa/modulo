@@ -1,7 +1,7 @@
 #include "modulo_core/Cell.hpp"
-#include "modulo_core/Exceptions/UnconfiguredNodeException.hpp"
 #include "modulo_core/Exceptions/ParameterNotFoundException.hpp"
 #include "modulo_core/Exceptions/ServiceNotAvailableException.hpp"
+#include "modulo_core/Exceptions/UnconfiguredNodeException.hpp"
 #include <state_representation/Exceptions/IncompatibleSizeException.hpp>
 #include <state_representation/Exceptions/UnrecognizedParameterTypeException.hpp>
 
@@ -262,7 +262,6 @@ void Cell::set_parameter_value(const std::string& node_name,
   this->set_parameter_value<std::vector<double>>(node_name, parameter_name, vector_value);
 }
 
-
 void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::ParameterInterface>& parameter) {
   using namespace StateRepresentation;
   using namespace StateRepresentation::Exceptions;
@@ -314,6 +313,11 @@ void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parame
 
     case StateType::PARAMETER_MATRIX: {
       this->set_parameter_value(std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(parameter));
+      break;
+    }
+
+    case StateType::PARAMETER_VECTOR: {
+      this->set_parameter_value(std::static_pointer_cast<Parameter<Eigen::VectorXd>>(parameter));
       break;
     }
 
@@ -604,6 +608,15 @@ void Cell::update_parameters() {
               throw IncompatibleSizeException("The value set does not have the correct expected size of " + std::to_string(rows) + "x" + std::to_string(cols) + "elements");
             }
             std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->set_value(matrix_value);
+            lck.unlock();
+            break;
+          }
+
+          case StateType::PARAMETER_VECTOR: {
+            std::unique_lock<std::mutex> lck(*this->mutex_);
+            std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+            Eigen::VectorXd vector_value = Eigen::VectorXd::Map(value.data(), value.size());
+            std::static_pointer_cast<Parameter<Eigen::VectorXd>>(param)->set_value(vector_value);
             lck.unlock();
             break;
           }
