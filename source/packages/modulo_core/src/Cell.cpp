@@ -203,6 +203,12 @@ void Cell::set_parameter_value(const std::string& parameter_name, const Eigen::M
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
 
+template <>
+void Cell::set_parameter_value(const std::string& parameter_name, const Eigen::VectorXd& value) {
+  std::vector<double> vector_value = std::vector<double>(value.data(), value.data() + value.size());
+  this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
+}
+
 std::shared_ptr<rclcpp::SyncParametersClient> Cell::create_parameter_client(const std::string& node_name) {
   auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(this->shared_from_this(), node_name);
   if (!parameters_client->wait_for_service(this->get_period())) {
@@ -317,6 +323,11 @@ void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parame
 
     case StateType::PARAMETER_MATRIX: {
       this->set_parameter_value(std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(parameter));
+      break;
+    }
+
+    case StateType::PARAMETER_VECTOR: {
+      this->set_parameter_value(std::static_pointer_cast<Parameter<Eigen::VectorXd>>(parameter));
       break;
     }
 
@@ -607,6 +618,15 @@ void Cell::update_parameters() {
               throw IncompatibleSizeException("The value set does not have the correct expected size of " + std::to_string(rows) + "x" + std::to_string(cols) + "elements");
             }
             std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->set_value(matrix_value);
+            lck.unlock();
+            break;
+          }
+
+          case StateType::PARAMETER_VECTOR: {
+            std::unique_lock<std::mutex> lck(*this->mutex_);
+            std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+            Eigen::VectorXd vector_value = Eigen::VectorXd::Map(value.data(), value.size());
+            std::static_pointer_cast<Parameter<Eigen::VectorXd>>(param)->set_value(vector_value);
             lck.unlock();
             break;
           }
