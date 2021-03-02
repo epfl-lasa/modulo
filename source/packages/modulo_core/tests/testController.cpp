@@ -99,7 +99,9 @@ public:
                                                                                                    current_robot_state_(std::make_shared<StateRepresentation::JointState>(StateRepresentation::JointState::Zero("iiwa", 7))),
                                                                                                    torques_command_(std::make_shared<StateRepresentation::JointTorques>(StateRepresentation::JointTorques::Zero("iiwa", 7))),
                                                                                                    iiwa_model_("iiwa", std::string(TEST_FIXTURES) + "/iiwa7.urdf"),
-                                                                                                   dt_(period) {}
+                                                                                                   dt_(period) {
+    this->add_parameters(this->controller_.get_parameters());
+  }
 
   bool on_configure() {
     this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist_);
