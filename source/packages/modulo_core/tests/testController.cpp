@@ -12,12 +12,11 @@ using namespace StateRepresentation;
 namespace {
 class LinearMotionGenerator : public modulo::core::Cell {
 private:
-  std::shared_ptr<Parameter<CartesianPose>> home_pose_;
-  std::shared_ptr<Parameter<double>> distance_tolerance_;
-  CartesianPose current_pose_;
-  std::shared_ptr<CartesianTwist> desired_twist_;
-  DynamicalSystems::Linear<CartesianState> motion_generator_;
-  CartesianPose previous_attractor_;
+  std::shared_ptr<Parameter<CartesianPose>> home_pose_;      ///< home pose parameter
+  std::shared_ptr<Parameter<double>> distance_tolerance_;    ///< distance tolerance to go to the next attractor
+  CartesianPose current_pose_;                               ///< current pose of the end-effector
+  std::shared_ptr<CartesianTwist> desired_twist_;            ///< desired twist of the end-effector
+  DynamicalSystems::Linear<CartesianState> motion_generator_;///< motion generator as a linear DS
 
   void play_trajectory(const std::shared_ptr<rmw_request_id_t> request_header,
                        const std::shared_ptr<modulo_msgs::srv::PlayTrajectory::Request> request,
@@ -47,8 +46,7 @@ public:
                                                                                                           distance_tolerance_(std::make_shared<Parameter<double>>("distance_tolerance", 0.01)),
                                                                                                           current_pose_(home_pose_->get_value()),
                                                                                                           desired_twist_(std::make_shared<CartesianTwist>("iiwa_link_ee")),
-                                                                                                          motion_generator_(home_pose_->get_value(), 1.0),
-                                                                                                          previous_attractor_(CartesianPose::Random("iiwa_link_ee")) {
+                                                                                                          motion_generator_(home_pose_->get_value(), 1.0) {
     this->add_parameter(home_pose_);
     this->add_parameter(distance_tolerance_);
     this->create_service<modulo_msgs::srv::PlayTrajectory>("~/play_trajectory",
@@ -80,12 +78,12 @@ public:
 
 class RobotInterface : public modulo::core::Cell {
 private:
-  std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist_;
-  std::shared_ptr<StateRepresentation::JointState> current_robot_state_;
-  std::shared_ptr<StateRepresentation::JointTorques> torques_command_;
-  controllers::impedance::Dissipative<StateRepresentation::CartesianState> controller_;
-  RobotModel::Model iiwa_model_;
-  std::chrono::milliseconds dt_;
+  std::shared_ptr<Parameter<bool>> compliant_mode_;                                    ///< parameter to turn on and off the compliance
+  std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist_;                 ///< desired twist of the end-effector
+  std::shared_ptr<StateRepresentation::JointState> current_robot_state_;               ///< the current state read from the robot
+  std::shared_ptr<StateRepresentation::JointTorques> torques_command_;                 ///< the desired torque command to send
+  controllers::impedance::Dissipative<StateRepresentation::CartesianState> controller_;///< the controller (PassiveDS)
+  RobotModel::Model iiwa_model_;                                                       ///< the model of the robot
 
 public:
   explicit RobotInterface(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
