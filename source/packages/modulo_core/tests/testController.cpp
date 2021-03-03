@@ -69,14 +69,8 @@ public:
       // get the eef tranform
       this->current_pose_ = this->lookup_transform(this->current_pose_.get_name(),
                                                    this->current_pose_.get_reference_frame());
-      bool attractor_reached = this->current_pose_.dist(this->motion_generator_.get_attractor()) < 1e-4;
-      // when the attractor is full reached stop sending commands
-      if (!attractor_reached) {
-        // compute the desired twist
-        *this->desired_twist_ = this->motion_generator_.evaluate(this->current_pose_);
-      } else {
-        *this->desired_twist_ = CartesianTwist::Zero("iiwa_link_ee");
-      }
+      // compute the desired twist based on the attractor
+      *this->desired_twist_ = this->motion_generator_.evaluate(this->current_pose_);
     } catch (tf2::LookupException& ex) {
       RCLCPP_ERROR(get_logger(), "%s", ex.what());
       *this->desired_twist_ = CartesianTwist::Zero("iiwa_link_ee");
@@ -95,11 +89,12 @@ private:
 
 public:
   explicit RobotInterface(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
+                                                                                                   compliant_mode_(std::make_shared<Parameter<bool>>("compliant_mode", false)),
                                                                                                    desired_twist_(std::make_shared<StateRepresentation::CartesianTwist>(StateRepresentation::CartesianTwist::Zero("iiwa_link_ee"))),
                                                                                                    current_robot_state_(std::make_shared<StateRepresentation::JointState>(StateRepresentation::JointState::Zero("iiwa", 7))),
                                                                                                    torques_command_(std::make_shared<StateRepresentation::JointTorques>(StateRepresentation::JointTorques::Zero("iiwa", 7))),
-                                                                                                   iiwa_model_("iiwa", std::string(TEST_FIXTURES) + "/iiwa7.urdf"),
-                                                                                                   dt_(period) {
+                                                                                                   iiwa_model_("iiwa", std::string(TEST_FIXTURES) + "/iiwa7.urdf") {
+    this->add_parameter(this->compliant_mode_);
     this->add_parameters(this->controller_.get_parameters());
   }
 
@@ -111,7 +106,10 @@ public:
   }
 
   void step() {
-    if (!this->current_robot_state_->is_empty() && !this->desired_twist_->is_empty()) {
+    // send a zero torque by default
+    *this->torques_command_ = StateRepresentation::JointTorques::Zero("iiwa", 7);
+    // compute the command if we received both the current state and the desired twist and the robot is not in compliant mode
+    if (!this->current_robot_state_->is_empty() && !this->desired_twist_->is_empty() && !this->compliant_mode_->get_value()) {
       // use the model forward kinematic to extract eef CartesianTwist
       StateRepresentation::Jacobian jacobian = this->iiwa_model_.compute_jacobian(*this->current_robot_state_);
       // compute current twist
