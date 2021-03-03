@@ -84,6 +84,14 @@ private:
    * @return the pointer to the client
    */
   std::shared_ptr<rclcpp::SyncParametersClient> create_parameter_client(const std::string& node_name);
+  
+  /**
+   * @brief Insert a parameter in the list of handlers
+   * @param parameter The parameter using the StateRepresentation of a parameter
+   * @param prefix a string for prefixing the parameter name
+   */
+  template <typename T>
+  void insert_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter, const std::string& prefix = "");
 
 protected:
   /**
@@ -514,6 +522,14 @@ inline const std::chrono::nanoseconds& Cell::get_period() const {
 
 inline const std::shared_ptr<StateRepresentation::ParameterInterface> Cell::get_parameter_pointer(const std::string& parameter_name) const {
   return this->parameters_.at(parameter_name);
+}
+
+template <typename T>
+void Cell::insert_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter, const std::string& prefix) {
+  std::lock_guard<std::mutex> lock(*this->mutex_);
+  std::string tprefix = (prefix != "") ? prefix + "_" : "";
+  parameter->set_name(tprefix + parameter->get_name());
+  this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
 }
 
 template <typename T>
