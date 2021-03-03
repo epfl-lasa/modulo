@@ -114,10 +114,6 @@ public:
     if (!this->current_robot_state_->is_empty() && !this->desired_twist_->is_empty()) {
       // use the model forward kinematic to extract eef CartesianTwist
       StateRepresentation::Jacobian jacobian = this->iiwa_model_.compute_jacobian(*this->current_robot_state_);
-
-      std::cout << *this->current_robot_state_ << std::endl;
-      std::cout << jacobian << std::endl;
-
       // compute current twist
       StateRepresentation::CartesianTwist current_twist = jacobian * static_cast<StateRepresentation::JointVelocities>(*this->current_robot_state_);
       // change twist name and reference frame
