@@ -121,7 +121,7 @@ public:
         current_twist.set_name(this->desired_twist_->get_name());
         current_twist.set_reference_frame(this->desired_twist_->get_reference_frame());
         //get the wrench command from the controller
-        *this->torques_command_ = this->controller_.compute_command(*this->desired_twist_, current_twist, jacobian);
+        *this->torques_command_ += this->controller_.compute_command(*this->desired_twist_, current_twist, jacobian);
       }
     }
   }
