@@ -27,14 +27,17 @@ find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 
 set(MSG_CORE "msg/Jacobian.msg")
-set(SRV_CORE "srv/PlayTrajectory.srv")
+set(SRV_CORE "srv/FollowPath.srv")
+set(ACTION_CORE "action/FollowPath.action")
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${MSG_CORE}
   ${SRV_CORE}
+  ${ACTION_CORE}
   DEPENDENCIES
   std_msgs
   nav_msgs
+  action_msgs
 )
 
 ament_package()
