@@ -106,17 +106,23 @@ public:
   void step() {
     // send a zero torque by default
     *this->torques_command_ = StateRepresentation::JointTorques::Zero("iiwa", 7);
-    // compute the command if we received both the current state and the desired twist and the robot is not in compliant mode
-    if (!this->current_robot_state_->is_empty() && !this->desired_twist_->is_empty() && !this->compliant_mode_->get_value()) {
-      // use the model forward kinematic to extract eef CartesianTwist
-      StateRepresentation::Jacobian jacobian = this->iiwa_model_.compute_jacobian(*this->current_robot_state_);
-      // compute current twist
-      StateRepresentation::CartesianTwist current_twist = jacobian * static_cast<StateRepresentation::JointVelocities>(*this->current_robot_state_);
-      // change twist name and reference frame
-      current_twist.set_name(this->desired_twist_->get_name());
-      current_twist.set_reference_frame(this->desired_twist_->get_reference_frame());
-      //get the wrench command from the controller
-      *this->torques_command_ = this->controller_.compute_command(*this->desired_twist_, current_twist, jacobian);
+    // if we received the current state we proceed with additional computations
+    if (!this->current_robot_state_->is_empty()) {
+      // we can remove inertia and coriolis effect
+      *this->torques_command_ += iiwa_model_.compute_inertia_torques(*this->current_robot_state_);
+      *this->torques_command_ += iiwa_model_.compute_coriolis_forces(*this->current_robot_state_);
+      // compute the command if we received the desired twist and the robot is not in compliant mode
+      if (!this->desired_twist_->is_empty() && !this->compliant_mode_->get_value()) {
+        // use the model forward kinematic to extract eef CartesianTwist
+        StateRepresentation::Jacobian jacobian = this->iiwa_model_.compute_jacobian(*this->current_robot_state_);
+        // compute current twist
+        StateRepresentation::CartesianTwist current_twist = jacobian * static_cast<StateRepresentation::JointVelocities>(*this->current_robot_state_);
+        // change twist name and reference frame
+        current_twist.set_name(this->desired_twist_->get_name());
+        current_twist.set_reference_frame(this->desired_twist_->get_reference_frame());
+        //get the wrench command from the controller
+        *this->torques_command_ = this->controller_.compute_command(*this->desired_twist_, current_twist, jacobian);
+      }
     }
   }
 };
