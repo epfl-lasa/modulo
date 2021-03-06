@@ -1,7 +1,7 @@
 #include "controllers/impedance/Dissipative.hpp"
 #include "dynamical_systems/Linear.hpp"
 #include "modulo_core/Cell.hpp"
-#include "modulo_msgs/srv/play_trajectory.hpp"
+#include "modulo_msgs/srv/follow_path.hpp"
 #include "rcutils/cmdline_parser.h"
 #include "robot_model/Model.hpp"
 #include <exception>
@@ -19,8 +19,8 @@ private:
   DynamicalSystems::Linear<CartesianState> motion_generator_;///< motion generator as a linear DS
 
   void play_trajectory(const std::shared_ptr<rmw_request_id_t> request_header,
-                       const std::shared_ptr<modulo_msgs::srv::PlayTrajectory::Request> request,
-                       std::shared_ptr<modulo_msgs::srv::PlayTrajectory::Response> response) {
+                       const std::shared_ptr<modulo_msgs::srv::FollowPath::Request> request,
+                       std::shared_ptr<modulo_msgs::srv::FollowPath::Response> response) {
     (void) request_header;
     // start looping through the points
     for (auto& p : request->trajectory.poses) {
@@ -49,12 +49,12 @@ public:
                                                                                                           motion_generator_(home_pose_->get_value(), 1.0) {
     this->add_parameter(home_pose_);
     this->add_parameter(distance_tolerance_);
-    this->create_service<modulo_msgs::srv::PlayTrajectory>("~/play_trajectory",
-                                                           std::bind(&LinearMotionGenerator::play_trajectory,
-                                                                     this,
-                                                                     std::placeholders::_1,
-                                                                     std::placeholders::_2,
-                                                                     std::placeholders::_3));
+    this->create_service<modulo_msgs::srv::FollowPath>("~/play_trajectory",
+                                                       std::bind(&LinearMotionGenerator::play_trajectory,
+                                                                 this,
+                                                                 std::placeholders::_1,
+                                                                 std::placeholders::_2,
+                                                                 std::placeholders::_3));
   }
 
   bool on_configure() {
