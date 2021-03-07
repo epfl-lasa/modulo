@@ -1,43 +1,86 @@
-#include "controllers/impedance/Dissipative.hpp"
-#include "dynamical_systems/Linear.hpp"
 #include "modulo_core/Cell.hpp"
-#include "modulo_msgs/srv/follow_path.hpp"
-#include "rcutils/cmdline_parser.h"
-#include "robot_model/Model.hpp"
+#include "modulo_msgs/action/follow_path.hpp"
+#include <controllers/impedance/Dissipative.hpp>
+#include <dynamical_systems/Linear.hpp>
 #include <exception>
+#include <functional>
 #include <iostream>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
+#include <rcutils/cmdline_parser.h>
+#include <robot_model/Model.hpp>
+#include <thread>
 
 using namespace StateRepresentation;
 
 namespace {
 class LinearMotionGenerator : public modulo::core::Cell {
 private:
-  std::shared_ptr<Parameter<CartesianPose>> home_pose_;      ///< home pose parameter
-  std::shared_ptr<Parameter<double>> distance_tolerance_;    ///< distance tolerance to go to the next attractor
-  CartesianPose current_pose_;                               ///< current pose of the end-effector
-  std::shared_ptr<CartesianTwist> desired_twist_;            ///< desired twist of the end-effector
-  DynamicalSystems::Linear<CartesianState> motion_generator_;///< motion generator as a linear DS
+  using FollowPath = modulo_msgs::action::FollowPath;
+  using GoalHandleFollowPath = rclcpp_action::ServerGoalHandle<FollowPath>;
 
-  void play_trajectory(const std::shared_ptr<rmw_request_id_t> request_header,
-                       const std::shared_ptr<modulo_msgs::srv::FollowPath::Request> request,
-                       std::shared_ptr<modulo_msgs::srv::FollowPath::Response> response) {
-    (void) request_header;
+  rclcpp_action::Server<FollowPath>::SharedPtr action_server_;///< shared_ptr to the action server
+  std::shared_ptr<Parameter<CartesianPose>> home_pose_;       ///< home pose parameter
+  std::shared_ptr<Parameter<double>> distance_tolerance_;     ///< distance tolerance to go to the next attractor
+  CartesianPose current_pose_;                                ///< current pose of the end-effector
+  std::shared_ptr<CartesianTwist> desired_twist_;             ///< desired twist of the end-effector
+  DynamicalSystems::Linear<CartesianState> motion_generator_; ///< motion generator as a linear DS
+
+  rclcpp_action::GoalResponse handle_goal(
+      const rclcpp_action::GoalUUID&,
+      std::shared_ptr<const FollowPath::Goal>) {
+    RCLCPP_INFO(this->get_logger(), "Received goal request");
+    return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+  }
+
+  rclcpp_action::CancelResponse handle_cancel(
+      const std::shared_ptr<GoalHandleFollowPath>) {
+    RCLCPP_INFO(this->get_logger(), "Received request to cancel goal");
+    return rclcpp_action::CancelResponse::ACCEPT;
+  }
+
+  void handle_accepted(const std::shared_ptr<GoalHandleFollowPath> goal_handle) {
+    using namespace std::placeholders;
+    // this needs to return quickly to avoid blocking the executor, so spin up a new thread
+    std::thread{std::bind(&LinearMotionGenerator::execute, this, _1), goal_handle}.detach();
+  }
+
+  void execute(const std::shared_ptr<GoalHandleFollowPath> goal_handle) {
+    RCLCPP_INFO(this->get_logger(), "Executing goal");
+    const auto goal = goal_handle->get_goal();
+    auto feedback = std::make_shared<FollowPath::Feedback>();
+    auto result = std::make_shared<FollowPath::Result>();
+
     // start looping through the points
-    for (auto& p : request->trajectory.poses) {
+    unsigned int nb_points = goal->path.poses.size();
+    for (unsigned int i = 0; (i < nb_points) && rclcpp::ok(); ++i) {
       // convert the PoseStamped to a CartesianPose
       CartesianPose pose(this->current_pose_.get_name(), this->current_pose_.get_reference_frame());
-      modulo::core::communication::state_conversion::read_msg(pose, p);
+      modulo::core::communication::state_conversion::read_msg(pose, goal->path.poses[i]);
       // set the point as attractor to the ds
       this->motion_generator_.set_attractor(pose);
+      // publish feedback
+      feedback->percentage_of_completion = i / nb_points * 100;
+      goal_handle->publish_feedback(feedback);
       // change attractor when close enough but not too close to
       // not have 0 velocity
-      while (this->current_pose_.dist(this->motion_generator_.get_attractor()) > this->distance_tolerance_->get_value()) {
+      bool attractor_not_reached = (this->current_pose_.is_empty() || this->current_pose_.dist(this->motion_generator_.get_attractor()) > this->distance_tolerance_->get_value());
+      while (attractor_not_reached && rclcpp::ok()) {
         // sleep for a small perdiod of time
         std::this_thread::sleep_for(this->get_period());
+        // Check if there is a cancel request
+        if (goal_handle->is_canceling()) {
+          goal_handle->canceled(result);
+          RCLCPP_INFO(this->get_logger(), "Goal canceled");
+          return;
+        }
       }
     }
-    // return success
-    response->success = true;
+    // Check if goal is done
+    if (rclcpp::ok()) {
+      goal_handle->succeed(result);
+      RCLCPP_INFO(this->get_logger(), "Goal succeeded");
+    }
   }
 
 public:
@@ -47,14 +90,17 @@ public:
                                                                                                           current_pose_(home_pose_->get_value()),
                                                                                                           desired_twist_(std::make_shared<CartesianTwist>("iiwa_link_ee")),
                                                                                                           motion_generator_(home_pose_->get_value(), 1.0) {
+    using namespace std::placeholders;
+
     this->add_parameter(home_pose_);
     this->add_parameter(distance_tolerance_);
-    this->create_service<modulo_msgs::srv::FollowPath>("~/play_trajectory",
-                                                       std::bind(&LinearMotionGenerator::play_trajectory,
-                                                                 this,
-                                                                 std::placeholders::_1,
-                                                                 std::placeholders::_2,
-                                                                 std::placeholders::_3));
+
+    this->action_server_ = rclcpp_action::create_server<modulo_msgs::action::FollowPath>(
+        this,
+        "~/follow_path",
+        std::bind(&LinearMotionGenerator::handle_goal, this, _1, _2),
+        std::bind(&LinearMotionGenerator::handle_cancel, this, _1),
+        std::bind(&LinearMotionGenerator::handle_accepted, this, _1));
   }
 
   bool on_configure() {
@@ -72,6 +118,7 @@ public:
     } catch (tf2::LookupException& ex) {
       RCLCPP_ERROR(get_logger(), "%s", ex.what());
       *this->desired_twist_ = CartesianTwist::Zero("iiwa_link_ee");
+      this->current_pose_.initialize();
     }
   }
 };
