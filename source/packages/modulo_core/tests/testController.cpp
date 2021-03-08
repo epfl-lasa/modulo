@@ -136,9 +136,10 @@ public:
   explicit RobotInterface(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
                                                                                                    compliant_mode_(std::make_shared<Parameter<bool>>("compliant_mode", false)),
                                                                                                    desired_twist_(std::make_shared<StateRepresentation::CartesianTwist>(StateRepresentation::CartesianTwist::Zero("iiwa_link_ee"))),
-                                                                                                   current_robot_state_(std::make_shared<StateRepresentation::JointState>(StateRepresentation::JointState::Zero("iiwa", 7))),
-                                                                                                   torques_command_(std::make_shared<StateRepresentation::JointTorques>(StateRepresentation::JointTorques::Zero("iiwa", 7))),
                                                                                                    iiwa_model_("iiwa", std::string(TEST_FIXTURES) + "/iiwa7.urdf") {
+
+    this->current_robot_state_ = std::make_shared<StateRepresentation::JointState>(StateRepresentation::JointState::Zero("iiwa", iiwa_model_.get_joint_frames()));
+    this->torques_command_ = std::make_shared<StateRepresentation::JointTorques>(StateRepresentation::JointTorques::Zero("iiwa", iiwa_model_.get_joint_frames()));
     this->add_parameter(this->compliant_mode_);
     this->add_parameters(this->controller_.get_parameters());
   }
