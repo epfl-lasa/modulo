@@ -153,7 +153,7 @@ public:
 
   void step() {
     // send a zero torque by default
-    *this->torques_command_ = StateRepresentation::JointTorques::Zero("iiwa", 7);
+    *this->torques_command_ = StateRepresentation::JointTorques::Zero("iiwa", iiwa_model_.get_joint_frames());
     // if we received the current state we proceed with additional computations
     if (!this->current_robot_state_->is_empty()) {
       // we can remove inertia and coriolis effect
