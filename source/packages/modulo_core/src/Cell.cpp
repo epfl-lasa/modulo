@@ -1,7 +1,7 @@
 #include "modulo_core/Cell.hpp"
 #include "modulo_core/Exceptions/UnconfiguredNodeException.hpp"
 #include "modulo_core/Exceptions/ParameterNotFoundException.hpp"
-#include "modulo_core/Exceptions/ExternalParameterServerNotAvailableException.hpp"
+#include "modulo_core/Exceptions/ServiceNotAvailableException.hpp"
 #include <state_representation/Exceptions/IncompatibleSizeException.hpp>
 #include <state_representation/Exceptions/UnrecognizedParameterTypeException.hpp>
 
@@ -222,36 +222,26 @@ void Cell::set_parameter_value(const std::string& parameter_name, const Eigen::V
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
 
-std::shared_ptr<rclcpp::SyncParametersClient> Cell::create_parameter_client(const std::string& node_name) {
-  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(this->shared_from_this(), node_name);
-  if (!parameters_client->wait_for_service(this->get_period())) {
-    throw exceptions::ExternalParameterServerNotAvailableException(node_name);
-  }
-  return parameters_client;
-}
-
 template <typename T>
-void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const T& value) {
-  auto parameter_client = this->create_parameter_client(node_name);
-  if (!parameter_client->has_parameter(parameter_name)) {
-    throw exceptions::ParameterNotFoundException(parameter_name);
-  }
-  parameter_client->set_parameters(std::vector<rclcpp::Parameter>{rclcpp::Parameter(parameter_name, value)});
+void Cell::set_parameter_value(const std::string& node_name, const std::string&, const T&) {
+  auto parameter_client = this->add_client<rcl_interfaces::srv::SetParameters>(node_name + "/set_parameters", this->get_period());
+  auto request = std::make_shared<rcl_interfaces::srv::SetParameters::Request>();
+  parameter_client->send_request(request);
 }
 
-template void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const double& value);
+template void Cell::set_parameter_value(const std::string&, const std::string&, const double&);
 
-template void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const std::vector<double>& value);
+template void Cell::set_parameter_value(const std::string&, const std::string&, const std::vector<double>&);
 
-template void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const bool& value);
+template void Cell::set_parameter_value(const std::string&, const std::string&, const bool&);
 
-template void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const std::vector<bool>& value);
+template void Cell::set_parameter_value(const std::string&, const std::string&, const std::vector<bool>&);
 
-template void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const char* const& value);
+template void Cell::set_parameter_value(const std::string&, const std::string&, const char* const&);
 
-template void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const std::string& value);
+template void Cell::set_parameter_value(const std::string&, const std::string&, const std::string&);
 
-template void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const std::vector<std::string>& value);
+template void Cell::set_parameter_value(const std::string&, const std::string&, const std::vector<std::string>&);
 
 template <>
 void Cell::set_parameter_value(const std::string& node_name,
