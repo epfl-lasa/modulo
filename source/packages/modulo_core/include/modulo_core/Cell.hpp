@@ -199,14 +199,16 @@ public:
                         int queue_size = 10);
 
   /**
-   * @brief Template function to add a generic client to the map of handlers
+   * @brief Template function to add a generic client to the map of handlers and returns it
+   * If the client has already been added simply returns the pointer from the map instead
    * @tparam srvT tamplate value to accept any type of ROS2 services
    * @tparam DurationT template value for accepting any type of std::chrono duration values
    * @param channel unique name of the communication topic between the client and the server
    * @param timeout period before considering the server is not responding
    */
   template <typename srvT, typename DurationT>
-  void add_client(const std::string& channel, const std::chrono::duration<int64_t, DurationT>& timeout);
+  std::shared_ptr<communication::ClientHandler<srvT>> add_client(const std::string& channel,
+                                                                 const std::chrono::duration<int64_t, DurationT>& timeout);
 
   /**
    * @brief Function to add a generic transform broadcaster to the map of handlers
@@ -608,19 +610,23 @@ void Cell::add_transform_listener(const std::chrono::duration<int64_t, DurationT
 }
 
 template <typename srvT, typename DurationT>
-void Cell::add_client(const std::string& channel, const std::chrono::duration<int64_t, DurationT>& timeout) {
+std::shared_ptr<communication::ClientHandler<srvT>> Cell::add_client(const std::string& channel, const std::chrono::duration<int64_t, DurationT>& timeout) {
+  if (this->handlers_.find(channel) != this->handlers_.end()) {
+    return std::static_pointer_cast<communication::ClientHandler<srvT>>(this->handlers_.at(channel).first);
+  }
   auto handler = std::make_shared<communication::ClientHandler<srvT>>(timeout, this->mutex_);
   handler->set_client(this->create_client<srvT>(channel));
   this->handlers_.insert(std::make_pair(channel, std::make_pair(handler, false)));
+  return handler;
 }
 
 template <typename srvT>
 std::shared_ptr<typename srvT::Response> Cell::send_blocking_request(const std::string& channel, const std::shared_ptr<typename srvT::Request>& request) {
-  return static_cast<communication::ClientHandler<srvT>&>(*this->handlers_.at(channel).first).send_blocking_request(request);
+  return std::static_pointer_cast<communication::ClientHandler<srvT>>(this->handlers_.at(channel).first)->send_blocking_request(request);
 }
 
 template <typename srvT>
 std::shared_future<std::shared_ptr<typename srvT::Response>> Cell::send_request(const std::string& channel, const std::shared_ptr<typename srvT::Request>& request) {
-  return static_cast<communication::ClientHandler<srvT>&>(*this->handlers_.at(channel).first).send_request(request);
+  return std::static_pointer_cast<communication::ClientHandler<srvT>>(*this->handlers_.at(channel).first)->send_request(request);
 }
 }// namespace modulo::core
