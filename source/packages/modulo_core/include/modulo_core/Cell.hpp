@@ -78,6 +78,13 @@ private:
    */
   void update_parameters();
 
+  /**
+   * @brief create a temporary client to the parameter server of an external node
+   * @param node_name the name of the external node
+   * @return the pointer to the client
+   */
+  std::shared_ptr<rclcpp::SyncParametersClient> create_parameter_client(const std::string& node_name);
+
 protected:
   /**
    * @brief Getter of the handlers attribute
@@ -281,10 +288,22 @@ public:
 
   /**
    * @brief Set the value of a declared parameter
-   * @param parameter the new value of the parameter
+   * @param parameter_name the name of the parameter to update
+   * @param value the new value of the parameter
    */
   template <typename T>
   void set_parameter_value(const std::string& parameter_name, const T& value);
+
+  /**
+   * @brief Set the value of a parameter declared in another node
+   * @param node_name the name of the node that hosts the parameter
+   * @param parameter_name the name of the parameter to update
+   * @param value the new value of the parameter
+   */
+  template <typename T>
+  void set_parameter_value(const std::string& node_name,
+                           const std::string& parameter_name,
+                           const T& value);
 
   /**
    * @brief Set the value of a declared parameter

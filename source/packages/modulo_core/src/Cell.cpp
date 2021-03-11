@@ -1,5 +1,7 @@
 #include "modulo_core/Cell.hpp"
 #include "modulo_core/Exceptions/UnconfiguredNodeException.hpp"
+#include "modulo_core/Exceptions/ParameterNotFoundException.hpp"
+#include "modulo_core/Exceptions/ExternalParameterServerNotAvailableException.hpp"
 #include <state_representation/Exceptions/IncompatibleSizeException.hpp>
 #include <state_representation/Exceptions/UnrecognizedParameterTypeException.hpp>
 
@@ -200,6 +202,70 @@ void Cell::set_parameter_value(const std::string& parameter_name, const Eigen::M
   std::vector<double> vector_value = std::vector<double>(value.data(), value.data() + value.size());
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
+
+std::shared_ptr<rclcpp::SyncParametersClient> Cell::create_parameter_client(const std::string& node_name) {
+  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(this->shared_from_this(), node_name);
+  if (!parameters_client->wait_for_service(this->get_period())) {
+    throw exceptions::ExternalParameterServerNotAvailableException(node_name);
+  }
+  return parameters_client;
+}
+
+template <typename T>
+void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const T& value) {
+  auto parameter_client = this->create_parameter_client(node_name);
+  if (!parameter_client->has_parameter(parameter_name)) {
+    throw exceptions::ParameterNotFoundException(parameter_name);
+  }
+  parameter_client->set_parameters(std::vector<rclcpp::Parameter>{rclcpp::Parameter(parameter_name, value)});
+}
+
+template void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const double& value);
+
+template void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const std::vector<double>& value);
+
+template void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const bool& value);
+
+template void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const std::vector<bool>& value);
+
+template void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const char* const& value);
+
+template void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const std::string& value);
+
+template void Cell::set_parameter_value(const std::string& node_name, const std::string& parameter_name, const std::vector<std::string>& value);
+
+template <>
+void Cell::set_parameter_value(const std::string& node_name,
+                               const std::string& parameter_name,
+                               const StateRepresentation::CartesianPose& value) {
+  std::vector<double> vector_value = value.StateRepresentation::CartesianPose::to_std_vector();
+  this->set_parameter_value<std::vector<double>>(node_name, parameter_name, vector_value);
+}
+
+template <>
+void Cell::set_parameter_value(const std::string& node_name,
+                               const std::string& parameter_name,
+                               const StateRepresentation::JointPositions& value) {
+  std::vector<double> vector_value = value.StateRepresentation::JointPositions::to_std_vector();
+  this->set_parameter_value<std::vector<double>>(node_name, parameter_name, vector_value);
+}
+
+template <>
+void Cell::set_parameter_value(const std::string& node_name,
+                               const std::string& parameter_name,
+                               const StateRepresentation::Ellipsoid& value) {
+  std::vector<double> vector_value = value.to_std_vector();
+  this->set_parameter_value<std::vector<double>>(node_name, parameter_name, vector_value);
+}
+
+template <>
+void Cell::set_parameter_value(const std::string& node_name,
+                               const std::string& parameter_name,
+                               const Eigen::MatrixXd& value) {
+  std::vector<double> vector_value = std::vector<double>(value.data(), value.data() + value.size());
+  this->set_parameter_value<std::vector<double>>(node_name, parameter_name, vector_value);
+}
+
 
 void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::ParameterInterface>& parameter) {
   using namespace StateRepresentation;
