@@ -157,8 +157,8 @@ public:
     // if we received the current state we proceed with additional computations
     if (!this->current_robot_state_->is_empty()) {
       // we can remove inertia and coriolis effect
-      *this->torques_command_ += iiwa_model_.compute_inertia_torques(*this->current_robot_state_);
-      *this->torques_command_ += iiwa_model_.compute_coriolis_torques(*this->current_robot_state_);
+      *this->torques_command_ -= iiwa_model_.compute_inertia_torques(*this->current_robot_state_);
+      *this->torques_command_ -= iiwa_model_.compute_coriolis_torques(*this->current_robot_state_);
       // compute the command if we received the desired twist and the robot is not in compliant mode
       if (!this->desired_twist_->is_empty() && !this->compliant_mode_->get_value()) {
         // use the model forward kinematic to extract eef CartesianTwist
