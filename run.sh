@@ -2,7 +2,7 @@
 NAME=$(echo "${PWD##*/}" | tr _ -)
 TAG=$(echo "$1" | tr _/ -)
 
-ISISOLATED=true # change to  false to use host network
+ISISOLATED=false # change to  false to use host network
 
 NETWORK=host
 if [ "${ISISOLATED}" = true ]; then

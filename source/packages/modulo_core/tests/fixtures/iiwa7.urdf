@@ -302,16 +302,16 @@
   <joint name="iiwa_joint_ee" type="fixed">
     <parent link="iiwa_link_7"/>
     <child link="iiwa_link_ee"/>
-    <origin rpy="0 0 0" xyz="0 0 0.045"/>
+    <origin rpy="0 0 0" xyz="0 0 0.245"/>
   </joint>
   <link name="iiwa_link_ee">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-      <mass value="1e-6"/>
-      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+      <mass value="1.32"/>
+      <inertia ixx="0.014001749999999999" ixy="0" ixz="0" iyy="0.014001749999999999" iyz="0" izz="0.006482699999999999"/>
     </inertial>
   </link>
-  <!-- Load Gazebo lib and set the robot namespace -->
+    <!-- Load Gazebo lib and set the robot namespace -->
   <gazebo>
     <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control">
       <robotNamespace>/iiwa</robotNamespace>

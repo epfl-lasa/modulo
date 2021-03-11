@@ -25,6 +25,7 @@ private:
   CartesianPose current_pose_;                                ///< current pose of the end-effector
   std::shared_ptr<CartesianTwist> desired_twist_;             ///< desired twist of the end-effector
   DynamicalSystems::Linear<CartesianState> motion_generator_; ///< motion generator as a linear DS
+  std::shared_ptr<Parameter<std::vector<double>>> clamping_values_;
 
   rclcpp_action::GoalResponse handle_goal(
       const rclcpp_action::GoalUUID&,
@@ -47,6 +48,7 @@ private:
 
   void execute(const std::shared_ptr<GoalHandleFollowPath> goal_handle) {
     RCLCPP_INFO(this->get_logger(), "Executing goal");
+    this->set_parameter_value("robot_interface", "compliant_mode", false);
     const auto goal = goal_handle->get_goal();
     auto feedback = std::make_shared<FollowPath::Feedback>();
     auto result = std::make_shared<FollowPath::Result>();
@@ -71,6 +73,7 @@ private:
         // Check if there is a cancel request
         if (goal_handle->is_canceling()) {
           goal_handle->canceled(result);
+          this->set_parameter_value("robot_interface", "compliant_mode", true);
           RCLCPP_INFO(this->get_logger(), "Goal canceled");
           return;
         }
@@ -85,16 +88,20 @@ private:
 
 public:
   explicit LinearMotionGenerator(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
-                                                                                                          home_pose_(std::make_shared<Parameter<CartesianPose>>("home_pose", CartesianPose("iiwa_link_ee", 0.5, 0., 0.75))),
+                                                                                                          home_pose_(std::make_shared<Parameter<CartesianPose>>("home_pose", CartesianPose("iiwa_link_ee_polish",
+                                                                                                          Eigen::Vector3d(-0.158869356053, -0.640538945967, 0.567536865494),
+                                                                                                          Eigen::Quaterniond(0.319, 0.742, 0.506, -0.302),
+                                                                                                          "iiwa_link_0"))),
                                                                                                           distance_tolerance_(std::make_shared<Parameter<double>>("distance_tolerance", 0.01)),
                                                                                                           current_pose_(home_pose_->get_value()),
-                                                                                                          desired_twist_(std::make_shared<CartesianTwist>("iiwa_link_ee")),
-                                                                                                          motion_generator_(home_pose_->get_value(), 1.0) {
+                                                                                                          desired_twist_(std::make_shared<CartesianTwist>("iiwa_link_ee_polish", "iiwa_link_0")),
+                                                                                                          motion_generator_(home_pose_->get_value(), std::vector<double> {50.0, 50.0, 50.0, 10.0, 10.0, 10.0}),
+                                                                                                          clamping_values_(std::make_shared<Parameter<std::vector<double>>>("clamping_values", std::vector<double>{1.0, 2.0, 0.005, 0.005})) {
     using namespace std::placeholders;
 
     this->add_parameter(home_pose_);
     this->add_parameter(distance_tolerance_);
-
+    this->add_parameter(clamping_values_);
     this->action_server_ = rclcpp_action::create_server<modulo_msgs::action::FollowPath>(
         this,
         "~/follow_path",
@@ -112,12 +119,15 @@ public:
     try {
       // get the eef tranform
       this->current_pose_ = this->lookup_transform(this->current_pose_.get_name(),
-                                                   this->current_pose_.get_reference_frame());
+                                                   "iiwa_link_0");
       // compute the desired twist based on the attractor
       *this->desired_twist_ = this->motion_generator_.evaluate(this->current_pose_);
+      std::vector<double> clamp_values = this->clamping_values_->get_value();
+      this->desired_twist_->clamp(clamp_values[0], clamp_values[1], clamp_values[2], clamp_values[3]);
+      this->send_transform(this->home_pose_->get_value(), "attractor");
     } catch (tf2::LookupException& ex) {
       RCLCPP_ERROR(get_logger(), "%s", ex.what());
-      *this->desired_twist_ = CartesianTwist::Zero("iiwa_link_ee");
+      *this->desired_twist_ = CartesianTwist::Zero("iiwa_link_ee_polish", "iiwa_link_0");
       this->current_pose_.initialize();
     }
   }
@@ -135,7 +145,7 @@ private:
 public:
   explicit RobotInterface(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
                                                                                                    compliant_mode_(std::make_shared<Parameter<bool>>("compliant_mode", false)),
-                                                                                                   desired_twist_(std::make_shared<StateRepresentation::CartesianTwist>(StateRepresentation::CartesianTwist::Zero("iiwa_link_ee"))),
+                                                                                                   desired_twist_(std::make_shared<StateRepresentation::CartesianTwist>(StateRepresentation::CartesianTwist::Zero("iiwa_link_ee_polish", "iiwa_link_0"))),
                                                                                                    iiwa_model_("iiwa", std::string(TEST_FIXTURES) + "/iiwa7.urdf") {
 
     this->current_robot_state_ = std::make_shared<StateRepresentation::JointState>(StateRepresentation::JointState::Zero("iiwa", iiwa_model_.get_joint_frames()));
@@ -157,8 +167,8 @@ public:
     // if we received the current state we proceed with additional computations
     if (!this->current_robot_state_->is_empty()) {
       // we can remove inertia and coriolis effect
-      *this->torques_command_ -= iiwa_model_.compute_inertia_torques(*this->current_robot_state_);
-      *this->torques_command_ -= iiwa_model_.compute_coriolis_torques(*this->current_robot_state_);
+      // *this->torques_command_ -= iiwa_model_.compute_inertia_torques(*this->current_robot_state_);
+      // *this->torques_command_ -= iiwa_model_.compute_coriolis_torques(*this->current_robot_state_);
       // compute the command if we received the desired twist and the robot is not in compliant mode
       if (!this->desired_twist_->is_empty() && !this->compliant_mode_->get_value()) {
         // use the model forward kinematic to extract eef CartesianTwist
