@@ -24,7 +24,6 @@ set(CORE_SOURCES
     src/Communication/CommunicationHandler.cpp
     src/Cell.cpp
     src/Monitor.cpp
-    src/Recorder.cpp
 )
 
 ament_auto_add_library(${PROJECT_NAME} SHARED ${CORE_SOURCES})

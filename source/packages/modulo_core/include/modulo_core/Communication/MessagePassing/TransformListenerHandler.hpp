@@ -2,6 +2,7 @@
 
 #include "modulo_core/Communication/MessagePassing/MessagePassingHandler.hpp"
 #include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
 
 namespace modulo::core::communication {
 /**
