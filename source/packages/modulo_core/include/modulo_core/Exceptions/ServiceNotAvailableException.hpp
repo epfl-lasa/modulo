@@ -1,25 +1,11 @@
-/**
- * @author Baptiste Busch
- * @date 2020/02/14
- *
- */
-#ifndef MODULOCORE_EXCEPTIONS_SERVICENOTAVAILABLEEXCEPTION_H_
-#define MODULOCORE_EXCEPTIONS_SERVICENOTAVAILABLEEXCEPTION_H_
+#pragma once
 
-#include <iostream>
 #include <exception>
+#include <iostream>
 
-namespace Modulo
-{
-	namespace Exceptions
-	{
-		class ServiceNotAvailableException: public std::runtime_error
-		{
-		public:
-			explicit ServiceNotAvailableException(const std::string& service_name):
-			runtime_error("Service " + service_name + " is not available")
-			{};
-		};
-	}
-}
-#endif
+namespace modulo::core::exceptions {
+class ServiceNotAvailableException : public std::runtime_error {
+public:
+  explicit ServiceNotAvailableException(const std::string& service_name) : runtime_error("Service " + service_name + " is not available"){};
+};
+}// namespace modulo::core::exceptions
