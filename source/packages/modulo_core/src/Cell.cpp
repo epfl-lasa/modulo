@@ -1,7 +1,7 @@
 #include "modulo_core/Cell.hpp"
 #include "modulo_core/Exceptions/UnconfiguredNodeException.hpp"
-#include "state_representation/Exceptions/IncompatibleSizeException.hpp"
-#include "state_representation/Exceptions/UnrecognizedParameterTypeException.hpp"
+#include <state_representation/Exceptions/IncompatibleSizeException.hpp>
+#include <state_representation/Exceptions/UnrecognizedParameterTypeException.hpp>
 
 namespace modulo::core {
 Cell::~Cell() {

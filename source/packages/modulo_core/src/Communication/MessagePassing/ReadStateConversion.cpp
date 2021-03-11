@@ -1,6 +1,6 @@
 #include "modulo_core/Communication/MessagePassing/ReadStateConversion.hpp"
-#include "state_representation/Exceptions/EmptyStateException.hpp"
-#include "state_representation/Exceptions/IncompatibleReferenceFramesException.hpp"
+#include <state_representation/Exceptions/EmptyStateException.hpp>
+#include <state_representation/Exceptions/IncompatibleReferenceFramesException.hpp>
 
 using namespace StateRepresentation::Exceptions;
 

@@ -1,15 +1,15 @@
 #pragma once
 
-#include "state_representation/Parameters/Parameter.hpp"
-#include "state_representation/Robot/Jacobian.hpp"
-#include "state_representation/Robot/JointState.hpp"
-#include "state_representation/Space/Cartesian/CartesianPose.hpp"
-#include "state_representation/Space/Cartesian/CartesianState.hpp"
-#include "state_representation/Space/Cartesian/CartesianTwist.hpp"
-#include "state_representation/Space/Cartesian/CartesianWrench.hpp"
-#include "state_representation/Space/DualQuaternion/DualQuaternionPose.hpp"
-#include "state_representation/Space/DualQuaternion/DualQuaternionTwist.hpp"
-#include "state_representation/Trajectories/Trajectory.hpp"
+#include <state_representation/Parameters/Parameter.hpp>
+#include <state_representation/Robot/Jacobian.hpp>
+#include <state_representation/Robot/JointState.hpp>
+#include <state_representation/Space/Cartesian/CartesianPose.hpp>
+#include <state_representation/Space/Cartesian/CartesianState.hpp>
+#include <state_representation/Space/Cartesian/CartesianTwist.hpp>
+#include <state_representation/Space/Cartesian/CartesianWrench.hpp>
+#include <state_representation/Space/DualQuaternion/DualQuaternionPose.hpp>
+#include <state_representation/Space/DualQuaternion/DualQuaternionTwist.hpp>
+#include <state_representation/Trajectories/Trajectory.hpp>
 #include <geometry_msgs/msg/accel_stamped.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
