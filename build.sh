@@ -1,5 +1,5 @@
 #!/bin/bash
-ROS_VERSION=rolling
+ROS_VERSION=foxy
 
 REBUILD=0
 

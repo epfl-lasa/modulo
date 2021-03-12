@@ -14,13 +14,15 @@
 using namespace StateRepresentation;
 
 namespace {
+
+
 class LinearMotionGenerator : public modulo::core::Cell {
 private:
   using FollowPath = modulo_msgs::action::FollowPath;
   using GoalHandleFollowPath = rclcpp_action::ServerGoalHandle<FollowPath>;
 
   rclcpp_action::Server<FollowPath>::SharedPtr action_server_;///< shared_ptr to the action server
-  std::shared_ptr<Parameter<CartesianPose>> home_pose_;       ///< home pose parameter
+  std::shared_ptr<Parameter<CartesianPose>> attractor_pose_;       ///< home pose parameter
   std::shared_ptr<Parameter<double>> distance_tolerance_;     ///< distance tolerance to go to the next attractor
   CartesianPose current_pose_;                                ///< current pose of the end-effector
   std::shared_ptr<CartesianTwist> desired_twist_;             ///< desired twist of the end-effector
@@ -48,36 +50,37 @@ private:
 
   void execute(const std::shared_ptr<GoalHandleFollowPath> goal_handle) {
     RCLCPP_INFO(this->get_logger(), "Executing goal");
-    this->set_parameter_value("robot_interface", "compliant_mode", false);
     const auto goal = goal_handle->get_goal();
     auto feedback = std::make_shared<FollowPath::Feedback>();
     auto result = std::make_shared<FollowPath::Result>();
-
     // start looping through the points
     unsigned int nb_points = goal->path.poses.size();
     for (unsigned int i = 0; (i < nb_points) && rclcpp::ok(); ++i) {
       // convert the PoseStamped to a CartesianPose
       CartesianPose pose(this->current_pose_.get_name(), this->current_pose_.get_reference_frame());
       modulo::core::communication::state_conversion::read_msg(pose, goal->path.poses[i]);
-      // set the point as attractor to the ds
-      this->motion_generator_.set_attractor(pose);
+      this->set_parameter_value("attractor_pose", pose);
+      while (pose.dist(this->motion_generator_.get_attractor(), CartesianStateVariable::POSE) > this->distance_tolerance_->get_value()) {
+        std::this_thread::sleep_for(this->get_period());
+        RCLCPP_INFO(this->get_logger(), "Waiting for attractor change");
+      }
       // publish feedback
       feedback->percentage_of_completion = i / nb_points * 100;
       goal_handle->publish_feedback(feedback);
       // change attractor when close enough but not too close to
       // not have 0 velocity
-      bool attractor_not_reached = (this->current_pose_.is_empty() || this->current_pose_.dist(this->motion_generator_.get_attractor()) > this->distance_tolerance_->get_value());
-      while (attractor_not_reached && rclcpp::ok()) {
+      bool attractor_not_reached;
+      do {
+        attractor_not_reached = (this->current_pose_.is_empty() || this->current_pose_.dist(this->motion_generator_.get_attractor(), CartesianStateVariable::POSE) > this->distance_tolerance_->get_value());
         // sleep for a small perdiod of time
-        std::this_thread::sleep_for(this->get_period());
+        std::this_thread::sleep_for(10 * this->get_period());
         // Check if there is a cancel request
         if (goal_handle->is_canceling()) {
           goal_handle->canceled(result);
-          this->set_parameter_value("robot_interface", "compliant_mode", true);
           RCLCPP_INFO(this->get_logger(), "Goal canceled");
           return;
         }
-      }
+      } while (attractor_not_reached && rclcpp::ok());
     }
     // Check if goal is done
     if (rclcpp::ok()) {
@@ -88,18 +91,18 @@ private:
 
 public:
   explicit LinearMotionGenerator(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
-                                                                                                          home_pose_(std::make_shared<Parameter<CartesianPose>>("home_pose", CartesianPose("iiwa_link_ee_polish",
-                                                                                                          Eigen::Vector3d(-0.158869356053, -0.640538945967, 0.567536865494),
-                                                                                                          Eigen::Quaterniond(0.319, 0.742, 0.506, -0.302),
+                                                                                                          attractor_pose_(std::make_shared<Parameter<CartesianPose>>("attractor_pose", CartesianPose("iiwa_link_ee_polish",
+                                                                                                          Eigen::Vector3d(0.65, 0.0, 0.55),
+                                                                                                          Eigen::Quaterniond( 0.500, 0.0,  0.866, 0.0),
                                                                                                           "iiwa_link_0"))),
                                                                                                           distance_tolerance_(std::make_shared<Parameter<double>>("distance_tolerance", 0.01)),
-                                                                                                          current_pose_(home_pose_->get_value()),
+                                                                                                          current_pose_(attractor_pose_->get_value()),
                                                                                                           desired_twist_(std::make_shared<CartesianTwist>("iiwa_link_ee_polish", "iiwa_link_0")),
-                                                                                                          motion_generator_(home_pose_->get_value(), std::vector<double> {50.0, 50.0, 50.0, 10.0, 10.0, 10.0}),
-                                                                                                          clamping_values_(std::make_shared<Parameter<std::vector<double>>>("clamping_values", std::vector<double>{1.0, 2.0, 0.005, 0.005})) {
+                                                                                                          motion_generator_(attractor_pose_->get_value(), std::vector<double> {20.0, 20.0, 20.0, 4.0, 4.0, 4.0}),
+                                                                                                          clamping_values_(std::make_shared<Parameter<std::vector<double>>>("clamping_values", std::vector<double>{0.25, 0.5, 0.005, 0.005})) {
     using namespace std::placeholders;
 
-    this->add_parameter(home_pose_);
+    this->add_parameter(attractor_pose_);
     this->add_parameter(distance_tolerance_);
     this->add_parameter(clamping_values_);
     this->action_server_ = rclcpp_action::create_server<modulo_msgs::action::FollowPath>(
@@ -118,13 +121,14 @@ public:
   void step() {
     try {
       // get the eef tranform
+      this->motion_generator_.set_attractor(this->attractor_pose_->get_value());
       this->current_pose_ = this->lookup_transform(this->current_pose_.get_name(),
                                                    "iiwa_link_0");
       // compute the desired twist based on the attractor
       *this->desired_twist_ = this->motion_generator_.evaluate(this->current_pose_);
       std::vector<double> clamp_values = this->clamping_values_->get_value();
       this->desired_twist_->clamp(clamp_values[0], clamp_values[1], clamp_values[2], clamp_values[3]);
-      this->send_transform(this->home_pose_->get_value(), "attractor");
+      this->send_transform(this->attractor_pose_->get_value(), "attractor");
     } catch (tf2::LookupException& ex) {
       RCLCPP_ERROR(get_logger(), "%s", ex.what());
       *this->desired_twist_ = CartesianTwist::Zero("iiwa_link_ee_polish", "iiwa_link_0");
@@ -157,7 +161,7 @@ public:
   bool on_configure() {
     this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist_);
     this->add_subscription<sensor_msgs::msg::JointState>("/iiwa/joint_states", this->current_robot_state_);
-    this->add_publisher<std_msgs::msg::Float64MultiArray>("/iiwa/TorqueController/command", this->torques_command_);
+    this->add_publisher<std_msgs::msg::Float64MultiArray>("/iiwa/TorqueController/raw", this->torques_command_);
     return true;
   }
 
