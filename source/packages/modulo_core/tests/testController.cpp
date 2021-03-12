@@ -28,6 +28,7 @@ private:
   std::shared_ptr<CartesianTwist> desired_twist_;             ///< desired twist of the end-effector
   DynamicalSystems::Linear<CartesianState> motion_generator_; ///< motion generator as a linear DS
   std::shared_ptr<Parameter<std::vector<double>>> clamping_values_;
+  bool last_action_attractor_;
 
   rclcpp_action::GoalResponse handle_goal(
       const rclcpp_action::GoalUUID&,
@@ -50,12 +51,20 @@ private:
 
   void execute(const std::shared_ptr<GoalHandleFollowPath> goal_handle) {
     RCLCPP_INFO(this->get_logger(), "Executing goal");
+    this->last_action_attractor_ = false;
+    double old_tolerance = distance_tolerance_->get_value();
+    // increase the tolerance
+    this->set_parameter_value("distance_tolerance", 0.1);
     const auto goal = goal_handle->get_goal();
     auto feedback = std::make_shared<FollowPath::Feedback>();
     auto result = std::make_shared<FollowPath::Result>();
     // start looping through the points
     unsigned int nb_points = goal->path.poses.size();
     for (unsigned int i = 0; (i < nb_points) && rclcpp::ok(); ++i) {
+      if (i == nb_points - 1) {
+        this->last_action_attractor_ = true;
+        this->set_parameter_value("distance_tolerance", old_tolerance);
+      }
       // convert the PoseStamped to a CartesianPose
       CartesianPose pose(this->current_pose_.get_name(), this->current_pose_.get_reference_frame());
       modulo::core::communication::state_conversion::read_msg(pose, goal->path.poses[i]);
@@ -76,6 +85,7 @@ private:
         std::this_thread::sleep_for(10 * this->get_period());
         // Check if there is a cancel request
         if (goal_handle->is_canceling()) {
+          this->last_action_attractor_ = true;
           goal_handle->canceled(result);
           RCLCPP_INFO(this->get_logger(), "Goal canceled");
           return;
@@ -84,6 +94,7 @@ private:
     }
     // Check if goal is done
     if (rclcpp::ok()) {
+      this->last_action_attractor_ = true;
       goal_handle->succeed(result);
       RCLCPP_INFO(this->get_logger(), "Goal succeeded");
     }
@@ -98,8 +109,9 @@ public:
                                                                                                           distance_tolerance_(std::make_shared<Parameter<double>>("distance_tolerance", 0.01)),
                                                                                                           current_pose_(attractor_pose_->get_value()),
                                                                                                           desired_twist_(std::make_shared<CartesianTwist>("iiwa_link_ee_polish", "iiwa_link_0")),
-                                                                                                          motion_generator_(attractor_pose_->get_value(), std::vector<double> {20.0, 20.0, 20.0, 4.0, 4.0, 4.0}),
-                                                                                                          clamping_values_(std::make_shared<Parameter<std::vector<double>>>("clamping_values", std::vector<double>{0.25, 0.5, 0.005, 0.005})) {
+                                                                                                          motion_generator_(attractor_pose_->get_value(), std::vector<double> {20.0, 20.0, 20.0, 8.0, 8.0, 8.0}),
+                                                                                                          clamping_values_(std::make_shared<Parameter<std::vector<double>>>("clamping_values", std::vector<double>{0.25, 0.5, 0.005, 0.005})),
+                                                                                                          last_action_attractor_(true) {
     using namespace std::placeholders;
 
     this->add_parameter(attractor_pose_);
@@ -114,6 +126,7 @@ public:
   }
 
   bool on_configure() {
+    this->last_action_attractor_ = true;
     this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist_);
     return true;
   }
@@ -129,6 +142,14 @@ public:
       std::vector<double> clamp_values = this->clamping_values_->get_value();
       this->desired_twist_->clamp(clamp_values[0], clamp_values[1], clamp_values[2], clamp_values[3]);
       this->send_transform(this->attractor_pose_->get_value(), "attractor");
+      // if we are not in the last attractor we normalize the twist
+      if (!this->last_action_attractor_) {
+        this->desired_twist_->normalize();
+        Eigen::VectorXd gain(6);
+        gain << clamp_values[0], clamp_values[0], clamp_values[0],
+                clamp_values[1], clamp_values[1], clamp_values[1];
+        *this->desired_twist_ *= gain.asDiagonal();
+      }
     } catch (tf2::LookupException& ex) {
       RCLCPP_ERROR(get_logger(), "%s", ex.what());
       *this->desired_twist_ = CartesianTwist::Zero("iiwa_link_ee_polish", "iiwa_link_0");
