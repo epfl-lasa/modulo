@@ -3,7 +3,7 @@ ARG ROS_VERSION=foxy
 FROM ros2_ws:${ROS_VERSION}
 
 # import control library packages
-RUN git clone -b feature/cartesian_norm --single-branch https://github.com/epfl-lasa/control_libraries.git
+RUN git clone -b tmp/aica_demonstration --single-branch https://github.com/epfl-lasa/control_libraries.git
 WORKDIR ${HOME}/control_libraries/source
 RUN sudo ./install.sh
 
