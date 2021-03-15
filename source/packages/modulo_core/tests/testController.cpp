@@ -154,6 +154,41 @@ public:
   }
 };
 
+class FTSensorInterface : public modulo::core::Cell {
+private:
+  std::shared_ptr<StateRepresentation::CartesianWrench> raw_sensor_data_;
+  std::shared_ptr<StateRepresentation::CartesianWrench> calibrated_sensor_data_;
+  std::shared_ptr<StateRepresentation::CartesianPose> ft_in_robot_;
+  std::shared_ptr<StateRepresentation::CartesianPose> tool_in_ft_;
+  StateRepresentation::CartesianWrench force_compensation_;
+
+public:
+  explicit FTSensorInterface(const std::string& node_name, const std::chrono::milliseconds& period) : 
+    Cell(node_name, period),
+    raw_sensor_data_(std::make_shared<StateRepresentation::CartesianWrench>("iiwa_link_ee", "iiwa_link_ee")),
+    calibrated_sensor_data_(std::make_shared<StateRepresentation::CartesianWrench>("iiwa_link_ee_polish", "iiwa_link_0")),
+    ft_in_robot_(std::make_shared<StateRepresentation::CartesianPose>("iiwa_link_ee", "iiwa_link_0")),
+    tool_in_ft_(std::make_shared<StateRepresentation::CartesianPose>("iiwa_link_ee_polish", "iiwa_link_ee")),
+    force_compensation_(StateRepresentation::CartesianWrench("iiwa_link_ee_polish", Eigen::Vector3d(0., 0., 9.), "iiwa_link_0")) {}
+
+    bool on_configure() {
+      this->add_subscription<geometry_msgs::msg::WrenchStamped>("/ft_sensor/netft_data", this->raw_sensor_data_);
+      this->add_subscription<geometry_msgs::msg::Pose>("/iiwa/EndEffectorPosition", this->ft_in_robot_);
+      this->add_subscription<geometry_msgs::msg::Pose>("/iiwa/EE2ToolPosition", this->tool_in_ft_);
+      this->add_publisher<geometry_msgs::msg::WrenchStamped>("/calibrated_ft_sensor/iiwa_link_ee_polish", this->calibrated_sensor_data_);
+      return true;
+    }
+
+    void step() {
+      if (!this->raw_sensor_data_->is_empty() && !this->ft_in_robot_->is_empty() && !this->tool_in_ft_->is_empty()) {
+        StateRepresentation::CartesianWrench force_at_tooltip = this->ft_in_robot_->inverse() * *this->raw_sensor_data_ * *this->tool_in_ft_;
+        *this->calibrated_sensor_data_ = force_at_tooltip - force_compensation_;
+
+        std::cout << *this->calibrated_sensor_data_ << std::endl;
+      }
+    }
+};
+
 class RobotInterface : public modulo::core::Cell {
 private:
   std::shared_ptr<Parameter<bool>> compliant_mode_;                                           ///< parameter to turn on and off the compliance
@@ -241,9 +276,11 @@ int main(int argc, char* argv[]) {
 
   rclcpp::executors::SingleThreadedExecutor exe;
 
+  std::shared_ptr<FTSensorInterface> fts = std::make_shared<FTSensorInterface>("ft_sensor_interface", 1ms);
   std::shared_ptr<LinearMotionGenerator> lmg = std::make_shared<LinearMotionGenerator>("motion_generator", 5ms);
   std::shared_ptr<RobotInterface> sri = std::make_shared<RobotInterface>("robot_interface", 5ms);
 
+  exe.add_node(fts->get_node_base_interface());
   exe.add_node(lmg->get_node_base_interface());
   exe.add_node(sri->get_node_base_interface());
 
