@@ -1,6 +1,7 @@
 #include "modulo_core/Cell.hpp"
 #include "modulo_msgs/action/follow_path.hpp"
 #include <controllers/impedance/Dissipative.hpp>
+#include <controllers/impedance/VelocityImpedance.hpp>
 #include <dynamical_systems/Linear.hpp>
 #include <exception>
 #include <functional>
@@ -160,20 +161,20 @@ public:
 
 class FTSensorInterface : public modulo::core::Cell {
 private:
-  std::shared_ptr<StateRepresentation::CartesianWrench> raw_sensor_data_;
-  std::shared_ptr<StateRepresentation::CartesianWrench> calibrated_sensor_data_;
-  std::shared_ptr<StateRepresentation::CartesianPose> ft_in_robot_;
-  std::shared_ptr<StateRepresentation::CartesianPose> tool_in_ft_;
-  StateRepresentation::CartesianWrench force_compensation_;
+  std::shared_ptr<CartesianWrench> raw_sensor_data_;
+  std::shared_ptr<CartesianWrench> calibrated_sensor_data_;
+  std::shared_ptr<CartesianPose> ft_in_robot_;
+  std::shared_ptr<CartesianPose> tool_in_ft_;
+  CartesianWrench force_compensation_;
 
 public:
   explicit FTSensorInterface(const std::string& node_name, const std::chrono::milliseconds& period) : 
     Cell(node_name, period),
-    raw_sensor_data_(std::make_shared<StateRepresentation::CartesianWrench>("iiwa_link_ee", "iiwa_link_ee")),
-    calibrated_sensor_data_(std::make_shared<StateRepresentation::CartesianWrench>("iiwa_link_ee_polish", "iiwa_link_0")),
-    ft_in_robot_(std::make_shared<StateRepresentation::CartesianPose>("iiwa_link_ee", "iiwa_link_0")),
-    tool_in_ft_(std::make_shared<StateRepresentation::CartesianPose>("iiwa_link_ee_polish", "iiwa_link_ee")),
-    force_compensation_(StateRepresentation::CartesianWrench("iiwa_link_ee_polish", Eigen::Vector3d(0., 0., -7.55), "iiwa_link_0")) {}
+    raw_sensor_data_(std::make_shared<CartesianWrench>("iiwa_link_ee", "iiwa_link_ee")),
+    calibrated_sensor_data_(std::make_shared<CartesianWrench>("iiwa_link_ee_polish", "iiwa_link_0")),
+    ft_in_robot_(std::make_shared<CartesianPose>("iiwa_link_ee", "iiwa_link_0")),
+    tool_in_ft_(std::make_shared<CartesianPose>("iiwa_link_ee_polish", "iiwa_link_ee")),
+    force_compensation_(CartesianWrench("iiwa_link_ee_polish", Eigen::Vector3d(0., 0., -7.55), "iiwa_link_0")) {}
 
     bool on_configure() {
       this->add_subscription<geometry_msgs::msg::WrenchStamped>("/ft_sensor/netft_data", this->raw_sensor_data_);
@@ -195,21 +196,23 @@ public:
 
 class RobotInterface : public modulo::core::Cell {
 private:
-  std::shared_ptr<StateRepresentation::Parameter<bool>> compliant_mode_;                                    ///< parameter to turn on and off the compliance
-  std::shared_ptr<StateRepresentation::Parameter<double>> desired_radial_force_;
-  std::shared_ptr<StateRepresentation::CartesianState> desired_state_;                 ///< desired twist of the end-effector
-  std::shared_ptr<StateRepresentation::CartesianState> feedback_state_;                 ///< current cartesian state of the robot
-  std::shared_ptr<StateRepresentation::JointState> current_robot_state_;               ///< the current state read from the robot
-  std::shared_ptr<StateRepresentation::JointTorques> torques_command_;                 ///< the desired torque command to send
-  controllers::impedance::Dissipative<StateRepresentation::CartesianState> controller_;///< the controller (PassiveDS)
+  std::shared_ptr<Parameter<bool>> compliant_mode_;                                    ///< parameter to turn on and off the compliance
+  std::shared_ptr<Parameter<double>> desired_radial_force_;
+  std::shared_ptr<CartesianState> desired_state_;                 ///< desired twist of the end-effector
+  std::shared_ptr<CartesianState> feedback_state_;                 ///< current cartesian state of the robot
+  std::shared_ptr<JointState> current_robot_state_;               ///< the current state read from the robot
+  std::shared_ptr<JointTorques> torques_command_;                 ///< the desired torque command to send
+  controllers::impedance::Dissipative<CartesianState> controller_;///< the controller (PassiveDS)
+  controllers::impedance::VelocityImpedance<CartesianState> orientation_controller_;///< controller for orientation
   RobotModel::Model iiwa_model_;                                                       ///< the model of the robot
 
 public:
   explicit RobotInterface(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
                                                                                                    compliant_mode_(std::make_shared<Parameter<bool>>("compliant_mode", false)),
                                                                                                    desired_radial_force_(std::make_shared<Parameter<double>>("desired_radial_force", 0.0)),
-                                                                                                   desired_state_(std::make_shared<StateRepresentation::CartesianState>(StateRepresentation::CartesianState::Identity("iiwa_link_ee_polish", "iiwa_link_0"))),
-                                                                                                   feedback_state_(std::make_shared<StateRepresentation::CartesianState>(StateRepresentation::CartesianState::Identity("iiwa_link_ee_polish", "iiwa_link_0"))),
+                                                                                                   desired_state_(std::make_shared<CartesianState>(CartesianState::Identity("iiwa_link_ee_polish", "iiwa_link_0"))),
+                                                                                                   feedback_state_(std::make_shared<CartesianState>(CartesianState::Identity("iiwa_link_ee_polish", "iiwa_link_0"))),
+                                                                                                   orientation_controller_(Eigen::MatrixXd::Identity(6, 6), Eigen::MatrixXd::Identity(6, 6)),
                                                                                                    iiwa_model_("iiwa", std::string(TEST_FIXTURES) + "/iiwa7.urdf") {
 
     this->current_robot_state_ = std::make_shared<StateRepresentation::JointState>(StateRepresentation::JointState::Zero("iiwa", iiwa_model_.get_joint_frames()));
@@ -217,6 +220,7 @@ public:
     this->add_parameter(this->compliant_mode_);
     this->add_parameter(this->desired_radial_force_);
     this->add_parameters(this->controller_.get_parameters());
+    this->add_parameters(this->orientation_controller_.get_parameters(), "orientation_controller");
   }
 
   bool on_configure() {
@@ -251,7 +255,10 @@ public:
         StateRepresentation::CartesianState current_twist = jacobian * static_cast<StateRepresentation::JointVelocities>(*this->current_robot_state_);
         this->feedback_state_->set_twist(current_twist.get_twist());
         //get the wrench command from the controller
-        *this->torques_command_ += this->controller_.compute_command(*this->desired_state_, *this->feedback_state_, jacobian);
+        CartesianWrench wrench_command(this->desired_state_->get_name(), this->desired_state_->get_reference_frame());
+        wrench_command.set_force(this->controller_.compute_command(*this->desired_state_, *this->feedback_state_).get_force());
+        wrench_command.set_torque(this->orientation_controller_.compute_command(*this->desired_state_, *this->feedback_state_).get_torque());
+        *this->torques_command_ += jacobian.transpose() * wrench_command;
       }
     }
   }
