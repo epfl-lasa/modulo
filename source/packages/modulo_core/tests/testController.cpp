@@ -1,6 +1,7 @@
 #include "modulo_core/Cell.hpp"
 #include "modulo_msgs/action/follow_path.hpp"
 #include <controllers/impedance/Dissipative.hpp>
+#include <controllers/impedance/VelocityImpedance.hpp>
 #include <dynamical_systems/Linear.hpp>
 #include <exception>
 #include <functional>
@@ -191,21 +192,21 @@ public:
 
 class RobotInterface : public modulo::core::Cell {
 private:
-  std::shared_ptr<Parameter<bool>> compliant_mode_;                                           ///< parameter to turn on and off the compliance
-  std::shared_ptr<StateRepresentation::CartesianState> desired_state_;                        ///< desired state of the end-effector
-  std::shared_ptr<StateRepresentation::JointState> current_robot_state_;                      ///< the current state read from the robot
-  std::shared_ptr<StateRepresentation::JointTorques> torques_command_;                        ///< the desired torque command to send
-  controllers::impedance::Dissipative<StateRepresentation::CartesianState> force_controller_; ///< the controller (PassiveDS) for the force part
-  controllers::impedance::Dissipative<StateRepresentation::CartesianState> torque_controller_;///< the controller (normal impedance) for the torque part
-  RobotModel::Model iiwa_model_;                                                              ///< the model of the robot
-  std::shared_ptr<Parameter<double>> desired_radial_force_;                                   ///< desired force in the radial direction
+  std::shared_ptr<Parameter<bool>> compliant_mode_;                                                 ///< parameter to turn on and off the compliance
+  std::shared_ptr<StateRepresentation::CartesianState> desired_state_;                              ///< desired state of the end-effector
+  std::shared_ptr<StateRepresentation::JointState> current_robot_state_;                            ///< the current state read from the robot
+  std::shared_ptr<StateRepresentation::JointTorques> torques_command_;                              ///< the desired torque command to send
+  controllers::impedance::Dissipative<StateRepresentation::CartesianState> force_controller_;       ///< the controller (PassiveDS) for the force part
+  controllers::impedance::VelocityImpedance<StateRepresentation::CartesianState> torque_controller_;///< the controller (normal impedance) for the torque part
+  RobotModel::Model iiwa_model_;                                                                    ///< the model of the robot
+  std::shared_ptr<Parameter<double>> desired_radial_force_;                                         ///< desired force in the radial direction
 
 public:
   explicit RobotInterface(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
                                                                                                    compliant_mode_(std::make_shared<Parameter<bool>>("compliant_mode", false)),
                                                                                                    desired_state_(std::make_shared<StateRepresentation::CartesianState>(StateRepresentation::CartesianState::Identity("iiwa_link_ee_polish", "iiwa_link_0"))),
                                                                                                    force_controller_(controllers::impedance::ComputationalSpaceType::LINEAR),
-                                                                                                   torque_controller_(controllers::impedance::ComputationalSpaceType::ANGULAR),
+                                                                                                   torque_controller_(Eigen::MatrixXd::Identity(6, 6), Eigen::MatrixXd::Identity(6, 6)),
                                                                                                    iiwa_model_("iiwa", std::string(TEST_FIXTURES) + "/iiwa7.urdf"),
                                                                                                    desired_radial_force_(std::make_shared<Parameter<double>>("desired_radial_force", 0.0)) {
 
@@ -251,8 +252,8 @@ public:
 
         //get the wrench command both controllers
         StateRepresentation::CartesianWrench wrench_command;
-        wrench_command = this->force_controller_.compute_command(*this->desired_state_, current_twist);
-        wrench_command += this->torque_controller_.compute_command(*this->desired_state_, current_twist);
+        wrench_command.set_force(this->force_controller_.compute_command(*this->desired_state_, current_twist).get_force());
+        wrench_command.set_torque(this->torque_controller_.compute_command(*this->desired_state_, current_twist).get_torque());
         // transpose it to joint command
         *this->torques_command_ += jacobian.transpose() * wrench_command;
       }
