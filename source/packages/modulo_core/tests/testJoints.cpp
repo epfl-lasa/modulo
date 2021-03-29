@@ -1,20 +1,20 @@
 #include "modulo_core/Cell.hpp"
 #include <dynamical_systems/Linear.hpp>
-#include <rcutils/cmdline_parser.h>
 #include <iostream>
+#include <rcutils/cmdline_parser.h>
 
 namespace {
 class LinearMotionGenerator : public modulo::core::Cell {
 private:
-  std::shared_ptr<StateRepresentation::JointState> current_positions;
-  std::shared_ptr<StateRepresentation::JointState> desired_velocities;
-  DynamicalSystems::Linear<StateRepresentation::JointState> motion_generator;
+  std::shared_ptr<state_representation::JointState> current_positions;
+  std::shared_ptr<state_representation::JointState> desired_velocities;
+  dynamical_systems::Linear<state_representation::JointState> motion_generator;
 
 public:
   explicit LinearMotionGenerator(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
-                                                                                                          current_positions(std::make_shared<StateRepresentation::JointState>("robot", 6)),
-                                                                                                          desired_velocities(std::make_shared<StateRepresentation::JointState>("robot", 6)),
-                                                                                                          motion_generator(StateRepresentation::JointPositions("robot", Eigen::VectorXd::Random(6))) {
+                                                                                                          current_positions(std::make_shared<state_representation::JointState>("robot", 6)),
+                                                                                                          desired_velocities(std::make_shared<state_representation::JointState>("robot", 6)),
+                                                                                                          motion_generator(state_representation::JointPositions("robot", Eigen::VectorXd::Random(6))) {
     this->add_parameters(this->motion_generator.get_parameters());
   }
 
@@ -35,13 +35,13 @@ public:
 
 class ConsoleVisualizer : public modulo::core::Cell {
 private:
-  std::shared_ptr<StateRepresentation::JointState> robot_positions;
-  std::shared_ptr<StateRepresentation::JointState> desired_velocities;
+  std::shared_ptr<state_representation::JointState> robot_positions;
+  std::shared_ptr<state_representation::JointState> desired_velocities;
 
 public:
   explicit ConsoleVisualizer(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
-                                                                                                      robot_positions(std::make_shared<StateRepresentation::JointState>("robot", 6)),
-                                                                                                      desired_velocities(std::make_shared<StateRepresentation::JointState>("robot", 6)) {}
+                                                                                                      robot_positions(std::make_shared<state_representation::JointState>("robot", 6)),
+                                                                                                      desired_velocities(std::make_shared<state_representation::JointState>("robot", 6)) {}
 
   bool on_configure() {
     this->add_subscription<sensor_msgs::msg::JointState>("/robot/joint_state", this->robot_positions);
@@ -61,14 +61,14 @@ public:
 
 class SimulatedRobotInterface : public modulo::core::Cell {
 private:
-  std::shared_ptr<StateRepresentation::JointState> robot_state;
-  std::shared_ptr<StateRepresentation::JointState> desired_velocities;
+  std::shared_ptr<state_representation::JointState> robot_state;
+  std::shared_ptr<state_representation::JointState> desired_velocities;
   double dt;
 
 public:
   explicit SimulatedRobotInterface(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
-                                                                                                            robot_state(std::make_shared<StateRepresentation::JointState>("robot", 6)),
-                                                                                                            desired_velocities(std::make_shared<StateRepresentation::JointState>("robot", 6)),
+                                                                                                            robot_state(std::make_shared<state_representation::JointState>("robot", 6)),
+                                                                                                            desired_velocities(std::make_shared<state_representation::JointState>("robot", 6)),
                                                                                                             dt(0.001) {}
 
   bool on_configure() {

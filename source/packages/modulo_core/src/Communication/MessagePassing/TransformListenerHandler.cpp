@@ -1,10 +1,10 @@
 #include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
 
 namespace modulo::core::communication {
-const StateRepresentation::CartesianPose TransformListenerHandler::lookup_transform(const std::string& frame_name,
-                                                                                    const std::string& reference_frame) const {
+const state_representation::CartesianPose TransformListenerHandler::lookup_transform(const std::string& frame_name,
+                                                                                     const std::string& reference_frame) const {
   geometry_msgs::msg::TransformStamped transformStamped;
-  StateRepresentation::CartesianPose result(frame_name, reference_frame);
+  state_representation::CartesianPose result(frame_name, reference_frame);
   transformStamped = this->buffer_.lookupTransform(reference_frame,
                                                    frame_name,
                                                    tf2::TimePoint(std::chrono::milliseconds(0)),

@@ -1,28 +1,28 @@
 #include "modulo_core/Cell.hpp"
-#include <rcutils/cmdline_parser.h>
 #include <dynamical_systems/Circular.hpp>
 #include <dynamical_systems/Linear.hpp>
-#include <state_representation/Space/Cartesian/CartesianPose.hpp>
-#include <state_representation/Space/Cartesian/CartesianState.hpp>
-#include <state_representation/Space/Cartesian/CartesianTwist.hpp>
 #include <eigen3/Eigen/Core>
 #include <exception>
 #include <iostream>
+#include <rcutils/cmdline_parser.h>
+#include <state_representation/space/cartesian/CartesianPose.hpp>
+#include <state_representation/space/cartesian/CartesianState.hpp>
+#include <state_representation/space/cartesian/CartesianTwist.hpp>
 
 namespace {
 class MotionGenerator : public modulo::core::Cell {
 private:
-  std::shared_ptr<StateRepresentation::CartesianState> object_state;
-  std::shared_ptr<StateRepresentation::CartesianPose> current_pose;
-  std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
-  DynamicalSystems::Circular motion_generator;
+  std::shared_ptr<state_representation::CartesianState> object_state;
+  std::shared_ptr<state_representation::CartesianPose> current_pose;
+  std::shared_ptr<state_representation::CartesianTwist> desired_twist;
+  dynamical_systems::Circular motion_generator;
 
 public:
   explicit MotionGenerator(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
-                                                                                                    object_state(std::make_shared<StateRepresentation::CartesianState>("object", "world")),
-                                                                                                    current_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", "world")),
-                                                                                                    desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test", "world")),
-                                                                                                    motion_generator(StateRepresentation::CartesianPose("robot_test_attractor", 0., 0., 0., "object")) {
+                                                                                                    object_state(std::make_shared<state_representation::CartesianState>("object", "world")),
+                                                                                                    current_pose(std::make_shared<state_representation::CartesianPose>("robot_test", "world")),
+                                                                                                    desired_twist(std::make_shared<state_representation::CartesianTwist>("robot_test", "world")),
+                                                                                                    motion_generator(state_representation::CartesianPose("robot_test_attractor", 0., 0., 0., "object")) {
     this->add_parameters(this->motion_generator.get_parameters());
   }
 
@@ -41,20 +41,20 @@ public:
       this->desired_twist->initialize();
     }
     if (!this->object_state->is_empty()) {
-      this->motion_generator.set_reference_frame(*this->object_state);
+      this->motion_generator.set_base_frame(*this->object_state);
     }
   }
 };
 
 class ConsoleVisualizer : public modulo::core::Cell {
 private:
-  std::shared_ptr<StateRepresentation::CartesianPose> robot_pose;
-  std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
+  std::shared_ptr<state_representation::CartesianPose> robot_pose;
+  std::shared_ptr<state_representation::CartesianTwist> desired_twist;
 
 public:
   explicit ConsoleVisualizer(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
-                                                                                                      robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test")),
-                                                                                                      desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")) {}
+                                                                                                      robot_pose(std::make_shared<state_representation::CartesianPose>("robot_test")),
+                                                                                                      desired_twist(std::make_shared<state_representation::CartesianTwist>("robot_test")) {}
 
   bool on_configure() {
     this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose);
@@ -75,17 +75,17 @@ public:
 
 class SimulatedObject : public modulo::core::Cell {
 private:
-  std::shared_ptr<StateRepresentation::CartesianPose> object_pose;
-  std::shared_ptr<StateRepresentation::CartesianTwist> object_twist;
-  DynamicalSystems::Linear<StateRepresentation::CartesianState> motion_generator;
+  std::shared_ptr<state_representation::CartesianPose> object_pose;
+  std::shared_ptr<state_representation::CartesianTwist> object_twist;
+  dynamical_systems::Linear<state_representation::CartesianState> motion_generator;
   std::chrono::milliseconds dt;
   double sign;
 
 public:
   explicit SimulatedObject(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
-                                                                                                    object_pose(std::make_shared<StateRepresentation::CartesianPose>(StateRepresentation::CartesianPose::Identity("object"))),
-                                                                                                    object_twist(std::make_shared<StateRepresentation::CartesianTwist>(StateRepresentation::CartesianTwist("object"))),
-                                                                                                    motion_generator(StateRepresentation::CartesianPose("object_attractor", 2., 0., 0.), 1.0),
+                                                                                                    object_pose(std::make_shared<state_representation::CartesianPose>(state_representation::CartesianPose::Identity("object"))),
+                                                                                                    object_twist(std::make_shared<state_representation::CartesianTwist>(state_representation::CartesianTwist("object"))),
+                                                                                                    motion_generator(state_representation::CartesianPose("object_attractor", 2., 0., 0.), 1.0),
                                                                                                     dt(period),
                                                                                                     sign(-1) {
     this->add_parameters(this->motion_generator.get_parameters());
@@ -106,7 +106,7 @@ public:
 
     // change attractor if previous was reached
     if (this->object_pose->dist(this->motion_generator.get_attractor()) < 1e-3) {
-      this->set_parameter_value("attractor", StateRepresentation::CartesianPose("object_attractor", sign * 2., 0., 0.));
+      this->set_parameter_value("attractor", state_representation::CartesianPose("object_attractor", sign * 2., 0., 0.));
       sign *= -1;
     }
     this->send_transform(*this->object_pose, "object");
@@ -115,14 +115,14 @@ public:
 
 class SimulatedRobotInterface : public modulo::core::Cell {
 private:
-  std::shared_ptr<StateRepresentation::CartesianPose> robot_pose;
-  std::shared_ptr<StateRepresentation::CartesianTwist> desired_twist;
+  std::shared_ptr<state_representation::CartesianPose> robot_pose;
+  std::shared_ptr<state_representation::CartesianTwist> desired_twist;
   std::chrono::milliseconds dt;
 
 public:
   explicit SimulatedRobotInterface(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
-                                                                                                            robot_pose(std::make_shared<StateRepresentation::CartesianPose>("robot_test", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom())),
-                                                                                                            desired_twist(std::make_shared<StateRepresentation::CartesianTwist>("robot_test")),
+                                                                                                            robot_pose(std::make_shared<state_representation::CartesianPose>("robot_test", Eigen::Vector3d::Random(), Eigen::Quaterniond::UnitRandom())),
+                                                                                                            desired_twist(std::make_shared<state_representation::CartesianTwist>("robot_test")),
                                                                                                             dt(period) {}
 
   bool on_configure() {

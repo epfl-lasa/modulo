@@ -1,17 +1,5 @@
 #pragma once
 
-#include <state_representation/Exceptions/EmptyStateException.hpp>
-#include <state_representation/Geometry/Ellipsoid.hpp>
-#include <state_representation/Parameters/Parameter.hpp>
-#include <state_representation/Robot/Jacobian.hpp>
-#include <state_representation/Robot/JointState.hpp>
-#include <state_representation/Space/Cartesian/CartesianPose.hpp>
-#include <state_representation/Space/Cartesian/CartesianState.hpp>
-#include <state_representation/Space/Cartesian/CartesianTwist.hpp>
-#include <state_representation/Space/Cartesian/CartesianWrench.hpp>
-#include <state_representation/Space/DualQuaternion/DualQuaternionPose.hpp>
-#include <state_representation/Space/DualQuaternion/DualQuaternionTwist.hpp>
-#include <state_representation/Trajectories/Trajectory.hpp>
 #include <geometry_msgs/msg/accel_stamped.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
@@ -22,6 +10,18 @@
 #include <rclcpp/time.hpp>
 #include <rcutils/logging_macros.h>
 #include <sensor_msgs/msg/joint_state.hpp>
+#include <state_representation/exceptions/EmptyStateException.hpp>
+#include <state_representation/geometry/Ellipsoid.hpp>
+#include <state_representation/parameters/Parameter.hpp>
+#include <state_representation/robot/Jacobian.hpp>
+#include <state_representation/robot/JointState.hpp>
+#include <state_representation/space/cartesian/CartesianPose.hpp>
+#include <state_representation/space/cartesian/CartesianState.hpp>
+#include <state_representation/space/cartesian/CartesianTwist.hpp>
+#include <state_representation/space/cartesian/CartesianWrench.hpp>
+#include <state_representation/space/dual_quaternion/DualQuaternionPose.hpp>
+#include <state_representation/space/dual_quaternion/DualQuaternionTwist.hpp>
+#include <state_representation/trajectories/Trajectory.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
@@ -37,7 +37,7 @@ namespace modulo::core::communication::state_conversion {
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::Quaternion& msg, const StateRepresentation::CartesianState& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::Quaternion& msg, const state_representation::CartesianState& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a CartesianState to a ROS geometry_msgs::msg::Pose
@@ -45,7 +45,7 @@ void write_msg(geometry_msgs::msg::Quaternion& msg, const StateRepresentation::C
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::Pose& msg, const StateRepresentation::CartesianState& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::Pose& msg, const state_representation::CartesianState& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a CartesianState to a ROS geometry_msgs::msg::PoseStamped
@@ -53,7 +53,7 @@ void write_msg(geometry_msgs::msg::Pose& msg, const StateRepresentation::Cartesi
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::PoseStamped& msg, const StateRepresentation::CartesianState& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::PoseStamped& msg, const state_representation::CartesianState& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a CartesianState to a ROS geometry_msgs::msg::Transform
@@ -61,7 +61,7 @@ void write_msg(geometry_msgs::msg::PoseStamped& msg, const StateRepresentation::
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::Transform& msg, const StateRepresentation::CartesianState& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::Transform& msg, const state_representation::CartesianState& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a CartesianState to a ROS geometry_msgs::msg::TransformStamped
@@ -69,7 +69,7 @@ void write_msg(geometry_msgs::msg::Transform& msg, const StateRepresentation::Ca
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::TransformStamped& msg, const StateRepresentation::CartesianState& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::TransformStamped& msg, const state_representation::CartesianState& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a CartesianState to a ROS geometry_msgs::msg::Twist
@@ -77,7 +77,7 @@ void write_msg(geometry_msgs::msg::TransformStamped& msg, const StateRepresentat
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::Twist& msg, const StateRepresentation::CartesianState& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::Twist& msg, const state_representation::CartesianState& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a CartesianState to a ROS geometry_msgs::msg::TwistStamped
@@ -85,7 +85,7 @@ void write_msg(geometry_msgs::msg::Twist& msg, const StateRepresentation::Cartes
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::TwistStamped& msg, const StateRepresentation::CartesianState& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::TwistStamped& msg, const state_representation::CartesianState& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a CartesianState to a ROS geometry_msgs::msg::Accel
@@ -93,7 +93,7 @@ void write_msg(geometry_msgs::msg::TwistStamped& msg, const StateRepresentation:
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::Accel& msg, const StateRepresentation::CartesianState& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::Accel& msg, const state_representation::CartesianState& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a CartesianState to a ROS geometry_msgs::msg::AccelStamped
@@ -101,7 +101,7 @@ void write_msg(geometry_msgs::msg::Accel& msg, const StateRepresentation::Cartes
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::AccelStamped& msg, const StateRepresentation::CartesianState& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::AccelStamped& msg, const state_representation::CartesianState& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a CartesianState to a ROS geometry_msgs::msg::Wrench
@@ -109,7 +109,7 @@ void write_msg(geometry_msgs::msg::AccelStamped& msg, const StateRepresentation:
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::Wrench& msg, const StateRepresentation::CartesianState& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::Wrench& msg, const state_representation::CartesianState& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a CartesianState to a ROS geometry_msgs::msg::WrenchStamped
@@ -117,7 +117,7 @@ void write_msg(geometry_msgs::msg::Wrench& msg, const StateRepresentation::Carte
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::WrenchStamped& msg, const StateRepresentation::CartesianState& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::WrenchStamped& msg, const state_representation::CartesianState& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a JointState to a ROS sensor_msgs::msg::JointState
@@ -125,7 +125,7 @@ void write_msg(geometry_msgs::msg::WrenchStamped& msg, const StateRepresentation
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(sensor_msgs::msg::JointState& msg, const StateRepresentation::JointState& state, const rclcpp::Time& time);
+void write_msg(sensor_msgs::msg::JointState& msg, const state_representation::JointState& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a Jacobian to a ROS modulo_msgs::msg::Jacobian
@@ -133,7 +133,7 @@ void write_msg(sensor_msgs::msg::JointState& msg, const StateRepresentation::Joi
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(modulo_msgs::msg::Jacobian& msg, const StateRepresentation::Jacobian& state, const rclcpp::Time& time);
+void write_msg(modulo_msgs::msg::Jacobian& msg, const state_representation::Jacobian& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a DualQuaternionPose to a ROS geometry_msgs::msg::Pose
@@ -141,7 +141,7 @@ void write_msg(modulo_msgs::msg::Jacobian& msg, const StateRepresentation::Jacob
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::Pose& msg, const StateRepresentation::DualQuaternionPose& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::Pose& msg, const state_representation::DualQuaternionPose& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a DualQuaternionPose to a ROS geometry_msgs::msg::PoseStamped
@@ -149,7 +149,7 @@ void write_msg(geometry_msgs::msg::Pose& msg, const StateRepresentation::DualQua
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::PoseStamped& msg, const StateRepresentation::DualQuaternionPose& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::PoseStamped& msg, const state_representation::DualQuaternionPose& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a DualQuaternionPose to a ROS geometry_msgs::msg::Twist
@@ -157,7 +157,7 @@ void write_msg(geometry_msgs::msg::PoseStamped& msg, const StateRepresentation::
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::Twist& msg, const StateRepresentation::DualQuaternionTwist& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::Twist& msg, const state_representation::DualQuaternionTwist& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a DualQuaternionPose to a ROS geometry_msgs::msg::TwistStamped
@@ -165,7 +165,7 @@ void write_msg(geometry_msgs::msg::Twist& msg, const StateRepresentation::DualQu
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(geometry_msgs::msg::TwistStamped& msg, const StateRepresentation::DualQuaternionTwist& state, const rclcpp::Time& time);
+void write_msg(geometry_msgs::msg::TwistStamped& msg, const state_representation::DualQuaternionTwist& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a CartesianState to a ROS tf2_msgs::msg::TFMessage
@@ -173,7 +173,7 @@ void write_msg(geometry_msgs::msg::TwistStamped& msg, const StateRepresentation:
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(tf2_msgs::msg::TFMessage& msg, const StateRepresentation::CartesianState& state, const rclcpp::Time& time);
+void write_msg(tf2_msgs::msg::TFMessage& msg, const state_representation::CartesianState& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a JointState to a ROS trajectory_msgs::msg::JointTrajectoryPoint
@@ -181,7 +181,7 @@ void write_msg(tf2_msgs::msg::TFMessage& msg, const StateRepresentation::Cartesi
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(trajectory_msgs::msg::JointTrajectoryPoint& msg, const StateRepresentation::JointState& state, const rclcpp::Time&);
+void write_msg(trajectory_msgs::msg::JointTrajectoryPoint& msg, const state_representation::JointState& state, const rclcpp::Time&);
 
 /**
  * @brief Convert a JointState to a ROS trajectory_msgs::msg::JointTrajectory
@@ -189,7 +189,7 @@ void write_msg(trajectory_msgs::msg::JointTrajectoryPoint& msg, const StateRepre
  * @param state The state to read from
  * @param time The time of the message
  */
-void write_msg(trajectory_msgs::msg::JointTrajectory& msg, const StateRepresentation::Trajectory<StateRepresentation::JointState>& state, const rclcpp::Time& time);
+void write_msg(trajectory_msgs::msg::JointTrajectory& msg, const state_representation::Trajectory<state_representation::JointState>& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a Parameter<double> to a ROS std_msgs::msg::Float64
@@ -198,7 +198,7 @@ void write_msg(trajectory_msgs::msg::JointTrajectory& msg, const StateRepresenta
  * @param time The time of the message
  */
 template <typename U, typename T>
-void write_msg(U& msg, const StateRepresentation::Parameter<T>& state, const rclcpp::Time&);
+void write_msg(U& msg, const state_representation::Parameter<T>& state, const rclcpp::Time&);
 
 /**
  * @brief Convert a state to a ROS std_msgs::msg::Float64MultiArray

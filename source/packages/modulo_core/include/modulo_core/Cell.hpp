@@ -5,8 +5,6 @@
 #include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
 #include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
 #include "modulo_core/Communication/ServiceClient/ClientHandler.hpp"
-#include <state_representation/Parameters/Parameter.hpp>
-#include <state_representation/Parameters/ParameterInterface.hpp>
 #include <chrono>
 #include <iostream>
 #include <lifecycle_msgs/msg/transition.hpp>
@@ -19,6 +17,8 @@
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 #include <rclcpp_lifecycle/lifecycle_publisher.hpp>
 #include <rcutils/logging_macros.h>
+#include <state_representation/parameters/Parameter.hpp>
+#include <state_representation/parameters/ParameterInterface.hpp>
 #include <string>
 #include <thread>
 
@@ -46,7 +46,7 @@ private:
   std::shared_ptr<std::mutex> mutex_;                                                                    ///< a mutex to use when modifying messages between functions
   std::chrono::nanoseconds period_;                                                                      ///< rate of the publisher functions in nanoseconds
   std::list<std::thread> active_threads_;                                                                ///< list of active threads for periodic calling
-  std::map<std::string, std::shared_ptr<StateRepresentation::ParameterInterface>> parameters_;           ///< list for storing parameters
+  std::map<std::string, std::shared_ptr<state_representation::ParameterInterface>> parameters_;          ///< list for storing parameters
   std::map<std::string, std::pair<std::shared_ptr<communication::CommunicationHandler>, bool>> handlers_;///< map for storing publishers, subscriptions and tf
 
   /**
@@ -95,7 +95,7 @@ protected:
    * @brief Get the pointer to the desired parameter
    * @param parameter_name the name of the desired parameter
    */
-  const std::shared_ptr<StateRepresentation::ParameterInterface> get_parameter_pointer(const std::string& parameter_name) const;
+  const std::shared_ptr<state_representation::ParameterInterface> get_parameter_pointer(const std::string& parameter_name) const;
 
 public:
   /**
@@ -208,7 +208,7 @@ public:
    * @param always_active if true, always publish the transform as soon as the node is configured
    */
   template <typename DurationT>
-  void add_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient,
+  void add_transform_broadcaster(const std::shared_ptr<state_representation::CartesianState>& recipient,
                                  const std::chrono::duration<int64_t, DurationT>& period,
                                  bool always_active = false,
                                  int queue_size = 10);
@@ -220,7 +220,7 @@ public:
    * @param always_active if true, always publish the transform as soon as the node is configured
    */
   template <typename DurationT>
-  void add_transform_broadcaster(const StateRepresentation::CartesianPose& recipient,
+  void add_transform_broadcaster(const state_representation::CartesianPose& recipient,
                                  const std::chrono::duration<int64_t, DurationT>& period,
                                  bool always_active = false,
                                  int queue_size = 10);
@@ -232,7 +232,7 @@ public:
    * @param always_active if true, always publish the transform as soon as the node is configured
    */
   template <typename DurationT>
-  void add_transform_broadcaster(const std::shared_ptr<StateRepresentation::ParameterInterface>& recipient,
+  void add_transform_broadcaster(const std::shared_ptr<state_representation::ParameterInterface>& recipient,
                                  const std::chrono::duration<int64_t, DurationT>& period,
                                  bool always_active = false,
                                  int queue_size = 10);
@@ -242,7 +242,7 @@ public:
    * @param recipient the state that contain the data to be published
    * @param always_active if true, always publish the transform as soon as the node is configured
    */
-  void add_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient,
+  void add_transform_broadcaster(const std::shared_ptr<state_representation::CartesianState>& recipient,
                                  bool always_active = false,
                                  int queue_size = 10);
 
@@ -251,7 +251,7 @@ public:
    * @param recipient the state that contain the data to be published
    * @param always_active if true, always publish the transform as soon as the node is configured
    */
-  void add_transform_broadcaster(const StateRepresentation::CartesianPose& recipient,
+  void add_transform_broadcaster(const state_representation::CartesianPose& recipient,
                                  bool always_active = false,
                                  int queue_size = 10);
 
@@ -260,24 +260,24 @@ public:
    * @param recipient the state that contain the data to be published
    * @param always_active if true, always publish the transform as soon as the node is configured
    */
-  void add_transform_broadcaster(const std::shared_ptr<StateRepresentation::ParameterInterface>& recipient,
+  void add_transform_broadcaster(const std::shared_ptr<state_representation::ParameterInterface>& recipient,
                                  bool always_active = false,
                                  int queue_size = 10);
 
   /**
    * @brief Add a parameter to be updated by the parameter server
-   * @param parameter The parameter using the StateRepresentation of a parameter
+   * @param parameter The parameter using the state_representation of a parameter
    * @param prefix a string for prefixing the parameter name
    */
   template <typename T>
-  void add_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter, const std::string& prefix = "");
+  void add_parameter(const std::shared_ptr<state_representation::Parameter<T>>& parameter, const std::string& prefix = "");
 
   /**
    * @brief Add multiple parameters to be updated by the parameter server
    * @param parameters the list of parameters
    * @param prefix a string for prefixing the parameter name 
    */
-  void add_parameters(const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>>& parameters, const std::string& prefix = "");
+  void add_parameters(const std::list<std::shared_ptr<state_representation::ParameterInterface>>& parameters, const std::string& prefix = "");
 
   /**
    * @brief Set the value of a declared parameter
@@ -291,20 +291,20 @@ public:
    * @param parameter the new value of the parameter
    */
   template <typename T>
-  void set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter);
+  void set_parameter_value(const std::shared_ptr<state_representation::Parameter<T>>& parameter);
 
   /**
    * @brief Set the value of a declared parameter
    * @param parameter the new value of the parameter
    */
-  void set_parameter_value(const std::shared_ptr<StateRepresentation::ParameterInterface>& parameter);
+  void set_parameter_value(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
 
   /**
    * @brief Function to send a transform using the generic transform broadcaster
    * @param transform the transformation to send
    * @param name the new name to give to the transform. If empty it will use the name provided in transform
    */
-  void send_transform(const StateRepresentation::CartesianState& transform, const std::string& name = "") const;
+  void send_transform(const state_representation::CartesianState& transform, const std::string& name = "") const;
 
   /**
    * @brief Send a request to the server and wait for its response
@@ -330,7 +330,7 @@ public:
    * @param the frame in wich to express the transform
    * @return the CartesianPose representing the transformation
    */
-  const StateRepresentation::CartesianPose lookup_transform(const std::string& frame_name, const std::string& reference_frame = "world") const;
+  const state_representation::CartesianPose lookup_transform(const std::string& frame_name, const std::string& reference_frame = "world") const;
 
   /**
    * @brief Transition callback for state configuring
@@ -493,12 +493,12 @@ inline const std::chrono::nanoseconds& Cell::get_period() const {
   return this->period_;
 }
 
-inline const std::shared_ptr<StateRepresentation::ParameterInterface> Cell::get_parameter_pointer(const std::string& parameter_name) const {
+inline const std::shared_ptr<state_representation::ParameterInterface> Cell::get_parameter_pointer(const std::string& parameter_name) const {
   return this->parameters_.at(parameter_name);
 }
 
 template <typename T>
-void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter) {
+void Cell::set_parameter_value(const std::shared_ptr<state_representation::Parameter<T>>& parameter) {
   this->set_parameter_value<T>(parameter->get_name(), parameter->get_value());
 }
 
@@ -550,7 +550,7 @@ void Cell::add_transform_broadcaster(const std::chrono::duration<int64_t, Durati
 }
 
 template <typename DurationT>
-void Cell::add_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient,
+void Cell::add_transform_broadcaster(const std::shared_ptr<state_representation::CartesianState>& recipient,
                                      const std::chrono::duration<int64_t, DurationT>& period,
                                      bool always_active,
                                      int queue_size) {
@@ -561,20 +561,20 @@ void Cell::add_transform_broadcaster(const std::shared_ptr<StateRepresentation::
 }
 
 template <typename DurationT>
-void Cell::add_transform_broadcaster(const StateRepresentation::CartesianPose& recipient,
+void Cell::add_transform_broadcaster(const state_representation::CartesianPose& recipient,
                                      const std::chrono::duration<int64_t, DurationT>& period,
                                      bool always_active,
                                      int queue_size) {
-  this->add_transform_broadcaster(std::make_shared<StateRepresentation::CartesianPose>(recipient), period, always_active, queue_size);
+  this->add_transform_broadcaster(std::make_shared<state_representation::CartesianPose>(recipient), period, always_active, queue_size);
 }
 
 template <typename DurationT>
-void Cell::add_transform_broadcaster(const std::shared_ptr<StateRepresentation::ParameterInterface>& recipient,
+void Cell::add_transform_broadcaster(const std::shared_ptr<state_representation::ParameterInterface>& recipient,
                                      const std::chrono::duration<int64_t, DurationT>& period,
                                      bool always_active,
                                      int queue_size) {
   using namespace communication;
-  using namespace StateRepresentation;
+  using namespace state_representation;
   auto parameter = std::static_pointer_cast<Parameter<CartesianPose>>(recipient);
   auto handler = std::make_shared<PublisherHandler<Parameter<CartesianPose>, tf2_msgs::msg::TFMessage>>(parameter, this->get_clock(), this->mutex_);
   handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));

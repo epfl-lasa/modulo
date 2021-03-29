@@ -9,7 +9,7 @@ namespace modulo::core::communication {
 /**
  * @class PublisherHandler
  * @brief Class to define a publisher
- * @tparam RecT the type of recipient (of StateRepresentation::State base class)
+ * @tparam RecT the type of recipient (of state_representation::State base class)
  * @tparam MsgT the type of associated ROS2 message
  *
  */
@@ -35,7 +35,7 @@ public:
    * @param  clock     reference to the Cell clock
    * @param  mutex     reference to the Cell mutex
    */
-  explicit PublisherHandler(const std::shared_ptr<StateRepresentation::State>& recipient,
+  explicit PublisherHandler(const std::shared_ptr<state_representation::State>& recipient,
                             const std::shared_ptr<rclcpp::Clock>& clock,
                             const std::shared_ptr<std::mutex>& mutex);
 
@@ -88,7 +88,7 @@ public:
 };
 
 template <class RecT, typename MsgT>
-PublisherHandler<RecT, MsgT>::PublisherHandler(const std::shared_ptr<StateRepresentation::State>& recipient,
+PublisherHandler<RecT, MsgT>::PublisherHandler(const std::shared_ptr<state_representation::State>& recipient,
                                                const std::shared_ptr<rclcpp::Clock>& clock,
                                                const std::shared_ptr<std::mutex>& mutex) : MessagePassingHandler(CommunicationType::PUBLISHER,
                                                                                                                  recipient,

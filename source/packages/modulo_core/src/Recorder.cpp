@@ -36,13 +36,13 @@ void Recorder::step() {
   }
 }
 
-bool Recorder::record(const StateRepresentation::State& state) const {
+bool Recorder::record(const state_representation::State& state) const {
   switch (state.get_type()) {
-    case StateRepresentation::StateType::CARTESIANSTATE:
-      return record(static_cast<const StateRepresentation::CartesianState&>(state));
+    case state_representation::StateType::CARTESIANSTATE:
+      return record(static_cast<const state_representation::CartesianState&>(state));
 
-    case StateRepresentation::StateType::JOINTSTATE:
-      return record(static_cast<const StateRepresentation::JointState&>(state));
+    case state_representation::StateType::JOINTSTATE:
+      return record(static_cast<const state_representation::JointState&>(state));
 
     default:
       RCLCPP_ERROR(this->get_logger(), "Recording function for " + state.get_name() + " not defined for this type of state");
@@ -50,12 +50,12 @@ bool Recorder::record(const StateRepresentation::State& state) const {
   }
 }
 
-bool Recorder::record(const StateRepresentation::CartesianState& state) const {
+bool Recorder::record(const state_representation::CartesianState& state) const {
   RCLCPP_WARN(this->get_logger(), "Trying to record " + state.get_name() + " from the base class");
   return false;
 }
 
-bool Recorder::record(const StateRepresentation::JointState& state) const {
+bool Recorder::record(const state_representation::JointState& state) const {
   RCLCPP_WARN(this->get_logger(), "Trying to record " + state.get_name() + " from the base class");
   return false;
 }
