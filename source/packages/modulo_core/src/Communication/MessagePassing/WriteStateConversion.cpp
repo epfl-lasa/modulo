@@ -118,8 +118,8 @@ void write_msg(sensor_msgs::msg::JointState& msg, const StateRepresentation::Joi
 void write_msg(modulo_msgs::msg::Jacobian& msg, const StateRepresentation::Jacobian& state, const rclcpp::Time& time) {
   if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
   msg.header.stamp = time;
-  msg.nb_dimensions = state.get_nb_rows();
-  msg.nb_joints = state.get_nb_cols();
+  msg.nb_dimensions = state.rows();
+  msg.nb_joints = state.cols();
   msg.joint_names = state.get_joint_names();
   msg.data = std::vector<double>(state.data().data(), state.data().data() + state.data().size());
 }

@@ -91,9 +91,9 @@ void read_msg(StateRepresentation::JointState& state, const sensor_msgs::msg::Jo
   if (!msg.effort.empty()) state.set_torques(Eigen::VectorXd::Map(msg.effort.data(), msg.effort.size()));
 }
 
-void read_msg(StateRepresentation::Jacobian& state, const modulo_msgs::msg::Jacobian& msg) {
-  state.set_nb_rows(msg.nb_dimensions);
-  state.set_nb_cols(msg.nb_joints);
+void read_msg(state_representation::Jacobian& state, const modulo_msgs::msg::Jacobian& msg) {
+  state.set_rows(msg.nb_dimensions);
+  state.set_cols(msg.nb_joints);
   state.set_joint_names(msg.joint_names);
   state.set_data(Eigen::MatrixXd::Map(msg.data.data(), msg.nb_dimensions, msg.nb_joints));
 }
