@@ -12,11 +12,11 @@ A module usually contains a set of publisher and subscriber. For example, to add
 class MyRobotInterface : public Modulo::Core::Cell
 {
 public:
-	std::shared_ptr<StateRepresentation::JointState> current_state;
+	std::shared_ptr<state_representation::JointState> current_state;
 
 	explicit MyRobotInterface(const std::string & node_name, const std::chrono::milliseconds & period) :
 	Cell(node_name, period),
-	current_state(std::make_shared<StateRepresentation::JointState>("my_robot"))
+	current_state(std::make_shared<state_representation::JointState>("my_robot"))
 	{
 		// a publisher contains a channel name and a shared_ptr to the state to publish
 		// shared_ptr are used to enable asynchronous communication between the modules
@@ -35,11 +35,11 @@ The core structure of the module should be implemented in the `step` function:
 class MyRobotInterface : public ModuloCore::RobotInterface
 {
 public:
-	std::shared_ptr<StateRepresentation::JointState> current_state;
+	std::shared_ptr<state_representation::JointState> current_state;
 
 	explicit MyRobotInterface(const std::string & node_name, const std::chrono::milliseconds & period) :
 	Cell(node_name, period),
-	current_state(std::make_shared<StateRepresentation::JointState>("my_robot"))
+	current_state(std::make_shared<state_representation::JointState>("my_robot"))
 	{
 		// a publisher contains a channel name and a shared_ptr to the state to publish
 		// shared_ptr are used to enable asynchronous communication between the modules

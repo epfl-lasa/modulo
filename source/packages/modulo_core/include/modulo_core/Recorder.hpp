@@ -94,7 +94,7 @@ public:
    * @param state the state to be recorded
    * @return true if the state was successfully recorded
    */
-  bool record(const StateRepresentation::State& state) const;
+  bool record(const state_representation::State& state) const;
 
   /**
    * @brief Abstract function to record a CartesianState. This function needs to be
@@ -102,7 +102,7 @@ public:
    * @param state the state to be recorded
    * @return true if the state was successfully recorded
    */
-  virtual bool record(const StateRepresentation::CartesianState& state) const;
+  virtual bool record(const state_representation::CartesianState& state) const;
 
   /**
    * @brief Abstract function to record a JointState. This function needs to be
@@ -110,7 +110,7 @@ public:
    * @param state the state to be recorded
    * @return true if the state was successfully recorded
    */
-  virtual bool record(const StateRepresentation::JointState& state) const;
+  virtual bool record(const state_representation::JointState& state) const;
 };
 
 template <typename DurationT>

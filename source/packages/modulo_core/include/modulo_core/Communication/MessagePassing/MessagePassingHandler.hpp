@@ -15,8 +15,8 @@ namespace modulo::core::communication {
  */
 class MessagePassingHandler : public CommunicationHandler {
 private:
-  std::shared_ptr<StateRepresentation::State> recipient_ = nullptr;///< recipient associated to the handler
-  bool asynchronous_;                                              ///< indicate if the handler is asynchronous or not (for publishing mainly)
+  std::shared_ptr<state_representation::State> recipient_ = nullptr;///< recipient associated to the handler
+  bool asynchronous_;                                               ///< indicate if the handler is asynchronous or not (for publishing mainly)
 
 public:
   /**
@@ -34,7 +34,7 @@ public:
    * @param  mutex     reference to the Cell mutex
    */
   explicit MessagePassingHandler(const CommunicationType& type,
-                                 const std::shared_ptr<StateRepresentation::State>& recipient,
+                                 const std::shared_ptr<state_representation::State>& recipient,
                                  const std::shared_ptr<std::mutex>& mutex);
 
   /**
@@ -46,7 +46,7 @@ public:
    */
   template <typename DurationT>
   explicit MessagePassingHandler(const CommunicationType& type,
-                                 const std::shared_ptr<StateRepresentation::State>& recipient,
+                                 const std::shared_ptr<state_representation::State>& recipient,
                                  const std::chrono::duration<int64_t, DurationT>& timeout,
                                  const std::shared_ptr<std::mutex>& mutex);
 
@@ -54,13 +54,13 @@ public:
    * @brief Getter of the recipient
    * @return the recipient
    */
-  const StateRepresentation::State& get_recipient() const;
+  const state_representation::State& get_recipient() const;
 
   /**
    * @brief Getter of the recipient as a non const value
    * @return the recipient
    */
-  StateRepresentation::State& get_recipient();
+  state_representation::State& get_recipient();
 
   /**
    * @brief Getter of the asynchronous attribute
@@ -71,17 +71,17 @@ public:
 
 template <typename DurationT>
 MessagePassingHandler::MessagePassingHandler(const CommunicationType& type,
-                                             const std::shared_ptr<StateRepresentation::State>& recipient,
+                                             const std::shared_ptr<state_representation::State>& recipient,
                                              const std::chrono::duration<int64_t, DurationT>& timeout,
                                              const std::shared_ptr<std::mutex>& mutex) : CommunicationHandler(type, timeout, mutex),
                                                                                          recipient_(recipient),
                                                                                          asynchronous_(true) {}
 
-inline const StateRepresentation::State& MessagePassingHandler::get_recipient() const {
+inline const state_representation::State& MessagePassingHandler::get_recipient() const {
   return *this->recipient_;
 }
 
-inline StateRepresentation::State& MessagePassingHandler::get_recipient() {
+inline state_representation::State& MessagePassingHandler::get_recipient() {
   return *this->recipient_;
 }
 

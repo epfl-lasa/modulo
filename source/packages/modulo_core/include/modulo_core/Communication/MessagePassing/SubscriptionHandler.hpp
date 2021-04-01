@@ -6,7 +6,7 @@ namespace modulo::core::communication {
 /**
  * @class SubscriptionHandler
  * @brief Class to define a subscription
- * @tparam RecT the type of recipient (of StateRepresentation::State base class)
+ * @tparam RecT the type of recipient (of state_representation::State base class)
  * @tparam MsgT the type of associated ROS2 message
  *
  */
@@ -23,7 +23,7 @@ public:
    * @param  mutex     reference to the Cell mutex
    */
   template <typename DurationT>
-  explicit SubscriptionHandler(const std::shared_ptr<StateRepresentation::State>& recipient,
+  explicit SubscriptionHandler(const std::shared_ptr<state_representation::State>& recipient,
                                const std::chrono::duration<int64_t, DurationT>& timeout,
                                const std::shared_ptr<std::mutex>& mutex);
 
@@ -57,7 +57,7 @@ public:
 
 template <class RecT, typename MsgT>
 template <typename DurationT>
-SubscriptionHandler<RecT, MsgT>::SubscriptionHandler(const std::shared_ptr<StateRepresentation::State>& recipient,
+SubscriptionHandler<RecT, MsgT>::SubscriptionHandler(const std::shared_ptr<state_representation::State>& recipient,
                                                      const std::chrono::duration<int64_t, DurationT>& timeout,
                                                      const std::shared_ptr<std::mutex>& mutex) : MessagePassingHandler(CommunicationType::SUBSCRIPTION,
                                                                                                                        recipient,

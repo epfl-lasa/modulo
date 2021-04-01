@@ -1,7 +1,7 @@
 #include "modulo_core/Cell.hpp"
 #include "modulo_core/Exceptions/UnconfiguredNodeException.hpp"
-#include <state_representation/Exceptions/IncompatibleSizeException.hpp>
-#include <state_representation/Exceptions/UnrecognizedParameterTypeException.hpp>
+#include <state_representation/exceptions/IncompatibleSizeException.hpp>
+#include <state_representation/exceptions/UnrecognizedParameterTypeException.hpp>
 
 namespace modulo::core {
 Cell::~Cell() {
@@ -21,7 +21,7 @@ void Cell::reset() {
 }
 
 template <typename T>
-void Cell::add_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>>& parameter, const std::string& prefix) {
+void Cell::add_parameter(const std::shared_ptr<state_representation::Parameter<T>>& parameter, const std::string& prefix) {
   std::lock_guard<std::mutex> lock(*this->mutex_);
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
@@ -29,56 +29,56 @@ void Cell::add_parameter(const std::shared_ptr<StateRepresentation::Parameter<T>
   this->declare_parameter(parameter->get_name(), parameter->get_value());
 }
 
-template void Cell::add_parameter<double>(const std::shared_ptr<StateRepresentation::Parameter<double>>& parameter, const std::string& prefix);
+template void Cell::add_parameter<double>(const std::shared_ptr<state_representation::Parameter<double>>& parameter, const std::string& prefix);
 
-template void Cell::add_parameter<std::vector<double>>(const std::shared_ptr<StateRepresentation::Parameter<std::vector<double>>>& parameter, const std::string& prefix);
+template void Cell::add_parameter<std::vector<double>>(const std::shared_ptr<state_representation::Parameter<std::vector<double>>>& parameter, const std::string& prefix);
 
-template void Cell::add_parameter<bool>(const std::shared_ptr<StateRepresentation::Parameter<bool>>& parameter, const std::string& prefix);
+template void Cell::add_parameter<bool>(const std::shared_ptr<state_representation::Parameter<bool>>& parameter, const std::string& prefix);
 
-template void Cell::add_parameter<std::vector<bool>>(const std::shared_ptr<StateRepresentation::Parameter<std::vector<bool>>>& parameter, const std::string& prefix);
+template void Cell::add_parameter<std::vector<bool>>(const std::shared_ptr<state_representation::Parameter<std::vector<bool>>>& parameter, const std::string& prefix);
 
-template void Cell::add_parameter<std::string>(const std::shared_ptr<StateRepresentation::Parameter<std::string>>& parameter, const std::string& prefix);
+template void Cell::add_parameter<std::string>(const std::shared_ptr<state_representation::Parameter<std::string>>& parameter, const std::string& prefix);
 
-template void Cell::add_parameter<std::vector<std::string>>(const std::shared_ptr<StateRepresentation::Parameter<std::vector<std::string>>>& parameter, const std::string& prefix);
+template void Cell::add_parameter<std::vector<std::string>>(const std::shared_ptr<state_representation::Parameter<std::vector<std::string>>>& parameter, const std::string& prefix);
 
 template <>
-void Cell::add_parameter<StateRepresentation::CartesianState>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::CartesianState>>& parameter, const std::string& prefix) {
+void Cell::add_parameter<state_representation::CartesianState>(const std::shared_ptr<state_representation::Parameter<state_representation::CartesianState>>& parameter, const std::string& prefix) {
   std::lock_guard<std::mutex> lock(*this->mutex_);
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
-  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().StateRepresentation::CartesianState::to_std_vector());
+  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().state_representation::CartesianState::to_std_vector());
 }
 
 template <>
-void Cell::add_parameter<StateRepresentation::CartesianPose>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::CartesianPose>>& parameter, const std::string& prefix) {
+void Cell::add_parameter<state_representation::CartesianPose>(const std::shared_ptr<state_representation::Parameter<state_representation::CartesianPose>>& parameter, const std::string& prefix) {
   std::lock_guard<std::mutex> lock(*this->mutex_);
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
-  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().StateRepresentation::CartesianPose::to_std_vector());
+  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().state_representation::CartesianPose::to_std_vector());
 }
 
 template <>
-void Cell::add_parameter<StateRepresentation::JointState>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::JointState>>& parameter, const std::string& prefix) {
+void Cell::add_parameter<state_representation::JointState>(const std::shared_ptr<state_representation::Parameter<state_representation::JointState>>& parameter, const std::string& prefix) {
   std::lock_guard<std::mutex> lock(*this->mutex_);
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
-  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().StateRepresentation::JointState::to_std_vector());
+  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().state_representation::JointState::to_std_vector());
 }
 
 template <>
-void Cell::add_parameter<StateRepresentation::JointPositions>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::JointPositions>>& parameter, const std::string& prefix) {
+void Cell::add_parameter<state_representation::JointPositions>(const std::shared_ptr<state_representation::Parameter<state_representation::JointPositions>>& parameter, const std::string& prefix) {
   std::lock_guard<std::mutex> lock(*this->mutex_);
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
-  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().StateRepresentation::JointPositions::to_std_vector());
+  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().state_representation::JointPositions::to_std_vector());
 }
 
 template <>
-void Cell::add_parameter<StateRepresentation::Ellipsoid>(const std::shared_ptr<StateRepresentation::Parameter<StateRepresentation::Ellipsoid>>& parameter, const std::string& prefix) {
+void Cell::add_parameter<state_representation::Ellipsoid>(const std::shared_ptr<state_representation::Parameter<state_representation::Ellipsoid>>& parameter, const std::string& prefix) {
   std::lock_guard<std::mutex> lock(*this->mutex_);
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
@@ -87,7 +87,7 @@ void Cell::add_parameter<StateRepresentation::Ellipsoid>(const std::shared_ptr<S
 }
 
 template <>
-void Cell::add_parameter<Eigen::MatrixXd>(const std::shared_ptr<StateRepresentation::Parameter<Eigen::MatrixXd>>& parameter, const std::string& prefix) {
+void Cell::add_parameter<Eigen::MatrixXd>(const std::shared_ptr<state_representation::Parameter<Eigen::MatrixXd>>& parameter, const std::string& prefix) {
   std::lock_guard<std::mutex> lock(*this->mutex_);
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
@@ -96,9 +96,9 @@ void Cell::add_parameter<Eigen::MatrixXd>(const std::shared_ptr<StateRepresentat
   this->declare_parameter<std::vector<double>>(parameter->get_name(), value);
 }
 
-void Cell::add_parameters(const std::list<std::shared_ptr<StateRepresentation::ParameterInterface>>& parameters, const std::string& prefix) {
-  using namespace StateRepresentation;
-  using namespace StateRepresentation::Exceptions;
+void Cell::add_parameters(const std::list<std::shared_ptr<state_representation::ParameterInterface>>& parameters, const std::string& prefix) {
+  using namespace state_representation;
+  using namespace state_representation::exceptions;
   for (auto& param : parameters) {
     switch (param->get_type()) {
       case StateType::PARAMETER_DOUBLE: {
@@ -178,19 +178,19 @@ template void Cell::set_parameter_value(const std::string& parameter_name, const
 template void Cell::set_parameter_value(const std::string& parameter_name, const std::vector<std::string>& value);
 
 template <>
-void Cell::set_parameter_value(const std::string& parameter_name, const StateRepresentation::CartesianPose& value) {
-  std::vector<double> vector_value = value.StateRepresentation::CartesianPose::to_std_vector();
+void Cell::set_parameter_value(const std::string& parameter_name, const state_representation::CartesianPose& value) {
+  std::vector<double> vector_value = value.state_representation::CartesianPose::to_std_vector();
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
 
 template <>
-void Cell::set_parameter_value(const std::string& parameter_name, const StateRepresentation::JointPositions& value) {
-  std::vector<double> vector_value = value.StateRepresentation::JointPositions::to_std_vector();
+void Cell::set_parameter_value(const std::string& parameter_name, const state_representation::JointPositions& value) {
+  std::vector<double> vector_value = value.state_representation::JointPositions::to_std_vector();
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
 
 template <>
-void Cell::set_parameter_value(const std::string& parameter_name, const StateRepresentation::Ellipsoid& value) {
+void Cell::set_parameter_value(const std::string& parameter_name, const state_representation::Ellipsoid& value) {
   std::vector<double> vector_value = value.to_std_vector();
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
@@ -201,9 +201,9 @@ void Cell::set_parameter_value(const std::string& parameter_name, const Eigen::M
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
 
-void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::ParameterInterface>& parameter) {
-  using namespace StateRepresentation;
-  using namespace StateRepresentation::Exceptions;
+void Cell::set_parameter_value(const std::shared_ptr<state_representation::ParameterInterface>& parameter) {
+  using namespace state_representation;
+  using namespace state_representation::exceptions;
   switch (parameter->get_type()) {
     case StateType::PARAMETER_DOUBLE: {
       this->set_parameter_value(std::static_pointer_cast<Parameter<double>>(parameter));
@@ -261,32 +261,32 @@ void Cell::set_parameter_value(const std::shared_ptr<StateRepresentation::Parame
   }
 }
 
-void Cell::add_transform_broadcaster(const std::shared_ptr<StateRepresentation::CartesianState>& recipient,
+void Cell::add_transform_broadcaster(const std::shared_ptr<state_representation::CartesianState>& recipient,
                                      bool always_active,
                                      int queue_size) {
   this->add_transform_broadcaster(recipient, this->get_period(), always_active, queue_size);
 }
 
-void Cell::add_transform_broadcaster(const StateRepresentation::CartesianPose& recipient,
+void Cell::add_transform_broadcaster(const state_representation::CartesianPose& recipient,
                                      bool always_active,
                                      int queue_size) {
   this->add_transform_broadcaster(recipient, this->get_period(), always_active, queue_size);
 }
 
-void Cell::add_transform_broadcaster(const std::shared_ptr<StateRepresentation::ParameterInterface>& recipient,
+void Cell::add_transform_broadcaster(const std::shared_ptr<state_representation::ParameterInterface>& recipient,
                                      bool always_active,
                                      int queue_size) {
   this->add_transform_broadcaster(recipient, this->get_period(), always_active, queue_size);
 }
 
-void Cell::send_transform(const StateRepresentation::CartesianState& transform, const std::string& name) const {
+void Cell::send_transform(const state_representation::CartesianState& transform, const std::string& name) const {
   if (!this->configured_) throw exceptions::UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
-  StateRepresentation::CartesianState transform_copy(transform);
+  state_representation::CartesianState transform_copy(transform);
   if (name != "") transform_copy.set_name(name);
   std::static_pointer_cast<communication::TransformBroadcasterHandler>(this->handlers_.at("tf_broadcaster").first)->send_transform(transform_copy);
 }
 
-const StateRepresentation::CartesianPose Cell::lookup_transform(const std::string& frame_name, const std::string& reference_frame) const {
+const state_representation::CartesianPose Cell::lookup_transform(const std::string& frame_name, const std::string& reference_frame) const {
   if (!this->configured_) throw exceptions::UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
   return std::static_pointer_cast<communication::TransformListenerHandler>(this->handlers_.at("tf_listener").first)->lookup_transform(frame_name, reference_frame);
 }
@@ -440,8 +440,8 @@ void Cell::add_periodic_call(const std::function<void(void)>& callback_function,
 }
 
 void Cell::update_parameters() {
-  using namespace StateRepresentation;
-  using namespace StateRepresentation::Exceptions;
+  using namespace state_representation;
+  using namespace state_representation::exceptions;
   while (!this->shutdown_) {
     auto start = std::chrono::steady_clock::now();
     try {

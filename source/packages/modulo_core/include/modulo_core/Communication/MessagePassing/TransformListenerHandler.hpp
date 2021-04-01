@@ -22,7 +22,7 @@ public:
  * @param  mutex     reference to the Cell mutex
  */
   template <typename DurationT>
-  explicit TransformListenerHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient,
+  explicit TransformListenerHandler(const std::shared_ptr<state_representation::CartesianPose>& recipient,
                                     const std::chrono::duration<int64_t, DurationT>& timeout,
                                     const std::shared_ptr<rclcpp::Clock>& clock,
                                     const std::shared_ptr<std::mutex>& mutex);
@@ -44,12 +44,12 @@ public:
  * @param  reference_frame name of its desired reference frame
  * @return                 the transform as a CartesianPose
  */
-  const StateRepresentation::CartesianPose lookup_transform(const std::string& frame_name,
-                                                            const std::string& reference_frame) const;
+  const state_representation::CartesianPose lookup_transform(const std::string& frame_name,
+                                                             const std::string& reference_frame) const;
 };
 
 template <typename DurationT>
-TransformListenerHandler::TransformListenerHandler(const std::shared_ptr<StateRepresentation::CartesianPose>& recipient,
+TransformListenerHandler::TransformListenerHandler(const std::shared_ptr<state_representation::CartesianPose>& recipient,
                                                    const std::chrono::duration<int64_t, DurationT>& timeout,
                                                    const std::shared_ptr<rclcpp::Clock>& clock,
                                                    const std::shared_ptr<std::mutex>& mutex) : MessagePassingHandler(CommunicationType::TRANSFORMLISTENER,
@@ -64,7 +64,7 @@ template <typename DurationT>
 TransformListenerHandler::TransformListenerHandler(const std::chrono::duration<int64_t, DurationT>& timeout,
                                                    const std::shared_ptr<rclcpp::Clock>& clock,
                                                    const std::shared_ptr<std::mutex>& mutex) : MessagePassingHandler(CommunicationType::TRANSFORMLISTENER,
-                                                                                                                     std::make_shared<StateRepresentation::CartesianPose>(),
+                                                                                                                     std::make_shared<state_representation::CartesianPose>(),
                                                                                                                      timeout,
                                                                                                                      mutex),
                                                                                                buffer_(clock) {
