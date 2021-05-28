@@ -47,7 +47,8 @@ void Cell::add_parameter<state_representation::CartesianState>(const std::shared
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
-  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().state_representation::CartesianState::to_std_vector());
+  state_representation::CartesianState value(parameter->get_value());
+  this->declare_parameter<std::vector<double>>(parameter->get_name(), value.to_std_vector());
 }
 
 template <>
@@ -56,7 +57,8 @@ void Cell::add_parameter<state_representation::CartesianPose>(const std::shared_
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
-  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().state_representation::CartesianPose::to_std_vector());
+  state_representation::CartesianPose value(parameter->get_value());
+  this->declare_parameter<std::vector<double>>(parameter->get_name(), value.to_std_vector());
 }
 
 template <>
@@ -65,7 +67,8 @@ void Cell::add_parameter<state_representation::JointState>(const std::shared_ptr
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
-  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().state_representation::JointState::to_std_vector());
+  state_representation::JointState value(parameter->get_value());
+  this->declare_parameter<std::vector<double>>(parameter->get_name(), value.to_std_vector());
 }
 
 template <>
@@ -74,7 +77,8 @@ void Cell::add_parameter<state_representation::JointPositions>(const std::shared
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
-  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().state_representation::JointPositions::to_std_vector());
+  state_representation::JointPositions value(parameter->get_value());
+  this->declare_parameter<std::vector<double>>(parameter->get_name(), value.to_std_vector());
 }
 
 template <>
@@ -179,13 +183,13 @@ template void Cell::set_parameter_value(const std::string& parameter_name, const
 
 template <>
 void Cell::set_parameter_value(const std::string& parameter_name, const state_representation::CartesianPose& value) {
-  std::vector<double> vector_value = value.state_representation::CartesianPose::to_std_vector();
+  std::vector<double> vector_value = value.to_std_vector();
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
 
 template <>
 void Cell::set_parameter_value(const std::string& parameter_name, const state_representation::JointPositions& value) {
-  std::vector<double> vector_value = value.state_representation::JointPositions::to_std_vector();
+  std::vector<double> vector_value = value.to_std_vector();
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
 
