@@ -2,6 +2,8 @@ ARG ROS_VERSION=foxy
 
 FROM ros2_ws:${ROS_VERSION}
 
+RUN sudo curl http://repo.ros2.org/repos.key | sudo apt-key add -
+
 # import control library packages
 RUN git clone -b develop --depth 1 https://github.com/epfl-lasa/control_libraries.git
 WORKDIR ${HOME}/control_libraries/source
