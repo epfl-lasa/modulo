@@ -92,8 +92,6 @@ void read_msg(state_representation::JointState& state, const sensor_msgs::msg::J
 }
 
 void read_msg(state_representation::Jacobian& state, const modulo_msgs::msg::Jacobian& msg) {
-  state.set_rows(msg.nb_dimensions);
-  state.set_cols(msg.nb_joints);
   state.set_joint_names(msg.joint_names);
   state.set_data(Eigen::MatrixXd::Map(msg.data.data(), msg.nb_dimensions, msg.nb_joints));
 }
