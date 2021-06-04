@@ -47,7 +47,7 @@ void Cell::add_parameter<state_representation::CartesianState>(const std::shared
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
-  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().state_representation::CartesianState::to_std_vector());
+  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
 }
 
 template <>
@@ -56,7 +56,8 @@ void Cell::add_parameter<state_representation::CartesianPose>(const std::shared_
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
-  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().state_representation::CartesianPose::to_std_vector());
+  state_representation::CartesianPose value(parameter->get_value());
+  this->declare_parameter<std::vector<double>>(parameter->get_name(), value.to_std_vector());
 }
 
 template <>
@@ -65,7 +66,7 @@ void Cell::add_parameter<state_representation::JointState>(const std::shared_ptr
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
-  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().state_representation::JointState::to_std_vector());
+  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
 }
 
 template <>
@@ -74,7 +75,8 @@ void Cell::add_parameter<state_representation::JointPositions>(const std::shared
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
-  this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().state_representation::JointPositions::to_std_vector());
+  state_representation::JointPositions value(parameter->get_value());
+  this->declare_parameter<std::vector<double>>(parameter->get_name(), value.to_std_vector());
 }
 
 template <>
@@ -131,8 +133,18 @@ void Cell::add_parameters(const std::list<std::shared_ptr<state_representation::
         break;
       }
 
+      case StateType::PARAMETER_CARTESIANSTATE: {
+        this->add_parameter(std::static_pointer_cast<Parameter<CartesianState>>(param), prefix);
+        break;
+      }
+
       case StateType::PARAMETER_CARTESIANPOSE: {
         this->add_parameter(std::static_pointer_cast<Parameter<CartesianPose>>(param), prefix);
+        break;
+      }
+
+      case StateType::PARAMETER_JOINTSTATE: {
+        this->add_parameter(std::static_pointer_cast<Parameter<JointState>>(param), prefix);
         break;
       }
 
@@ -178,14 +190,26 @@ template void Cell::set_parameter_value(const std::string& parameter_name, const
 template void Cell::set_parameter_value(const std::string& parameter_name, const std::vector<std::string>& value);
 
 template <>
+void Cell::set_parameter_value(const std::string& parameter_name, const state_representation::CartesianState& value) {
+  std::vector<double> vector_value = value.to_std_vector();
+  this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
+}
+
+template <>
 void Cell::set_parameter_value(const std::string& parameter_name, const state_representation::CartesianPose& value) {
-  std::vector<double> vector_value = value.state_representation::CartesianPose::to_std_vector();
+  std::vector<double> vector_value = value.to_std_vector();
+  this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
+}
+
+template <>
+void Cell::set_parameter_value(const std::string& parameter_name, const state_representation::JointState& value) {
+  std::vector<double> vector_value = value.to_std_vector();
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
 
 template <>
 void Cell::set_parameter_value(const std::string& parameter_name, const state_representation::JointPositions& value) {
-  std::vector<double> vector_value = value.state_representation::JointPositions::to_std_vector();
+  std::vector<double> vector_value = value.to_std_vector();
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
 
@@ -235,8 +259,18 @@ void Cell::set_parameter_value(const std::shared_ptr<state_representation::Param
       break;
     }
 
+    case StateType::PARAMETER_CARTESIANSTATE: {
+      this->set_parameter_value(std::static_pointer_cast<Parameter<CartesianState>>(parameter));
+      break;
+    }
+
     case StateType::PARAMETER_CARTESIANPOSE: {
       this->set_parameter_value(std::static_pointer_cast<Parameter<CartesianPose>>(parameter));
+      break;
+    }
+
+    case StateType::PARAMETER_JOINTSTATE: {
+      this->set_parameter_value(std::static_pointer_cast<Parameter<JointState>>(parameter));
       break;
     }
 
@@ -495,10 +529,26 @@ void Cell::update_parameters() {
             break;
           }
 
+          case StateType::PARAMETER_CARTESIANSTATE: {
+            std::unique_lock<std::mutex> lck(*this->mutex_);
+            std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+            std::static_pointer_cast<Parameter<CartesianState>>(param)->get_value().from_std_vector(value);
+            lck.unlock();
+            break;
+          }
+
           case StateType::PARAMETER_CARTESIANPOSE: {
             std::unique_lock<std::mutex> lck(*this->mutex_);
             std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
             std::static_pointer_cast<Parameter<CartesianPose>>(param)->get_value().CartesianPose::from_std_vector(value);
+            lck.unlock();
+            break;
+          }
+
+          case StateType::PARAMETER_JOINTSTATE: {
+            std::unique_lock<std::mutex> lck(*this->mutex_);
+            std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+            std::static_pointer_cast<Parameter<JointState>>(param)->get_value().from_std_vector(value);
             lck.unlock();
             break;
           }
