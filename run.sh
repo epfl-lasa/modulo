@@ -1,13 +1,16 @@
 #!/bin/bash
-NAME=$(echo "${PWD##*/}" | tr _ -)
-TAG=$(echo "$1" | tr _/ -)
 
-ISISOLATED=true # change to  false to use host network
+IMAGE_NAME=aica-technology/modulo
+IMAGE_TAG=latest
+
+VOLUME_NAME="modulo-src-vol"
+
+ISISOLATED=true # change to false to use host network
 
 NETWORK=host
 if [ "${ISISOLATED}" = true ]; then
-    docker network inspect isolated >/dev/null 2>&1 || docker network create --driver bridge isolated
-    NETWORK=isolated
+  docker network inspect isolated >/dev/null 2>&1 || docker network create --driver bridge isolated
+  NETWORK=isolated
 fi
 
 if [ -z "$TAG" ]; then
@@ -16,16 +19,16 @@ fi
 
 # create a shared volume to store the ros_ws
 docker volume create --driver local \
-    --opt type="none" \
-    --opt device="${PWD}/source/packages/" \
-    --opt o="bind" \
-    "${NAME}_src_vol"
+  --opt type="none" \
+  --opt device="${PWD}/source/packages/" \
+  --opt o="bind" \
+  "${VOLUME_NAME}"
 
 xhost +
 docker run \
-    --privileged \
-	--net="${NETWORK}" \
-	-it \
-    --rm \
-	--volume="${NAME}_src_vol:/home/ros2/ros2_ws/src/:rw" \
-	"${NAME}:${TAG}"
+  -it \
+  --rm \
+  --privileged \
+  --net="${NETWORK}" \
+  --volume="${VOLUME_NAME}:/home/ros2/ros2_ws/src/:rw" \
+  "${IMAGE_NAME}:${IMAGE_TAG}"

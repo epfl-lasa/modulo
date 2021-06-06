@@ -1,26 +1,20 @@
 ARG ROS_VERSION=foxy
+FROM aica-technology/ros2-ws:${ROS_VERSION}
 
-FROM ros2_ws:${ROS_VERSION}
-
-RUN sudo curl http://repo.ros2.org/repos.key | sudo apt-key add -
-
-# import control library packages
+# install control library packages
 RUN git clone -b develop --depth 1 https://github.com/epfl-lasa/control_libraries.git
 WORKDIR ${HOME}/control_libraries/source
 RUN sudo ./install.sh -y
 
-# build ROS workspace
+# copy sources and build ROS workspace with user permissions
 WORKDIR ${HOME}/ros2_ws/
 COPY --chown=${USER} ./source/packages/ ./src/
-RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"
+RUN su ${USER} -c /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"
 
-# change to the home root
 WORKDIR ${HOME}
 
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/openrobots/lib/
+RUN sudo ldconfig
 
 # Clean image
 RUN sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
-
-ENTRYPOINT ["/ros_entrypoint.sh"]
-CMD ["bash"]
