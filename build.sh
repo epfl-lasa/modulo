@@ -1,5 +1,5 @@
 #!/bin/bash
-ROS_VERSION=foxy
+ROS_VERSION=galactic
 
 IMAGE_NAME=aica-technology/modulo
 IMAGE_TAG=latest
