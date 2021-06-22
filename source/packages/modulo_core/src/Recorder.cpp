@@ -31,7 +31,7 @@ void Recorder::step() {
   for (auto& h : this->get_handlers()) {
     if (h.second.first->get_type() == communication::CommunicationType::SUBSCRIPTION) {
       const communication::MessagePassingHandler& subscription = static_cast<const communication::MessagePassingHandler&>(*h.second.first);
-      if (!this->record(subscription.get_recipient())) RCLCPP_ERROR(this->get_logger(), "Unable to record " + subscription.get_recipient().get_name());
+      if (!this->record(subscription.get_recipient())) RCLCPP_ERROR(this->get_logger(), "Unable to record %s", subscription.get_recipient().get_name().c_str());
     }
   }
 }
@@ -45,18 +45,18 @@ bool Recorder::record(const state_representation::State& state) const {
       return record(static_cast<const state_representation::JointState&>(state));
 
     default:
-      RCLCPP_ERROR(this->get_logger(), "Recording function for " + state.get_name() + " not defined for this type of state");
+      RCLCPP_ERROR(this->get_logger(), "Recording function for %s not defined for this type of state", state.get_name().c_str());
       return false;
   }
 }
 
 bool Recorder::record(const state_representation::CartesianState& state) const {
-  RCLCPP_WARN(this->get_logger(), "Trying to record " + state.get_name() + " from the base class");
+  RCLCPP_WARN(this->get_logger(), "Trying to record %s from the base class", state.get_name().c_str());
   return false;
 }
 
 bool Recorder::record(const state_representation::JointState& state) const {
-  RCLCPP_WARN(this->get_logger(), "Trying to record " + state.get_name() + " from the base class");
+  RCLCPP_WARN(this->get_logger(), "Trying to record %s from the base class", state.get_name().c_str());
   return false;
 }
 }// namespace modulo::core
