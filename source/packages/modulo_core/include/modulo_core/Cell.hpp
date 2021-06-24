@@ -145,11 +145,14 @@ public:
    * @param channel unique name of the publish channel that is used as key to the map
    * @param recipient the state that contain the data to be published
    * @param period the period to wait between two publishing
+   * @param always_active if true, always publish the message as soon as the node is configured
+   * @param queue_size publisher parameters indicating the maximum size of the buffer
    */
   template <typename MsgT, class RecT, typename DurationT>
   void add_publisher(const std::string& channel,
                      const std::shared_ptr<RecT>& recipient,
                      const std::chrono::duration<int64_t, DurationT>& period,
+                     bool always_active = false,
                      int queue_size = 10);
 
   /**
@@ -158,10 +161,13 @@ public:
    * @tparam RecT template value for accepting any type of recipient
    * @param channel unique name of the publish channel that is used as key to the map
    * @param recipient the state that contain the data to be published
+   * @param always_active if true, always publish the message as soon as the node is configured
+   * @param queue_size publisher parameters indicating the maximum size of the buffer
    */
   template <typename MsgT, class RecT>
   void add_publisher(const std::string& channel,
                      const std::shared_ptr<RecT>& recipient,
+                     bool always_active = false,
                      int queue_size = 10);
 
   /**
@@ -172,22 +178,28 @@ public:
    * @param channel unique name of the subscription channel that is used as key to the map
    * @param recipient the state that will contain the received data
    * @param timeout the period after wich to consider that the subscriber has timeout
+   * @param always_active if true, always receive messages from the topic as soon as the node is configured
+   * @param queue_size subscriber parameters indicating the maximum size of the buffer
    */
   template <typename MsgT, class RecT, typename DurationT>
   void add_subscription(const std::string& channel,
                         const std::shared_ptr<RecT>& recipient,
                         const std::chrono::duration<int64_t, DurationT>& timeout,
+                        bool always_active = false,
                         int queue_size = 10);
 
   /**
    * @brief Template function to add a generic subscription to the map of handlers
    * @param channel unique name of the subscription channel that is used as key to the map
    * @param recipient the state that will contain the received data
-   * @param nb_period_to_timeout the number of period before considering that the subscription has timeout 
+   * @param always_active if true, always receive messages from the topic as soon as the node is configured
+   * @param nb_period_to_timeout the number of period before considering that the subscription has timeout
+   * @param queue_size subscriber parameters indicating the maximum size of the buffer
    */
   template <typename MsgT, class RecT>
   void add_subscription(const std::string& channel,
                         const std::shared_ptr<RecT>& recipient,
+                        bool always_active = false,
                         unsigned int nb_period_to_timeout = 10,
                         int queue_size = 10);
 
@@ -506,37 +518,40 @@ template <typename MsgT, class RecT, typename DurationT>
 void Cell::add_publisher(const std::string& channel,
                          const std::shared_ptr<RecT>& recipient,
                          const std::chrono::duration<int64_t, DurationT>& period,
+                         bool always_active,
                          int queue_size) {
   auto handler = std::make_shared<communication::PublisherHandler<RecT, MsgT>>(recipient, this->get_clock(), this->mutex_);
   handler->set_publisher(this->create_publisher<MsgT>(channel, queue_size));
   handler->set_timer(this->create_wall_timer(period, std::bind(&communication::PublisherHandler<RecT, MsgT>::publish_callback, handler)));
-  this->handlers_.insert(std::make_pair(channel, std::make_pair(handler, false)));
+  this->handlers_.insert(std::make_pair(channel, std::make_pair(handler, always_active)));
 }
 
 template <typename MsgT, class RecT>
 void Cell::add_publisher(const std::string& channel,
                          const std::shared_ptr<RecT>& recipient,
+                         bool always_active,
                          int queue_size) {
-  this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, queue_size);
+  this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, always_active, queue_size);
 }
 
 template <typename MsgT, class RecT, typename DurationT>
 void Cell::add_subscription(const std::string& channel,
                             const std::shared_ptr<RecT>& recipient,
-                            const std::chrono::duration<int64_t,
-                                                        DurationT>& timeout,
+                            const std::chrono::duration<int64_t, DurationT>& timeout,
+                            bool always_active,
                             int queue_size) {
   auto handler = std::make_shared<communication::SubscriptionHandler<RecT, MsgT>>(recipient, timeout, this->mutex_);
   handler->set_subscription(this->create_subscription<MsgT>(channel, queue_size, std::bind(&communication::SubscriptionHandler<RecT, MsgT>::subscription_callback, handler, std::placeholders::_1)));
-  this->handlers_.insert(std::make_pair(channel, std::make_pair(handler, false)));
+  this->handlers_.insert(std::make_pair(channel, std::make_pair(handler, always_active)));
 }
 
 template <typename MsgT, class RecT>
 void Cell::add_subscription(const std::string& channel,
                             const std::shared_ptr<RecT>& recipient,
+                            bool always_active,
                             unsigned int nb_period_to_timeout,
                             int queue_size) {
-  this->add_subscription<MsgT, RecT>(channel, recipient, nb_period_to_timeout * this->period_, queue_size);
+  this->add_subscription<MsgT, RecT>(channel, recipient, nb_period_to_timeout * this->period_, always_active, queue_size);
 }
 
 template <typename DurationT>
