@@ -178,8 +178,8 @@ public:
    * @param channel unique name of the subscription channel that is used as key to the map
    * @param recipient the state that will contain the received data
    * @param timeout the period after wich to consider that the subscriber has timeout
-   * @param always_active if true, always publish the message as soon as the node is configured
-   * @param queue_size publisher parameters indicating the maximum size of the buffer
+   * @param always_active if true, always receive messages from the topic as soon as the node is configured
+   * @param queue_size subscriber parameters indicating the maximum size of the buffer
    */
   template <typename MsgT, class RecT, typename DurationT>
   void add_subscription(const std::string& channel,
@@ -194,7 +194,7 @@ public:
    * @param recipient the state that will contain the received data
    * @param always_active if true, always receive messages from the topic as soon as the node is configured
    * @param nb_period_to_timeout the number of period before considering that the subscription has timeout
-   * @param queue_size publisher parameters indicating the maximum size of the buffer
+   * @param queue_size subscriber parameters indicating the maximum size of the buffer
    */
   template <typename MsgT, class RecT>
   void add_subscription(const std::string& channel,
