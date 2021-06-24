@@ -327,7 +327,6 @@ const state_representation::CartesianPose Cell::lookup_transform(const std::stri
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_configure(const rclcpp_lifecycle::State&) {
   RCUTILS_LOG_INFO_NAMED(get_name(), "on_configure() is called.");
-  this->active_ = false;
   this->configured_ = true;
   // call the proxy on_configure function
   if (!this->on_configure()) {
