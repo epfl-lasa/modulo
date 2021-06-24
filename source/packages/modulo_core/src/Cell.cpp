@@ -327,15 +327,13 @@ const state_representation::CartesianPose Cell::lookup_transform(const std::stri
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_configure(const rclcpp_lifecycle::State&) {
   RCUTILS_LOG_INFO_NAMED(get_name(), "on_configure() is called.");
+  this->configured_ = true;
   // call the proxy on_configure function
   if (!this->on_configure()) {
     RCLCPP_ERROR(get_logger(), "Configuration failed");
     this->reset();
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
-  // start the parameters
-  this->active_ = false;
-  this->configured_ = true;
   // add the run thread
   std::function<void(void)> run_fnc = std::bind(&Cell::run, this);
   this->run_thread_ = std::thread(run_fnc);
