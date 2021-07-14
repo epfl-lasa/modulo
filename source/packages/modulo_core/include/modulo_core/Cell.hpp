@@ -475,7 +475,7 @@ Cell::Cell(const std::string& node_name, const std::chrono::duration<int64_t, Du
                                                                                                                               mutex_(std::make_shared<std::mutex>()),
                                                                                                                               period_(period) {
   // add the update parameters call
-  auto update_parameters_fnc = std::bind(&Cell::update_parameters, this);
+  std::function<void(void)> update_parameters_fnc = std::bind(&Cell::update_parameters, this);
   this->update_parameters_timer_ = this->create_wall_timer(this->period_, update_parameters_fnc);
 }
 
