@@ -107,6 +107,13 @@ public:
   explicit Cell(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms = false);
 
   /**
+   * @brief Cell construction from ROS2 NodeOptions
+   * @param options NodeOptions containing a node name in the remapping arguments list and a "period" parameter
+   * with a value in seconds in the parameter override list
+   */
+  explicit Cell(const rclcpp::NodeOptions& options);
+
+  /**
    * @brief Destructor
    */
   ~Cell();

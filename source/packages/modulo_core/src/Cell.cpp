@@ -1,9 +1,15 @@
 #include "modulo_core/Cell.hpp"
+#include "modulo_core/Utilities/utilities.hpp"
 #include "modulo_core/Exceptions/UnconfiguredNodeException.hpp"
-#include <state_representation/exceptions/IncompatibleSizeException.hpp>
 #include <state_representation/exceptions/UnrecognizedParameterTypeException.hpp>
 
+
 namespace modulo::core {
+
+Cell::Cell(const rclcpp::NodeOptions& options) : Cell(utilities::parse_node_name(options, "Cell"),
+                                                      utilities::parse_period(options),
+                                                      options.use_intra_process_comms()) {}
+
 Cell::~Cell() {
   this->parameters_.clear();
   this->on_shutdown();
