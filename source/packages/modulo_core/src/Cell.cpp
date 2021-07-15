@@ -6,9 +6,15 @@
 
 namespace modulo::core {
 
-Cell::Cell(const rclcpp::NodeOptions& options) : Cell(utilities::parse_node_name(options, "Cell"),
-                                                      utilities::parse_period(options),
-                                                      options.use_intra_process_comms()) {}
+Cell::Cell(const rclcpp::NodeOptions& options) :
+    rclcpp_lifecycle::LifecycleNode(utilities::parse_node_name(options, "Cell"), options),
+    configured_(false),
+    active_(false),
+    shutdown_(false),
+    period_(utilities::parse_period(options)) {
+  // add the update parameters call
+  this->update_parameters_timer_ = this->create_wall_timer(this->period_, [this] { this->update_parameters(); });
+}
 
 Cell::~Cell() {
   this->parameters_.clear();
