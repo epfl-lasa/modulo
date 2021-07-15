@@ -15,18 +15,15 @@ public:
    * @brief Constructor for and asychronous TransformBroadcaster handler
    * @param  recipient the associated recipient to publish
    * @param  clock     reference to the Cell clock
-   * @param  mutex     reference to the Cell mutex
    */
   explicit TransformBroadcasterHandler(const std::shared_ptr<state_representation::CartesianState>& recipient,
-                                       const std::shared_ptr<rclcpp::Clock>& clock,
-                                       const std::shared_ptr<std::mutex>& mutex);
+                                       const std::shared_ptr<rclcpp::Clock>& clock);
 
   /**
    * @brief Constructor for TransformBroadcaster handler without an associated recipient
    * @param  clock     reference to the Cell clock
-   * @param  mutex     reference to the Cell mutex
    */
-  explicit TransformBroadcasterHandler(const std::shared_ptr<rclcpp::Clock>& clock, const std::shared_ptr<std::mutex>& mutex);
+  explicit TransformBroadcasterHandler(const std::shared_ptr<rclcpp::Clock>& clock);
 
   /**
    * @brief Function to send a transform over the network

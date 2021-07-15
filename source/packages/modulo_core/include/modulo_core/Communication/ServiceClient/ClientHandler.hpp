@@ -19,11 +19,9 @@ public:
   /**
    * @brief Constructor of a ClientHandler
    * @param timeout period before timeout
-   * @param mutex reference to the Cell mutex
    */
   template <typename DurationT>
-  explicit ClientHandler(const std::chrono::duration<int64_t, DurationT>& timeout,
-                         const std::shared_ptr<std::mutex>& mutex);
+  explicit ClientHandler(const std::chrono::duration<int64_t, DurationT>& timeout);
 
   /**
    * @brief Setter of the publisher reference
@@ -43,26 +41,24 @@ public:
                                             const std::chrono::duration<int64_t, DurationT>& time_to_wait);
 
   /**
- * @brief Send a request to the server asymchronously withtout waiting for the answer
- * @param request the request
- * @return the response as a future pointer
- */
+   * @brief Send a request to the server asymchronously withtout waiting for the answer
+   * @param request the request
+   * @return the response as a future pointer
+   */
   std::shared_future<std::shared_ptr<typename SrvT::Response>> send_request(const std::shared_ptr<typename SrvT::Request>& request) const;
 
   /**
- * @brief Send a request to the server asymchronously and wait for the answer
- * @param request the request
- * @return the response as a shared pointer
- */
+   * @brief Send a request to the server asymchronously and wait for the answer
+   * @param request the request
+   * @return the response as a shared pointer
+   */
   std::shared_ptr<typename SrvT::Response> send_blocking_request(const std::shared_ptr<typename SrvT::Request>& request) const;
 };
 
 template <typename SrvT>
 template <typename DurationT>
-ClientHandler<SrvT>::ClientHandler(const std::chrono::duration<int64_t, DurationT>& timeout,
-                                   const std::shared_ptr<std::mutex>& mutex) : CommunicationHandler(CommunicationType::CLIENT,
-                                                                                                    timeout,
-                                                                                                    mutex) {}
+ClientHandler<SrvT>::ClientHandler(const std::chrono::duration<int64_t, DurationT>& timeout) : CommunicationHandler(CommunicationType::CLIENT,
+                                                                                                                    timeout) {}
 
 template <typename SrvT>
 inline void ClientHandler<SrvT>::set_client(const std::shared_ptr<rclcpp::Client<SrvT>>& client) {

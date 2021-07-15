@@ -20,12 +20,10 @@ public:
    * @brief Constructor of a SubscriptionHandler
    * @param  recipient the recipient associated to the subscription
    * @param  timeout   the period before timeout
-   * @param  mutex     reference to the Cell mutex
    */
   template <typename DurationT>
   explicit SubscriptionHandler(const std::shared_ptr<state_representation::State>& recipient,
-                               const std::chrono::duration<int64_t, DurationT>& timeout,
-                               const std::shared_ptr<std::mutex>& mutex);
+                               const std::chrono::duration<int64_t, DurationT>& timeout);
 
   /**
    * @brief Callback function to receive the message from the network
@@ -58,15 +56,12 @@ public:
 template <class RecT, typename MsgT>
 template <typename DurationT>
 SubscriptionHandler<RecT, MsgT>::SubscriptionHandler(const std::shared_ptr<state_representation::State>& recipient,
-                                                     const std::chrono::duration<int64_t, DurationT>& timeout,
-                                                     const std::shared_ptr<std::mutex>& mutex) : MessagePassingHandler(CommunicationType::SUBSCRIPTION,
-                                                                                                                       recipient,
-                                                                                                                       timeout,
-                                                                                                                       mutex) {}
+                                                     const std::chrono::duration<int64_t, DurationT>& timeout) : MessagePassingHandler(CommunicationType::SUBSCRIPTION,
+                                                                                                                                       recipient,
+                                                                                                                                       timeout) {}
 
 template <class RecT, typename MsgT>
 void SubscriptionHandler<RecT, MsgT>::subscription_callback(const std::shared_ptr<MsgT> msg) {
-  std::lock_guard<std::mutex> guard(this->get_mutex());
   state_conversion::read_msg(static_cast<RecT&>(this->get_recipient()), *msg);
 }
 

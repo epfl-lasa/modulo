@@ -22,33 +22,27 @@ public:
   /**
    * @brief Constructor for a MessagePassingHandler without timeout nor recipient
    * @param  type      the type of MessagePassingHandler from the CommunicationType enumeration
-   * @param  mutex     reference to the Cell mutex
    */
-  explicit MessagePassingHandler(const CommunicationType& type,
-                                 const std::shared_ptr<std::mutex>& mutex);
+  explicit MessagePassingHandler(const CommunicationType& type);
 
   /**
    * @brief Constructor for a MessagePassingHandler without timeout
    * @param  type      the type of MessagePassingHandler from the CommunicationType enumeration
    * @param  recipient recipient associated to the handler
-   * @param  mutex     reference to the Cell mutex
    */
   explicit MessagePassingHandler(const CommunicationType& type,
-                                 const std::shared_ptr<state_representation::State>& recipient,
-                                 const std::shared_ptr<std::mutex>& mutex);
+                                 const std::shared_ptr<state_representation::State>& recipient);
 
   /**
    * @brief Constructor for a MessagePassingHandler
    * @param  type      the type of CommunicationHandler from the CommunicationType enumeration
    * @param  recipient recipient associated to the handler
    * @param  timeout   period before considered time out
-   * @param  mutex     reference to the Cell mutex
    */
   template <typename DurationT>
   explicit MessagePassingHandler(const CommunicationType& type,
                                  const std::shared_ptr<state_representation::State>& recipient,
-                                 const std::chrono::duration<int64_t, DurationT>& timeout,
-                                 const std::shared_ptr<std::mutex>& mutex);
+                                 const std::chrono::duration<int64_t, DurationT>& timeout);
 
   /**
    * @brief Getter of the recipient
@@ -72,10 +66,9 @@ public:
 template <typename DurationT>
 MessagePassingHandler::MessagePassingHandler(const CommunicationType& type,
                                              const std::shared_ptr<state_representation::State>& recipient,
-                                             const std::chrono::duration<int64_t, DurationT>& timeout,
-                                             const std::shared_ptr<std::mutex>& mutex) : CommunicationHandler(type, timeout, mutex),
-                                                                                         recipient_(recipient),
-                                                                                         asynchronous_(true) {}
+                                             const std::chrono::duration<int64_t, DurationT>& timeout) : CommunicationHandler(type, timeout),
+                                                                                                         recipient_(recipient),
+                                                                                                         asynchronous_(true) {}
 
 inline const state_representation::State& MessagePassingHandler::get_recipient() const {
   return *this->recipient_;

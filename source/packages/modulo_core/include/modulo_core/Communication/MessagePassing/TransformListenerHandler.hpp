@@ -5,7 +5,6 @@
 
 #include "modulo_core/Communication/MessagePassing/MessagePassingHandler.hpp"
 
-
 namespace modulo::core::communication {
 /**
  * @class TransformListenerHandler
@@ -18,35 +17,31 @@ private:
 
 public:
   /**
- * @brief Constructor for an asychronous TransformListener
- * @param  recipient the associated recipient to store received transforms
- * @param  timeout   period before timeout
- * @param  clock     reference to the Cell clock
- * @param  mutex     reference to the Cell mutex
- */
+   * @brief Constructor for an asychronous TransformListener
+   * @param  recipient the associated recipient to store received transforms
+   * @param  timeout   period before timeout
+   * @param  clock     reference to the Cell clock
+   */
   template <typename DurationT>
   explicit TransformListenerHandler(const std::shared_ptr<state_representation::CartesianPose>& recipient,
                                     const std::chrono::duration<int64_t, DurationT>& timeout,
-                                    const std::shared_ptr<rclcpp::Clock>& clock,
-                                    const std::shared_ptr<std::mutex>& mutex);
+                                    const std::shared_ptr<rclcpp::Clock>& clock);
 
   /**
- * @brief Constructor for a TransformListener without a recipient
- * @param  timeout   period before timeout
- * @param  clock     reference to the Cell clock
- * @param  mutex     reference to the Cell mutex
- */
+   * @brief Constructor for a TransformListener without a recipient
+   * @param  timeout   period before timeout
+   * @param  clock     reference to the Cell clock
+   */
   template <typename DurationT>
   explicit TransformListenerHandler(const std::chrono::duration<int64_t, DurationT>& timeout,
-                                    const std::shared_ptr<rclcpp::Clock>& clock,
-                                    const std::shared_ptr<std::mutex>& mutex);
+                                    const std::shared_ptr<rclcpp::Clock>& clock);
 
   /**
- * @brief Function to look up a transform over the network
- * @param  frame_name      name of the frame associated to the transform
- * @param  reference_frame name of its desired reference frame
- * @return                 the transform as a CartesianPose
- */
+   * @brief Function to look up a transform over the network
+   * @param  frame_name      name of the frame associated to the transform
+   * @param  reference_frame name of its desired reference frame
+   * @return                 the transform as a CartesianPose
+   */
   const state_representation::CartesianPose lookup_transform(const std::string& frame_name,
                                                              const std::string& reference_frame) const;
 };
@@ -54,23 +49,19 @@ public:
 template <typename DurationT>
 TransformListenerHandler::TransformListenerHandler(const std::shared_ptr<state_representation::CartesianPose>& recipient,
                                                    const std::chrono::duration<int64_t, DurationT>& timeout,
-                                                   const std::shared_ptr<rclcpp::Clock>& clock,
-                                                   const std::shared_ptr<std::mutex>& mutex) : MessagePassingHandler(CommunicationType::TRANSFORMLISTENER,
-                                                                                                                     recipient,
-                                                                                                                     timeout,
-                                                                                                                     mutex),
-                                                                                               buffer_(clock) {
+                                                   const std::shared_ptr<rclcpp::Clock>& clock) : MessagePassingHandler(CommunicationType::TRANSFORMLISTENER,
+                                                                                                                        recipient,
+                                                                                                                        timeout),
+                                                                                                  buffer_(clock) {
   this->tf_listener_ = std::make_unique<tf2_ros::TransformListener>(buffer_);
 }
 
 template <typename DurationT>
 TransformListenerHandler::TransformListenerHandler(const std::chrono::duration<int64_t, DurationT>& timeout,
-                                                   const std::shared_ptr<rclcpp::Clock>& clock,
-                                                   const std::shared_ptr<std::mutex>& mutex) : MessagePassingHandler(CommunicationType::TRANSFORMLISTENER,
-                                                                                                                     std::make_shared<state_representation::CartesianPose>(),
-                                                                                                                     timeout,
-                                                                                                                     mutex),
-                                                                                               buffer_(clock) {
+                                                   const std::shared_ptr<rclcpp::Clock>& clock) : MessagePassingHandler(CommunicationType::TRANSFORMLISTENER,
+                                                                                                                        std::make_shared<state_representation::CartesianPose>(),
+                                                                                                                        timeout),
+                                                                                                  buffer_(clock) {
   this->tf_listener_ = std::make_unique<tf2_ros::TransformListener>(buffer_);
 }
 }// namespace modulo::core::communication

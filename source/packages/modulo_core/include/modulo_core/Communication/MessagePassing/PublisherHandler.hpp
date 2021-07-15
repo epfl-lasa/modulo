@@ -33,19 +33,15 @@ public:
    * @brief Constructor of a PublisherHandler
    * @param  recipient the recipent associated to the publisher
    * @param  clock     reference to the Cell clock
-   * @param  mutex     reference to the Cell mutex
    */
   explicit PublisherHandler(const std::shared_ptr<state_representation::State>& recipient,
-                            const std::shared_ptr<rclcpp::Clock>& clock,
-                            const std::shared_ptr<std::mutex>& mutex);
+                            const std::shared_ptr<rclcpp::Clock>& clock);
 
   /**
    * @brief Constructor of a PublisherHandler without a recipient for one-shot publishing
    * @param  clock     reference to the Cell clock
-   * @param  mutex     reference to the Cell mutex
    */
-  explicit PublisherHandler(const std::shared_ptr<rclcpp::Clock>& clock,
-                            const std::shared_ptr<std::mutex>& mutex);
+  explicit PublisherHandler(const std::shared_ptr<rclcpp::Clock>& clock);
 
   /**
    * @brief Function to publish periodically 
@@ -89,19 +85,15 @@ public:
 
 template <class RecT, typename MsgT>
 PublisherHandler<RecT, MsgT>::PublisherHandler(const std::shared_ptr<state_representation::State>& recipient,
-                                               const std::shared_ptr<rclcpp::Clock>& clock,
-                                               const std::shared_ptr<std::mutex>& mutex) : MessagePassingHandler(CommunicationType::PUBLISHER,
-                                                                                                                 recipient,
-                                                                                                                 mutex),
-                                                                                           clock_(clock),
-                                                                                           activated_(false) {}
+                                               const std::shared_ptr<rclcpp::Clock>& clock) : MessagePassingHandler(CommunicationType::PUBLISHER,
+                                                                                                                    recipient),
+                                                                                              clock_(clock),
+                                                                                              activated_(false) {}
 
 template <class RecT, typename MsgT>
-PublisherHandler<RecT, MsgT>::PublisherHandler(const std::shared_ptr<rclcpp::Clock>& clock,
-                                               const std::shared_ptr<std::mutex>& mutex) : MessagePassingHandler(CommunicationType::PUBLISHER,
-                                                                                                                 mutex),
-                                                                                           clock_(clock),
-                                                                                           activated_(false) {}
+PublisherHandler<RecT, MsgT>::PublisherHandler(const std::shared_ptr<rclcpp::Clock>& clock) : MessagePassingHandler(CommunicationType::PUBLISHER),
+                                                                                              clock_(clock),
+                                                                                              activated_(false) {}
 
 template <class RecT, typename MsgT>
 void PublisherHandler<RecT, MsgT>::publish(const RecT& recipient) {
@@ -112,7 +104,6 @@ void PublisherHandler<RecT, MsgT>::publish(const RecT& recipient) {
 
 template <class RecT, typename MsgT>
 void PublisherHandler<RecT, MsgT>::publish_callback() {
-  std::lock_guard<std::mutex> guard(this->get_mutex());
   if (this->is_asynchronous() && this->activated_ && !this->get_recipient().is_empty()) {
     this->publish(static_cast<RecT&>(this->get_recipient()));
   }

@@ -42,7 +42,6 @@ private:
   bool shutdown_;                                                                                        ///< boolean that informs that the node has been shutdown, i.e passed by the on_shutdown state
   std::shared_ptr<rclcpp::TimerBase> update_parameters_timer_;                                           ///< reference to the timer for periodically that periodicall update the parameters
   std::list<std::shared_ptr<rclcpp::TimerBase>> timers_;                                                 ///< reference to timers for periodically called functions
-  std::shared_ptr<std::mutex> mutex_;                                                                    ///< a mutex to use when modifying messages between functions
   std::chrono::nanoseconds period_;                                                                      ///< rate of the publisher functions in nanoseconds
   std::map<std::string, std::shared_ptr<state_representation::ParameterInterface>> parameters_;          ///< list for storing parameters
   std::map<std::string, std::pair<std::shared_ptr<communication::CommunicationHandler>, bool>> handlers_;///< map for storing publishers, subscriptions and tf
@@ -82,12 +81,6 @@ protected:
    * @return Reference to the handlers attribute
    */
   const std::map<std::string, std::pair<std::shared_ptr<communication::CommunicationHandler>, bool>>& get_handlers() const;
-
-  /**
-   * @brief Getter of the mutex attribute
-   * @return Reference to the mutex attribute
-   */
-  std::mutex& get_mutex();
 
   /**
    * @brief Get the pointer to the desired parameter
@@ -472,7 +465,6 @@ Cell::Cell(const std::string& node_name, const std::chrono::duration<int64_t, Du
                                                                                                                               configured_(false),
                                                                                                                               active_(false),
                                                                                                                               shutdown_(false),
-                                                                                                                              mutex_(std::make_shared<std::mutex>()),
                                                                                                                               period_(period) {
   // add the update parameters call
   this->update_parameters_timer_ = this->create_wall_timer(this->period_, [this] { this->update_parameters(); });
@@ -494,10 +486,6 @@ inline bool Cell::is_shutdown() const {
   return this->shutdown_;
 }
 
-inline std::mutex& Cell::get_mutex() {
-  return (*this->mutex_);
-}
-
 inline const std::chrono::nanoseconds& Cell::get_period() const {
   return this->period_;
 }
@@ -517,7 +505,7 @@ void Cell::add_publisher(const std::string& channel,
                          const std::chrono::duration<int64_t, DurationT>& period,
                          bool always_active,
                          int queue_size) {
-  auto handler = std::make_shared<communication::PublisherHandler<RecT, MsgT>>(recipient, this->get_clock(), this->mutex_);
+  auto handler = std::make_shared<communication::PublisherHandler<RecT, MsgT>>(recipient, this->get_clock());
   handler->set_publisher(this->create_publisher<MsgT>(channel, queue_size));
   handler->set_timer(this->create_wall_timer(period, [handler] { handler->publish_callback(); }));
   this->handlers_.insert(std::make_pair(channel, std::make_pair(handler, always_active)));
@@ -537,7 +525,7 @@ void Cell::add_subscription(const std::string& channel,
                             const std::chrono::duration<int64_t, DurationT>& timeout,
                             bool always_active,
                             int queue_size) {
-  auto handler = std::make_shared<communication::SubscriptionHandler<RecT, MsgT>>(recipient, timeout, this->mutex_);
+  auto handler = std::make_shared<communication::SubscriptionHandler<RecT, MsgT>>(recipient, timeout);
   handler->set_subscription(this->create_subscription<MsgT>(channel, queue_size, [handler](const std::shared_ptr<MsgT> msg) { handler->subscription_callback(msg); }));
   this->handlers_.insert(std::make_pair(channel, std::make_pair(handler, always_active)));
 }
@@ -555,7 +543,7 @@ template <typename DurationT>
 void Cell::add_transform_broadcaster(const std::chrono::duration<int64_t, DurationT>& period,
                                      bool always_active,
                                      int queue_size) {
-  auto handler = std::make_shared<communication::TransformBroadcasterHandler>(this->get_clock(), this->mutex_);
+  auto handler = std::make_shared<communication::TransformBroadcasterHandler>(this->get_clock());
   handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
   handler->set_timer(this->create_wall_timer(period, [handler] { handler->publish_callback(); }));
   this->handlers_.insert(std::make_pair("tf_broadcaster", std::make_pair(handler, always_active)));
@@ -566,7 +554,7 @@ void Cell::add_transform_broadcaster(const std::shared_ptr<state_representation:
                                      const std::chrono::duration<int64_t, DurationT>& period,
                                      bool always_active,
                                      int queue_size) {
-  auto handler = std::make_shared<communication::TransformBroadcasterHandler>(recipient, this->get_clock(), this->mutex_);
+  auto handler = std::make_shared<communication::TransformBroadcasterHandler>(recipient, this->get_clock());
   handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
   handler->set_timer(this->create_wall_timer(period, [handler] { handler->publish_callback(); }));
   this->handlers_.insert(std::make_pair(recipient->get_name() + "_in_" + recipient->get_reference_frame() + "_broadcaster", std::make_pair(handler, always_active)));
@@ -588,7 +576,7 @@ void Cell::add_transform_broadcaster(const std::shared_ptr<state_representation:
   using namespace communication;
   using namespace state_representation;
   auto parameter = std::static_pointer_cast<Parameter<CartesianPose>>(recipient);
-  auto handler = std::make_shared<PublisherHandler<Parameter<CartesianPose>, tf2_msgs::msg::TFMessage>>(parameter, this->get_clock(), this->mutex_);
+  auto handler = std::make_shared<PublisherHandler<Parameter<CartesianPose>, tf2_msgs::msg::TFMessage>>(parameter, this->get_clock());
   handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
   handler->set_timer(this->create_wall_timer(period, [handler] { handler->publish_callback(); }));
   this->handlers_.insert(std::make_pair(parameter->get_value().get_name() + "_in_" + parameter->get_value().get_reference_frame() + "_broadcaster", std::make_pair(handler, always_active)));
@@ -596,13 +584,13 @@ void Cell::add_transform_broadcaster(const std::shared_ptr<state_representation:
 
 template <typename DurationT>
 void Cell::add_transform_listener(const std::chrono::duration<int64_t, DurationT>& timeout) {
-  auto handler = std::make_shared<communication::TransformListenerHandler>(timeout, this->get_clock(), this->mutex_);
+  auto handler = std::make_shared<communication::TransformListenerHandler>(timeout, this->get_clock());
   this->handlers_.insert(std::make_pair("tf_listener", std::make_pair(handler, false)));
 }
 
 template <typename srvT, typename DurationT>
 void Cell::add_client(const std::string& channel, const std::chrono::duration<int64_t, DurationT>& timeout) {
-  auto handler = std::make_shared<communication::ClientHandler<srvT>>(timeout, this->mutex_);
+  auto handler = std::make_shared<communication::ClientHandler<srvT>>(timeout);
   handler->set_client(this->create_client<srvT>(channel));
   this->handlers_.insert(std::make_pair(channel, std::make_pair(handler, false)));
 }
