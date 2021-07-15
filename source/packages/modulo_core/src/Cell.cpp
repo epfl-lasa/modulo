@@ -1,9 +1,21 @@
 #include "modulo_core/Cell.hpp"
+#include "modulo_core/Utilities/utilities.hpp"
 #include "modulo_core/Exceptions/UnconfiguredNodeException.hpp"
-#include <state_representation/exceptions/IncompatibleSizeException.hpp>
 #include <state_representation/exceptions/UnrecognizedParameterTypeException.hpp>
 
+
 namespace modulo::core {
+
+Cell::Cell(const rclcpp::NodeOptions& options) :
+    rclcpp_lifecycle::LifecycleNode(utilities::parse_node_name(options, "Cell"), options),
+    configured_(false),
+    active_(false),
+    shutdown_(false),
+    period_(utilities::parse_period(options)) {
+  // add the update parameters call
+  this->update_parameters_timer_ = this->create_wall_timer(this->period_, [this] { this->update_parameters(); });
+}
+
 Cell::~Cell() {
   this->parameters_.clear();
   this->on_shutdown();
