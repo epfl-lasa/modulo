@@ -331,8 +331,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
   // add the run periodic call
-  std::function<void(void)> run_fnc = std::bind(&Cell::run, this);
-  this->timers_.push_back(this->create_wall_timer(this->period_, run_fnc));
+  this->timers_.push_back(this->create_wall_timer(this->period_, [this] { this->run(); }));
   // add default transform broadcaster and transform listener
   this->add_transform_broadcaster(this->period_, true);
   this->add_transform_listener(10 * this->period_);
@@ -445,8 +444,7 @@ void Cell::run_periodic_call(const std::function<void(void)>& callback_function)
 }
 
 void Cell::add_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::nanoseconds& period) {
-  std::function<void(void)> run_fnc = std::bind(&Cell::run_periodic_call, this, callback_function);
-  this->timers_.push_back(this->create_wall_timer(period, run_fnc));
+  this->timers_.push_back(this->create_wall_timer(period, [this, callback_function] { this->run_periodic_call(callback_function); }));
 }
 
 void Cell::update_parameters() {
