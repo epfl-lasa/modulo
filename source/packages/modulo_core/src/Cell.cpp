@@ -13,11 +13,7 @@ void Cell::reset() {
   this->active_ = false;
   this->configured_ = false;
   this->handlers_.clear();
-  for (auto& t : this->active_threads_) {
-    t.join();
-  }
-  this->active_threads_.clear();
-  this->run_thread_.join();
+  this->timers_.clear();
 }
 
 template <typename T>
@@ -334,9 +330,8 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::
     this->reset();
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
-  // add the run thread
-  std::function<void(void)> run_fnc = std::bind(&Cell::run, this);
-  this->run_thread_ = std::thread(run_fnc);
+  // add the run periodic call
+  this->timers_.push_back(this->create_wall_timer(this->period_, [this] { this->run(); }));
   // add default transform broadcaster and transform listener
   this->add_transform_broadcaster(this->period_, true);
   this->add_transform_listener(10 * this->period_);
@@ -428,190 +423,162 @@ bool Cell::on_shutdown() {
 }
 
 void Cell::run() {
-  while (this->configured_) {
-    auto start = std::chrono::steady_clock::now();
-    std::unique_lock<std::mutex> lck(*this->mutex_);
-    for (auto& h : this->handlers_) {
-      h.second.first->check_timeout();
-    }
-    if (this->active_) {
-      this->step();
-    }
-    lck.unlock();
-    auto end = std::chrono::steady_clock::now();
-    auto elapsed = end - start;
-    auto timeToWait = this->period_ - elapsed;
-    if (timeToWait > std::chrono::nanoseconds::zero()) {
-      std::this_thread::sleep_for(timeToWait);
-    }
+  std::unique_lock<std::mutex> lck(*this->mutex_);
+  for (auto& h : this->handlers_) {
+    h.second.first->check_timeout();
   }
+  if (this->active_) {
+    this->step();
+  }
+  lck.unlock();
 }
 
 void Cell::step() {}
 
-void Cell::run_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::nanoseconds& period) {
-  while (this->configured_) {
-    auto start = std::chrono::steady_clock::now();
-    std::unique_lock<std::mutex> lck(*this->mutex_);
-    if (this->active_) {
-      callback_function();
-    }
-    lck.unlock();
-    auto end = std::chrono::steady_clock::now();
-    auto elapsed = end - start;
-    auto timeToWait = period - elapsed;
-    if (timeToWait > std::chrono::nanoseconds::zero()) {
-      std::this_thread::sleep_for(timeToWait);
-    }
+void Cell::run_periodic_call(const std::function<void(void)>& callback_function) {
+  std::unique_lock<std::mutex> lck(*this->mutex_);
+  if (this->active_) {
+    callback_function();
   }
+  lck.unlock();
 }
 
 void Cell::add_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::nanoseconds& period) {
-  std::function<void(const std::function<void(void)>&, const std::chrono::nanoseconds&)> fnc = std::bind(&Cell::run_periodic_call, this, callback_function, period);
-  this->active_threads_.push_back(std::thread(fnc, callback_function, period));
+  this->timers_.push_back(this->create_wall_timer(period, [this, callback_function] { this->run_periodic_call(callback_function); }));
 }
 
 void Cell::update_parameters() {
   using namespace state_representation;
   using namespace state_representation::exceptions;
-  while (!this->shutdown_) {
-    auto start = std::chrono::steady_clock::now();
-    try {
-      for (auto& [key, param] : this->parameters_) {
-        switch (param->get_type()) {
-          case StateType::PARAMETER_DOUBLE: {
-            std::unique_lock<std::mutex> lck(*this->mutex_);
-            double value = this->get_parameter(param->get_name()).as_double();
-            std::static_pointer_cast<Parameter<double>>(param)->set_value(value);
-            lck.unlock();
-            break;
-          }
+  try {
+    for (auto& [key, param] : this->parameters_) {
+      switch (param->get_type()) {
+        case StateType::PARAMETER_DOUBLE: {
+          std::unique_lock<std::mutex> lck(*this->mutex_);
+          double value = this->get_parameter(param->get_name()).as_double();
+          std::static_pointer_cast<Parameter<double>>(param)->set_value(value);
+          lck.unlock();
+          break;
+        }
 
-          case StateType::PARAMETER_DOUBLE_ARRAY: {
-            std::unique_lock<std::mutex> lck(*this->mutex_);
-            std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-            std::static_pointer_cast<Parameter<std::vector<double>>>(param)->set_value(value);
-            lck.unlock();
-            break;
-          }
+        case StateType::PARAMETER_DOUBLE_ARRAY: {
+          std::unique_lock<std::mutex> lck(*this->mutex_);
+          std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+          std::static_pointer_cast<Parameter<std::vector<double>>>(param)->set_value(value);
+          lck.unlock();
+          break;
+        }
 
-          case StateType::PARAMETER_BOOL: {
-            std::unique_lock<std::mutex> lck(*this->mutex_);
-            bool value = this->get_parameter(param->get_name()).as_bool();
-            std::static_pointer_cast<Parameter<bool>>(param)->set_value(value);
-            lck.unlock();
-            break;
-          }
+        case StateType::PARAMETER_BOOL: {
+          std::unique_lock<std::mutex> lck(*this->mutex_);
+          bool value = this->get_parameter(param->get_name()).as_bool();
+          std::static_pointer_cast<Parameter<bool>>(param)->set_value(value);
+          lck.unlock();
+          break;
+        }
 
-          case StateType::PARAMETER_BOOL_ARRAY: {
-            std::unique_lock<std::mutex> lck(*this->mutex_);
-            std::vector<bool> value = this->get_parameter(param->get_name()).as_bool_array();
-            std::static_pointer_cast<Parameter<std::vector<bool>>>(param)->set_value(value);
-            lck.unlock();
-            break;
-          }
+        case StateType::PARAMETER_BOOL_ARRAY: {
+          std::unique_lock<std::mutex> lck(*this->mutex_);
+          std::vector<bool> value = this->get_parameter(param->get_name()).as_bool_array();
+          std::static_pointer_cast<Parameter<std::vector<bool>>>(param)->set_value(value);
+          lck.unlock();
+          break;
+        }
 
-          case StateType::PARAMETER_STRING: {
-            std::unique_lock<std::mutex> lck(*this->mutex_);
-            std::string value = this->get_parameter(param->get_name()).as_string();
-            std::static_pointer_cast<Parameter<std::string>>(param)->set_value(value);
-            lck.unlock();
-            break;
-          }
+        case StateType::PARAMETER_STRING: {
+          std::unique_lock<std::mutex> lck(*this->mutex_);
+          std::string value = this->get_parameter(param->get_name()).as_string();
+          std::static_pointer_cast<Parameter<std::string>>(param)->set_value(value);
+          lck.unlock();
+          break;
+        }
 
-          case StateType::PARAMETER_STRING_ARRAY: {
-            std::unique_lock<std::mutex> lck(*this->mutex_);
-            std::vector<std::string> value = this->get_parameter(param->get_name()).as_string_array();
-            std::static_pointer_cast<Parameter<std::vector<std::string>>>(param)->set_value(value);
-            lck.unlock();
-            break;
-          }
+        case StateType::PARAMETER_STRING_ARRAY: {
+          std::unique_lock<std::mutex> lck(*this->mutex_);
+          std::vector<std::string> value = this->get_parameter(param->get_name()).as_string_array();
+          std::static_pointer_cast<Parameter<std::vector<std::string>>>(param)->set_value(value);
+          lck.unlock();
+          break;
+        }
 
-          case StateType::PARAMETER_CARTESIANSTATE: {
-            std::unique_lock<std::mutex> lck(*this->mutex_);
-            std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-            std::static_pointer_cast<Parameter<CartesianState>>(param)->get_value().from_std_vector(value);
-            lck.unlock();
-            break;
-          }
+        case StateType::PARAMETER_CARTESIANSTATE: {
+          std::unique_lock<std::mutex> lck(*this->mutex_);
+          std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+          std::static_pointer_cast<Parameter<CartesianState>>(param)->get_value().from_std_vector(value);
+          lck.unlock();
+          break;
+        }
 
-          case StateType::PARAMETER_CARTESIANPOSE: {
-            std::unique_lock<std::mutex> lck(*this->mutex_);
-            std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-            std::static_pointer_cast<Parameter<CartesianPose>>(param)->get_value().CartesianPose::from_std_vector(value);
-            lck.unlock();
-            break;
-          }
+        case StateType::PARAMETER_CARTESIANPOSE: {
+          std::unique_lock<std::mutex> lck(*this->mutex_);
+          std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+          std::static_pointer_cast<Parameter<CartesianPose>>(param)->get_value().CartesianPose::from_std_vector(value);
+          lck.unlock();
+          break;
+        }
 
-          case StateType::PARAMETER_JOINTSTATE: {
-            std::unique_lock<std::mutex> lck(*this->mutex_);
-            std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-            std::static_pointer_cast<Parameter<JointState>>(param)->get_value().from_std_vector(value);
-            lck.unlock();
-            break;
-          }
+        case StateType::PARAMETER_JOINTSTATE: {
+          std::unique_lock<std::mutex> lck(*this->mutex_);
+          std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+          std::static_pointer_cast<Parameter<JointState>>(param)->get_value().from_std_vector(value);
+          lck.unlock();
+          break;
+        }
 
-          case StateType::PARAMETER_JOINTPOSITIONS: {
-            std::unique_lock<std::mutex> lck(*this->mutex_);
-            std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-            std::static_pointer_cast<Parameter<JointPositions>>(param)->get_value().JointPositions::from_std_vector(value);
-            lck.unlock();
-            break;
-          }
+        case StateType::PARAMETER_JOINTPOSITIONS: {
+          std::unique_lock<std::mutex> lck(*this->mutex_);
+          std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+          std::static_pointer_cast<Parameter<JointPositions>>(param)->get_value().JointPositions::from_std_vector(value);
+          lck.unlock();
+          break;
+        }
 
-          case StateType::PARAMETER_ELLIPSOID: {
-            std::unique_lock<std::mutex> lck(*this->mutex_);
-            std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-            std::static_pointer_cast<Parameter<Ellipsoid>>(param)->get_value().from_std_vector(value);
-            lck.unlock();
-            break;
-          }
+        case StateType::PARAMETER_ELLIPSOID: {
+          std::unique_lock<std::mutex> lck(*this->mutex_);
+          std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+          std::static_pointer_cast<Parameter<Ellipsoid>>(param)->get_value().from_std_vector(value);
+          lck.unlock();
+          break;
+        }
 
-          case StateType::PARAMETER_MATRIX: {
-            std::unique_lock<std::mutex> lck(*this->mutex_);
-            std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-            size_t rows = std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->get_value().rows();
-            size_t cols = std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->get_value().cols();
-            size_t size = std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->get_value().size();
-            // depending on the size of the received parameter produce a different matrix
-            Eigen::MatrixXd matrix_value(rows, cols);
-            if (value.size() == size)// equal size direct copy
-            {
-              matrix_value = Eigen::MatrixXd::Map(value.data(), rows, cols);
-            } else if (value.size() == rows && value.size() == cols)// diagonal matrix with only diagonal values set
-            {
-              Eigen::VectorXd diagonal_coefficients = Eigen::VectorXd::Map(value.data(), value.size());
-              matrix_value = diagonal_coefficients.asDiagonal();
-            } else if (value.size() == 1)// single element means iso diagonal matrix
-            {
-              matrix_value = value[0] * Eigen::MatrixXd::Identity(rows, cols);
-            } else// any other sizes generates an error
-            {
-              throw IncompatibleSizeException("The value set does not have the correct expected size of " + std::to_string(rows) + "x" + std::to_string(cols) + "elements");
-            }
-            std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->set_value(matrix_value);
-            lck.unlock();
-            break;
+        case StateType::PARAMETER_MATRIX: {
+          std::unique_lock<std::mutex> lck(*this->mutex_);
+          std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+          size_t rows = std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->get_value().rows();
+          size_t cols = std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->get_value().cols();
+          size_t size = std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->get_value().size();
+          // depending on the size of the received parameter produce a different matrix
+          Eigen::MatrixXd matrix_value(rows, cols);
+          if (value.size() == size)// equal size direct copy
+          {
+            matrix_value = Eigen::MatrixXd::Map(value.data(), rows, cols);
+          } else if (value.size() == rows && value.size() == cols)// diagonal matrix with only diagonal values set
+          {
+            Eigen::VectorXd diagonal_coefficients = Eigen::VectorXd::Map(value.data(), value.size());
+            matrix_value = diagonal_coefficients.asDiagonal();
+          } else if (value.size() == 1)// single element means iso diagonal matrix
+          {
+            matrix_value = value[0] * Eigen::MatrixXd::Identity(rows, cols);
+          } else// any other sizes generates an error
+          {
+            throw IncompatibleSizeException("The value set does not have the correct expected size of " + std::to_string(rows) + "x" + std::to_string(cols) + "elements");
           }
+          std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->set_value(matrix_value);
+          lck.unlock();
+          break;
+        }
 
-          default: {
-            throw UnrecognizedParameterTypeException("The Parameter type is not available");
-          }
+        default: {
+          throw UnrecognizedParameterTypeException("The Parameter type is not available");
         }
       }
-    } catch (rclcpp::ParameterTypeException& e) {
-      RCLCPP_ERROR(this->get_logger(), e.what());
-    } catch (IncompatibleSizeException& e) {
-      RCLCPP_ERROR(this->get_logger(), e.what());
-    } catch (UnrecognizedParameterTypeException& e) {
-      RCLCPP_ERROR(this->get_logger(), e.what());
     }
-    auto end = std::chrono::steady_clock::now();
-    auto elapsed = end - start;
-    auto timeToWait = this->period_ - elapsed;
-    if (timeToWait > std::chrono::nanoseconds::zero()) {
-      std::this_thread::sleep_for(timeToWait);
-    }
+  } catch (rclcpp::ParameterTypeException& e) {
+    RCLCPP_ERROR(this->get_logger(), e.what());
+  } catch (IncompatibleSizeException& e) {
+    RCLCPP_ERROR(this->get_logger(), e.what());
+  } catch (UnrecognizedParameterTypeException& e) {
+    RCLCPP_ERROR(this->get_logger(), e.what());
   }
 }
 }// namespace modulo::core
