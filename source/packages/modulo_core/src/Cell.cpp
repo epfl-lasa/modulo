@@ -18,7 +18,6 @@ void Cell::reset() {
 
 template <typename T>
 void Cell::add_parameter(const std::shared_ptr<state_representation::Parameter<T>>& parameter, const std::string& prefix) {
-  std::lock_guard<std::mutex> lock(*this->mutex_);
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
@@ -39,7 +38,6 @@ template void Cell::add_parameter<std::vector<std::string>>(const std::shared_pt
 
 template <>
 void Cell::add_parameter<state_representation::CartesianState>(const std::shared_ptr<state_representation::Parameter<state_representation::CartesianState>>& parameter, const std::string& prefix) {
-  std::lock_guard<std::mutex> lock(*this->mutex_);
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
@@ -48,7 +46,6 @@ void Cell::add_parameter<state_representation::CartesianState>(const std::shared
 
 template <>
 void Cell::add_parameter<state_representation::CartesianPose>(const std::shared_ptr<state_representation::Parameter<state_representation::CartesianPose>>& parameter, const std::string& prefix) {
-  std::lock_guard<std::mutex> lock(*this->mutex_);
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
@@ -58,7 +55,6 @@ void Cell::add_parameter<state_representation::CartesianPose>(const std::shared_
 
 template <>
 void Cell::add_parameter<state_representation::JointState>(const std::shared_ptr<state_representation::Parameter<state_representation::JointState>>& parameter, const std::string& prefix) {
-  std::lock_guard<std::mutex> lock(*this->mutex_);
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
@@ -67,7 +63,6 @@ void Cell::add_parameter<state_representation::JointState>(const std::shared_ptr
 
 template <>
 void Cell::add_parameter<state_representation::JointPositions>(const std::shared_ptr<state_representation::Parameter<state_representation::JointPositions>>& parameter, const std::string& prefix) {
-  std::lock_guard<std::mutex> lock(*this->mutex_);
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
@@ -77,7 +72,6 @@ void Cell::add_parameter<state_representation::JointPositions>(const std::shared
 
 template <>
 void Cell::add_parameter<state_representation::Ellipsoid>(const std::shared_ptr<state_representation::Parameter<state_representation::Ellipsoid>>& parameter, const std::string& prefix) {
-  std::lock_guard<std::mutex> lock(*this->mutex_);
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
@@ -86,7 +80,6 @@ void Cell::add_parameter<state_representation::Ellipsoid>(const std::shared_ptr<
 
 template <>
 void Cell::add_parameter<Eigen::MatrixXd>(const std::shared_ptr<state_representation::Parameter<Eigen::MatrixXd>>& parameter, const std::string& prefix) {
-  std::lock_guard<std::mutex> lock(*this->mutex_);
   std::string tprefix = (prefix != "") ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
@@ -423,24 +416,20 @@ bool Cell::on_shutdown() {
 }
 
 void Cell::run() {
-  std::unique_lock<std::mutex> lck(*this->mutex_);
   for (auto& h : this->handlers_) {
     h.second.first->check_timeout();
   }
   if (this->active_) {
     this->step();
   }
-  lck.unlock();
 }
 
 void Cell::step() {}
 
 void Cell::run_periodic_call(const std::function<void(void)>& callback_function) {
-  std::unique_lock<std::mutex> lck(*this->mutex_);
   if (this->active_) {
     callback_function();
   }
-  lck.unlock();
 }
 
 void Cell::add_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::nanoseconds& period) {
@@ -454,95 +443,72 @@ void Cell::update_parameters() {
     for (auto& [key, param] : this->parameters_) {
       switch (param->get_type()) {
         case StateType::PARAMETER_DOUBLE: {
-          std::unique_lock<std::mutex> lck(*this->mutex_);
           double value = this->get_parameter(param->get_name()).as_double();
           std::static_pointer_cast<Parameter<double>>(param)->set_value(value);
-          lck.unlock();
           break;
         }
 
         case StateType::PARAMETER_DOUBLE_ARRAY: {
-          std::unique_lock<std::mutex> lck(*this->mutex_);
           std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
           std::static_pointer_cast<Parameter<std::vector<double>>>(param)->set_value(value);
-          lck.unlock();
           break;
         }
 
         case StateType::PARAMETER_BOOL: {
-          std::unique_lock<std::mutex> lck(*this->mutex_);
           bool value = this->get_parameter(param->get_name()).as_bool();
           std::static_pointer_cast<Parameter<bool>>(param)->set_value(value);
-          lck.unlock();
           break;
         }
 
         case StateType::PARAMETER_BOOL_ARRAY: {
-          std::unique_lock<std::mutex> lck(*this->mutex_);
           std::vector<bool> value = this->get_parameter(param->get_name()).as_bool_array();
           std::static_pointer_cast<Parameter<std::vector<bool>>>(param)->set_value(value);
-          lck.unlock();
           break;
         }
 
         case StateType::PARAMETER_STRING: {
-          std::unique_lock<std::mutex> lck(*this->mutex_);
           std::string value = this->get_parameter(param->get_name()).as_string();
           std::static_pointer_cast<Parameter<std::string>>(param)->set_value(value);
-          lck.unlock();
           break;
         }
 
         case StateType::PARAMETER_STRING_ARRAY: {
-          std::unique_lock<std::mutex> lck(*this->mutex_);
           std::vector<std::string> value = this->get_parameter(param->get_name()).as_string_array();
           std::static_pointer_cast<Parameter<std::vector<std::string>>>(param)->set_value(value);
-          lck.unlock();
           break;
         }
 
         case StateType::PARAMETER_CARTESIANSTATE: {
-          std::unique_lock<std::mutex> lck(*this->mutex_);
           std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
           std::static_pointer_cast<Parameter<CartesianState>>(param)->get_value().from_std_vector(value);
-          lck.unlock();
           break;
         }
 
         case StateType::PARAMETER_CARTESIANPOSE: {
-          std::unique_lock<std::mutex> lck(*this->mutex_);
           std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
           std::static_pointer_cast<Parameter<CartesianPose>>(param)->get_value().CartesianPose::from_std_vector(value);
-          lck.unlock();
           break;
         }
 
         case StateType::PARAMETER_JOINTSTATE: {
-          std::unique_lock<std::mutex> lck(*this->mutex_);
           std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
           std::static_pointer_cast<Parameter<JointState>>(param)->get_value().from_std_vector(value);
-          lck.unlock();
           break;
         }
 
         case StateType::PARAMETER_JOINTPOSITIONS: {
-          std::unique_lock<std::mutex> lck(*this->mutex_);
           std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
           std::static_pointer_cast<Parameter<JointPositions>>(param)->get_value().JointPositions::from_std_vector(value);
-          lck.unlock();
           break;
         }
 
         case StateType::PARAMETER_ELLIPSOID: {
-          std::unique_lock<std::mutex> lck(*this->mutex_);
           std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
           std::static_pointer_cast<Parameter<Ellipsoid>>(param)->get_value().from_std_vector(value);
-          lck.unlock();
           break;
         }
 
         case StateType::PARAMETER_MATRIX: {
-          std::unique_lock<std::mutex> lck(*this->mutex_);
           std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
           size_t rows = std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->get_value().rows();
           size_t cols = std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->get_value().cols();
@@ -564,7 +530,6 @@ void Cell::update_parameters() {
             throw IncompatibleSizeException("The value set does not have the correct expected size of " + std::to_string(rows) + "x" + std::to_string(cols) + "elements");
           }
           std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->set_value(matrix_value);
-          lck.unlock();
           break;
         }
 
