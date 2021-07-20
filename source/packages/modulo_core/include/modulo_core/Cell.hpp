@@ -26,14 +26,14 @@ using namespace std::chrono_literals;
 namespace modulo::core {
 /**
  * @class Cell
- * @brief Abstract class to define a Call
+ * @brief Abstract class to define a Cell
  * A Cell is the base class of the whole architecture.
  * It handles all the basic ROS communications such as
- * definitions of subrscriptions, publishers and service
+ * definitions of subscriptions, publishers and service
  * calls. It can then be derived into a MotionGenerator,
  * a Controller, a Sensor, or a RobotInterface. It is
- * derived from a lifecyle node which allows to use
- * ROS2 state machine functionnalities for nodes.
+ * derived from a lifecycle node which allows to use
+ * ROS2 state machine functionalities for nodes.
  */
 class Cell : public rclcpp_lifecycle::LifecycleNode {
 private:
@@ -98,6 +98,13 @@ public:
    */
   template <typename DurationT>
   explicit Cell(const std::string& node_name, const std::chrono::duration<int64_t, DurationT>& period, bool intra_process_comms = false);
+
+  /**
+   * @brief Cell construction from ROS2 NodeOptions
+   * @param options NodeOptions containing a node name in the remapping arguments list and a "period" parameter
+   * with a value in seconds in the parameter override list
+   */
+  explicit Cell(const rclcpp::NodeOptions& options);
 
   /**
    * @brief Destructor
