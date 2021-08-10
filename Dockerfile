@@ -1,16 +1,27 @@
 ARG ROS_VERSION=foxy
 FROM ghcr.io/aica-technology/ros2-ws:${ROS_VERSION}
 
+# install google dependencies
+COPY --from=ghcr.io/epfl-lasa/control-libraries/development-dependencies:latest /usr/local/include/google /usr/local/include/google
+COPY --from=ghcr.io/epfl-lasa/control-libraries/development-dependencies:latest /usr/local/lib/libproto* /usr/local/lib
+COPY --from=ghcr.io/epfl-lasa/control-libraries/development-dependencies:latest /usr/local/bin/protoc /usr/local/bin
+RUN ldconfig
+
+USER ${USER}
 # install control library packages
 WORKDIR ${HOME}
-RUN git clone -b develop --depth 1 https://github.com/epfl-lasa/control_libraries.git
+RUN git clone -b fix/proto_makefile --depth 1 https://github.com/epfl-lasa/control_libraries.git
 WORKDIR ${HOME}/control_libraries/source
 RUN sudo ./install.sh -y
+
+# generate protobuf bindings
+WORKDIR ${HOME}/control_libraries/protocol/protobuf
+RUN make all -j
 
 # copy sources and build ROS workspace with user permissions
 WORKDIR ${HOME}/ros2_ws/
 COPY --chown=${USER} ./source/packages/ ./src/
-RUN su ${USER} -c /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"
+RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"
 
 WORKDIR ${HOME}
 
