@@ -1,5 +1,5 @@
 ARG ROS_VERSION=foxy
-FROM aica-technology/ros2-ws:${ROS_VERSION}
+FROM ghcr.io/aica-technology/ros2-ws:${ROS_VERSION}
 
 # install control library packages
 WORKDIR ${HOME}

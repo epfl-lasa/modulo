@@ -18,4 +18,5 @@ shift "$(( OPTIND - 1 ))"
 BUILD_FLAGS+=(--build-arg ROS_VERSION="${ROS_VERSION}")
 BUILD_FLAGS+=(-t "${IMAGE_NAME}":"${IMAGE_TAG}")
 
+docker pull ghcr.io/aica-technology/ros2-ws:"${ROS_VERSION}"
 DOCKER_BUILDKIT=1 docker build "${BUILD_FLAGS[@]}" .
