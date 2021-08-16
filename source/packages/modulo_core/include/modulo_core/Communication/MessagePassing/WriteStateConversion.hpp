@@ -211,4 +211,12 @@ void write_msg(std_msgs::msg::Float64MultiArray& msg, const T& state, const rclc
   if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
   msg.data = state.to_std_vector();
 }
+
+/**
+ * @brief Convert a state to a ROS std_msgs::msg::String using protobuf encoding
+ * @param msg The ROS msg to populate
+ * @param state The state to read from
+ * @param time The time of the message
+ */
+void write_msg(std_msgs::msg::String& msg, const state_representation::State& state, const rclcpp::Time&);
 }// namespace modulo::core::communication::state_conversion

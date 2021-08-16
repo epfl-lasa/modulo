@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.9)
 project(modulo_core)
 
 # Default to C++17
@@ -19,11 +19,13 @@ list(APPEND CMAKE_PREFIX_PATH /opt/openrobots)
 find_package(pinocchio REQUIRED)
 find_package(OsqpEigen REQUIRED)
 find_package(osqp REQUIRED)
+find_package(Protobuf REQUIRED)
 
 find_library(state_representation REQUIRED)
 find_library(dynamical_systems REQUIRED)
 find_library(controllers REQUIRED)
 find_library(robot_model REQUIRED)
+find_library(clproto REQUIRED)
 
 set(CORE_SOURCES
     src/Communication/MessagePassing/ReadStateConversion.cpp
@@ -46,6 +48,7 @@ include_directories(
   ${PINOCCHIO_INCLUDE_DIR}
   ${OsqpEigen_INCLUDE_DIR}
   /opt/openrobots/include
+  ${CLPROTO_INCLUDE_DIR}
 )
 
 ament_auto_add_library(${PROJECT_NAME} SHARED ${CORE_SOURCES})
@@ -53,6 +56,8 @@ target_link_libraries(${PROJECT_NAME}
   ${PINOCCHIO_LIBRARIES}
   OsqpEigen::OsqpEigen
   osqp::osqp
+  clproto
+  protobuf
   state_representation
   dynamical_systems
   controllers

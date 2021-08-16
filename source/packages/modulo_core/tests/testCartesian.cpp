@@ -21,8 +21,8 @@ public:
   }
 
   bool on_configure() {
-    this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->current_pose);
-    this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
+    this->add_subscription<std_msgs::msg::String>("/robot_test/pose", this->current_pose);
+    this->add_publisher<std_msgs::msg::String>("/ds/desired_twist", this->desired_twist);
     return true;
   }
 
@@ -51,8 +51,8 @@ public:
                                                                                                       desired_twist(std::make_shared<state_representation::CartesianTwist>("robot_test")) {}
 
   bool on_configure() {
-    this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose);
-    this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
+    this->add_subscription<std_msgs::msg::String>("/robot_test/pose", this->robot_pose);
+    this->add_subscription<std_msgs::msg::String>("/ds/desired_twist", this->desired_twist);
     return true;
   }
 
@@ -80,8 +80,8 @@ public:
                                                                                                             dt(period) {}
 
   bool on_configure() {
-    this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
-    this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose, 0);
+    this->add_subscription<std_msgs::msg::String>("/ds/desired_twist", this->desired_twist);
+    this->add_publisher<std_msgs::msg::String>("/robot_test/pose", this->robot_pose, 0);
     return true;
   }
 

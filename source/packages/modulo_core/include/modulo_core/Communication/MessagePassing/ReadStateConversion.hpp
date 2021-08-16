@@ -1,5 +1,6 @@
 #pragma once
 
+#include <clproto.h>
 #include <geometry_msgs/msg/accel_stamped.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
@@ -22,6 +23,7 @@
 #include <state_representation/trajectories/Trajectory.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
+#include <std_msgs/msg/string.hpp>
 #include <tf2_msgs/msg/tf_message.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
@@ -156,5 +158,16 @@ void read_msg(state_representation::DualQuaternionTwist& state, const geometry_m
 template <typename T, typename U>
 void read_msg(state_representation::Parameter<T>& state, const U& msg) {
   state.set_value(msg.data);
+}
+
+/**
+ * @brief Convert a ROS std_msgs::msg::String to a State using protobuf decoding
+ * @tparam a state_representation::State type object
+ * @param state The state to populate
+ * @param msg The ROS msg to read from
+ */
+template <typename T>
+void read_msg(T& state, const std_msgs::msg::String& msg) {
+  state = clproto::decode<T>(msg.data);
 }
 }// namespace modulo::core::communication::state_conversion
