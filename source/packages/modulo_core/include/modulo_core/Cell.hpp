@@ -1,10 +1,5 @@
 #pragma once
 
-#include "modulo_core/Communication/MessagePassing/PublisherHandler.hpp"
-#include "modulo_core/Communication/MessagePassing/SubscriptionHandler.hpp"
-#include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
-#include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
-#include "modulo_core/Communication/ServiceClient/ClientHandler.hpp"
 #include <chrono>
 #include <iostream>
 #include <lifecycle_msgs/msg/transition.hpp>
@@ -20,6 +15,13 @@
 #include <state_representation/parameters/Parameter.hpp>
 #include <state_representation/parameters/ParameterInterface.hpp>
 #include <string>
+
+#include "modulo_core/Communication/MessagePassing/PublisherHandler.hpp"
+#include "modulo_core/Communication/MessagePassing/SubscriptionHandler.hpp"
+#include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
+#include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
+#include "modulo_core/Communication/ServiceClient/ClientHandler.hpp"
+#include "modulo_core/Communication/EncodedState.hpp"
 
 using namespace std::chrono_literals;
 
