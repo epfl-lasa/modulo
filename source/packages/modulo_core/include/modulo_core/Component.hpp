@@ -125,46 +125,18 @@ public:
   const std::list<std::shared_ptr<state_representation::Predicate>> get_predicates() const;
 
   /**
-   * @brief This function is called time the configure call 
-   * is made from the lifecycle server. It is used to
-   * define behavior such as connecting to a database 
-   * or resetting an history buffer. After being 
-   * configured the node can be activated.
+   * @brief Transition callback for state configuring
+   * on_configure callback is being called when the lifecycle node
+   * enters the "configuring" state.
+   * Depending on the return value of this function, the state machine
+   * either invokes a transition to the "inactive" state or stays
+   * in "unconfigured".
+   * TRANSITION_CALLBACK_SUCCESS transitions to "inactive"
+   * TRANSITION_CALLBACK_FAILURE transitions to "unconfigured"
+   * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
    */
-  virtual bool on_configure() override;
-
-  /**
-   * @brief This function is called time the activate call 
-   * is made from the lifecycle server. It activates publishing
-   * and subsciptions and can be extended to start a recording
-   * or replay.
-   */
-  virtual bool on_activate() override;
-
-  /**
-   * @brief This function is called time the deactivate call 
-   * is made from the lifecycle server. It deactivates publishing
-   * and subsciptions and can be extended to stop a recording
-   * or a replay.
-   */
-  virtual bool on_deactivate() override;
-
-  /**
-   * @brief This function is called time the cleanup call 
-   * is made from the lifecycle server. It cleans the node
-   * and can be extended to close connections to a database
-   * or delete pointers. After cleanup a new configure call
-   * can be made.
-   */
-  virtual bool on_cleanup() override;
-
-  /**
-   * @brief This function is called time the shutdown call 
-   * is made from the lifecycle server. It terminates the node.
-   * Each elements needed to be cleaned before termination should
-   * be here.
-   */
-  virtual bool on_shutdown() override;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_configure(const rclcpp_lifecycle::State& state) override;
 
   /**
    * @brief Function computing one step of calculation. It is called periodically in the run function.
@@ -177,7 +149,7 @@ Component::Component(const std::string& node_name,
                      const std::chrono::duration<int64_t, DurationT>& period,
                      bool intra_process_comms) : Cell(node_name, period, intra_process_comms) {
   this->declare_parameter<int>("predicate_checking_period", 100);
-  this->add_predicate(std::make_shared<state_representation::Predicate>("is_configured", false));
-  this->add_predicate(std::make_shared<state_representation::Predicate>("is_active", false));
+  this->add_predicate("is_configured", std::bind(&Component::is_configured, this));
+  this->add_predicate("is_active", std::bind(&Component::is_active, this));
 }
 }// namespace modulo::core

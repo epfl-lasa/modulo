@@ -82,7 +82,8 @@ const std::list<std::shared_ptr<state_representation::Predicate>> Component::get
   return predicate_list;
 }
 
-bool Component::on_configure() {
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+Component::on_configure(const rclcpp_lifecycle::State& state) {
   this->add_periodic_call(std::bind(&Component::evaluate_predicate_functions, this),
                           std::chrono::milliseconds(this->get_parameter("predicate_checking_period").as_int()));
   for (auto& [key, val] : this->predicates_) {
@@ -94,26 +95,6 @@ bool Component::on_configure() {
       this->add_subscription<std_msgs::msg::Bool>(external_predicate_iterator->second, val, true);
     }
   }
-  this->set_predicate_value("is_configured", true);
-  return true;
-}
-
-bool Component::on_activate() {
-  this->set_predicate_value("is_active", true);
-  return true;
-}
-
-bool Component::on_deactivate() {
-  this->set_predicate_value("is_active", false);
-  return true;
-}
-
-bool Component::on_cleanup() {
-  this->set_predicate_value("is_configured", false);
-  return true;
-}
-
-bool Component::on_shutdown() {
-  return true;
+  return this->Cell::on_configure(state);
 }
 }// namespace modulo::core

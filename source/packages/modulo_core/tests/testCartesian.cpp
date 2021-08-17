@@ -53,7 +53,6 @@ public:
                                                                                                       desired_twist(std::make_shared<state_representation::CartesianTwist>("robot_test")) {}
 
   bool on_configure() {
-    bool configured = this->Component::on_configure();
     this->add_state_subscription("/robot_test/pose", this->robot_pose);
     this->add_state_subscription("/ds/desired_twist", this->desired_twist);
     return true;
