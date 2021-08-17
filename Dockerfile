@@ -10,7 +10,7 @@ RUN sudo ldconfig
 USER ${USER}
 # install control library packages
 WORKDIR ${HOME}
-RUN git clone -b fix/proto_install_permissions --depth 1 https://github.com/epfl-lasa/control_libraries.git
+RUN git clone -b develop --depth 1 https://github.com/epfl-lasa/control_libraries.git
 WORKDIR ${HOME}/control_libraries/source
 RUN sudo ./install.sh -y
 
