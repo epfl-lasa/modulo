@@ -23,11 +23,12 @@
 #include <state_representation/trajectories/Trajectory.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
-#include <std_msgs/msg/byte_multi_array.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <tf2_msgs/msg/tf_message.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
+
+#include "modulo_core/Communication/EncodedState.hpp"
 
 namespace modulo::core::communication::state_conversion {
 /**
@@ -162,13 +163,13 @@ void read_msg(state_representation::Parameter<T>& state, const U& msg) {
 }
 
 /**
- * @brief Convert a ROS std_msgs::msg::ByteMultiArray to a State using protobuf decoding
+ * @brief Convert an EncodedState type message to a State using protobuf decoding
  * @tparam a state_representation::State type object
  * @param state The state to populate
  * @param msg The ROS msg to read from
  */
 template <typename T>
-void read_msg(T& state, const std_msgs::msg::ByteMultiArray& msg) {
+void read_msg(T& state, const EncodedState& msg) {
   std::string tmp(msg.data.begin(), msg.data.end());
   state = clproto::decode<T>(tmp);
 }
