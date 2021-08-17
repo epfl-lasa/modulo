@@ -19,13 +19,13 @@ list(APPEND CMAKE_PREFIX_PATH /opt/openrobots)
 find_package(pinocchio REQUIRED)
 find_package(OsqpEigen REQUIRED)
 find_package(osqp REQUIRED)
-find_package(Protobuf REQUIRED)
 
+find_library(protobuf REQUIRED)
+find_library(clproto REQUIRED)
 find_library(state_representation REQUIRED)
 find_library(dynamical_systems REQUIRED)
 find_library(controllers REQUIRED)
 find_library(robot_model REQUIRED)
-find_library(clproto REQUIRED)
 
 set(CORE_SOURCES
     src/Communication/MessagePassing/ReadStateConversion.cpp
