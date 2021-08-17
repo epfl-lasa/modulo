@@ -21,7 +21,6 @@
 #include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
 #include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
 #include "modulo_core/Communication/ServiceClient/ClientHandler.hpp"
-#include "modulo_core/Communication/EncodedState.hpp"
 
 using namespace std::chrono_literals;
 
@@ -171,6 +170,39 @@ public:
                      int queue_size = 10);
 
   /**
+   * @brief Template function to add a specific state publisher that makes use of protobuf encodings
+   * to the map of handlers
+   * @tparam RecT template value for accepting any State type recipient
+   * @tparam DurationT template value for accepting any type of std::chrono duration values
+   * @param channel unique name of the publish channel that is used as key to the map
+   * @param recipient the state that contain the data to be published
+   * @param period the period to wait between two publishing
+   * @param always_active if true, always publish the message as soon as the node is configured
+   * @param queue_size publisher parameters indicating the maximum size of the buffer
+   */
+  template <class RecT, typename DurationT>
+  void add_state_publisher(const std::string& channel,
+                           const std::shared_ptr<RecT>& recipient,
+                           const std::chrono::duration<int64_t, DurationT>& period,
+                           bool always_active = false,
+                           int queue_size = 10);
+
+  /**
+   * @brief Template function to add a specific state publisher that makes use of protobuf encodings
+   * to the map of handlers
+   * @tparam RecT template value for accepting any State type recipient
+   * @param channel unique name of the publish channel that is used as key to the map
+   * @param recipient the state that contain the data to be published
+   * @param always_active if true, always publish the message as soon as the node is configured
+   * @param queue_size publisher parameters indicating the maximum size of the buffer
+   */
+  template <class RecT>
+  void add_state_publisher(const std::string& channel,
+                           const std::shared_ptr<RecT>& recipient,
+                           bool always_active = false,
+                           int queue_size = 10);
+
+  /**
    * @brief Template function to add a generic subscription to the map of handlers
    * @tparam MsgT template value for accepting any type of ROS2 messages
    * @tparam RecT template value for accepting any type of recipient
@@ -202,6 +234,41 @@ public:
                         bool always_active = false,
                         unsigned int nb_period_to_timeout = 10,
                         int queue_size = 10);
+
+  /**
+   * @brief Template function to add a specific state subscription that makes use of
+   * protobuf decoding to the map of handlers
+   * @tparam RecT template value for accepting any State type recipient
+   * @tparam DurationT template value for accepting any type of std::chrono duration values
+   * @param channel unique name of the subscription channel that is used as key to the map
+   * @param recipient the state that will contain the received data
+   * @param timeout the period after wich to consider that the subscriber has timeout
+   * @param always_active if true, always receive messages from the topic as soon as the node is configured
+   * @param queue_size subscriber parameters indicating the maximum size of the buffer
+   */
+  template <class RecT, typename DurationT>
+  void add_state_subscription(const std::string& channel,
+                              const std::shared_ptr<RecT>& recipient,
+                              const std::chrono::duration<int64_t, DurationT>& timeout,
+                              bool always_active = false,
+                              int queue_size = 10);
+
+  /**
+   * @brief Template function to add a specific state subscription that makes use of
+   * protobuf decoding to the map of handlers
+   * @tparam RecT template value for accepting any State type recipient
+   * @param channel unique name of the subscription channel that is used as key to the map
+   * @param recipient the state that will contain the received data
+   * @param always_active if true, always receive messages from the topic as soon as the node is configured
+   * @param nb_period_to_timeout the number of period before considering that the subscription has timeout
+   * @param queue_size subscriber parameters indicating the maximum size of the buffer
+   */
+  template <class RecT>
+  void add_state_subscription(const std::string& channel,
+                              const std::shared_ptr<RecT>& recipient,
+                              bool always_active = false,
+                              unsigned int nb_period_to_timeout = 10,
+                              int queue_size = 10);
 
   /**
    * @brief Template function to add a generic client to the map of handlers
@@ -528,6 +595,23 @@ void Cell::add_publisher(const std::string& channel,
   this->add_publisher<MsgT, RecT>(channel, recipient, this->period_, always_active, queue_size);
 }
 
+template <class RecT, typename DurationT>
+void Cell::add_state_publisher(const std::string& channel,
+                               const std::shared_ptr<RecT>& recipient,
+                               const std::chrono::duration<int64_t, DurationT>& period,
+                               bool always_active,
+                               int queue_size) {
+  this->add_publisher<EncodedState, RecT>(channel, recipient, period, always_active, queue_size);
+}
+
+template <class RecT>
+void Cell::add_state_publisher(const std::string& channel,
+                               const std::shared_ptr<RecT>& recipient,
+                               bool always_active,
+                               int queue_size) {
+  this->add_publisher<EncodedState, RecT>(channel, recipient, always_active, queue_size);
+}
+
 template <typename MsgT, class RecT, typename DurationT>
 void Cell::add_subscription(const std::string& channel,
                             const std::shared_ptr<RecT>& recipient,
@@ -546,6 +630,24 @@ void Cell::add_subscription(const std::string& channel,
                             unsigned int nb_period_to_timeout,
                             int queue_size) {
   this->add_subscription<MsgT, RecT>(channel, recipient, nb_period_to_timeout * this->period_, always_active, queue_size);
+}
+
+template <class RecT, typename DurationT>
+void Cell::add_state_subscription(const std::string& channel,
+                                  const std::shared_ptr<RecT>& recipient,
+                                  const std::chrono::duration<int64_t, DurationT>& timeout,
+                                  bool always_active,
+                                  int queue_size) {
+  this->add_subscription<EncodedState, RecT>(channel, recipient, timeout, always_active, queue_size);
+}
+
+template <class RecT>
+void Cell::add_state_subscription(const std::string& channel,
+                                  const std::shared_ptr<RecT>& recipient,
+                                  bool always_active,
+                                  unsigned int nb_period_to_timeout,
+                                  int queue_size) {
+  this->add_subscription<EncodedState, RecT>(channel, recipient, nb_period_to_timeout, always_active, queue_size);
 }
 
 template <typename DurationT>
