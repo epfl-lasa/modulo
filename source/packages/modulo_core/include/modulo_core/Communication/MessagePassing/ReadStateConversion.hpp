@@ -23,6 +23,7 @@
 #include <state_representation/trajectories/Trajectory.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
+#include <std_msgs/msg/byte_multi_array.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <tf2_msgs/msg/tf_message.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
@@ -150,10 +151,10 @@ void read_msg(state_representation::DualQuaternionTwist& state, const geometry_m
 
 /**
  * @brief Template function to convert a ROS std_msgs::msg::T to a Parameter<T>
- * @param state The Parameter<T> to populate
- * @param msg The ROS msg to read from
  * @tparam T all types of parameters supported in ROS std messages
  * @tparam U all types of parameters supported in ROS std messages
+ * @param state The Parameter<T> to populate
+ * @param msg The ROS msg to read from
  */
 template <typename T, typename U>
 void read_msg(state_representation::Parameter<T>& state, const U& msg) {
@@ -161,13 +162,14 @@ void read_msg(state_representation::Parameter<T>& state, const U& msg) {
 }
 
 /**
- * @brief Convert a ROS std_msgs::msg::String to a State using protobuf decoding
+ * @brief Convert a ROS std_msgs::msg::ByteMultiArray to a State using protobuf decoding
  * @tparam a state_representation::State type object
  * @param state The state to populate
  * @param msg The ROS msg to read from
  */
 template <typename T>
-void read_msg(T& state, const std_msgs::msg::String& msg) {
-  state = clproto::decode<T>(msg.data);
+void read_msg(T& state, const std_msgs::msg::ByteMultiArray& msg) {
+  std::string tmp(msg.data.begin(), msg.data.end());
+  state = clproto::decode<T>(tmp);
 }
 }// namespace modulo::core::communication::state_conversion

@@ -1,6 +1,5 @@
 #include "modulo_core/Communication/MessagePassing/WriteStateConversion.hpp"
 
-#include <clproto.h>
 #include <state_representation/exceptions/IncompatibleReferenceFramesException.hpp>
 
 using namespace state_representation::exceptions;
@@ -222,9 +221,5 @@ void write_msg(geometry_msgs::msg::TransformStamped& msg, const state_representa
 template <>
 void write_msg(tf2_msgs::msg::TFMessage& msg, const state_representation::Parameter<state_representation::CartesianPose>& state, const rclcpp::Time& time) {
   write_msg(msg, state.get_value(), time);
-}
-
-void write_msg(std_msgs::msg::String& msg, const state_representation::State& state, const rclcpp::Time&) {
-  msg.data = clproto::encode(state);
 }
 }// namespace modulo::core::communication::state_conversion
