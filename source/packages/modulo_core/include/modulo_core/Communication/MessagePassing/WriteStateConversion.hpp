@@ -1,5 +1,6 @@
 #pragma once
 
+#include <clproto.h>
 #include <geometry_msgs/msg/accel_stamped.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
@@ -29,6 +30,8 @@
 #include <tf2_msgs/msg/tf_message.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
+
+#include "modulo_core/Communication/EncodedState.hpp"
 
 namespace modulo::core::communication::state_conversion {
 /**
@@ -192,7 +195,9 @@ void write_msg(trajectory_msgs::msg::JointTrajectoryPoint& msg, const state_repr
 void write_msg(trajectory_msgs::msg::JointTrajectory& msg, const state_representation::Trajectory<state_representation::JointState>& state, const rclcpp::Time& time);
 
 /**
- * @brief Convert a Parameter<double> to a ROS std_msgs::msg::Float64
+ * @brief Convert a Parameter<T> to a ROS equivalent representation
+ * @tparam T all types of parameters supported in ROS std messages
+ * @tparam U all types of parameters supported in ROS std messages
  * @param msg The ROS msg to populate
  * @param state The state to read from
  * @param time The time of the message
@@ -202,6 +207,7 @@ void write_msg(U& msg, const state_representation::Parameter<T>& state, const rc
 
 /**
  * @brief Convert a state to a ROS std_msgs::msg::Float64MultiArray
+ * @tparam a state_representation::State type object
  * @param msg The ROS msg to populate
  * @param state The state to read from
  * @param time The time of the message
@@ -210,5 +216,18 @@ template <typename T>
 void write_msg(std_msgs::msg::Float64MultiArray& msg, const T& state, const rclcpp::Time&) {
   if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
   msg.data = state.to_std_vector();
+}
+
+/**
+ * @brief Convert a state to an EncodedState type message using protobuf encoding
+ * @tparam a state_representation::State type object
+ * @param msg The ROS msg to populate
+ * @param state The state to read from
+ * @param time The time of the message
+ */
+template <typename T>
+void write_msg(EncodedState& msg, const T& state, const rclcpp::Time&) {
+  std::string tmp = clproto::encode<T>(state);
+  msg.data = std::vector<unsigned char>(tmp.begin(), tmp.end());
 }
 }// namespace modulo::core::communication::state_conversion

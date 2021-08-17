@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.9)
 project(modulo_core)
 
 # Default to C++17
@@ -20,6 +20,8 @@ find_package(pinocchio REQUIRED)
 find_package(OsqpEigen REQUIRED)
 find_package(osqp REQUIRED)
 
+find_library(protobuf REQUIRED)
+find_library(clproto REQUIRED)
 find_library(state_representation REQUIRED)
 find_library(dynamical_systems REQUIRED)
 find_library(controllers REQUIRED)
@@ -46,6 +48,7 @@ include_directories(
   ${PINOCCHIO_INCLUDE_DIR}
   ${OsqpEigen_INCLUDE_DIR}
   /opt/openrobots/include
+  ${CLPROTO_INCLUDE_DIR}
 )
 
 ament_auto_add_library(${PROJECT_NAME} SHARED ${CORE_SOURCES})
@@ -53,6 +56,8 @@ target_link_libraries(${PROJECT_NAME}
   ${PINOCCHIO_LIBRARIES}
   OsqpEigen::OsqpEigen
   osqp::osqp
+  clproto
+  protobuf
   state_representation
   dynamical_systems
   controllers

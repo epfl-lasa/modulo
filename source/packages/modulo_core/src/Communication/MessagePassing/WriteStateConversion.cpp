@@ -1,4 +1,5 @@
 #include "modulo_core/Communication/MessagePassing/WriteStateConversion.hpp"
+
 #include <state_representation/exceptions/IncompatibleReferenceFramesException.hpp>
 
 using namespace state_representation::exceptions;
