@@ -116,15 +116,6 @@ void write_msg(sensor_msgs::msg::JointState& msg, const state_representation::Jo
   msg.effort = std::vector<double>(state.get_torques().data(), state.get_torques().data() + state.get_torques().size());
 }
 
-void write_msg(modulo_msgs::msg::Jacobian& msg, const state_representation::Jacobian& state, const rclcpp::Time& time) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
-  msg.header.stamp = time;
-  msg.nb_dimensions = state.rows();
-  msg.nb_joints = state.cols();
-  msg.joint_names = state.get_joint_names();
-  msg.data = std::vector<double>(state.data().data(), state.data().data() + state.data().size());
-}
-
 void write_msg(geometry_msgs::msg::Pose& msg, const state_representation::DualQuaternionPose& state, const rclcpp::Time&) {
   if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
   // position

@@ -91,11 +91,6 @@ void read_msg(state_representation::JointState& state, const sensor_msgs::msg::J
   if (!msg.effort.empty()) state.set_torques(Eigen::VectorXd::Map(msg.effort.data(), msg.effort.size()));
 }
 
-void read_msg(state_representation::Jacobian& state, const modulo_msgs::msg::Jacobian& msg) {
-  state.set_joint_names(msg.joint_names);
-  state.set_data(Eigen::MatrixXd::Map(msg.data.data(), msg.nb_dimensions, msg.nb_joints));
-}
-
 void read_msg(state_representation::DualQuaternionPose& state, const geometry_msgs::msg::Pose& msg) {
   Eigen::Quaterniond orientation(msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z);
   Eigen::Vector3d position(msg.position.x, msg.position.y, msg.position.z);

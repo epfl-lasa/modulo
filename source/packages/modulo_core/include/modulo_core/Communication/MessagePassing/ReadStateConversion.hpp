@@ -6,13 +6,11 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <geometry_msgs/msg/wrench_stamped.hpp>
-#include <modulo_msgs/msg/jacobian.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/time.hpp>
 #include <rcutils/logging_macros.h>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <state_representation/parameters/Parameter.hpp>
-#include <state_representation/robot/Jacobian.hpp>
 #include <state_representation/robot/JointState.hpp>
 #include <state_representation/space/cartesian/CartesianPose.hpp>
 #include <state_representation/space/cartesian/CartesianState.hpp>
@@ -114,13 +112,6 @@ void read_msg(state_representation::CartesianState& state, const nav_msgs::msg::
  * @param msg The ROS msg to read from
  */
 void read_msg(state_representation::JointState& state, const sensor_msgs::msg::JointState& msg);
-
-/**
- * @brief Convert a ROS modulo_msgs::msg::Jacobian to a Jacobian
- * @param state The Jacobian to populate
- * @param msg The ROS msg to read from
- */
-void read_msg(state_representation::Jacobian& state, const modulo_msgs::msg::Jacobian& msg);
 
 /**
  * @brief Convert a ROS geometry_msgs::msg::Pose to a DualQuaternionPose

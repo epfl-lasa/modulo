@@ -6,7 +6,6 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <geometry_msgs/msg/wrench_stamped.hpp>
-#include <modulo_msgs/msg/jacobian.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/time.hpp>
 #include <rcutils/logging_macros.h>
@@ -14,7 +13,6 @@
 #include <state_representation/exceptions/EmptyStateException.hpp>
 #include <state_representation/geometry/Ellipsoid.hpp>
 #include <state_representation/parameters/Parameter.hpp>
-#include <state_representation/robot/Jacobian.hpp>
 #include <state_representation/robot/JointState.hpp>
 #include <state_representation/space/cartesian/CartesianPose.hpp>
 #include <state_representation/space/cartesian/CartesianState.hpp>
@@ -129,14 +127,6 @@ void write_msg(geometry_msgs::msg::WrenchStamped& msg, const state_representatio
  * @param time The time of the message
  */
 void write_msg(sensor_msgs::msg::JointState& msg, const state_representation::JointState& state, const rclcpp::Time& time);
-
-/**
- * @brief Convert a Jacobian to a ROS modulo_msgs::msg::Jacobian
- * @param msg The ROS msg to populate
- * @param state The state to read from
- * @param time The time of the message
- */
-void write_msg(modulo_msgs::msg::Jacobian& msg, const state_representation::Jacobian& state, const rclcpp::Time& time);
 
 /**
  * @brief Convert a DualQuaternionPose to a ROS geometry_msgs::msg::Pose
