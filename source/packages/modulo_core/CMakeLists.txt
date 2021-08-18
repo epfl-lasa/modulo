@@ -35,6 +35,7 @@ set(CORE_SOURCES
     src/Communication/MessagePassing/MessagePassingHandler.cpp
     src/Communication/CommunicationHandler.cpp
     src/Cell.cpp
+    src/Component.cpp
     src/Monitor.cpp
     src/Recorder.cpp
 )

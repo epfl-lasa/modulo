@@ -1,9 +1,11 @@
-#include "modulo_core/Cell.hpp"
 #include <dynamical_systems/Linear.hpp>
 #include <eigen3/Eigen/Core>
 #include <exception>
 #include <iostream>
 #include <rcutils/cmdline_parser.h>
+
+#include "modulo_core/Cell.hpp"
+#include "modulo_core/Component.hpp"
 
 namespace {
 class LinearMotionGenerator : public modulo::core::Cell {
@@ -40,13 +42,13 @@ public:
   }
 };
 
-class ConsoleVisualizer : public modulo::core::Cell {
+class ConsoleVisualizer : public modulo::core::Component {
 private:
   std::shared_ptr<state_representation::CartesianPose> robot_pose;
   std::shared_ptr<state_representation::CartesianTwist> desired_twist;
 
 public:
-  explicit ConsoleVisualizer(const std::string& node_name, const std::chrono::milliseconds& period) : Cell(node_name, period),
+  explicit ConsoleVisualizer(const std::string& node_name, const std::chrono::milliseconds& period) : Component(node_name, period),
                                                                                                       robot_pose(std::make_shared<state_representation::CartesianPose>("robot_test")),
                                                                                                       desired_twist(std::make_shared<state_representation::CartesianTwist>("robot_test")) {}
 
