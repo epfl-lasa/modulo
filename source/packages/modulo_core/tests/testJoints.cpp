@@ -1,7 +1,8 @@
-#include "modulo_core/Cell.hpp"
 #include <dynamical_systems/Linear.hpp>
 #include <iostream>
 #include <rcutils/cmdline_parser.h>
+
+#include "modulo_core/Cell.hpp"
 
 namespace {
 class LinearMotionGenerator : public modulo::core::Cell {

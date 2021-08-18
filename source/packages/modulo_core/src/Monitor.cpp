@@ -1,5 +1,6 @@
 #include "modulo_core/Monitor.hpp"
-#include "modulo_core/Exceptions/CommunicationTimeoutException.hpp"
+
+#include "modulo_core/exceptions/CommunicationTimeoutException.hpp"
 
 namespace modulo::core {
 Monitor::~Monitor() {

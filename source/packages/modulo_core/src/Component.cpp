@@ -1,6 +1,7 @@
 #include "modulo_core/Component.hpp"
-#include "modulo_core/Exceptions/PredicateAlreadyRegisteredException.hpp"
-#include "modulo_core/Exceptions/PredicateNotFoundException.hpp"
+
+#include "modulo_core/exceptions/PredicateAlreadyRegisteredException.hpp"
+#include "modulo_core/exceptions/PredicateNotFoundException.hpp"
 
 namespace modulo::core {
 Component::~Component() {

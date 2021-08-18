@@ -1,7 +1,8 @@
 #pragma once
 
-#include "modulo_core/Cell.hpp"
 #include <typeinfo>
+
+#include "modulo_core/Cell.hpp"
 
 namespace modulo::core {
 /**

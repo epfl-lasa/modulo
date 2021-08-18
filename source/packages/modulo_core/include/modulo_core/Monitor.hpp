@@ -1,8 +1,9 @@
 #pragma once
 
-#include "modulo_core/Cell.hpp"
 #include <lifecycle_msgs/srv/get_state.hpp>
 #include <list>
+
+#include "modulo_core/Cell.hpp"
 
 namespace modulo::core {
 /**

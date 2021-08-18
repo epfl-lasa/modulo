@@ -16,11 +16,11 @@
 #include <state_representation/parameters/ParameterInterface.hpp>
 #include <string>
 
-#include "modulo_core/Communication/MessagePassing/PublisherHandler.hpp"
-#include "modulo_core/Communication/MessagePassing/SubscriptionHandler.hpp"
-#include "modulo_core/Communication/MessagePassing/TransformBroadcasterHandler.hpp"
-#include "modulo_core/Communication/MessagePassing/TransformListenerHandler.hpp"
-#include "modulo_core/Communication/ServiceClient/ClientHandler.hpp"
+#include "modulo_core/communication/message_passing/PublisherHandler.hpp"
+#include "modulo_core/communication/message_passing/SubscriptionHandler.hpp"
+#include "modulo_core/communication/message_passing/TransformBroadcasterHandler.hpp"
+#include "modulo_core/communication/message_passing/TransformListenerHandler.hpp"
+#include "modulo_core/communication/service_client/ClientHandler.hpp"
 
 using namespace std::chrono_literals;
 

@@ -1,10 +1,11 @@
+#include "modulo_core/Cell.hpp"
+
 #include <state_representation/robot/JointPositions.hpp>
 #include <state_representation/robot/JointVelocities.hpp>
 #include <state_representation/exceptions/UnrecognizedParameterTypeException.hpp>
 
-#include "modulo_core/Cell.hpp"
-#include "modulo_core/Utilities/utilities.hpp"
-#include "modulo_core/Exceptions/UnconfiguredNodeException.hpp"
+#include "modulo_core/utilities/utilities.hpp"
+#include "modulo_core/exceptions/UnconfiguredNodeException.hpp"
 
 namespace modulo::core {
 

@@ -1,9 +1,10 @@
-#include "modulo_core/Cell.hpp"
 #include <dynamical_systems/Circular.hpp>
 #include <eigen3/Eigen/Core>
 #include <exception>
 #include <iostream>
 #include <rcutils/cmdline_parser.h>
+
+#include "modulo_core/Cell.hpp"
 
 namespace {
 class MotionGenerator : public modulo::core::Cell {
