@@ -84,7 +84,7 @@ const std::list<std::shared_ptr<state_representation::Predicate>> Component::get
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 Component::on_configure(const rclcpp_lifecycle::State& state) {
-  this->add_periodic_call(std::bind(&Component::evaluate_predicate_functions, this),
+  this->add_periodic_call([this] { this->evaluate_predicate_functions(); },
                           std::chrono::milliseconds(this->get_parameter("predicate_checking_period").as_int()));
   for (auto& [key, val] : this->predicates_) {
     // check if the predicate is external or local

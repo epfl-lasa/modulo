@@ -149,7 +149,7 @@ Component::Component(const std::string& node_name,
                      const std::chrono::duration<int64_t, DurationT>& period,
                      bool intra_process_comms) : Cell(node_name, period, intra_process_comms) {
   this->declare_parameter<int>("predicate_checking_period", 100);
-  this->add_predicate("is_configured", std::bind(&Component::is_configured, this));
-  this->add_predicate("is_active", std::bind(&Component::is_active, this));
+  this->add_predicate("is_configured", [this] { return this->is_configured(); });
+  this->add_predicate("is_active", [this] { return this->is_active(); });
 }
 }// namespace modulo::core
