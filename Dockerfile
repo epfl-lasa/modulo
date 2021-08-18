@@ -23,7 +23,7 @@ RUN sudo ldconfig
 
 # copy sources and build ROS workspace with user permissions
 WORKDIR ${HOME}/ros2_ws/
-COPY --chown=${USER} ./source/packages/ ./src/
+COPY --chown=${USER} ./source/ ./src/
 RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"
 
 WORKDIR ${HOME}
