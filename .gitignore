@@ -4,5 +4,3 @@
 
 .idea
 cmake-build-*
-
-/source/lib/state_representation/build/*
