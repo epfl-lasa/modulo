@@ -4,6 +4,13 @@
 #include "modulo_core/exceptions/PredicateNotFoundException.hpp"
 
 namespace modulo::core {
+
+Component::Component(const rclcpp::NodeOptions& options) : Cell(options) {
+  this->declare_parameter<int>("predicate_checking_period", 100);
+  this->add_predicate("is_configured", [this] { return this->is_configured(); });
+  this->add_predicate("is_active", [this] { return this->is_active(); });
+}
+
 Component::~Component() {
   this->on_shutdown();
 }
