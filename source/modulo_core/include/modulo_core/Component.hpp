@@ -19,7 +19,7 @@ private:
   std::map<std::string, std::shared_ptr<state_representation::Predicate>> predicates_;///< map of predicates
   std::list<std::pair<std::string, std::function<bool(void)>>> predicate_functions_;  ///< list of predicate functions evaluated at each step
   std::map<std::string, std::string> external_predicate_channels_;                    ///< map storing the channels for the external predicates
-  
+
   /**
    * @brief Periodically called function that evaluates the predicates functions
    */
@@ -112,6 +112,13 @@ public:
   explicit Component(const std::string& node_name,
                      const std::chrono::duration<int64_t, DurationT>& period,
                      bool intra_process_comms = false);
+
+  /**
+   * @brief Component construction from ROS2 NodeOptions
+   * @param options NodeOptions containing a node name in the remapping arguments list and a "period" parameter
+   * with a value in seconds in the parameter override list
+   */
+  explicit Component(const rclcpp::NodeOptions& options);
 
   /**
    * @brief Destructor
