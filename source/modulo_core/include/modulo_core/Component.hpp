@@ -17,8 +17,7 @@ namespace modulo::core {
 class Component : public core::Cell {
 private:
   std::map<std::string, std::shared_ptr<state_representation::Predicate>> predicates_;///< map of predicates
-  std::list<std::pair<std::string, std::function<bool(void)>>> predicate_functions_;  ///< list of predicate functions evaluated at each step
-  std::map<std::string, std::string> external_predicate_channels_;                    ///< map storing the channels for the external predicates
+  std::map<std::string, std::function<bool(void)>> predicate_functions_;              ///< map of predicate functions evaluated at each step
 
   /**
    * @brief Periodically called function that evaluates the predicates functions
@@ -132,20 +131,6 @@ public:
   const std::list<std::shared_ptr<state_representation::Predicate>> get_predicates() const;
 
   /**
-   * @brief Transition callback for state configuring
-   * on_configure callback is being called when the lifecycle node
-   * enters the "configuring" state.
-   * Depending on the return value of this function, the state machine
-   * either invokes a transition to the "inactive" state or stays
-   * in "unconfigured".
-   * TRANSITION_CALLBACK_SUCCESS transitions to "inactive"
-   * TRANSITION_CALLBACK_FAILURE transitions to "unconfigured"
-   * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
-   */
-  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-  on_configure(const rclcpp_lifecycle::State& state) override;
-
-  /**
    * @brief Function computing one step of calculation. It is called periodically in the run function.
    */
   virtual void step() override = 0;
@@ -158,5 +143,7 @@ Component::Component(const std::string& node_name,
   this->declare_parameter<int>("predicate_checking_period", 100);
   this->add_predicate("is_configured", [this] { return this->is_configured(); });
   this->add_predicate("is_active", [this] { return this->is_active(); });
+  this->add_daemon([this] { this->evaluate_predicate_functions(); },
+                   std::chrono::milliseconds(this->get_parameter("predicate_checking_period").as_int()));
 }
 }// namespace modulo::core
