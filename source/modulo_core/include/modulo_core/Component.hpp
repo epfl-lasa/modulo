@@ -148,7 +148,7 @@ public:
   /**
    * @brief Function computing one step of calculation. It is called periodically in the run function.
    */
-  virtual void step() = 0;
+  virtual void step() override = 0;
 };
 
 template <typename DurationT>
