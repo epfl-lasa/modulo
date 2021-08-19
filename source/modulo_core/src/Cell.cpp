@@ -16,18 +16,25 @@ Cell::Cell(const rclcpp::NodeOptions& options) :
     shutdown_(false),
     period_(utilities::parse_period(options)) {
   // add the update parameters call
-  this->update_parameters_timer_ = this->create_wall_timer(this->period_, [this] { this->update_parameters(); });
+  this->add_daemon([this] { this->update_parameters(); }, this->period_);
 }
 
 Cell::~Cell() {
-  this->parameters_.clear();
   this->on_shutdown();
 }
 
 void Cell::reset() {
   this->active_ = false;
   this->configured_ = false;
-  this->handlers_.clear();
+  // clear the map of handlers only for non always activated ones
+  for (auto it = this->handlers_.cbegin(); it != this->handlers_.cend(); /* no increment */) {
+    if (!it->second.second) {
+      it = this->handlers_.erase(it);
+    }
+    else {
+      ++it;
+    }
+  }
   this->timers_.clear();
 }
 
@@ -343,10 +350,6 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::
   // add default transform broadcaster and transform listener
   this->add_transform_broadcaster(this->period_, true);
   this->add_transform_listener(10 * this->period_);
-  // set all always active handlers to be activated
-  for (auto& h : this->handlers_) {
-    if (h.second.second) h.second.first->activate();
-  }
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
@@ -382,10 +385,12 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::
     RCLCPP_ERROR(get_logger(), "Deactivation failed.");
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
-  // set all handlers to not activated
+  // set all handlers to not activated except for the one always active
   this->active_ = false;
   for (auto& h : this->handlers_) {
-    if (!h.second.second) h.second.first->deactivate();
+    if (!h.second.second) {
+      h.second.first->deactivate();
+    }
   }
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
@@ -421,6 +426,9 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::
   }
   // reset all handlers for clean shutdown
   this->reset();
+  this->handlers_.clear();
+  this->daemons_.clear();
+  this->parameters_.clear();
   this->shutdown_ = true;
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
@@ -449,6 +457,10 @@ void Cell::run_periodic_call(const std::function<void(void)>& callback_function)
 
 void Cell::add_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::nanoseconds& period) {
   this->timers_.push_back(this->create_wall_timer(period, [this, callback_function] { this->run_periodic_call(callback_function); }));
+}
+
+void Cell::add_daemon(const std::function<void(void)>& callback_function, const std::chrono::nanoseconds& period) {
+  this->daemons_.push_back(this->create_wall_timer(period, callback_function));
 }
 
 void Cell::update_parameters() {

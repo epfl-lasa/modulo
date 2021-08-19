@@ -42,10 +42,11 @@ private:
   bool active_;                                                                                          ///< boolean that informs that the node has been activated, i.e passed by the on_activate state
   bool shutdown_;                                                                                        ///< boolean that informs that the node has been shutdown, i.e passed by the on_shutdown state
   std::shared_ptr<rclcpp::TimerBase> update_parameters_timer_;                                           ///< reference to the timer for periodically that periodicall update the parameters
-  std::list<std::shared_ptr<rclcpp::TimerBase>> timers_;                                                 ///< reference to timers for periodically called functions
   std::chrono::nanoseconds period_;                                                                      ///< rate of the publisher functions in nanoseconds
   std::map<std::string, std::shared_ptr<state_representation::ParameterInterface>> parameters_;          ///< list for storing parameters
   std::map<std::string, std::pair<std::shared_ptr<communication::CommunicationHandler>, bool>> handlers_;///< map for storing publishers, subscriptions and tf
+  std::list<std::shared_ptr<rclcpp::TimerBase>> timers_;                                                 ///< reference to timers for periodically called functions
+  std::list<std::shared_ptr<rclcpp::TimerBase>> daemons_;                                                ///< reference to timers for daemonized functions
 
   /**
    * @brief Function to clear all publishers, subscriptions and services
@@ -56,7 +57,7 @@ private:
    * @brief Function to add a default transform broadcaster to the map of handlers
    * @tparam DurationT template value for accepting any type of std::chrono duration values
    * @param period the period to wait between two publishing
-   * @param always_active if true, always publish the transform as soon as the node is configured
+   * @param always_active if true, always publish the transform even if the node is not configured
    */
   template <typename DurationT>
   void add_transform_broadcaster(const std::chrono::duration<int64_t, DurationT>& period,
@@ -144,7 +145,7 @@ public:
    * @param channel unique name of the publish channel that is used as key to the map
    * @param recipient the state that contain the data to be published
    * @param period the period to wait between two publishing
-   * @param always_active if true, always publish the message as soon as the node is configured
+   * @param always_active if true, always publish even if the node is not configured
    * @param queue_size publisher parameters indicating the maximum size of the buffer
    */
   template <typename MsgT, class RecT, typename DurationT>
@@ -160,7 +161,7 @@ public:
    * @tparam RecT template value for accepting any type of recipient
    * @param channel unique name of the publish channel that is used as key to the map
    * @param recipient the state that contain the data to be published
-   * @param always_active if true, always publish the message as soon as the node is configured
+   * @param always_active if true, always publish even if the node is not configured
    * @param queue_size publisher parameters indicating the maximum size of the buffer
    */
   template <typename MsgT, class RecT>
@@ -177,7 +178,7 @@ public:
    * @param channel unique name of the publish channel that is used as key to the map
    * @param recipient the state that contain the data to be published
    * @param period the period to wait between two publishing
-   * @param always_active if true, always publish the message as soon as the node is configured
+   * @param always_active if true, always publish even if the node is not configured
    * @param queue_size publisher parameters indicating the maximum size of the buffer
    */
   template <class RecT, typename DurationT>
@@ -193,7 +194,7 @@ public:
    * @tparam RecT template value for accepting any State type recipient
    * @param channel unique name of the publish channel that is used as key to the map
    * @param recipient the state that contain the data to be published
-   * @param always_active if true, always publish the message as soon as the node is configured
+   * @param always_active if true, always publish even if the node is not configured
    * @param queue_size publisher parameters indicating the maximum size of the buffer
    */
   template <class RecT>
@@ -210,7 +211,7 @@ public:
    * @param channel unique name of the subscription channel that is used as key to the map
    * @param recipient the state that will contain the received data
    * @param timeout the period after wich to consider that the subscriber has timeout
-   * @param always_active if true, always receive messages from the topic as soon as the node is configured
+   * @param always_active if true, always receive messages from the topic even if the node is not configured
    * @param queue_size subscriber parameters indicating the maximum size of the buffer
    */
   template <typename MsgT, class RecT, typename DurationT>
@@ -224,7 +225,7 @@ public:
    * @brief Template function to add a generic subscription to the map of handlers
    * @param channel unique name of the subscription channel that is used as key to the map
    * @param recipient the state that will contain the received data
-   * @param always_active if true, always receive messages from the topic as soon as the node is configured
+   * @param always_active if true, always receive messages from the topic even if the node is not configured
    * @param nb_period_to_timeout the number of period before considering that the subscription has timeout
    * @param queue_size subscriber parameters indicating the maximum size of the buffer
    */
@@ -243,7 +244,7 @@ public:
    * @param channel unique name of the subscription channel that is used as key to the map
    * @param recipient the state that will contain the received data
    * @param timeout the period after wich to consider that the subscriber has timeout
-   * @param always_active if true, always receive messages from the topic as soon as the node is configured
+   * @param always_active if true, always receive messages from the topic even if the node is not configured
    * @param queue_size subscriber parameters indicating the maximum size of the buffer
    */
   template <class RecT, typename DurationT>
@@ -259,7 +260,7 @@ public:
    * @tparam RecT template value for accepting any State type recipient
    * @param channel unique name of the subscription channel that is used as key to the map
    * @param recipient the state that will contain the received data
-   * @param always_active if true, always receive messages from the topic as soon as the node is configured
+   * @param always_active if true, always receive messages from the topic even if the node is not configured
    * @param nb_period_to_timeout the number of period before considering that the subscription has timeout
    * @param queue_size subscriber parameters indicating the maximum size of the buffer
    */
@@ -284,7 +285,7 @@ public:
    * @brief Function to add a generic transform broadcaster to the map of handlers
    * @param recipient the state that contain the data to be published
    * @param period the period to wait between two publishing
-   * @param always_active if true, always publish the transform as soon as the node is configured
+   * @param always_active if true, always publish the transform even if the node is not configured
    */
   template <typename DurationT>
   void add_transform_broadcaster(const std::shared_ptr<state_representation::CartesianState>& recipient,
@@ -296,7 +297,7 @@ public:
    * @brief Function to add a generic transform broadcaster to the map of handlers
    * @param recipient the state that contain the data to be published
    * @param period the period to wait between two publishing
-   * @param always_active if true, always publish the transform as soon as the node is configured
+   * @param always_active if true, always publish the transform even if the node is not configured
    */
   template <typename DurationT>
   void add_transform_broadcaster(const state_representation::CartesianPose& recipient,
@@ -308,7 +309,7 @@ public:
    * @brief Function to add a generic transform broadcaster to the map of handlers
    * @param recipient the state that contain the data to be published
    * @param period the period to wait between two publishing
-   * @param always_active if true, always publish the transform as soon as the node is configured
+   * @param always_active if true, always publish the transform even if the node is not configured
    */
   template <typename DurationT>
   void add_transform_broadcaster(const std::shared_ptr<state_representation::ParameterInterface>& recipient,
@@ -319,7 +320,7 @@ public:
   /**
    * @brief Function to add a generic transform broadcaster to the map of handlers
    * @param recipient the state that contain the data to be published
-   * @param always_active if true, always publish the transform as soon as the node is configured
+   * @param always_active if true, always publish the transform even if the node is not configured
    */
   void add_transform_broadcaster(const std::shared_ptr<state_representation::CartesianState>& recipient,
                                  bool always_active = false,
@@ -328,7 +329,7 @@ public:
   /**
    * @brief Function to add a generic transform broadcaster to the map of handlers
    * @param recipient the state that contain the data to be published
-   * @param always_active if true, always publish the transform as soon as the node is configured
+   * @param always_active if true, always publish the transform even if the node is not configured
    */
   void add_transform_broadcaster(const state_representation::CartesianPose& recipient,
                                  bool always_active = false,
@@ -337,7 +338,7 @@ public:
   /**
    * @brief Function to add a generic transform broadcaster to the map of handlers
    * @param recipient the state that contain the data to be published
-   * @param always_active if true, always publish the transform as soon as the node is configured
+   * @param always_active if true, always publish the transform even if the node is not configured
    */
   void add_transform_broadcaster(const std::shared_ptr<state_representation::ParameterInterface>& recipient,
                                  bool always_active = false,
@@ -534,6 +535,13 @@ public:
    * @param period the period between two calls
    */
   void add_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::nanoseconds& period);
+
+  /**
+   * @brief Function to daemonized the callback function given in input
+   * @param callback_function the function to call
+   * @param period the period between two calls
+   */
+  void add_daemon(const std::function<void(void)>& callback_function, const std::chrono::nanoseconds& period);
 };
 
 template <typename DurationT>
@@ -585,6 +593,10 @@ void Cell::add_publisher(const std::string& channel,
   handler->set_publisher(this->create_publisher<MsgT>(channel, queue_size));
   handler->set_timer(this->create_wall_timer(period, [handler] { handler->publish_callback(); }));
   this->handlers_.insert(std::make_pair(channel, std::make_pair(handler, always_active)));
+  // if the handler is always active, activate it directly
+  if (always_active) {
+    handler->activate();
+  }
 }
 
 template <typename MsgT, class RecT>
@@ -621,6 +633,9 @@ void Cell::add_subscription(const std::string& channel,
   auto handler = std::make_shared<communication::SubscriptionHandler<RecT, MsgT>>(recipient, timeout);
   handler->set_subscription(this->create_subscription<MsgT>(channel, queue_size, [handler](const std::shared_ptr<MsgT> msg) { handler->subscription_callback(msg); }));
   this->handlers_.insert(std::make_pair(channel, std::make_pair(handler, always_active)));
+  if (always_active) {
+    handler->activate();
+  }
 }
 
 template <typename MsgT, class RecT>
@@ -658,6 +673,9 @@ void Cell::add_transform_broadcaster(const std::chrono::duration<int64_t, Durati
   handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
   handler->set_timer(this->create_wall_timer(period, [handler] { handler->publish_callback(); }));
   this->handlers_.insert(std::make_pair("tf_broadcaster", std::make_pair(handler, always_active)));
+  if (always_active) {
+    handler->activate();
+  }
 }
 
 template <typename DurationT>
@@ -669,6 +687,9 @@ void Cell::add_transform_broadcaster(const std::shared_ptr<state_representation:
   handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
   handler->set_timer(this->create_wall_timer(period, [handler] { handler->publish_callback(); }));
   this->handlers_.insert(std::make_pair(recipient->get_name() + "_in_" + recipient->get_reference_frame() + "_broadcaster", std::make_pair(handler, always_active)));
+  if (always_active) {
+    handler->activate();
+  }
 }
 
 template <typename DurationT>
@@ -691,6 +712,9 @@ void Cell::add_transform_broadcaster(const std::shared_ptr<state_representation:
   handler->set_publisher(this->create_publisher<tf2_msgs::msg::TFMessage>("tf", queue_size));
   handler->set_timer(this->create_wall_timer(period, [handler] { handler->publish_callback(); }));
   this->handlers_.insert(std::make_pair(parameter->get_value().get_name() + "_in_" + parameter->get_value().get_reference_frame() + "_broadcaster", std::make_pair(handler, always_active)));
+  if (always_active) {
+    handler->activate();
+  }
 }
 
 template <typename DurationT>
