@@ -43,11 +43,17 @@ void Component::add_predicate(const std::shared_ptr<state_representation::Predic
 }
 
 void Component::add_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function) {
+  // insert the predicate function in the list overwriting it if it already exists
+  this->predicate_functions_.insert_or_assign(predicate_name, predicate_function);
   // crate a predicate with named prefixed with the action name
   auto predicate = std::make_shared<state_representation::Predicate>(predicate_name);
-  this->add_predicate(predicate);
-  // insert the predicate function in the list
-  this->predicate_functions_.insert(std::make_pair(predicate_name, predicate_function));
+  // try to insert the predicate in the map. If it already exists, do nothing to just
+  // update the predicate_function
+  try {
+    this->add_predicate(predicate);
+  } catch (exceptions::PredicateAlreadyRegisteredException&) {
+    RCLCPP_DEBUG(this->get_logger(), "Predicate with same name already exists, overwriting predicate callback function");
+  }
 }
 
 void Component::add_received_predicate(const std::string& predicate_name, const std::string& channel) {
