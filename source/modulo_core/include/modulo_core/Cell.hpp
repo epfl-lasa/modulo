@@ -531,6 +531,11 @@ public:
 
   /**
    * @brief Function to add a periodic call to the function given in input
+   * @details This function is similar to the add_deamon one with
+   * the difference that the callback_function is only called when the node
+   * is active. The desired design is, therefore, that it should only be called
+   * in the on_configure function, as periodic_call will be cleaned when on_cleanup
+   * is called.
    * @param callback_function the function to call
    * @param period the period between two calls
    */
@@ -538,6 +543,10 @@ public:
 
   /**
    * @brief Function to daemonize the callback function given in input
+   * @details This function is similar to the add_periodic_call one with
+   * the difference that a daemon is always active, including when the node
+   * is not configured. The desired design is, therefore, that it should be
+   * called only in the constructor to avoid potential duplicates.
    * @param callback_function the function to call
    * @param period the period between two calls
    */
