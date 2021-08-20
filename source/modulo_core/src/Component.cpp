@@ -5,10 +5,16 @@
 
 namespace modulo::core {
 
-Component::Component(const rclcpp::NodeOptions& options) : Cell(options) {
+void Component::on_init() {
   this->declare_parameter<int>("predicate_checking_period", 100);
   this->add_predicate("is_configured", [this] { return this->is_configured(); });
   this->add_predicate("is_active", [this] { return this->is_active(); });
+  this->add_daemon([this] { this->evaluate_predicate_functions(); },
+                   std::chrono::milliseconds(this->get_parameter("predicate_checking_period").as_int()));
+}
+
+Component::Component(const rclcpp::NodeOptions& options) : Cell(options) {
+  this->on_init();
 }
 
 Component::~Component() {
@@ -16,9 +22,13 @@ Component::~Component() {
 }
 
 void Component::evaluate_predicate_functions() {
-  for (auto& predicate : this->predicate_functions_) {
-    this->set_predicate_value(predicate.first, (predicate.second)());
+  for (auto const& [key, val] : this->predicate_functions_) {
+    this->set_predicate_value(key, (val)());
   }
+}
+
+std::string Component::generate_predicate_topic(const std::string& predicate_name) const {
+  return "/predicates/" + std::string(this->get_name()) + "/" + predicate_name;
 }
 
 void Component::add_predicate(const std::shared_ptr<state_representation::Predicate>& predicate) {
@@ -28,20 +38,29 @@ void Component::add_predicate(const std::shared_ptr<state_representation::Predic
   }
   // add the predicate to the map
   this->predicates_.insert(std::make_pair(predicate_name, predicate));
+  // add the publisher predicate
+  this->add_publisher<std_msgs::msg::Bool>(this->generate_predicate_topic(predicate_name), predicate, true);
 }
 
 void Component::add_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function) {
+  // insert the predicate function in the list overwriting it if it already exists
+  this->predicate_functions_.insert_or_assign(predicate_name, predicate_function);
   // crate a predicate with named prefixed with the action name
   auto predicate = std::make_shared<state_representation::Predicate>(predicate_name);
-  this->add_predicate(predicate);
-  // insert the predicate function in the list
-  this->predicate_functions_.push_back(std::make_pair(predicate_name, predicate_function));
+  // try to insert the predicate in the map. If it already exists, do nothing to just
+  // update the predicate_function
+  try {
+    this->add_predicate(predicate);
+  } catch (exceptions::PredicateAlreadyRegisteredException&) {
+    RCLCPP_DEBUG(this->get_logger(), "Predicate with same name already exists, overwriting predicate callback function");
+  }
 }
 
 void Component::add_received_predicate(const std::string& predicate_name, const std::string& channel) {
   auto predicate = std::make_shared<state_representation::Predicate>(predicate_name);
   this->predicates_.insert(std::make_pair(predicate_name, predicate));
-  this->external_predicate_channels_.insert(std::make_pair(predicate_name, channel));
+  // add a subscription to the channel where the predicate is published
+  this->add_subscription<std_msgs::msg::Bool>(channel, predicate, true);
 }
 
 bool Component::get_predicate_value(const std::string& predicate_name) const {
@@ -88,21 +107,5 @@ const std::list<std::shared_ptr<state_representation::Predicate>> Component::get
   std::list<std::shared_ptr<state_representation::Predicate>> predicate_list;
   std::transform(this->predicates_.begin(), this->predicates_.end(), std::back_inserter(predicate_list), [](const std::map<std::string, std::shared_ptr<state_representation::Predicate>>::value_type& val) { return val.second; });
   return predicate_list;
-}
-
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-Component::on_configure(const rclcpp_lifecycle::State& state) {
-  this->add_periodic_call([this] { this->evaluate_predicate_functions(); },
-                          std::chrono::milliseconds(this->get_parameter("predicate_checking_period").as_int()));
-  for (auto& [key, val] : this->predicates_) {
-    // check if the predicate is external or local
-    auto external_predicate_iterator = this->external_predicate_channels_.find(key);
-    if (external_predicate_iterator == this->external_predicate_channels_.end()) {
-      this->add_publisher<std_msgs::msg::Bool>("/predicates/" + std::string(this->get_name()) + "/" + key, val, true);
-    } else {
-      this->add_subscription<std_msgs::msg::Bool>(external_predicate_iterator->second, val, true);
-    }
-  }
-  return this->Cell::on_configure(state);
 }
 }// namespace modulo::core
