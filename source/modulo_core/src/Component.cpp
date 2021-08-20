@@ -21,6 +21,10 @@ void Component::evaluate_predicate_functions() {
   }
 }
 
+std::string Component::generate_predicate_topic(const std::string& predicate_name) const {
+  return "/predicates/" + std::string(this->get_name()) + "/" + predicate_name;
+}
+
 void Component::add_predicate(const std::shared_ptr<state_representation::Predicate>& predicate) {
   std::string predicate_name = predicate->get_name();
   if (this->predicates_.find(predicate_name) != this->predicates_.end()) {
@@ -29,7 +33,7 @@ void Component::add_predicate(const std::shared_ptr<state_representation::Predic
   // add the predicate to the map
   this->predicates_.insert(std::make_pair(predicate_name, predicate));
   // add the publisher predicate
-  this->add_publisher<std_msgs::msg::Bool>("/predicates/" + std::string(this->get_name()) + "/" + predicate_name, predicate, true);
+  this->add_publisher<std_msgs::msg::Bool>(this->generate_predicate_topic(predicate_name), predicate, true);
 }
 
 void Component::add_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function) {

@@ -24,6 +24,13 @@ private:
    */
   void evaluate_predicate_functions();
 
+  /**
+   * @brief Create a topic name from the predicate name
+   * @param predicate_name The predicate name
+   * @return A corresponding topic name
+   */
+  std::string generate_predicate_topic(const std::string& predicate_name) const;
+
 protected:
   /**
    * @brief Add a predicate to the map of predicates
