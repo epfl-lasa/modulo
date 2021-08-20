@@ -5,10 +5,16 @@
 
 namespace modulo::core {
 
-Component::Component(const rclcpp::NodeOptions& options) : Cell(options) {
+void Component::on_init() {
   this->declare_parameter<int>("predicate_checking_period", 100);
   this->add_predicate("is_configured", [this] { return this->is_configured(); });
   this->add_predicate("is_active", [this] { return this->is_active(); });
+  this->add_daemon([this] { this->evaluate_predicate_functions(); },
+                   std::chrono::milliseconds(this->get_parameter("predicate_checking_period").as_int()));
+}
+
+Component::Component(const rclcpp::NodeOptions& options) : Cell(options) {
+  this->on_init();
 }
 
 Component::~Component() {

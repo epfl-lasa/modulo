@@ -20,6 +20,11 @@ private:
   std::map<std::string, std::function<bool(void)>> predicate_functions_;              ///< map of predicate functions evaluated at each step
 
   /**
+   * @brief Initialize all the parameters needed in the constructors
+   */
+  void on_init();
+
+  /**
    * @brief Periodically called function that evaluates the predicates functions
    */
   void evaluate_predicate_functions();
@@ -147,10 +152,6 @@ template <typename DurationT>
 Component::Component(const std::string& node_name,
                      const std::chrono::duration<int64_t, DurationT>& period,
                      bool intra_process_comms) : Cell(node_name, period, intra_process_comms) {
-  this->declare_parameter<int>("predicate_checking_period", 100);
-  this->add_predicate("is_configured", [this] { return this->is_configured(); });
-  this->add_predicate("is_active", [this] { return this->is_active(); });
-  this->add_daemon([this] { this->evaluate_predicate_functions(); },
-                   std::chrono::milliseconds(this->get_parameter("predicate_checking_period").as_int()));
+  this->on_init();
 }
 }// namespace modulo::core
