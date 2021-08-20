@@ -537,7 +537,7 @@ public:
   void add_periodic_call(const std::function<void(void)>& callback_function, const std::chrono::nanoseconds& period);
 
   /**
-   * @brief Function to daemonized the callback function given in input
+   * @brief Function to daemonize the callback function given in input
    * @param callback_function the function to call
    * @param period the period between two calls
    */
