@@ -507,31 +507,31 @@ void Cell::update_parameters() {
 
         case StateType::PARAMETER_CARTESIANSTATE: {
           std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-          std::static_pointer_cast<Parameter<CartesianState>>(param)->get_value().from_std_vector(value);
+          std::static_pointer_cast<Parameter<CartesianState>>(param)->get_value().set_data(value);
           break;
         }
 
         case StateType::PARAMETER_CARTESIANPOSE: {
           std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-          std::static_pointer_cast<Parameter<CartesianPose>>(param)->get_value().CartesianPose::from_std_vector(value);
+          std::static_pointer_cast<Parameter<CartesianPose>>(param)->get_value().CartesianPose::set_data(value);
           break;
         }
 
         case StateType::PARAMETER_JOINTSTATE: {
           std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-          std::static_pointer_cast<Parameter<JointState>>(param)->get_value().from_std_vector(value);
+          std::static_pointer_cast<Parameter<JointState>>(param)->get_value().set_data(value);
           break;
         }
 
         case StateType::PARAMETER_JOINTPOSITIONS: {
           std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-          std::static_pointer_cast<Parameter<JointPositions>>(param)->get_value().JointPositions::from_std_vector(value);
+          std::static_pointer_cast<Parameter<JointPositions>>(param)->get_value().JointPositions::set_data(value);
           break;
         }
 
         case StateType::PARAMETER_ELLIPSOID: {
           std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-          std::static_pointer_cast<Parameter<Ellipsoid>>(param)->get_value().from_std_vector(value);
+          std::static_pointer_cast<Parameter<Ellipsoid>>(param)->get_value().set_data(value);
           break;
         }
 
