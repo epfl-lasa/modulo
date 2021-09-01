@@ -1,8 +1,8 @@
 #!/bin/bash
 ROS_VERSION=foxy
 
+TARGET=development
 IMAGE_NAME=aica-technology/modulo
-IMAGE_TAG=latest
 
 BUILD_FLAGS=()
 
@@ -15,8 +15,9 @@ while getopts 'r' opt; do
 done
 shift "$(( OPTIND - 1 ))"
 
+
 BUILD_FLAGS+=(--build-arg ROS_VERSION="${ROS_VERSION}")
-BUILD_FLAGS+=(-t "${IMAGE_NAME}":"${IMAGE_TAG}")
+BUILD_FLAGS+=(-t "${IMAGE_NAME}/${TARGET}":"${ROS_VERSION}")
 
 docker pull ghcr.io/aica-technology/ros2-ws:"${ROS_VERSION}"
-DOCKER_BUILDKIT=1 docker build "${BUILD_FLAGS[@]}" .
+DOCKER_BUILDKIT=1 docker build --file ./Dockerfile.${TARGET} "${BUILD_FLAGS[@]}" .

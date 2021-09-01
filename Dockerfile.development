@@ -21,12 +21,10 @@ RUN sudo ./install.sh
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/openrobots/lib/
 RUN sudo ldconfig
 
+WORKDIR ${HOME}/ros2_ws
 # copy sources and build ROS workspace with user permissions
 WORKDIR ${HOME}/ros2_ws/
 COPY --chown=${USER} ./source/ ./src/
-RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"
-
-WORKDIR ${HOME}
 
 # Clean image
 RUN sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
