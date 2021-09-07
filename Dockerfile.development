@@ -28,5 +28,5 @@ COPY --chown=${USER} ./source/ ./src/
 # Clean image
 RUN sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
 
-# add the key for robotpkg
+# Restore the key for robotpkg
 RUN sudo curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
