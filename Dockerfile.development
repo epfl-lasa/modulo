@@ -1,32 +1,7 @@
 ARG ROS_VERSION=foxy
-FROM ghcr.io/aica-technology/ros2-ws:${ROS_VERSION}
-
-# install google dependencies
-COPY --from=ghcr.io/epfl-lasa/control-libraries/development-dependencies:latest /usr/local/include/google /usr/local/include/google
-COPY --from=ghcr.io/epfl-lasa/control-libraries/development-dependencies:latest /usr/local/lib/libproto* /usr/local/lib/
-COPY --from=ghcr.io/epfl-lasa/control-libraries/development-dependencies:latest /usr/local/bin/protoc /usr/local/bin
-RUN ldconfig
-
-# install control library packages
-WORKDIR ${HOME}
-RUN git clone -b develop --depth 1 https://github.com/epfl-lasa/control-libraries.git
-WORKDIR ${HOME}/control-libraries/source
-RUN ./install.sh -y
-
-# generate protobuf bindings
-WORKDIR ${HOME}/control-libraries/protocol
-RUN ./install.sh
-
-ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/openrobots/lib/
-RUN ldconfig
+FROM ghcr.io/aica-technology/ros2-control-libraries:${ROS_VERSION}
 
 WORKDIR ${HOME}/ros2_ws
 # copy sources and build ROS workspace with user permissions
 WORKDIR ${HOME}/ros2_ws/
 COPY --chown=${USER} ./source/ ./src/
-
-# Clean image
-RUN sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
-
-# Restore the key for robotpkg
-RUN sudo curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
