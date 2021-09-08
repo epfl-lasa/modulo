@@ -1,5 +1,6 @@
 ARG ROS_VERSION=foxy
-FROM aica-technology/modulo/development:${ROS_VERSION} as remote-development
+ARG BASE_IMAGE=aica-technology/modulo/development:${ROS_VERSION}
+FROM ${BASE_IMAGE} as remote-development
 
 # build modulo
 RUN su ${USER} -c /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"
