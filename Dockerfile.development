@@ -9,12 +9,12 @@ RUN ldconfig
 
 # install control library packages
 WORKDIR ${HOME}
-RUN git clone -b develop --depth 1 https://github.com/epfl-lasa/control_libraries.git
-WORKDIR ${HOME}/control_libraries/source
+RUN git clone -b develop --depth 1 https://github.com/epfl-lasa/control-libraries.git
+WORKDIR ${HOME}/control-libraries/source
 RUN ./install.sh -y
 
 # generate protobuf bindings
-WORKDIR ${HOME}/control_libraries/protocol
+WORKDIR ${HOME}/control-libraries/protocol
 RUN ./install.sh
 
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/openrobots/lib/
