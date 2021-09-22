@@ -1,3 +1,8 @@
+## 1.0.0 (September 22, 2020)
+
+Modulo core library to provide ROS2 Cell and Component classes built
+around state_representation and clproto libraries.
+
 ## 0.3.0 (November 18, 2020)
 
 Latest version that fixes different bugs and add the possibility to isolate the containers to run them on dedicated network. Complete list of commits is:
@@ -408,4 +413,3 @@ Latest version that fixes different bugs and add the possibility to isolate the 
   - Modify the README
   - Add the software architechture at its current stage of development
   - Initial commit
-
