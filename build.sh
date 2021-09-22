@@ -38,7 +38,7 @@ DOCKER_BUILDKIT=1 docker build --file ./Dockerfile.development "${BUILD_FLAGS[@]
 if [ $BUILD_PROD = true ]; then
   BUILD_FLAGS=()
   BUILD_FLAGS+=(--build-arg ROS_VERSION="${ROS_VERSION}")
-  BUILD_FLAGS+=(-t "${IMAGE_NAME}/production":"${ROS_VERSION}")
+  BUILD_FLAGS+=(-t "${IMAGE_NAME}":"${ROS_VERSION}")
   BUILD_FLAGS+=("${PARAM_BUILD_FLAGS[@]}")
   DOCKER_BUILDKIT=1 docker build --file ./Dockerfile.production "${BUILD_FLAGS[@]}" .
 fi
