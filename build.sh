@@ -2,7 +2,7 @@
 ROS_VERSION=foxy
 
 BUILD_PROD=false
-IMAGE_NAME=aica-technology/modulo
+IMAGE_NAME=epfl-lasa/modulo
 
 HELP_MESSAGE="Usage: build.sh [-p] [-r]
 
