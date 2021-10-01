@@ -1,7 +1,0 @@
-ARG ROS_VERSION=foxy
-FROM ghcr.io/aica-technology/ros2-control-libraries:${ROS_VERSION}
-
-WORKDIR ${HOME}/ros2_ws
-# copy sources and build ROS workspace with user permissions
-WORKDIR ${HOME}/ros2_ws/
-COPY --chown=${USER} ./source/ ./src/
