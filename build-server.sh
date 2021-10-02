@@ -18,13 +18,13 @@ Options:
   -s, --serve            Start the remove development server
 "
 
-PARAM_BUILD_FLAGS=()
+BUILD_FLAGS=(--build-arg ROS_VERSION="${ROS_VERSION}")
 while [[ $# -gt 0 ]]; do
   opt="$1"
   case $opt in
     -p|--production) BUILD_PROD=true ; shift ;;
-    -r|--rebuild) PARAM_BUILD_FLAGS+=(--no-cache) ; shift ;;
-    -v|--verbose) PARAM_BUILD_FLAGS+=(--progress=plain) ; shift ;;
+    -r|--rebuild) BUILD_FLAGS+=(--no-cache) ; shift ;;
+    -v|--verbose) BUILD_FLAGS+=(--progress=plain) ; shift ;;
     -s|--serve) SERVE_REMOTE=true ; shift ;;
     -h|--help) echo "${HELP_MESSAGE}" ; exit 0 ;;
     *) echo 'Error in command line parsing' >&2
@@ -32,10 +32,6 @@ while [[ $# -gt 0 ]]; do
        exit 1
   esac
 done
-
-BUILD_FLAGS=()
-BUILD_FLAGS+=(--build-arg ROS_VERSION="${ROS_VERSION}")
-BUILD_FLAGS+=("${PARAM_BUILD_FLAGS[@]}")
 
 docker pull ghcr.io/aica-technology/ros2-control-libraries:"${ROS_VERSION}"
 DOCKER_BUILDKIT=1 docker build --target development -t "${IMAGE_NAME}/development:latest" "${BUILD_FLAGS[@]}" .
