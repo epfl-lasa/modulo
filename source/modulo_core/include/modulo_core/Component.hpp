@@ -132,11 +132,6 @@ public:
   explicit Component(const rclcpp::NodeOptions& options);
 
   /**
-   * @brief Destructor
-   */
-  ~Component();
-
-  /**
    * @brief Get the list of predicates of the action
    * @return the list of predicates
    */

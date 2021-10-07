@@ -17,10 +17,6 @@ Component::Component(const rclcpp::NodeOptions& options) : Cell(options) {
   this->on_init();
 }
 
-Component::~Component() {
-  this->on_shutdown();
-}
-
 void Component::evaluate_predicate_functions() {
   for (auto const& [key, val] : this->predicate_functions_) {
     this->set_predicate_value(key, (val)());
