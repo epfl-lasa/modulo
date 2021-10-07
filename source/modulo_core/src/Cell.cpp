@@ -23,8 +23,7 @@ Cell::Cell(const rclcpp::NodeOptions& options) :
 
 Cell::~Cell() {
   RCUTILS_LOG_INFO_NAMED(get_name(), "Shutting down the node before destruction");
-  auto callback_code = this->on_shutdown(this->get_current_state());
-  if (callback_code == rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE) {
+  if (this->on_shutdown(this->get_current_state()) != rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS) {
     RCUTILS_LOG_ERROR_NAMED(get_name(), "Error during the shutdown process, shutting down anyway.");
   }
 }
@@ -427,23 +426,21 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::
   RCUTILS_LOG_INFO_NAMED(get_name(), "on_shutdown() is called from state %s.", state.label().c_str());
   uint8_t current_state = state.id();
   // if the node is already shutdown just return success
-  if (state.id() == lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED) {
+  if (current_state == lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED) {
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
   }
   // check current state and eventually deactivate and deconfigure
   if (current_state == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
     RCUTILS_LOG_INFO_NAMED(get_name(), "Node is active, deactivating it before shutdown.");
-    auto callback_code = this->on_deactivate(this->get_current_state());
-    if (callback_code == rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE) {
-      return callback_code;
+    if (auto callback_return = this->on_deactivate(this->get_current_state()) != CallbackReturn::SUCCESS) {
+      return callback_return;
     }
     current_state = lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE;
   }
   if (current_state == lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE) {
-    RCUTILS_LOG_INFO_NAMED(get_name(), "Node is configured, deconfiguring it before shutdown.");
-    auto callback_code = this->on_cleanup(this->get_current_state());
-    if (callback_code == rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE) {
-      return callback_code;
+    RCUTILS_LOG_INFO_NAMED(get_name(), "Node is inactive, cleaning up before shutdown.");
+    if (auto callback_return = this->on_cleanup(this->get_current_state()) != CallbackReturn::SUCCESS) {
+      return callback_return;
     }
     current_state = lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED;
   }
