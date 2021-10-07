@@ -9,6 +9,8 @@
 #include "modulo_core/utilities/utilities.hpp"
 #include "modulo_core/exceptions/UnconfiguredNodeException.hpp"
 
+using namespace rclcpp_lifecycle::node_interfaces;
+
 namespace modulo::core {
 
 Cell::Cell(const rclcpp::NodeOptions& options) :
@@ -23,7 +25,7 @@ Cell::Cell(const rclcpp::NodeOptions& options) :
 
 Cell::~Cell() {
   RCUTILS_LOG_INFO_NAMED(get_name(), "Shutting down the node before destruction");
-  if (this->on_shutdown(this->get_current_state()) != rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS) {
+  if (this->on_shutdown(this->get_current_state()) != CallbackReturn::SUCCESS) {
     RCUTILS_LOG_ERROR_NAMED(get_name(), "Error during the shutdown process, shutting down anyway.");
   }
 }
@@ -341,21 +343,21 @@ const state_representation::CartesianPose Cell::lookup_transform(const std::stri
   return std::static_pointer_cast<communication::TransformListenerHandler>(this->handlers_.at("tf_listener").first)->lookup_transform(frame_name, reference_frame);
 }
 
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_configure(const rclcpp_lifecycle::State&) {
+LifecycleNodeInterface::CallbackReturn Cell::on_configure(const rclcpp_lifecycle::State&) {
   RCUTILS_LOG_INFO_NAMED(get_name(), "on_configure() is called.");
   this->configured_ = true;
   // call the proxy on_configure function
   if (!this->on_configure()) {
     RCLCPP_ERROR(get_logger(), "Configuration failed");
     this->reset();
-    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
+    return LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
   // add the run periodic call
   this->timers_.push_back(this->create_wall_timer(this->period_, [this] { this->run(); }));
   // add default transform broadcaster and transform listener
   this->add_transform_broadcaster(this->period_, true);
   this->add_transform_listener(10 * this->period_);
-  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  return LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 bool Cell::on_configure() {
@@ -363,19 +365,19 @@ bool Cell::on_configure() {
   return true;
 }
 
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_activate(const rclcpp_lifecycle::State&) {
+LifecycleNodeInterface::CallbackReturn Cell::on_activate(const rclcpp_lifecycle::State&) {
   RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
   // call the proxy on_activate function
   if (!this->on_activate()) {
     RCLCPP_ERROR(get_logger(), "Activation failed.");
-    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
+    return LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
   // set all handlers to activated
   this->active_ = true;
   for (auto& h : this->handlers_) {
     h.second.first->activate();
   }
-  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  return LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 bool Cell::on_activate() {
@@ -383,12 +385,12 @@ bool Cell::on_activate() {
   return true;
 }
 
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_deactivate(const rclcpp_lifecycle::State&) {
+LifecycleNodeInterface::CallbackReturn Cell::on_deactivate(const rclcpp_lifecycle::State&) {
   RCUTILS_LOG_INFO_NAMED(get_name(), "on_deactivate() is called.");
   // call the proxy on_deactivate function
   if (!this->on_deactivate()) {
     RCLCPP_ERROR(get_logger(), "Deactivation failed.");
-    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
+    return LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
   // set all handlers to not activated except for the one always active
   this->active_ = false;
@@ -397,7 +399,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::
       h.second.first->deactivate();
     }
   }
-  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  return LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 bool Cell::on_deactivate() {
@@ -405,16 +407,16 @@ bool Cell::on_deactivate() {
   return true;
 }
 
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_cleanup(const rclcpp_lifecycle::State&) {
+LifecycleNodeInterface::CallbackReturn Cell::on_cleanup(const rclcpp_lifecycle::State&) {
   RCUTILS_LOG_INFO_NAMED(get_name(), "on_cleanup() is called.");
   // call the proxy on_cleanup function
   if (!this->on_cleanup()) {
     RCLCPP_ERROR(get_logger(), "Cleanup failed.");
-    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
+    return LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
   // reset all handlers
   this->reset();
-  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  return LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 bool Cell::on_cleanup() {
@@ -422,24 +424,26 @@ bool Cell::on_cleanup() {
   return true;
 }
 
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_shutdown(const rclcpp_lifecycle::State& state) {
+LifecycleNodeInterface::CallbackReturn Cell::on_shutdown(const rclcpp_lifecycle::State& state) {
   RCUTILS_LOG_INFO_NAMED(get_name(), "on_shutdown() is called from state %s.", state.label().c_str());
   uint8_t current_state = state.id();
   // if the node is already shutdown just return success
   if (current_state == lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED) {
-    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+    return LifecycleNodeInterface::CallbackReturn::SUCCESS;
   }
   // check current state and eventually deactivate and deconfigure
   if (current_state == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
     RCUTILS_LOG_INFO_NAMED(get_name(), "Node is active, deactivating it before shutdown.");
-    if (auto callback_return = this->on_deactivate(this->get_current_state()) != CallbackReturn::SUCCESS) {
+    auto callback_return = this->on_deactivate(this->get_current_state());
+    if (callback_return != CallbackReturn::SUCCESS) {
       return callback_return;
     }
     current_state = lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE;
   }
   if (current_state == lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE) {
     RCUTILS_LOG_INFO_NAMED(get_name(), "Node is inactive, cleaning up before shutdown.");
-    if (auto callback_return = this->on_cleanup(this->get_current_state()) != CallbackReturn::SUCCESS) {
+    auto callback_return = this->on_cleanup(this->get_current_state());
+    if (callback_return != CallbackReturn::SUCCESS) {
       return callback_return;
     }
     current_state = lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED;
@@ -447,7 +451,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::
   // call the proxy on_shutdown function
   if (!this->on_shutdown()) {
     RCLCPP_ERROR(get_logger(), "Shutdown failed.");
-    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
+    return LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
   // reset all handlers for clean shutdown
   this->reset();
@@ -455,7 +459,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::
   this->daemons_.clear();
   this->parameters_.clear();
   this->shutdown_ = true;
-  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  return LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 bool Cell::on_shutdown() {
