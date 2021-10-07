@@ -1,20 +1,23 @@
 #!/bin/bash
 ROS_VERSION=foxy
 
-BUILD_PROD=false
-SERVE_REMOTE=false
-
 IMAGE_NAME=epfl-lasa/modulo
+IMAGE_TAG=latest
+
 REMOTE_SSH_PORT=4440
+SERVE_REMOTE=false
 
 HELP_MESSAGE="Usage: build.sh [-p] [-r]
 Options:
-  -p, --production       Build the production ready image on top of
-                         of the development one.
+  -d, --development      Only target the development layer to prevent
+                         sources from being built or tested
+
   -r, --rebuild          Rebuild the image(s) using the docker
                          --no-cache option
+
   -v, --verbose          Use the verbose option during the building
                          process
+
   -s, --serve            Start the remove development server
 "
 
@@ -22,7 +25,7 @@ BUILD_FLAGS=(--build-arg ROS_VERSION="${ROS_VERSION}")
 while [[ $# -gt 0 ]]; do
   opt="$1"
   case $opt in
-    -p|--production) BUILD_PROD=true ; shift ;;
+    -d|--development) BUILD_FLAGS+=(--target development) ; IMAGE_TAG=development ; shift ;;
     -r|--rebuild) BUILD_FLAGS+=(--no-cache) ; shift ;;
     -v|--verbose) BUILD_FLAGS+=(--progress=plain) ; shift ;;
     -s|--serve) SERVE_REMOTE=true ; shift ;;
@@ -34,12 +37,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 docker pull ghcr.io/aica-technology/ros2-control-libraries:"${ROS_VERSION}"
-DOCKER_BUILDKIT=1 docker build --target development -t "${IMAGE_NAME}/development:latest" "${BUILD_FLAGS[@]}" .
-
-if [ "${BUILD_PROD}" = true ]; then
-  DOCKER_BUILDKIT=1 docker build --target production -t "${IMAGE_NAME}:latest" "${BUILD_FLAGS[@]}" .
-fi
+DOCKER_BUILDKIT=1 docker build -t "${IMAGE_NAME}/${IMAGE_TAG}" "${BUILD_FLAGS[@]}" . || exit 1
 
 if [ "${SERVE_REMOTE}" = true ]; then
-  aica-docker server "${IMAGE_NAME}/development:latest" -u ros2 -p "${REMOTE_SSH_PORT}"
+  aica-docker server "${IMAGE_NAME}/${IMAGE_TAG}" -u ros2 -p "${REMOTE_SSH_PORT}"
 fi
