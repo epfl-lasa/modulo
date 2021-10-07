@@ -25,7 +25,7 @@ Cell::Cell(const rclcpp::NodeOptions& options) :
 
 Cell::~Cell() {
   RCUTILS_LOG_INFO_NAMED(get_name(), "Shutting down the node before destruction");
-  if (this->on_shutdown(this->get_current_state()) != CallbackReturn::SUCCESS) {
+  if (this->on_shutdown(this->get_current_state()) != LifecycleNodeInterface::CallbackReturn::SUCCESS) {
     RCUTILS_LOG_ERROR_NAMED(get_name(), "Error during the shutdown process, shutting down anyway.");
   }
 }
@@ -435,7 +435,7 @@ LifecycleNodeInterface::CallbackReturn Cell::on_shutdown(const rclcpp_lifecycle:
   if (current_state == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
     RCUTILS_LOG_INFO_NAMED(get_name(), "Node is active, deactivating it before shutdown.");
     auto callback_return = this->on_deactivate(this->get_current_state());
-    if (callback_return != CallbackReturn::SUCCESS) {
+    if (callback_return != LifecycleNodeInterface::CallbackReturn::SUCCESS) {
       return callback_return;
     }
     current_state = lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE;
@@ -443,7 +443,7 @@ LifecycleNodeInterface::CallbackReturn Cell::on_shutdown(const rclcpp_lifecycle:
   if (current_state == lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE) {
     RCUTILS_LOG_INFO_NAMED(get_name(), "Node is inactive, cleaning up before shutdown.");
     auto callback_return = this->on_cleanup(this->get_current_state());
-    if (callback_return != CallbackReturn::SUCCESS) {
+    if (callback_return != LifecycleNodeInterface::CallbackReturn::SUCCESS) {
       return callback_return;
     }
     current_state = lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED;
