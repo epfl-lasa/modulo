@@ -1,5 +1,7 @@
 #include "modulo_core/Cell.hpp"
 
+#include <lifecycle_msgs/msg/state.hpp>
+
 #include <state_representation/robot/JointPositions.hpp>
 #include <state_representation/robot/JointVelocities.hpp>
 #include <state_representation/exceptions/UnrecognizedParameterTypeException.hpp>
@@ -20,7 +22,11 @@ Cell::Cell(const rclcpp::NodeOptions& options) :
 }
 
 Cell::~Cell() {
-  this->on_shutdown();
+  RCUTILS_LOG_INFO_NAMED(get_name(), "Shutting down the node before destruction");
+  auto callback_code = this->on_shutdown(this->get_current_state());
+  if (callback_code == rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE) {
+    RCUTILS_LOG_ERROR_NAMED(get_name(), "Error during the shutdown process, shutting down anyway.");
+  }
 }
 
 void Cell::reset() {
@@ -419,6 +425,28 @@ bool Cell::on_cleanup() {
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cell::on_shutdown(const rclcpp_lifecycle::State& state) {
   RCUTILS_LOG_INFO_NAMED(get_name(), "on_shutdown() is called from state %s.", state.label().c_str());
+  uint8_t current_state = state.id();
+  // if the node is already shutdown just return success
+  if (state.id() == lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED) {
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  }
+  // check current state and eventually deactivate and deconfigure
+  if (current_state == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
+    RCUTILS_LOG_INFO_NAMED(get_name(), "Node is active, deactivating it before shutdown.");
+    auto callback_code = this->on_deactivate(this->get_current_state());
+    if (callback_code == rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE) {
+      return callback_code;
+    }
+    current_state = lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE;
+  }
+  if (current_state == lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE) {
+    RCUTILS_LOG_INFO_NAMED(get_name(), "Node is configured, deconfiguring it before shutdown.");
+    auto callback_code = this->on_cleanup(this->get_current_state());
+    if (callback_code == rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE) {
+      return callback_code;
+    }
+    current_state = lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED;
+  }
   // call the proxy on_shutdown function
   if (!this->on_shutdown()) {
     RCLCPP_ERROR(get_logger(), "Shutdown failed.");
