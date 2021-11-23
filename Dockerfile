@@ -1,4 +1,4 @@
-ARG ROS_VERSION=foxy
+ARG ROS_VERSION=galactic
 FROM ghcr.io/aica-technology/ros2-control-libraries:${ROS_VERSION} as development
 
 WORKDIR ${HOME}/ros2_ws
@@ -13,4 +13,4 @@ RUN sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
 FROM development as production
 
 # build modulo
-RUN su ${USER} -c /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"
+RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"

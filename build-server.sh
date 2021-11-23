@@ -1,5 +1,5 @@
 #!/bin/bash
-ROS_VERSION=foxy
+ROS_VERSION=galactic
 
 IMAGE_NAME=epfl-lasa/modulo
 IMAGE_TAG=latest
