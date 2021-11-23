@@ -37,17 +37,16 @@ void Cell::reset() {
   for (auto it = this->handlers_.cbegin(); it != this->handlers_.cend(); /* no increment */) {
     if (!it->second.second) {
       it = this->handlers_.erase(it);
-    }
-    else {
+    } else {
       ++it;
     }
   }
   this->timers_.clear();
 }
 
-template <typename T>
+template<typename T>
 void Cell::add_parameter(const std::shared_ptr<state_representation::Parameter<T>>& parameter, const std::string& prefix) {
-  std::string tprefix = (prefix != "") ? prefix + "_" : "";
+  std::string tprefix = (!prefix.empty()) ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
   this->declare_parameter(parameter->get_name(), parameter->get_value());
@@ -86,58 +85,78 @@ template void Cell::add_parameter<std::string>(const std::shared_ptr<state_repre
 
 template void Cell::add_parameter<std::vector<std::string>>(const std::shared_ptr<state_representation::Parameter<std::vector<std::string>>>& parameter, const std::string& prefix);
 
-template <>
-void Cell::add_parameter<state_representation::CartesianState>(const std::shared_ptr<state_representation::Parameter<state_representation::CartesianState>>& parameter, const std::string& prefix) {
-  std::string tprefix = (prefix != "") ? prefix + "_" : "";
+template<>
+void Cell::add_parameter<state_representation::CartesianState>(
+    const std::shared_ptr<state_representation::Parameter<state_representation::CartesianState>>& parameter,
+    const std::string& prefix
+) {
+  std::string tprefix = (!prefix.empty()) ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
   this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
 }
 
-template <>
-void Cell::add_parameter<state_representation::CartesianPose>(const std::shared_ptr<state_representation::Parameter<state_representation::CartesianPose>>& parameter, const std::string& prefix) {
-  std::string tprefix = (prefix != "") ? prefix + "_" : "";
+template<>
+void Cell::add_parameter<state_representation::CartesianPose>(
+    const std::shared_ptr<state_representation::Parameter<state_representation::CartesianPose>>& parameter,
+    const std::string& prefix
+) {
+  std::string tprefix = (!prefix.empty()) ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
   state_representation::CartesianPose value(parameter->get_value());
   this->declare_parameter<std::vector<double>>(parameter->get_name(), value.to_std_vector());
 }
 
-template <>
-void Cell::add_parameter<state_representation::JointState>(const std::shared_ptr<state_representation::Parameter<state_representation::JointState>>& parameter, const std::string& prefix) {
-  std::string tprefix = (prefix != "") ? prefix + "_" : "";
+template<>
+void Cell::add_parameter<state_representation::JointState>(
+    const std::shared_ptr<state_representation::Parameter<state_representation::JointState>>& parameter,
+    const std::string& prefix
+) {
+  std::string tprefix = (!prefix.empty()) ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
   this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
 }
 
-template <>
-void Cell::add_parameter<state_representation::JointPositions>(const std::shared_ptr<state_representation::Parameter<state_representation::JointPositions>>& parameter, const std::string& prefix) {
-  std::string tprefix = (prefix != "") ? prefix + "_" : "";
+template<>
+void Cell::add_parameter<state_representation::JointPositions>(
+    const std::shared_ptr<state_representation::Parameter<state_representation::JointPositions>>& parameter,
+    const std::string& prefix
+) {
+  std::string tprefix = (!prefix.empty()) ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
   state_representation::JointPositions value(parameter->get_value());
   this->declare_parameter<std::vector<double>>(parameter->get_name(), value.to_std_vector());
 }
 
-template <>
-void Cell::add_parameter<state_representation::Ellipsoid>(const std::shared_ptr<state_representation::Parameter<state_representation::Ellipsoid>>& parameter, const std::string& prefix) {
-  std::string tprefix = (prefix != "") ? prefix + "_" : "";
+template<>
+void Cell::add_parameter<state_representation::Ellipsoid>(
+    const std::shared_ptr<state_representation::Parameter<state_representation::Ellipsoid>>& parameter,
+    const std::string& prefix
+) {
+  std::string tprefix = (!prefix.empty()) ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
   this->declare_parameter<std::vector<double>>(parameter->get_name(), parameter->get_value().to_std_vector());
 }
 
-template <>
-void Cell::add_parameter<Eigen::MatrixXd>(const std::shared_ptr<state_representation::Parameter<Eigen::MatrixXd>>& parameter, const std::string& prefix) {
-  std::string tprefix = (prefix != "") ? prefix + "_" : "";
+template<>
+void Cell::add_parameter<Eigen::MatrixXd>(
+    const std::shared_ptr<state_representation::Parameter<Eigen::MatrixXd>>& parameter, const std::string& prefix
+) {
+  std::string tprefix = (!prefix.empty()) ? prefix + "_" : "";
   parameter->set_name(tprefix + parameter->get_name());
   this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
-  std::vector<double> value = std::vector<double>(parameter->get_value().data(), parameter->get_value().data() + parameter->get_value().size());
+  std::vector<double> value =
+      std::vector<double>(parameter->get_value().data(), parameter->get_value().data() + parameter->get_value().size());
   this->declare_parameter<std::vector<double>>(parameter->get_name(), value);
 }
 
-void Cell::add_parameters(const std::list<std::shared_ptr<state_representation::ParameterInterface>>& parameters, const std::string& prefix) {
+void Cell::add_parameters(
+    const std::list<std::shared_ptr<state_representation::ParameterInterface>>& parameters, const std::string& prefix
+) {
   using namespace state_representation;
   using namespace state_representation::exceptions;
   for (auto& param : parameters) {
@@ -219,7 +238,7 @@ void Cell::add_parameters(const std::list<std::shared_ptr<state_representation::
   }
 }
 
-template <typename T>
+template<typename T>
 void Cell::set_parameter_value(const std::string& parameter_name, const T& value) {
   this->set_parameter(rclcpp::Parameter(parameter_name, value));
 }
@@ -242,37 +261,37 @@ template void Cell::set_parameter_value(const std::string& parameter_name, const
 
 template void Cell::set_parameter_value(const std::string& parameter_name, const std::vector<std::string>& value);
 
-template <>
+template<>
 void Cell::set_parameter_value(const std::string& parameter_name, const state_representation::CartesianState& value) {
   std::vector<double> vector_value = value.to_std_vector();
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
 
-template <>
+template<>
 void Cell::set_parameter_value(const std::string& parameter_name, const state_representation::CartesianPose& value) {
   std::vector<double> vector_value = value.to_std_vector();
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
 
-template <>
+template<>
 void Cell::set_parameter_value(const std::string& parameter_name, const state_representation::JointState& value) {
   std::vector<double> vector_value = value.to_std_vector();
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
 
-template <>
+template<>
 void Cell::set_parameter_value(const std::string& parameter_name, const state_representation::JointPositions& value) {
   std::vector<double> vector_value = value.to_std_vector();
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
 
-template <>
+template<>
 void Cell::set_parameter_value(const std::string& parameter_name, const state_representation::Ellipsoid& value) {
   std::vector<double> vector_value = value.to_std_vector();
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
 }
 
-template <>
+template<>
 void Cell::set_parameter_value(const std::string& parameter_name, const Eigen::MatrixXd& value) {
   std::vector<double> vector_value = std::vector<double>(value.data(), value.data() + value.size());
   this->set_parameter_value<std::vector<double>>(parameter_name, vector_value);
@@ -358,34 +377,46 @@ void Cell::set_parameter_value(const std::shared_ptr<state_representation::Param
   }
 }
 
-void Cell::add_transform_broadcaster(const std::shared_ptr<state_representation::CartesianState>& recipient,
-                                     bool always_active,
-                                     int queue_size) {
+void Cell::add_transform_broadcaster(
+    const std::shared_ptr<state_representation::CartesianState>& recipient, bool always_active, int queue_size
+) {
   this->add_transform_broadcaster(recipient, this->get_period(), always_active, queue_size);
 }
 
-void Cell::add_transform_broadcaster(const state_representation::CartesianPose& recipient,
-                                     bool always_active,
-                                     int queue_size) {
+void Cell::add_transform_broadcaster(
+    const state_representation::CartesianPose& recipient, bool always_active, int queue_size
+) {
   this->add_transform_broadcaster(recipient, this->get_period(), always_active, queue_size);
 }
 
-void Cell::add_transform_broadcaster(const std::shared_ptr<state_representation::ParameterInterface>& recipient,
-                                     bool always_active,
-                                     int queue_size) {
+void Cell::add_transform_broadcaster(
+    const std::shared_ptr<state_representation::ParameterInterface>& recipient, bool always_active, int queue_size
+) {
   this->add_transform_broadcaster(recipient, this->get_period(), always_active, queue_size);
 }
 
 void Cell::send_transform(const state_representation::CartesianState& transform, const std::string& name) const {
-  if (!this->configured_) throw exceptions::UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
+  if (!this->configured_) {
+    throw exceptions::UnconfiguredNodeException(
+        "The node is not yet configured. Call the lifecycle configure before using this function"
+    );
+  }
   state_representation::CartesianState transform_copy(transform);
-  if (name != "") transform_copy.set_name(name);
-  std::static_pointer_cast<communication::TransformBroadcasterHandler>(this->handlers_.at("tf_broadcaster").first)->send_transform(transform_copy);
+  if (!name.empty()) { transform_copy.set_name(name); }
+  std::static_pointer_cast<communication::TransformBroadcasterHandler>(
+      this->handlers_.at("tf_broadcaster").first
+  )->send_transform(transform_copy);
 }
 
 const state_representation::CartesianPose Cell::lookup_transform(const std::string& frame_name, const std::string& reference_frame) const {
-  if (!this->configured_) throw exceptions::UnconfiguredNodeException("The node is not yet configured. Call the lifecycle configure before using this function");
-  return std::static_pointer_cast<communication::TransformListenerHandler>(this->handlers_.at("tf_listener").first)->lookup_transform(frame_name, reference_frame);
+  if (!this->configured_) {
+    throw exceptions::UnconfiguredNodeException(
+        "The node is not yet configured. Call the lifecycle configure before using this function"
+    );
+  }
+  return std::static_pointer_cast<communication::TransformListenerHandler>(
+      this->handlers_.at("tf_listener").first
+  )->lookup_transform(frame_name, reference_frame);
 }
 
 LifecycleNodeInterface::CallbackReturn Cell::on_configure(const rclcpp_lifecycle::State&) {
@@ -641,7 +672,10 @@ void Cell::update_parameters() {
             matrix_value = value[0] * Eigen::MatrixXd::Identity(rows, cols);
           } else// any other sizes generates an error
           {
-            throw IncompatibleSizeException("The value set does not have the correct expected size of " + std::to_string(rows) + "x" + std::to_string(cols) + "elements");
+            throw IncompatibleSizeException(
+                "The value set does not have the correct expected size of " + std::to_string(rows) + "x"
+                    + std::to_string(cols) + "elements"
+            );
           }
           std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->set_value(matrix_value);
           break;
