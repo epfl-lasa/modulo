@@ -53,6 +53,27 @@ void Cell::add_parameter(const std::shared_ptr<state_representation::Parameter<T
   this->declare_parameter(parameter->get_name(), parameter->get_value());
 }
 
+template<>
+void Cell::add_parameter<int>(
+    const std::shared_ptr<state_representation::Parameter<int>>& parameter, const std::string& prefix
+) {
+  std::string tprefix = (!prefix.empty()) ? prefix + "_" : "";
+  parameter->set_name(tprefix + parameter->get_name());
+  this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
+  this->declare_parameter(parameter->get_name(), static_cast<std::int64_t>(parameter->get_value()));
+}
+
+template<>
+void Cell::add_parameter<std::vector<int>>(
+    const std::shared_ptr<state_representation::Parameter<std::vector<int>>>& parameter, const std::string& prefix
+) {
+  std::string tprefix = (!prefix.empty()) ? prefix + "_" : "";
+  parameter->set_name(tprefix + parameter->get_name());
+  this->parameters_.insert(std::make_pair(parameter->get_name(), parameter));
+  this->declare_parameter(
+      parameter->get_name(), std::vector<std::int64_t>(parameter->get_value().begin(), parameter->get_value().end()));
+}
+
 template void Cell::add_parameter<double>(const std::shared_ptr<state_representation::Parameter<double>>& parameter, const std::string& prefix);
 
 template void Cell::add_parameter<std::vector<double>>(const std::shared_ptr<state_representation::Parameter<std::vector<double>>>& parameter, const std::string& prefix);
@@ -121,6 +142,16 @@ void Cell::add_parameters(const std::list<std::shared_ptr<state_representation::
   using namespace state_representation::exceptions;
   for (auto& param : parameters) {
     switch (param->get_type()) {
+      case StateType::PARAMETER_INT: {
+        this->add_parameter(std::static_pointer_cast<Parameter<int>>(param), prefix);
+        break;
+      }
+
+      case StateType::PARAMETER_INT_ARRAY: {
+        this->add_parameter(std::static_pointer_cast<Parameter<std::vector<int>>>(param), prefix);
+        break;
+      }
+
       case StateType::PARAMETER_DOUBLE: {
         this->add_parameter(std::static_pointer_cast<Parameter<double>>(param), prefix);
         break;
@@ -193,6 +224,10 @@ void Cell::set_parameter_value(const std::string& parameter_name, const T& value
   this->set_parameter(rclcpp::Parameter(parameter_name, value));
 }
 
+template void Cell::set_parameter_value(const std::string& parameter_name, const int& value);
+
+template void Cell::set_parameter_value(const std::string& parameter_name, const std::vector<int>& value);
+
 template void Cell::set_parameter_value(const std::string& parameter_name, const double& value);
 
 template void Cell::set_parameter_value(const std::string& parameter_name, const std::vector<double>& value);
@@ -247,6 +282,16 @@ void Cell::set_parameter_value(const std::shared_ptr<state_representation::Param
   using namespace state_representation;
   using namespace state_representation::exceptions;
   switch (parameter->get_type()) {
+    case StateType::PARAMETER_INT: {
+      this->set_parameter_value(std::static_pointer_cast<Parameter<int>>(parameter));
+      break;
+    }
+
+    case StateType::PARAMETER_INT_ARRAY: {
+      this->set_parameter_value(std::static_pointer_cast<Parameter<std::vector<int>>>(parameter));
+      break;
+    }
+
     case StateType::PARAMETER_DOUBLE: {
       this->set_parameter_value(std::static_pointer_cast<Parameter<double>>(parameter));
       break;
@@ -498,6 +543,19 @@ void Cell::update_parameters() {
   try {
     for (auto& [key, param] : this->parameters_) {
       switch (param->get_type()) {
+        case StateType::PARAMETER_INT: {
+          int value = static_cast<int>(this->get_parameter(param->get_name()).as_int());
+          std::static_pointer_cast<Parameter<int>>(param)->set_value(value);
+          break;
+        }
+
+        case StateType::PARAMETER_INT_ARRAY: {
+          std::vector<std::int64_t> tmp = this->get_parameter(param->get_name()).as_integer_array();
+          std::vector<int> value(tmp.begin(), tmp.end());
+          std::static_pointer_cast<Parameter<std::vector<int>>>(param)->set_value(value);
+          break;
+        }
+
         case StateType::PARAMETER_DOUBLE: {
           double value = this->get_parameter(param->get_name()).as_double();
           std::static_pointer_cast<Parameter<double>>(param)->set_value(value);
