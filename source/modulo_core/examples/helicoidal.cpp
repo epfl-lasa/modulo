@@ -41,16 +41,17 @@ public:
 
   void step() {
     if (!this->current_pose->is_empty()) {
-      double ring_distance = this->current_pose->dist(this->ring_motion_generator.get_center(),
-                                                      CartesianStateVariable::POSITION) - 0.01;
+      double ring_distance = this->current_pose->dist(
+          this->ring_motion_generator.get_center(), CartesianStateVariable::POSITION
+      ) - 0.01;
       if (ring_distance > .03) {
         this->ring_motion_generator.set_radius(radius);
         *this->desired_twist = this->ring_motion_generator.evaluate(*this->current_pose);
         this->radius *= this->radius_decay;
-      }
-      else {
+      } else {
         *this->desired_twist = this->linear_motion_generator.evaluate(*this->current_pose);
       }
+      this->desired_twist->clamp(0.4, 2.0);
     } else {
       this->desired_twist->initialize();
     }

@@ -65,20 +65,20 @@ target_link_libraries(${PROJECT_NAME}
   robot_model
 )
 
-ament_auto_add_executable(examples_test_cartesian examples/testCartesian.cpp)
-target_link_libraries(examples_test_cartesian ${PROJECT_NAME})
+ament_auto_add_executable(example_cartesian_linear examples/cartesianLinear.cpp)
+target_link_libraries(example_cartesian_linear ${PROJECT_NAME})
 
-ament_auto_add_executable(examples_test_cartesian_circular examples/testCartesianCircular.cpp)
-target_link_libraries(examples_test_cartesian_circular ${PROJECT_NAME})
+ament_auto_add_executable(example_cartesian_circular examples/cartesianCircular.cpp)
+target_link_libraries(example_cartesian_circular ${PROJECT_NAME})
 
-ament_auto_add_executable(examples_test_helicoidal_trajectory examples/testHelicoidalTrajectory.cpp)
-target_link_libraries(examples_test_helicoidal_trajectory ${PROJECT_NAME})
+ament_auto_add_executable(example_helicoidal examples/helicoidal.cpp)
+target_link_libraries(example_helicoidal ${PROJECT_NAME})
 
-ament_auto_add_executable(examples_test_joints examples/testJoints.cpp)
-target_link_libraries(examples_test_joints ${PROJECT_NAME})
+ament_auto_add_executable(example_joints examples/joints.cpp)
+target_link_libraries(example_joints ${PROJECT_NAME})
 
-ament_auto_add_executable(examples_test_moving_reference_frame examples/testMovingReferenceFrame.cpp)
-target_link_libraries(examples_test_moving_reference_frame ${PROJECT_NAME})
+ament_auto_add_executable(example_moving_reference_frame examples/movingReferenceFrame.cpp)
+target_link_libraries(example_moving_reference_frame ${PROJECT_NAME})
 
 ament_auto_package()
 
