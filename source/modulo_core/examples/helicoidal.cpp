@@ -10,11 +10,12 @@
 
 #include "modulo_core/Cell.hpp"
 
+using namespace modulo::core;
 using namespace state_representation;
 using namespace dynamical_systems;
 
 namespace {
-class MotionGenerator : public modulo::core::Cell {
+class MotionGenerator : public Cell {
 private:
   std::shared_ptr<CartesianPose> current_pose;
   std::shared_ptr<CartesianTwist> desired_twist;
@@ -34,8 +35,8 @@ public:
       radius_decay(0.99) {}
 
   bool on_configure() {
-    this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->current_pose);
-    this->add_publisher<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
+    this->add_subscription<EncodedState>("/robot_test/pose", this->current_pose);
+    this->add_publisher<EncodedState>("/ds/desired_twist", this->desired_twist);
     return true;
   }
 
@@ -58,7 +59,7 @@ public:
   }
 };
 
-class ConsoleVisualizer : public modulo::core::Cell {
+class ConsoleVisualizer : public Cell {
 private:
   std::shared_ptr<CartesianPose> robot_pose;
   std::shared_ptr<CartesianTwist> desired_twist;
@@ -70,8 +71,8 @@ public:
       desired_twist(std::make_shared<CartesianTwist>("robot_test")) {}
 
   bool on_configure() {
-    this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose);
-    this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
+    this->add_subscription<EncodedState>("/robot_test/pose", this->robot_pose);
+    this->add_subscription<EncodedState>("/ds/desired_twist", this->desired_twist);
     return true;
   }
 
@@ -86,7 +87,7 @@ public:
   }
 };
 
-class SimulatedRobotInterface : public modulo::core::Cell {
+class SimulatedRobotInterface : public Cell {
 private:
   std::shared_ptr<CartesianPose> robot_pose;
   std::shared_ptr<CartesianTwist> desired_twist;
@@ -102,8 +103,8 @@ public:
       dt(period) {}
 
   bool on_configure() {
-    this->add_subscription<geometry_msgs::msg::TwistStamped>("/ds/desired_twist", this->desired_twist);
-    this->add_publisher<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->robot_pose);
+    this->add_subscription<EncodedState>("/ds/desired_twist", this->desired_twist);
+    this->add_publisher<EncodedState>("/robot_test/pose", this->robot_pose);
     return true;
   }
 
