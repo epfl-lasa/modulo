@@ -1,7 +1,8 @@
 #include <iostream>
 
 #include <state_representation/robot/JointState.hpp>
-#include <dynamical_systems/Linear.hpp>
+#include <state_representation/robot/JointPositions.hpp>
+#include <dynamical_systems/DynamicalSystemFactory.hpp>
 
 #include "modulo_core/Cell.hpp"
 
@@ -13,14 +14,19 @@ class LinearMotionGenerator : public modulo::core::Cell {
 private:
   std::shared_ptr<JointState> current_positions;
   std::shared_ptr<JointState> desired_velocities;
-  Linear<JointState> motion_generator;
+  std::shared_ptr<IDynamicalSystem<JointState>> motion_generator;
 
 public:
   explicit LinearMotionGenerator(const std::string& node_name, const std::chrono::milliseconds& period) :
       Cell(node_name, period),
       current_positions(std::make_shared<JointState>("robot", 6)),
       desired_velocities(std::make_shared<JointState>("robot", 6)),
-      motion_generator(JointPositions("robot", Eigen::VectorXd::Random(6))) {}
+      motion_generator(
+          DynamicalSystemFactory<JointState>::create_dynamical_system(
+              DynamicalSystemFactory<JointState>::DYNAMICAL_SYSTEM::POINT_ATTRACTOR
+          )) {
+    motion_generator->set_parameter(make_shared_parameter("attractor", JointPositions::Random("robot", 6)));
+  }
 
   bool on_configure() {
     this->add_subscription<sensor_msgs::msg::JointState>("/robot/joint_state", this->current_positions);
@@ -30,7 +36,7 @@ public:
 
   void step() {
     if (!this->current_positions->is_empty()) {
-      *this->desired_velocities = this->motion_generator.evaluate(*this->current_positions);
+      *this->desired_velocities = this->motion_generator->evaluate(*this->current_positions);
     } else {
       this->desired_velocities->initialize();
     }

@@ -5,7 +5,7 @@
 #include <state_representation/space/cartesian/CartesianPose.hpp>
 #include <state_representation/space/cartesian/CartesianState.hpp>
 #include <state_representation/space/cartesian/CartesianTwist.hpp>
-#include <dynamical_systems/Circular.hpp>
+#include <dynamical_systems/DynamicalSystemFactory.hpp>
 
 #include "modulo_core/Cell.hpp"
 
@@ -17,14 +17,17 @@ class MotionGenerator : public modulo::core::Cell {
 private:
   std::shared_ptr<CartesianPose> current_pose;
   std::shared_ptr<CartesianTwist> desired_twist;
-  Circular motion_generator;
+  std::shared_ptr<IDynamicalSystem<CartesianState>> motion_generator;
 
 public:
   explicit MotionGenerator(const std::string& node_name, const std::chrono::milliseconds& period) :
       Cell(node_name, period),
       current_pose(std::make_shared<CartesianPose>("robot_test")),
       desired_twist(std::make_shared<CartesianTwist>("robot_test")),
-      motion_generator(CartesianPose("robot_test", 0., 0., 0.)) {}
+      motion_generator(
+          DynamicalSystemFactory<CartesianState>::create_dynamical_system(
+              DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::CIRCULAR
+          )) {}
 
   bool on_configure() {
     this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->current_pose);
@@ -34,7 +37,7 @@ public:
 
   void step() {
     if (!this->current_pose->is_empty()) {
-      *this->desired_twist = this->motion_generator.evaluate(*this->current_pose);
+      *this->desired_twist = this->motion_generator->evaluate(*this->current_pose);
     } else {
       this->desired_twist->initialize();
     }

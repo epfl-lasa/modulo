@@ -5,8 +5,7 @@
 #include <state_representation/space/cartesian/CartesianPose.hpp>
 #include <state_representation/space/cartesian/CartesianState.hpp>
 #include <state_representation/space/cartesian/CartesianTwist.hpp>
-#include <dynamical_systems/Linear.hpp>
-#include <dynamical_systems/Ring.hpp>
+#include <dynamical_systems/DynamicalSystemFactory.hpp>
 
 #include "modulo_core/Cell.hpp"
 
@@ -19,8 +18,8 @@ class MotionGenerator : public Cell {
 private:
   std::shared_ptr<CartesianPose> current_pose;
   std::shared_ptr<CartesianTwist> desired_twist;
-  Ring ring_motion_generator;
-  Linear<CartesianState> linear_motion_generator;
+  std::shared_ptr<IDynamicalSystem<CartesianState>> ring_motion_generator;
+  std::shared_ptr<IDynamicalSystem<CartesianState>> linear_motion_generator;
   double radius;
   double radius_decay;
 
@@ -29,8 +28,14 @@ public:
       Cell(node_name, period),
       current_pose(std::make_shared<CartesianPose>("robot_test")),
       desired_twist(std::make_shared<CartesianTwist>("robot_test")),
-      ring_motion_generator(CartesianPose::Identity("robot_test")),
-      linear_motion_generator(CartesianPose::Identity("robot_test")),
+      ring_motion_generator(
+          DynamicalSystemFactory<CartesianState>::create_dynamical_system(
+              DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::RING
+          )),
+      linear_motion_generator(
+          DynamicalSystemFactory<CartesianState>::create_dynamical_system(
+              DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::POINT_ATTRACTOR
+          )),
       radius(1.0),
       radius_decay(0.99) {}
 
@@ -43,14 +48,14 @@ public:
   void step() {
     if (!this->current_pose->is_empty()) {
       double ring_distance = this->current_pose->dist(
-          this->ring_motion_generator.get_center(), CartesianStateVariable::POSITION
+          this->ring_motion_generator->get_parameter_value<CartesianPose>("center"), CartesianStateVariable::POSITION
       ) - 0.01;
       if (ring_distance > .03) {
-        this->ring_motion_generator.set_radius(radius);
-        *this->desired_twist = this->ring_motion_generator.evaluate(*this->current_pose);
+        this->ring_motion_generator->set_parameter(make_shared_parameter("radius", radius));
+        *this->desired_twist = this->ring_motion_generator->evaluate(*this->current_pose);
         this->radius *= this->radius_decay;
       } else {
-        *this->desired_twist = this->linear_motion_generator.evaluate(*this->current_pose);
+        *this->desired_twist = this->linear_motion_generator->evaluate(*this->current_pose);
       }
       this->desired_twist->clamp(0.4, 2.0);
     } else {

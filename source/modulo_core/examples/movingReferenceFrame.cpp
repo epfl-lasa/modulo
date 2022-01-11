@@ -5,8 +5,7 @@
 #include <state_representation/space/cartesian/CartesianPose.hpp>
 #include <state_representation/space/cartesian/CartesianState.hpp>
 #include <state_representation/space/cartesian/CartesianTwist.hpp>
-#include <dynamical_systems/Circular.hpp>
-#include <dynamical_systems/Linear.hpp>
+#include <dynamical_systems/DynamicalSystemFactory.hpp>
 
 #include "modulo_core/Cell.hpp"
 
@@ -19,7 +18,7 @@ private:
   std::shared_ptr<CartesianState> object_state;
   std::shared_ptr<CartesianPose> current_pose;
   std::shared_ptr<CartesianTwist> desired_twist;
-  Circular motion_generator;
+  std::shared_ptr<IDynamicalSystem<CartesianState>> motion_generator;
 
 public:
   explicit MotionGenerator(const std::string& node_name, const std::chrono::milliseconds& period) :
@@ -27,7 +26,12 @@ public:
       object_state(std::make_shared<CartesianState>("object", "world")),
       current_pose(std::make_shared<CartesianPose>("robot_test", "world")),
       desired_twist(std::make_shared<CartesianTwist>("robot_test", "world")),
-      motion_generator(CartesianPose("robot_test_attractor", 0., 0., 0., "object")) {}
+      motion_generator(
+          DynamicalSystemFactory<CartesianState>::create_dynamical_system(
+              DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::CIRCULAR
+          )) {
+    motion_generator->set_parameter(make_shared_parameter("center", CartesianPose::Identity("robot_test", "object")));
+  }
 
   bool on_configure() {
     this->add_subscription<geometry_msgs::msg::PoseStamped>("/object/pose", this->object_state);
@@ -39,12 +43,12 @@ public:
 
   void step() {
     if (!this->current_pose->is_empty()) {
-      *this->desired_twist = this->motion_generator.evaluate(*this->current_pose);
+      *this->desired_twist = this->motion_generator->evaluate(*this->current_pose);
     } else {
       this->desired_twist->initialize();
     }
     if (!this->object_state->is_empty()) {
-      this->motion_generator.set_base_frame(*this->object_state);
+      this->motion_generator->set_base_frame(*this->object_state);
     }
   }
 };
@@ -81,22 +85,21 @@ class SimulatedObject : public modulo::core::Cell {
 private:
   std::shared_ptr<CartesianPose> object_pose;
   std::shared_ptr<CartesianTwist> object_twist;
-  Linear<CartesianState> motion_generator;
+  std::shared_ptr<IDynamicalSystem<CartesianState>> motion_generator;
   std::chrono::milliseconds dt;
   double sign;
 
 public:
   explicit SimulatedObject(const std::string& node_name, const std::chrono::milliseconds& period) :
-      Cell(node_name, period),
-      object_pose(
-          std::make_shared<CartesianPose>(
-              CartesianPose::Identity("object"))),
-      object_twist(
-          std::make_shared<CartesianTwist>(CartesianTwist("object"))),
-      motion_generator(CartesianPose("object_attractor", 2., 0., 0.), 1.0),
-      dt(period),
-      sign(-1) {
-    this->add_parameters(this->motion_generator.get_parameters());
+      Cell(node_name, period), object_pose(
+      std::make_shared<CartesianPose>(
+          CartesianPose::Identity("object"))), object_twist(
+      std::make_shared<CartesianTwist>(CartesianTwist("object"))), motion_generator(
+      DynamicalSystemFactory<CartesianState>::create_dynamical_system(
+          DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::POINT_ATTRACTOR
+      )), dt(period), sign(-1) {
+    motion_generator->set_parameter(
+        make_shared_parameter("attractor", CartesianPose("object_attractor", 2., 0., 0.)));
   }
 
   bool on_configure() {
@@ -107,13 +110,13 @@ public:
 
   void step() {
     // compute the dynamics of the object
-    *this->object_twist = this->motion_generator.evaluate(*this->object_pose);
+    *this->object_twist = this->motion_generator->evaluate(*this->object_pose);
     this->object_twist->set_angular_velocity(Eigen::Vector3d(0.2, 0., 0.));
     this->object_twist->clamp(0.5, 0.2);
     *this->object_pose = dt * *this->object_twist + *this->object_pose;
 
     // change attractor if previous was reached
-    if (this->object_pose->dist(this->motion_generator.get_attractor()) < 1e-3) {
+    if (this->object_pose->dist(this->motion_generator->get_parameter_value<CartesianPose>("attractor")) < 1e-3) {
       this->set_parameter_value(
           "attractor", CartesianPose("object_attractor", sign * 2., 0., 0.));
       sign *= -1;

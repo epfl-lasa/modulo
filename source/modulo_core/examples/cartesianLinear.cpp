@@ -5,7 +5,7 @@
 #include <state_representation/space/cartesian/CartesianPose.hpp>
 #include <state_representation/space/cartesian/CartesianState.hpp>
 #include <state_representation/space/cartesian/CartesianTwist.hpp>
-#include <dynamical_systems/Linear.hpp>
+#include <dynamical_systems/DynamicalSystemFactory.hpp>
 
 #include "modulo_core/Cell.hpp"
 #include "modulo_core/Component.hpp"
@@ -18,14 +18,19 @@ class LinearMotionGenerator : public modulo::core::Cell {
 private:
   std::shared_ptr<CartesianPose> current_pose;
   std::shared_ptr<CartesianTwist> desired_twist;
-  Linear<CartesianState> motion_generator;
+  std::shared_ptr<IDynamicalSystem<CartesianState>> motion_generator;
 
 public:
   explicit LinearMotionGenerator(const std::string& node_name, const std::chrono::milliseconds& period) :
       Cell(node_name, period),
       current_pose(std::make_shared<CartesianPose>("robot_test")),
       desired_twist(std::make_shared<CartesianTwist>("robot_test")),
-      motion_generator(CartesianPose::Random("robot_test"), 1.0) {}
+      motion_generator(
+          DynamicalSystemFactory<CartesianState>::create_dynamical_system(
+              DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::POINT_ATTRACTOR
+          )) {
+    motion_generator->set_parameter(make_shared_parameter("attractor", CartesianPose::Random("robot_test")));
+  }
 
   bool on_configure() {
     this->add_state_subscription("/robot_test/pose", this->current_pose);
@@ -35,15 +40,15 @@ public:
 
   void step() {
     if (!this->current_pose->is_empty()) {
-      *this->desired_twist = this->motion_generator.evaluate(*this->current_pose);
+      *this->desired_twist = this->motion_generator->evaluate(*this->current_pose);
       // change attractor if previous was reached
-      if (this->current_pose->dist(this->motion_generator.get_attractor()) < 1e-3) {
+      if (this->current_pose->dist(this->motion_generator->get_parameter_value<CartesianPose>("attractor")) < 1e-3) {
         this->set_parameter_value("attractor", CartesianPose::Random("robot_test"));
       }
     } else {
       this->desired_twist->initialize();
     }
-    this->send_transform(this->motion_generator.get_attractor(), "attractor");
+    this->send_transform(this->motion_generator->get_parameter_value<CartesianPose>("attractor"), "attractor");
   }
 };
 
