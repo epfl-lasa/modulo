@@ -57,4 +57,4 @@ public:
 
 No need to do anything else. The step function is called periodically at a frequency defined in the node under the `period` argument. And the `current_state` variable will be published over `robot/joint_state` channel on ros2 network automatically.
 
-We recommand to keep this step function short, especially if you use a small period. Otherwise, latency will occur in your control loop. Complete examples of control loop including multiple nodes are written in the [tests](./tests/) for each representation spaces.
+We recommend keeping this step function short, especially if you use a small period. Otherwise, latency will occur in your control loop. Complete examples of control loops including multiple nodes are written in the [tests](examples/) for each representation spaces.
