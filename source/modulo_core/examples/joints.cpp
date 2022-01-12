@@ -25,7 +25,7 @@ public:
           DynamicalSystemFactory<JointState>::create_dynamical_system(
               DynamicalSystemFactory<JointState>::DYNAMICAL_SYSTEM::POINT_ATTRACTOR
           )) {
-    motion_generator->set_parameter(make_shared_parameter("attractor", JointPositions::Random("robot", 6)));
+    motion_generator->set_parameter_value("attractor", JointState::Random("robot", 6));
   }
 
   bool on_configure() {

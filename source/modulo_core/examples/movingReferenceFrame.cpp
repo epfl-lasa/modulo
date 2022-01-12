@@ -30,7 +30,7 @@ public:
           DynamicalSystemFactory<CartesianState>::create_dynamical_system(
               DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::CIRCULAR
           )) {
-    motion_generator->set_parameter(make_shared_parameter("center", CartesianPose::Identity("robot_test", "object")));
+    motion_generator->set_parameter_value("limit_cycle", Ellipsoid("attractor", "object"));
   }
 
   bool on_configure() {
@@ -98,8 +98,7 @@ public:
       DynamicalSystemFactory<CartesianState>::create_dynamical_system(
           DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::POINT_ATTRACTOR
       )), dt(period), sign(-1) {
-    motion_generator->set_parameter(
-        make_shared_parameter("attractor", CartesianPose("object_attractor", 2., 0., 0.)));
+    motion_generator->set_parameter_value("attractor", CartesianPose("object_attractor", 2., 0., 0.));
   }
 
   bool on_configure() {
@@ -117,7 +116,7 @@ public:
 
     // change attractor if previous was reached
     if (this->object_pose->dist(this->motion_generator->get_parameter_value<CartesianPose>("attractor")) < 1e-3) {
-      this->set_parameter_value(
+      this->motion_generator->set_parameter_value(
           "attractor", CartesianPose("object_attractor", sign * 2., 0., 0.));
       sign *= -1;
     }

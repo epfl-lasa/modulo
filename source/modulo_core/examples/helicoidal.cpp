@@ -37,7 +37,10 @@ public:
               DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::POINT_ATTRACTOR
           )),
       radius(1.0),
-      radius_decay(0.99) {}
+      radius_decay(0.99) {
+    this->linear_motion_generator->set_parameter_value("attractor", CartesianPose::Identity("robot_test"));
+    this->ring_motion_generator->set_parameter_value("center", CartesianPose::Identity("center"));
+  }
 
   bool on_configure() {
     this->add_subscription<EncodedState>("/robot_test/pose", this->current_pose);
@@ -51,7 +54,7 @@ public:
           this->ring_motion_generator->get_parameter_value<CartesianPose>("center"), CartesianStateVariable::POSITION
       ) - 0.01;
       if (ring_distance > .03) {
-        this->ring_motion_generator->set_parameter(make_shared_parameter("radius", radius));
+        this->ring_motion_generator->set_parameter_value("radius", radius);
         *this->desired_twist = this->ring_motion_generator->evaluate(*this->current_pose);
         this->radius *= this->radius_decay;
       } else {

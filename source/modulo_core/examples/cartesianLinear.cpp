@@ -29,7 +29,7 @@ public:
           DynamicalSystemFactory<CartesianState>::create_dynamical_system(
               DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::POINT_ATTRACTOR
           )) {
-    motion_generator->set_parameter(make_shared_parameter("attractor", CartesianPose::Random("robot_test")));
+    this->motion_generator->set_parameter_value("attractor", CartesianPose::Random("robot_test"));
   }
 
   bool on_configure() {
@@ -43,7 +43,7 @@ public:
       *this->desired_twist = this->motion_generator->evaluate(*this->current_pose);
       // change attractor if previous was reached
       if (this->current_pose->dist(this->motion_generator->get_parameter_value<CartesianPose>("attractor")) < 1e-3) {
-        this->set_parameter_value("attractor", CartesianPose::Random("robot_test"));
+        this->motion_generator->set_parameter_value("attractor", CartesianPose::Random("robot_test"));
       }
     } else {
       this->desired_twist->initialize();

@@ -27,7 +27,9 @@ public:
       motion_generator(
           DynamicalSystemFactory<CartesianState>::create_dynamical_system(
               DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::CIRCULAR
-          )) {}
+          )) {
+    motion_generator->set_parameter_value("limit_cycle", Ellipsoid("attractor"));
+  }
 
   bool on_configure() {
     this->add_subscription<geometry_msgs::msg::PoseStamped>("/robot_test/pose", this->current_pose);
