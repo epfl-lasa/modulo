@@ -1,17 +1,24 @@
 #pragma once
 
 #include <clproto.h>
+#include <rclcpp/time.hpp>
+#include <rcutils/logging_macros.h>
 #include <geometry_msgs/msg/accel_stamped.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <geometry_msgs/msg/wrench_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
-#include <rclcpp/time.hpp>
-#include <rcutils/logging_macros.h>
 #include <sensor_msgs/msg/joint_state.hpp>
+#include <std_msgs/msg/float64.hpp>
+#include <std_msgs/msg/float64_multi_array.hpp>
+#include <std_msgs/msg/string.hpp>
+#include <tf2_msgs/msg/tf_message.hpp>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
+#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
+
 #include <state_representation/parameters/Parameter.hpp>
-#include <state_representation/robot/JointState.hpp>
+#include <state_representation/space/joint/JointState.hpp>
 #include <state_representation/space/cartesian/CartesianPose.hpp>
 #include <state_representation/space/cartesian/CartesianState.hpp>
 #include <state_representation/space/cartesian/CartesianTwist.hpp>
@@ -19,12 +26,6 @@
 #include <state_representation/space/dual_quaternion/DualQuaternionPose.hpp>
 #include <state_representation/space/dual_quaternion/DualQuaternionTwist.hpp>
 #include <state_representation/trajectories/Trajectory.hpp>
-#include <std_msgs/msg/float64.hpp>
-#include <std_msgs/msg/float64_multi_array.hpp>
-#include <std_msgs/msg/string.hpp>
-#include <tf2_msgs/msg/tf_message.hpp>
-#include <trajectory_msgs/msg/joint_trajectory.hpp>
-#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 
 #include "modulo_core/communication/EncodedState.hpp"
 
