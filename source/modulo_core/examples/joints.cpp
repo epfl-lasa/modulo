@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include <state_representation/robot/JointState.hpp>
-#include <state_representation/robot/JointPositions.hpp>
+#include <state_representation/space/joint/JointState.hpp>
+#include <state_representation/space/joint/JointPositions.hpp>
 #include <dynamical_systems/DynamicalSystemFactory.hpp>
 
 #include "modulo_core/Cell.hpp"
