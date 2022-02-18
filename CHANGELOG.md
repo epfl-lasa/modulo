@@ -1,4 +1,18 @@
-## 1.0.0 (September 22, 2020)
+## 1.1.0 (February 18, 2022)
+
+This version contains some general improvements and fixes, including support
+for the breaking changes introduced by control libraries 5.0
+
+- Update docker paradigm (#30)
+- Refactor the shutdown logic (#31)
+- Modify build script for production by default (#32)
+- Change the underlying message type to UInt8MultiArray (#33)
+- Support int and int array parameters (#34)
+- Remove the pure virtual step function (#35)
+- Fix the examples due to breaking changes in DS (#36)
+- Correct the include due to changes in control-libraries (#38)
+
+## 1.0.0 (September 22, 2021)
 
 Modulo core library to provide ROS2 Cell and Component classes built
 around state_representation and clproto libraries.
