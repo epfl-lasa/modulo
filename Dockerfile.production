@@ -1,6 +1,0 @@
-ARG ROS_VERSION=foxy
-ARG BASE_IMAGE=epfl-lasa/modulo/development:${ROS_VERSION}
-FROM ${BASE_IMAGE} as remote-development
-
-# build modulo
-RUN su ${USER} -c /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"

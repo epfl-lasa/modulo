@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
-project(modulo_core)
+project(modulo_core VERSION 1.1.0)
 
 # Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
@@ -65,17 +65,20 @@ target_link_libraries(${PROJECT_NAME}
   robot_model
 )
 
-ament_auto_add_executable(${PROJECT_NAME}_test_cartesian tests/testCartesian.cpp)
-target_link_libraries(${PROJECT_NAME}_test_cartesian ${PROJECT_NAME})
+ament_auto_add_executable(example_cartesian_linear examples/cartesianLinear.cpp)
+target_link_libraries(example_cartesian_linear ${PROJECT_NAME})
 
-ament_auto_add_executable(${PROJECT_NAME}_test_cartesian_circular tests/testCartesianCircular.cpp)
-target_link_libraries(${PROJECT_NAME}_test_cartesian_circular ${PROJECT_NAME})
+ament_auto_add_executable(example_cartesian_circular examples/cartesianCircular.cpp)
+target_link_libraries(example_cartesian_circular ${PROJECT_NAME})
 
-ament_auto_add_executable(${PROJECT_NAME}_test_joints tests/testJoints.cpp)
-target_link_libraries(${PROJECT_NAME}_test_joints ${PROJECT_NAME})
+ament_auto_add_executable(example_helicoidal examples/helicoidal.cpp)
+target_link_libraries(example_helicoidal ${PROJECT_NAME})
 
-ament_auto_add_executable(${PROJECT_NAME}_test_moving_reference_frame tests/testMovingReferenceFrame.cpp)
-target_link_libraries(${PROJECT_NAME}_test_moving_reference_frame ${PROJECT_NAME})
+ament_auto_add_executable(example_joints examples/joints.cpp)
+target_link_libraries(example_joints ${PROJECT_NAME})
+
+ament_auto_add_executable(example_moving_reference_frame examples/movingReferenceFrame.cpp)
+target_link_libraries(example_moving_reference_frame ${PROJECT_NAME})
 
 ament_auto_package()
 

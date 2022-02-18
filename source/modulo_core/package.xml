@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>modulo_core</name>
-  <version>0.0.0</version>
+  <version>1.1.0</version>
   <description>TODO: Package description</description>
   <maintainer email="buschbapti@aica.tech">buschbapti</maintainer>
   <license>TODO: License declaration</license>
@@ -19,7 +19,7 @@
   <depend>lifecycle_msgs</depend>
   <depend>tf2_msgs</depend>
   <depend>tf2_ros</depend>
-  
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 

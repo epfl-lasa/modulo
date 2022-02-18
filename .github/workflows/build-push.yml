@@ -4,7 +4,7 @@ name: Build and Push
 on:
   push:
     branches:
-      - master
+      - main
       - develop
   release:
     types: [published]
@@ -21,8 +21,7 @@ jobs:
 
       - name: Build image
         run: |
-          docker build . --file ./Dockerfile.development  --tag dev-image
-          docker build . --file ./Dockerfile.production --build-arg BASE_IMAGE=dev-image --tag modulo
+          docker build --tag modulo .
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 

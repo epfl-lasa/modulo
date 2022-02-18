@@ -132,20 +132,10 @@ public:
   explicit Component(const rclcpp::NodeOptions& options);
 
   /**
-   * @brief Destructor
-   */
-  ~Component();
-
-  /**
    * @brief Get the list of predicates of the action
    * @return the list of predicates
    */
   const std::list<std::shared_ptr<state_representation::Predicate>> get_predicates() const;
-
-  /**
-   * @brief Function computing one step of calculation. It is called periodically in the run function.
-   */
-  virtual void step() override = 0;
 };
 
 template <typename DurationT>
