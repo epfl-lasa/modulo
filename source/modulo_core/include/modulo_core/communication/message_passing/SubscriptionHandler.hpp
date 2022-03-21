@@ -62,7 +62,7 @@ SubscriptionHandler<RecT, MsgT>::SubscriptionHandler(const std::shared_ptr<state
 
 template <class RecT, typename MsgT>
 void SubscriptionHandler<RecT, MsgT>::subscription_callback(const std::shared_ptr<MsgT> msg) {
-  state_conversion::read_msg(static_cast<RecT&>(this->get_recipient()), *msg);
+  modulo_new_core::translators::read_msg(static_cast<RecT&>(this->get_recipient()), *msg);
 }
 
 template <class RecT, typename MsgT>

@@ -16,6 +16,7 @@
 #include <state_representation/parameters/ParameterInterface.hpp>
 #include <string>
 
+#include "modulo_core/communication/EncodedState.hpp"
 #include "modulo_core/communication/message_passing/PublisherHandler.hpp"
 #include "modulo_core/communication/message_passing/SubscriptionHandler.hpp"
 #include "modulo_core/communication/message_passing/TransformBroadcasterHandler.hpp"
