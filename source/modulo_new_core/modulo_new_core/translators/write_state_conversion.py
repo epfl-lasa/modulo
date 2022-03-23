@@ -4,7 +4,7 @@ import numpy as np
 import rclpy.time
 import sensor_msgs.msg
 import state_representation as sr
-import std_msgs.msg
+from modulo_new_core.encoded_state import EncodedState
 
 
 def write_point(vector: np.array) -> geometry.Point:
@@ -85,8 +85,8 @@ def write_msg_stamped(msg, state, time: rclpy.time.Time):
     return state
 
 
-def write_clproto_msg(state: sr.State, msg_type: clproto.MessageType) -> std_msgs.msg.UInt8MultiArray:
-    msg = std_msgs.msg.UInt8MultiArray()
+def write_clproto_msg(state: sr.State, msg_type: clproto.MessageType) -> EncodedState():
+    msg = EncodedState()
     if isinstance(state, sr.State) and isinstance(msg_type, clproto.MessageType):
         msg.data = clproto.encode(state, msg_type)
     else:

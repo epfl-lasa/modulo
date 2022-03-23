@@ -3,7 +3,7 @@ from typing import List
 import clproto
 import geometry_msgs.msg as geometry
 import sensor_msgs.msg
-import std_msgs.msg
+from modulo_new_core.encoded_state import EncodedState
 
 
 def read_point(msg: geometry.Point) -> List[float]:
@@ -66,8 +66,8 @@ def read_msg_stamped(state, msg):
     return state
 
 
-def read_clproto_msg(msg: std_msgs.msg.UInt8MultiArray):
-    if isinstance(msg, std_msgs.msg.UInt8MultiArray):
+def read_clproto_msg(msg: EncodedState):
+    if isinstance(msg, EncodedState):
         return clproto.decode(msg.data.tobytes())
     else:
         raise RuntimeError("Your input does not have the correct type")
