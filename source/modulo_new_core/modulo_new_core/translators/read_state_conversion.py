@@ -6,39 +6,38 @@ import sensor_msgs.msg
 from modulo_new_core.encoded_state import EncodedState
 
 
-def read_point(msg: geometry.Point) -> List[float]:
+def __read_xyz(msg) -> List[float]:
     return [msg.x, msg.y, msg.z]
 
 
-def read_vector(msg: geometry.Vector3) -> List[float]:
-    return [msg.x, msg.y, msg.z]
-
-
-def read_quaternion(msg: geometry.Quaternion) -> List[float]:
+def __read_quaternion(msg: geometry.Quaternion) -> List[float]:
     return [msg.w, msg.x, msg.y, msg.z]
 
 
 def read_msg(state, msg):
     if isinstance(msg, geometry.Accel):
-        state.set_linear_acceleration(read_vector(msg.linear))
-        state.set_angular_acceleration(read_vector(msg.angular))
+        state.set_linear_acceleration(__read_xyz(msg.linear))
+        state.set_angular_acceleration(__read_xyz(msg.angular))
     elif isinstance(msg, geometry.Pose):
-        state.set_position(read_point(msg.position))
-        state.set_orientation(read_quaternion(msg.orientation))
+        state.set_position(__read_xyz(msg.position))
+        state.set_orientation(__read_quaternion(msg.orientation))
     elif isinstance(msg, geometry.Transform):
-        state.set_position(read_vector(msg.translation))
-        state.set_orientation(read_quaternion(msg.rotation))
+        state.set_position(__read_xyz(msg.translation))
+        state.set_orientation(__read_quaternion(msg.rotation))
     elif isinstance(msg, geometry.Twist):
-        state.set_linear_velocity(read_vector(msg.linear))
-        state.set_angular_velocity(read_vector(msg.angular))
+        state.set_linear_velocity(__read_xyz(msg.linear))
+        state.set_angular_velocity(__read_xyz(msg.angular))
     elif isinstance(msg, geometry.Wrench):
-        state.set_force(read_vector(msg.force))
-        state.set_torque(read_vector(msg.torque))
+        state.set_force(__read_xyz(msg.force))
+        state.set_torque(__read_xyz(msg.torque))
     elif isinstance(msg, sensor_msgs.msg.JointState):
         state.set_names(msg.name)
-        state.set_positions(msg.position)
-        state.set_velocities(msg.velocity)
-        state.set_torques(msg.effort)
+        if len(msg.position):
+            state.set_positions(msg.position)
+        if len(msg.velocity):
+            state.set_velocities(msg.velocity)
+        if len(msg.effort):
+            state.set_torques(msg.effort)
     else:
         raise RuntimeError("This message type is not supported")
     return state

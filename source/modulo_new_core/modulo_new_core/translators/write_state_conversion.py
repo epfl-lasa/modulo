@@ -7,24 +7,14 @@ import state_representation as sr
 from modulo_new_core.encoded_state import EncodedState
 
 
-def write_point(vector: np.array) -> geometry.Point:
-    msg = geometry.Point()
+def __write_xyz(msg, vector: np.array):
     msg.x = vector[0]
     msg.y = vector[1]
     msg.z = vector[2]
     return msg
 
 
-def write_vector(vector: np.array) -> geometry.Vector3:
-    msg = geometry.Vector3()
-    msg.x = vector[0]
-    msg.y = vector[1]
-    msg.z = vector[2]
-    return msg
-
-
-def write_quaternion(quat: np.array) -> geometry.Quaternion:
-    msg = geometry.Quaternion()
+def __write_quaternion(msg: geometry.Quaternion, quat: np.array) -> geometry.Quaternion:
     msg.w = quat[0]
     msg.x = quat[1]
     msg.y = quat[2]
@@ -33,21 +23,31 @@ def write_quaternion(quat: np.array) -> geometry.Quaternion:
 
 
 def write_msg(msg, state):
-    if isinstance(msg, geometry.Accel) and isinstance(state, sr.CartesianState):
-        msg.linear = write_vector(state.get_linear_acceleration())
-        msg.angular = write_vector(state.get_angular_acceleration())
+    if not isinstance(state, sr.State):
+        raise RuntimeError("This state type is not supported")
+    if state.is_empty():
+        raise RuntimeError(f"{state.get_name()} state is empty while attempting to write it to message")
+    if isinstance(msg, geometry.Point) and isinstance(state, sr.CartesianState):
+        __write_xyz(msg, state)
+    elif isinstance(msg, geometry.Vector3) and isinstance(state, sr.CartesianState):
+        __write_xyz(msg, state)
+    elif isinstance(msg, geometry.Quaternion) and isinstance(state, sr.CartesianState):
+        __write_quaternion(msg, state)
+    elif isinstance(msg, geometry.Accel) and isinstance(state, sr.CartesianState):
+        __write_xyz(msg.linear, state.get_linear_acceleration())
+        __write_xyz(msg.angular, state.get_angular_acceleration())
     elif isinstance(msg, geometry.Pose) and isinstance(state, sr.CartesianState):
-        msg.position = write_point(state.get_position())
-        msg.orientation = write_quaternion(state.get_orientation())
+        __write_xyz(msg.position, state.get_position())
+        __write_quaternion(msg.orientation, state.get_orientation())
     elif isinstance(msg, geometry.Transform) and isinstance(state, sr.CartesianState):
-        msg.translation = write_vector(state.get_position())
-        msg.rotation = write_quaternion(state.get_orientation())
+        __write_xyz(msg.translation, state.get_position())
+        __write_quaternion(msg.rotation, state.get_orientation())
     elif isinstance(msg, geometry.Twist) and isinstance(state, sr.CartesianState):
-        msg.linear = write_vector(state.get_linear_velocity())
-        msg.angular = write_vector(state.get_angular_velocity())
+        __write_xyz(msg.linear, state.get_linear_velocity())
+        __write_xyz(msg.angular, state.get_angular_velocity())
     elif isinstance(msg, geometry.Wrench) and isinstance(state, sr.CartesianState):
-        msg.force = write_vector(state.get_force())
-        msg.torque = write_vector(state.get_torque())
+        __write_xyz(msg.force, state.get_force())
+        __write_xyz(msg.torque, state.get_torque())
     elif isinstance(msg, sensor_msgs.msg.JointState) and isinstance(state, sr.JointState):
         msg.name = state.get_names()
         msg.position = state.get_positions().tolist()
