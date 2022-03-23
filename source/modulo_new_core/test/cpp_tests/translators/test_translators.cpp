@@ -26,7 +26,7 @@ static void expect_quaternion_equal(const Eigen::Quaterniond& q1, const geometry
   EXPECT_FLOAT_EQ(q1.w(), q2.w);
 }
 
-class TestAicaMsgs : public ::testing::Test {
+class TranslatorsTest : public ::testing::Test {
 protected:
   void SetUp() override {
     state_ = state_representation::CartesianState::Random("test", "reference");
@@ -37,13 +37,14 @@ protected:
   rclcpp::Clock clock_;
 };
 
-TEST_F(TestAicaMsgs, TestAccel) {
+TEST_F(TranslatorsTest, TestAccel) {
   auto accel = geometry_msgs::msg::Accel();
   write_msg(accel, state_, clock_.now());
   expect_vector_equal(state_.get_linear_acceleration(), accel.linear);
   expect_vector_equal(state_.get_angular_acceleration(), accel.angular);
 
   state_representation::CartesianState new_state("new");
+  EXPECT_THROW(write_msg(accel, new_state, clock_.now()), state_representation::exceptions::EmptyStateException);
   read_msg(new_state, accel);
   EXPECT_TRUE(new_state.get_acceleration().isApprox(state_.get_acceleration()));
 
@@ -58,13 +59,14 @@ TEST_F(TestAicaMsgs, TestAccel) {
   EXPECT_TRUE(new_state.get_acceleration().isApprox(state_.get_acceleration()));
 }
 
-TEST_F(TestAicaMsgs, TestPose) {
+TEST_F(TranslatorsTest, TestPose) {
   auto pose = geometry_msgs::msg::Pose();
   write_msg(pose, state_, clock_.now());
   expect_point_equal(state_.get_position(), pose.position);
   expect_quaternion_equal(state_.get_orientation(), pose.orientation);
 
   state_representation::CartesianState new_state("new");
+  EXPECT_THROW(write_msg(pose, new_state, clock_.now()), state_representation::exceptions::EmptyStateException);
   read_msg(new_state, pose);
   EXPECT_TRUE(new_state.get_pose().isApprox(state_.get_pose()));
 
@@ -79,13 +81,14 @@ TEST_F(TestAicaMsgs, TestPose) {
   EXPECT_TRUE(new_state.get_pose().isApprox(state_.get_pose()));
 }
 
-TEST_F(TestAicaMsgs, TestTransform) {
+TEST_F(TranslatorsTest, TestTransform) {
   auto tf = geometry_msgs::msg::Transform();
   write_msg(tf, state_, clock_.now());
   expect_vector_equal(state_.get_position(), tf.translation);
   expect_quaternion_equal(state_.get_orientation(), tf.rotation);
 
   state_representation::CartesianState new_state("new");
+  EXPECT_THROW(write_msg(tf, new_state, clock_.now()), state_representation::exceptions::EmptyStateException);
   read_msg(new_state, tf);
   EXPECT_TRUE(new_state.get_pose().isApprox(state_.get_pose()));
 
@@ -102,13 +105,14 @@ TEST_F(TestAicaMsgs, TestTransform) {
   EXPECT_TRUE(new_state.get_pose().isApprox(state_.get_pose()));
 }
 
-TEST_F(TestAicaMsgs, TestTwist) {
+TEST_F(TranslatorsTest, TestTwist) {
   auto twist = geometry_msgs::msg::Twist();
   write_msg(twist, state_, clock_.now());
   expect_vector_equal(state_.get_linear_velocity(), twist.linear);
   expect_vector_equal(state_.get_angular_velocity(), twist.angular);
 
   state_representation::CartesianState new_state("new");
+  EXPECT_THROW(write_msg(twist, new_state, clock_.now()), state_representation::exceptions::EmptyStateException);
   read_msg(new_state, twist);
   EXPECT_TRUE(new_state.get_twist().isApprox(state_.get_twist()));
 
@@ -123,13 +127,14 @@ TEST_F(TestAicaMsgs, TestTwist) {
   EXPECT_TRUE(new_state.get_twist().isApprox(state_.get_twist()));
 }
 
-TEST_F(TestAicaMsgs, TestWrench) {
+TEST_F(TranslatorsTest, TestWrench) {
   auto wrench = geometry_msgs::msg::Wrench();
   write_msg(wrench, state_, clock_.now());
   expect_vector_equal(state_.get_force(), wrench.force);
   expect_vector_equal(state_.get_torque(), wrench.torque);
 
   state_representation::CartesianState new_state("new");
+  EXPECT_THROW(write_msg(wrench, new_state, clock_.now()), state_representation::exceptions::EmptyStateException);
   read_msg(new_state, wrench);
   EXPECT_TRUE(new_state.get_wrench().isApprox(state_.get_wrench()));
 
@@ -144,7 +149,7 @@ TEST_F(TestAicaMsgs, TestWrench) {
   EXPECT_TRUE(new_state.get_wrench().isApprox(state_.get_wrench()));
 }
 
-TEST_F(TestAicaMsgs, TestJointState) {
+TEST_F(TranslatorsTest, TestJointState) {
   auto msg = sensor_msgs::msg::JointState();
   write_msg(msg, joint_state_, clock_.now());
   for (unsigned int i = 0; i < joint_state_.get_size(); ++i) {
@@ -155,6 +160,7 @@ TEST_F(TestAicaMsgs, TestJointState) {
   }
 
   auto new_state = state_representation::JointState("test", {"1", "2", "3"});
+  EXPECT_THROW(write_msg(msg, new_state, clock_.now()), state_representation::exceptions::EmptyStateException);
   read_msg(new_state, msg);
   EXPECT_TRUE(new_state.get_positions().isApprox(joint_state_.get_positions()));
   EXPECT_TRUE(new_state.get_velocities().isApprox(joint_state_.get_velocities()));
@@ -164,7 +170,7 @@ TEST_F(TestAicaMsgs, TestJointState) {
   }
 }
 
-TEST_F(TestAicaMsgs, TestEncodedState) {
+TEST_F(TranslatorsTest, TestEncodedState) {
   auto msg = modulo_new_core::EncodedState();
   write_msg(msg, state_, clock_.now());
   state_representation::CartesianState new_state;
