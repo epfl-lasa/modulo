@@ -1,5 +1,5 @@
 #!/bin/bash
-ROS_VERSION=galactic-devel
+BASE_TAG=galactic-devel
 
 IMAGE_NAME=epfl-lasa/modulo
 IMAGE_TAG=latest
@@ -36,7 +36,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-docker pull ghcr.io/aica-technology/ros2-control-libraries:"${ROS_VERSION}"
+docker pull ghcr.io/aica-technology/ros2-control-libraries:"${BASE_TAG}"
 DOCKER_BUILDKIT=1 docker build -t "${IMAGE_NAME}:${IMAGE_TAG}" "${BUILD_FLAGS[@]}" . || exit 1
 
 if [ "${SERVE_REMOTE}" = true ]; then

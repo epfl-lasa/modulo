@@ -1,5 +1,5 @@
-ARG ROS_VERSION=galactic
-FROM ghcr.io/aica-technology/ros2-control-libraries:${ROS_VERSION} as dependencies
+ARG BASE_TAG=galactic
+FROM ghcr.io/aica-technology/ros2-control-libraries:${BASE_TAG} as development
 
 # upgrade ament_cmake_python
 RUN sudo apt update && sudo apt install -y ros-${ROS_DISTRO}-ament-cmake-python && sudo rm -rf /var/lib/apt/lists/*

@@ -21,9 +21,11 @@ find_package(ament_cmake_python REQUIRED)
 
 ament_auto_find_build_dependencies()
 
+find_package(control_libraries 5.0.0 REQUIRED COMPONENTS state_representation)
+find_library(clproto REQUIRED)
+
 include_directories(include)
 
-# update below to change the component
 ament_auto_add_library(modulo_new_core SHARED
     ${PROJECT_SOURCE_DIR}/src/translators/ReadStateConversion.cpp
     ${PROJECT_SOURCE_DIR}/src/translators/WriteStateConversion.cpp)
