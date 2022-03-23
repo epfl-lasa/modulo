@@ -29,84 +29,102 @@ static void write_quaternion(geometry_msgs::msg::Quaternion& msg, const Eigen::Q
 }
 
 void write_msg(geometry_msgs::msg::Point& msg, const state_representation::CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  if (state.is_empty()) {
+    throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  }
   write_point(msg, state.get_position());
 }
 
 void write_msg(geometry_msgs::msg::Vector3& msg, const state_representation::CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  if (state.is_empty()) {
+    throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  }
   write_vector3(msg, state.get_position());
 }
 
 void write_msg(geometry_msgs::msg::Quaternion& msg, const state_representation::CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  if (state.is_empty()) {
+    throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  }
   write_quaternion(msg, state.get_orientation());
 }
 
 void write_msg(geometry_msgs::msg::Accel& msg, const state_representation::CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  if (state.is_empty()) {
+    throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  }
   write_vector3(msg.linear, state.get_linear_acceleration());
   write_vector3(msg.angular, state.get_angular_acceleration());
 }
 
 void write_msg(geometry_msgs::msg::AccelStamped& msg, const state_representation::CartesianState& state, const rclcpp::Time& time) {
+  write_msg(msg.accel, state, time);
   msg.header.stamp = time;
   msg.header.frame_id = state.get_reference_frame();
-  write_msg(msg.accel, state, time);
 }
 
 
 void write_msg(geometry_msgs::msg::Pose& msg, const state_representation::CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  if (state.is_empty()) {
+    throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  }
   write_point(msg.position, state.get_position());
   write_quaternion(msg.orientation, state.get_orientation());
 }
 
 void write_msg(geometry_msgs::msg::PoseStamped& msg, const state_representation::CartesianState& state, const rclcpp::Time& time) {
+  write_msg(msg.pose, state, time);
   msg.header.stamp = time;
   msg.header.frame_id = state.get_reference_frame();
-  write_msg(msg.pose, state, time);
 }
 
 void write_msg(geometry_msgs::msg::Transform& msg, const state_representation::CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  if (state.is_empty()) {
+    throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  }
   write_vector3(msg.translation, state.get_position());
   write_quaternion(msg.rotation, state.get_orientation());
 }
 
 void write_msg(geometry_msgs::msg::TransformStamped& msg, const state_representation::CartesianState& state, const rclcpp::Time& time) {
+  write_msg(msg.transform, state, time);
   msg.header.stamp = time;
   msg.header.frame_id = state.get_reference_frame();
   msg.child_frame_id = state.get_name();
-  write_msg(msg.transform, state, time);
 }
 
 void write_msg(geometry_msgs::msg::Twist& msg, const state_representation::CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  if (state.is_empty()) {
+    throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  }
   write_vector3(msg.linear, state.get_linear_velocity());
   write_vector3(msg.angular, state.get_angular_velocity());
 }
 
 void write_msg(geometry_msgs::msg::TwistStamped& msg, const state_representation::CartesianState& state, const rclcpp::Time& time) {
+  write_msg(msg.twist, state, time);
   msg.header.stamp = time;
   msg.header.frame_id = state.get_reference_frame();
-  write_msg(msg.twist, state, time);
 }
 
 void write_msg(geometry_msgs::msg::Wrench& msg, const state_representation::CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  if (state.is_empty()) {
+    throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  }
   write_vector3(msg.force, state.get_force());
   write_vector3(msg.torque, state.get_torque());
 }
 
 void write_msg(geometry_msgs::msg::WrenchStamped& msg, const state_representation::CartesianState& state, const rclcpp::Time& time) {
+  write_msg(msg.wrench, state, time);
   msg.header.stamp = time;
   msg.header.frame_id = state.get_reference_frame();
-  write_msg(msg.wrench, state, time);
 }
 
 void write_msg(sensor_msgs::msg::JointState& msg, const state_representation::JointState& state, const rclcpp::Time& time) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  if (state.is_empty()) {
+    throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  }
   msg.header.stamp = time;
   msg.name = state.get_names();
   msg.position = std::vector<double>(state.get_positions().data(), state.get_positions().data() + state.get_positions().size());
@@ -115,7 +133,9 @@ void write_msg(sensor_msgs::msg::JointState& msg, const state_representation::Jo
 }
 
 void write_msg(tf2_msgs::msg::TFMessage& msg, const state_representation::CartesianState& state, const rclcpp::Time& time) {
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  if (state.is_empty()) {
+    throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  }
   geometry_msgs::msg::TransformStamped transform;
   write_msg(transform, state, time);
   msg.transforms.push_back(transform);
@@ -124,7 +144,9 @@ void write_msg(tf2_msgs::msg::TFMessage& msg, const state_representation::Cartes
 template <typename U, typename T>
 void write_msg(U& msg, const state_representation::Parameter<T>& state, const rclcpp::Time&) {
   using namespace state_representation::exceptions;
-  if (state.is_empty()) throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  if (state.is_empty()) {
+    throw EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
+  }
   msg.data = state.get_value();
 }
 

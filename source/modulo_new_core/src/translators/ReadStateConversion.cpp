@@ -69,8 +69,14 @@ void read_msg(state_representation::CartesianState& state, const geometry_msgs::
 
 void read_msg(state_representation::JointState& state, const sensor_msgs::msg::JointState& msg) {
   state.set_names(msg.name);
-  if (!msg.position.empty()) state.set_positions(Eigen::VectorXd::Map(msg.position.data(), msg.position.size()));
-  if (!msg.velocity.empty()) state.set_velocities(Eigen::VectorXd::Map(msg.velocity.data(), msg.velocity.size()));
-  if (!msg.effort.empty()) state.set_torques(Eigen::VectorXd::Map(msg.effort.data(), msg.effort.size()));
+  if (!msg.position.empty()) {
+    state.set_positions(Eigen::VectorXd::Map(msg.position.data(), msg.position.size()));
+  }
+  if (!msg.velocity.empty()) {
+    state.set_velocities(Eigen::VectorXd::Map(msg.velocity.data(), msg.velocity.size()));
+  }
+  if (!msg.effort.empty()) {
+    state.set_torques(Eigen::VectorXd::Map(msg.effort.data(), msg.effort.size()));
+  }
 }
 }// namespace modulo_new_core::translators
