@@ -7,7 +7,6 @@
 #include <geometry_msgs/msg/wrench_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <std_msgs/msg/u_int8_multi_array.hpp>
 #include <tf2_msgs/msg/tf_message.hpp>
 
 #include <clproto.h>
@@ -17,6 +16,8 @@
 #include <state_representation/space/cartesian/CartesianTwist.hpp>
 #include <state_representation/space/cartesian/CartesianWrench.hpp>
 #include <state_representation/space/joint/JointState.hpp>
+
+#include "modulo_new_core/EncodedState.hpp"
 
 namespace modulo_new_core::translators {
 /**
@@ -122,7 +123,7 @@ void read_msg(state_representation::Parameter<T>& state, const U& msg) {
  * @param msg The ROS msg to read from
  */
 template <typename T>
-void read_msg(T& state, const std_msgs::msg::UInt8MultiArray& msg) {
+void read_msg(T& state, const EncodedState& msg) {
   std::string tmp(msg.data.begin(), msg.data.end());
   state = clproto::decode<T>(tmp);
 }

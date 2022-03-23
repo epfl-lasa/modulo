@@ -16,7 +16,7 @@
 #include <state_representation/parameters/ParameterInterface.hpp>
 #include <string>
 
-#include "modulo_core/communication/EncodedState.hpp"
+#include "modulo_new_core/EncodedState.hpp"
 #include "modulo_core/communication/message_passing/PublisherHandler.hpp"
 #include "modulo_core/communication/message_passing/SubscriptionHandler.hpp"
 #include "modulo_core/communication/message_passing/TransformBroadcasterHandler.hpp"
@@ -623,7 +623,7 @@ void Cell::add_state_publisher(const std::string& channel,
                                const std::chrono::duration<int64_t, DurationT>& period,
                                bool always_active,
                                int queue_size) {
-  this->add_publisher<EncodedState, RecT>(channel, recipient, period, always_active, queue_size);
+  this->add_publisher<modulo_new_core::EncodedState, RecT>(channel, recipient, period, always_active, queue_size);
 }
 
 template <class RecT>
@@ -631,7 +631,7 @@ void Cell::add_state_publisher(const std::string& channel,
                                const std::shared_ptr<RecT>& recipient,
                                bool always_active,
                                int queue_size) {
-  this->add_publisher<EncodedState, RecT>(channel, recipient, always_active, queue_size);
+  this->add_publisher<modulo_new_core::EncodedState, RecT>(channel, recipient, always_active, queue_size);
 }
 
 template <typename MsgT, class RecT, typename DurationT>
@@ -663,7 +663,7 @@ void Cell::add_state_subscription(const std::string& channel,
                                   const std::chrono::duration<int64_t, DurationT>& timeout,
                                   bool always_active,
                                   int queue_size) {
-  this->add_subscription<EncodedState, RecT>(channel, recipient, timeout, always_active, queue_size);
+  this->add_subscription<modulo_new_core::EncodedState, RecT>(channel, recipient, timeout, always_active, queue_size);
 }
 
 template <class RecT>
@@ -672,7 +672,7 @@ void Cell::add_state_subscription(const std::string& channel,
                                   bool always_active,
                                   unsigned int nb_period_to_timeout,
                                   int queue_size) {
-  this->add_subscription<EncodedState, RecT>(channel, recipient, nb_period_to_timeout, always_active, queue_size);
+  this->add_subscription<modulo_new_core::EncodedState, RecT>(channel, recipient, nb_period_to_timeout, always_active, queue_size);
 }
 
 template <typename DurationT>

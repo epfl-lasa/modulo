@@ -7,7 +7,6 @@
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <geometry_msgs/msg/wrench_stamped.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <std_msgs/msg/u_int8_multi_array.hpp>
 #include <tf2_msgs/msg/tf_message.hpp>
 
 #include <clproto.h>
@@ -18,6 +17,8 @@
 #include <state_representation/space/cartesian/CartesianState.hpp>
 #include <state_representation/space/cartesian/CartesianTwist.hpp>
 #include <state_representation/space/cartesian/CartesianWrench.hpp>
+
+#include "modulo_new_core/EncodedState.hpp"
 
 namespace modulo_new_core::translators {
 /**
@@ -143,7 +144,7 @@ void write_msg(U& msg, const state_representation::Parameter<T>& state, const rc
  * @param time The time of the message
  */
 template <typename T>
-void write_msg(std_msgs::msg::UInt8MultiArray& msg, const T& state, const rclcpp::Time&) {
+void write_msg(EncodedState& msg, const T& state, const rclcpp::Time&) {
   std::string tmp = clproto::encode<T>(state);
   msg.data = std::vector<unsigned char>(tmp.begin(), tmp.end());
 }

@@ -165,7 +165,7 @@ TEST_F(TestAicaMsgs, TestJointState) {
 }
 
 TEST_F(TestAicaMsgs, TestEncodedState) {
-  auto msg = std_msgs::msg::UInt8MultiArray();
+  auto msg = modulo_new_core::EncodedState();
   write_msg(msg, state_, clock_.now());
   state_representation::CartesianState new_state;
   read_msg(new_state, msg);
