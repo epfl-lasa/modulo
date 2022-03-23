@@ -1,7 +1,5 @@
 #include "modulo_new_core/translators/ReadStateConversion.hpp"
 
-using namespace state_representation::exceptions;
-
 namespace modulo_new_core::translators {
 
 static Eigen::Vector3d read_point(const geometry_msgs::msg::Point& msg) {
