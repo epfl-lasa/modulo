@@ -1,6 +1,9 @@
 ARG ROS_VERSION=galactic
 FROM ghcr.io/aica-technology/ros2-control-libraries:${ROS_VERSION} as development
 
+# upgrade ament_cmake_python
+RUN sudo apt update && sudo apt install -y ros-${ROS_DISTRO}-ament-cmake-python && sudo rm -rf /var/lib/apt/lists/*
+
 WORKDIR ${HOME}/ros2_ws
 # copy sources and build ROS workspace with user permissions
 WORKDIR ${HOME}/ros2_ws/
