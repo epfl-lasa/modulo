@@ -1,11 +1,11 @@
 #pragma once
 
 #include "modulo_components/ComponentInterface.h"
-#include "modulo_core/communication/EncodedState.hpp"
+#include "modulo_new_core/EncodedState.hpp"
 
 namespace modulo_components {
 
-class Component : public ComponentInterface<rclcpp::Node, rclcpp::Publisher<modulo::core::EncodedState>> {
+class Component : public ComponentInterface<rclcpp::Node, rclcpp::Publisher<modulo_new_core::EncodedState>> {
 
 };
 

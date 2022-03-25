@@ -17,6 +17,7 @@
   <depend>rclcpp_components</depend>
   <depend>rcutils</depend>
   <depend>modulo_core</depend>
+  <depend>modulo_new_core</depend>
 
   <exec_depend>launch_ros</exec_depend>
 
