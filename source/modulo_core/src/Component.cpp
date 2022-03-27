@@ -3,6 +3,8 @@
 #include "modulo_core/exceptions/PredicateAlreadyRegisteredException.hpp"
 #include "modulo_core/exceptions/PredicateNotFoundException.hpp"
 
+#include <std_msgs/msg/bool.hpp>
+
 namespace modulo::core {
 
 void Component::on_init() {

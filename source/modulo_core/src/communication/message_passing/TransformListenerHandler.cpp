@@ -9,7 +9,7 @@ const state_representation::CartesianPose TransformListenerHandler::lookup_trans
                                                    frame_name,
                                                    tf2::TimePoint(std::chrono::milliseconds(0)),
                                                    tf2::Duration(this->get_timeout()));
-  state_conversion::read_msg(result, transformStamped);
+  modulo_new_core::translators::read_msg(result, transformStamped);
   return result;
 }
 }// namespace modulo::core::communication
