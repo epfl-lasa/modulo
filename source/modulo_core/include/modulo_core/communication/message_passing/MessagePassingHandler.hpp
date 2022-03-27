@@ -6,8 +6,8 @@
 #include <string>
 
 #include "modulo_core/communication/CommunicationHandler.hpp"
-#include "modulo_core/communication/message_passing/ReadStateConversion.hpp"
-#include "modulo_core/communication/message_passing/WriteStateConversion.hpp"
+#include "modulo_new_core/translators/ReadStateConversion.hpp"
+#include "modulo_new_core/translators/WriteStateConversion.hpp"
 
 namespace modulo::core::communication {
 /**

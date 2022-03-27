@@ -38,8 +38,8 @@ public:
   }
 
   bool on_configure() {
-    this->add_subscription<EncodedState>("/robot_test/pose", this->current_pose);
-    this->add_publisher<EncodedState>("/ds/desired_twist", this->desired_twist);
+    this->add_subscription<modulo_new_core::EncodedState>("/robot_test/pose", this->current_pose);
+    this->add_publisher<modulo_new_core::EncodedState>("/ds/desired_twist", this->desired_twist);
     return true;
   }
 
@@ -74,8 +74,8 @@ public:
       desired_twist(std::make_shared<CartesianTwist>("robot_test")) {}
 
   bool on_configure() {
-    this->add_subscription<EncodedState>("/robot_test/pose", this->robot_pose);
-    this->add_subscription<EncodedState>("/ds/desired_twist", this->desired_twist);
+    this->add_subscription<modulo_new_core::EncodedState>("/robot_test/pose", this->robot_pose);
+    this->add_subscription<modulo_new_core::EncodedState>("/ds/desired_twist", this->desired_twist);
     return true;
   }
 
@@ -106,8 +106,8 @@ public:
       dt(period) {}
 
   bool on_configure() {
-    this->add_subscription<EncodedState>("/ds/desired_twist", this->desired_twist);
-    this->add_publisher<EncodedState>("/robot_test/pose", this->robot_pose);
+    this->add_subscription<modulo_new_core::EncodedState>("/ds/desired_twist", this->desired_twist);
+    this->add_publisher<modulo_new_core::EncodedState>("/robot_test/pose", this->robot_pose);
     return true;
   }
 

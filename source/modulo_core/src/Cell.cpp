@@ -2,6 +2,7 @@
 
 #include <lifecycle_msgs/msg/state.hpp>
 
+#include <state_representation/geometry/Ellipsoid.hpp>
 #include <state_representation/space/joint/JointPositions.hpp>
 #include <state_representation/space/joint/JointVelocities.hpp>
 #include <state_representation/exceptions/UnrecognizedParameterTypeException.hpp>

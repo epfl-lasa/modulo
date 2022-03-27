@@ -28,8 +28,6 @@ find_library(controllers REQUIRED)
 find_library(robot_model REQUIRED)
 
 set(CORE_SOURCES
-    src/communication/message_passing/ReadStateConversion.cpp
-    src/communication/message_passing/WriteStateConversion.cpp
     src/communication/message_passing/TransformListenerHandler.cpp
     src/communication/message_passing/TransformBroadcasterHandler.cpp
     src/communication/message_passing/MessagePassingHandler.cpp
