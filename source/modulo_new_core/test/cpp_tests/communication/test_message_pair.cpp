@@ -9,16 +9,16 @@ static void test_message_interface(const DataT& initial_value, const DataT& new_
   auto data = std::make_shared<DataT>(initial_value);
   auto msg_pair = std::make_shared<MessagePair<MsgT, DataT>>(data);
   EXPECT_EQ(initial_value, *msg_pair->get_data());
-  EXPECT_EQ(initial_value, msg_pair->get_message().data);
+  EXPECT_EQ(initial_value, msg_pair->write_message().data);
 
   std::shared_ptr<MessagePairInterface> msg_pair_interface(msg_pair);
-  auto msg = msg_pair_interface->get_message_pair_message<MsgT, DataT>();
+  auto msg = msg_pair_interface->template write_message<MsgT, DataT>();
   EXPECT_EQ(initial_value, msg.data);
 
   *data = new_value;
   EXPECT_EQ(new_value, *msg_pair->get_data());
-  EXPECT_EQ(new_value, msg_pair->get_message().data);
-  msg = msg_pair_interface->get_message_pair_message<MsgT, DataT>();
+  EXPECT_EQ(new_value, msg_pair->write_message().data);
+  msg = msg_pair_interface->template write_message<MsgT, DataT>();
   EXPECT_EQ(new_value, msg.data);
 }
 
@@ -35,11 +35,11 @@ TEST(MessagePairTest, TestDoubleArray) {
   auto msg_pair = std::make_shared<MessagePair<std_msgs::msg::Float64MultiArray, std::vector<double>>>(data);
   for (std::size_t i = 0; i < initial_value.size(); ++i) {
     EXPECT_EQ(initial_value.at(i), msg_pair->get_data()->at(i));
-    EXPECT_EQ(initial_value.at(i), msg_pair->get_message().data.at(i));
+    EXPECT_EQ(initial_value.at(i), msg_pair->write_message().data.at(i));
   }
 
   std::shared_ptr<MessagePairInterface> msg_pair_interface(msg_pair);
-  auto msg = msg_pair_interface->get_message_pair_message<std_msgs::msg::Float64MultiArray, std::vector<double>>();
+  auto msg = msg_pair_interface->write_message<std_msgs::msg::Float64MultiArray, std::vector<double>>();
   for (std::size_t i = 0; i < initial_value.size(); ++i) {
     EXPECT_EQ(initial_value.at(i),msg.data.at(i));
   }
@@ -47,10 +47,10 @@ TEST(MessagePairTest, TestDoubleArray) {
 
   std::vector<double> new_value = {0.4, 0.5};
   *data = new_value;
-  msg = msg_pair_interface->get_message_pair_message<std_msgs::msg::Float64MultiArray, std::vector<double>>();
+  msg = msg_pair_interface->write_message<std_msgs::msg::Float64MultiArray, std::vector<double>>();
   for (std::size_t i = 0; i < new_value.size(); ++i) {
     EXPECT_EQ(new_value.at(i), msg_pair->get_data()->at(i));
-    EXPECT_EQ(new_value.at(i), msg_pair->get_message().data.at(i));
+    EXPECT_EQ(new_value.at(i), msg_pair->write_message().data.at(i));
     EXPECT_EQ(new_value.at(i),msg.data.at(i));
   }
 }

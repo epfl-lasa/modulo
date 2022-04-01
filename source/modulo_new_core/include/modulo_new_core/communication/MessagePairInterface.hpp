@@ -21,7 +21,7 @@ public:
   std::shared_ptr<MessagePair<MsgT, DataT>> get_message_pair(bool validate_pointer = true);
 
   template<typename MsgT, typename DataT>
-  MsgT get_message_pair_message();
+  MsgT write_message();
 
   MessageType get_type() const;
 
@@ -36,19 +36,20 @@ inline std::shared_ptr<MessagePair<MsgT, DataT>> MessagePairInterface::get_messa
     message_pair_ptr = std::dynamic_pointer_cast<MessagePair<MsgT, DataT>>(this->shared_from_this());
   } catch (const std::exception& ex) {
     if (validate_pointer) {
-      // TODO do we need a name for the MessagePairInterface?
-      throw std::runtime_error("MessagePair interface \"test\" is not managed by a valid pointer");
+      // TODO proper exception
+      throw std::runtime_error("MessagePair interface is not managed by a valid pointer");
     }
   }
   if (message_pair_ptr == nullptr && validate_pointer) {
+    // TODO proper exception
     throw std::runtime_error("Unable to cast MessagePair interface");
   }
   return message_pair_ptr;
 }
 
 template<typename MsgT, typename DataT>
-inline MsgT MessagePairInterface::get_message_pair_message() {
-  return this->template get_message_pair<MsgT, DataT>()->get_message();
+inline MsgT MessagePairInterface::write_message() {
+  return this->template get_message_pair<MsgT, DataT>()->write_message();
 }
 
 }// namespace modulo_new_core::communication

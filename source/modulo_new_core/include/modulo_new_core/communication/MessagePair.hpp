@@ -1,6 +1,7 @@
 #pragma once
 
 #include "modulo_new_core/communication/MessagePairInterface.hpp"
+#include "modulo_new_core/translators/WriteStateConversion.hpp"
 
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/float64.hpp>
@@ -18,14 +19,16 @@ private:
 public:
   explicit MessagePair(std::shared_ptr<DataT> data);
 
-  [[nodiscard]] MsgT get_message() const;
+  [[nodiscard]] MsgT write_message() const;
 
   [[nodiscard]] std::shared_ptr<DataT> get_data() const;
 };
 
 template<typename MsgT, typename DataT>
-MsgT MessagePair<MsgT, DataT>::get_message() const {
+MsgT MessagePair<MsgT, DataT>::write_message() const {
   auto msg = MsgT();
+  // TODO use translators
+  //  translators::write_msg(msg, *this->data_);
   msg.data = *this->data_;
   return msg;
 }
