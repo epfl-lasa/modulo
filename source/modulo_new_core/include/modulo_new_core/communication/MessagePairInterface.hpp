@@ -51,8 +51,4 @@ inline MsgT MessagePairInterface::get_message_pair_message() {
   return this->template get_message_pair<MsgT, DataT>()->get_message();
 }
 
-inline MessageType MessagePairInterface::get_type() const {
-  return this->type_;
-}
-
 }// namespace modulo_new_core::communication

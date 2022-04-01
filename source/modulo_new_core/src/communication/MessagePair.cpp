@@ -4,11 +4,6 @@
 
 namespace modulo_new_core::communication {
 
-template<typename MsgT, typename DataT>
-MessagePair<MsgT, DataT>::MessagePair(std::shared_ptr<DataT>) {
-  throw std::runtime_error("not implemented");
-}
-
 template<>
 MessagePair<std_msgs::msg::Bool, bool>::MessagePair(std::shared_ptr<bool>  data) :
     MessagePairInterface(MessageType::BOOL), data_(std::move(data)) {}

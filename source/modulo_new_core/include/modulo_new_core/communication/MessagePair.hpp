@@ -7,7 +7,6 @@
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <std_msgs/msg/int64.hpp>
 #include <std_msgs/msg/string.hpp>
-#include <std_msgs/msg/u_int8_multi_array.hpp>
 
 namespace modulo_new_core::communication {
 
