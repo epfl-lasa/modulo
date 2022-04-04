@@ -1,7 +1,10 @@
 #pragma once
 
 #include <memory>
+
 #include "modulo_new_core/communication/MessageType.hpp"
+#include "modulo_new_core/exceptions/InvalidMessagePairCastException.hpp"
+#include "modulo_new_core/exceptions/InvalidPointerException.hpp"
 
 namespace modulo_new_core::communication {
 
@@ -36,13 +39,13 @@ inline std::shared_ptr<MessagePair<MsgT, DataT>> MessagePairInterface::get_messa
     message_pair_ptr = std::dynamic_pointer_cast<MessagePair<MsgT, DataT>>(this->shared_from_this());
   } catch (const std::exception& ex) {
     if (validate_pointer) {
-      // TODO proper exception
-      throw std::runtime_error("MessagePair interface is not managed by a valid pointer");
+      throw exceptions::InvalidPointerException("Message pair interface is not managed by a valid pointer");
     }
   }
   if (message_pair_ptr == nullptr && validate_pointer) {
-    // TODO proper exception
-    throw std::runtime_error("Unable to cast MessagePair interface");
+    throw exceptions::InvalidMessagePairCastException(
+        "Unable to case message pair interface to a message pair pointer of requested type"
+    );
   }
   return message_pair_ptr;
 }
