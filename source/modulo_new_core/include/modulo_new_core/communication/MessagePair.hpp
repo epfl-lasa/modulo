@@ -3,10 +3,11 @@
 #include "modulo_new_core/communication/MessagePairInterface.hpp"
 #include "modulo_new_core/translators/WriteStateConversion.hpp"
 
+#include <rclcpp/clock.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
-#include <std_msgs/msg/int64.hpp>
+#include <std_msgs/msg/int32.hpp>
 #include <std_msgs/msg/string.hpp>
 
 namespace modulo_new_core::communication {
@@ -15,9 +16,10 @@ template<typename MsgT, typename DataT>
 class MessagePair : public MessagePairInterface {
 private:
   std::shared_ptr<DataT> data_;
+  std::shared_ptr<rclcpp::Clock> clock_;
 
 public:
-  explicit MessagePair(std::shared_ptr<DataT> data);
+  MessagePair(std::shared_ptr<DataT> data, std::shared_ptr<rclcpp::Clock> clock);
 
   [[nodiscard]] MsgT write_message() const;
 
@@ -27,9 +29,7 @@ public:
 template<typename MsgT, typename DataT>
 MsgT MessagePair<MsgT, DataT>::write_message() const {
   auto msg = MsgT();
-  // TODO use translators
-  //  translators::write_msg(msg, *this->data_);
-  msg.data = *this->data_;
+  translators::write_msg(msg, *this->data_, clock_->now());
   return msg;
 }
 

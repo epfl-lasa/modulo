@@ -12,6 +12,7 @@
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 #include <rclcpp_lifecycle/lifecycle_publisher.hpp>
 #include <rcutils/logging_macros.h>
+#include <state_representation/space/cartesian/CartesianPose.hpp>
 #include <state_representation/parameters/Parameter.hpp>
 #include <state_representation/parameters/ParameterInterface.hpp>
 #include <string>

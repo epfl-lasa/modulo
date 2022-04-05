@@ -77,4 +77,24 @@ void read_msg(state_representation::JointState& state, const sensor_msgs::msg::J
     state.set_torques(Eigen::VectorXd::Map(msg.effort.data(), msg.effort.size()));
   }
 }
+
+void read_msg(bool& state, const std_msgs::msg::Bool& msg) {
+  state = msg.data;
+}
+
+void read_msg(double& state, const std_msgs::msg::Float64& msg) {
+  state = msg.data;
+}
+
+void read_msg(std::vector<double>& state, const std_msgs::msg::Float64MultiArray& msg) {
+  state = msg.data;
+}
+
+void read_msg(int& state, const std_msgs::msg::Int32& msg) {
+  state = msg.data;
+}
+
+void read_msg(std::string& state, const std_msgs::msg::String& msg) {
+  state = msg.data;
+}
 }// namespace modulo_new_core::translators

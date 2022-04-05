@@ -1,5 +1,6 @@
 #pragma once
 
+#include <state_representation/space/cartesian/CartesianPose.hpp>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 
