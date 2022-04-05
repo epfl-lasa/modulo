@@ -1,9 +1,7 @@
 #include "modulo_new_core/translators/WriteStateConversion.hpp"
 
-#include <std_msgs/msg/bool.hpp>
-#include <std_msgs/msg/float64.hpp>
-#include <std_msgs/msg/float64_multi_array.hpp>
-#include <std_msgs/msg/string.hpp>
+#include <state_representation/exceptions/EmptyStateException.hpp>
+#include <state_representation/space/cartesian/CartesianPose.hpp>
 
 using namespace state_representation;
 
@@ -28,27 +26,6 @@ static void write_quaternion(geometry_msgs::msg::Quaternion& msg, const Eigen::Q
   msg.z = quat.z();
 }
 
-void write_msg(geometry_msgs::msg::Point& msg, const CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) {
-    throw exceptions::EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
-  }
-  write_point(msg, state.get_position());
-}
-
-void write_msg(geometry_msgs::msg::Vector3& msg, const CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) {
-    throw exceptions::EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
-  }
-  write_vector3(msg, state.get_position());
-}
-
-void write_msg(geometry_msgs::msg::Quaternion& msg, const CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) {
-    throw exceptions::EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
-  }
-  write_quaternion(msg, state.get_orientation());
-}
-
 void write_msg(geometry_msgs::msg::Accel& msg, const CartesianState& state, const rclcpp::Time&) {
   if (state.is_empty()) {
     throw exceptions::EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
@@ -62,7 +39,6 @@ void write_msg(geometry_msgs::msg::AccelStamped& msg, const CartesianState& stat
   msg.header.stamp = time;
   msg.header.frame_id = state.get_reference_frame();
 }
-
 
 void write_msg(geometry_msgs::msg::Pose& msg, const CartesianState& state, const rclcpp::Time&) {
   if (state.is_empty()) {
@@ -170,5 +146,25 @@ void write_msg(geometry_msgs::msg::TransformStamped& msg, const Parameter<Cartes
 template <>
 void write_msg(tf2_msgs::msg::TFMessage& msg, const Parameter<CartesianPose>& state, const rclcpp::Time& time) {
   write_msg(msg, state.get_value(), time);
+}
+
+void write_msg(std_msgs::msg::Bool& msg, const bool& state, const rclcpp::Time&) {
+  msg.data = state;
+}
+
+void write_msg(std_msgs::msg::Float64& msg, const double& state, const rclcpp::Time&) {
+  msg.data = state;
+}
+
+void write_msg(std_msgs::msg::Float64MultiArray& msg, const std::vector<double>& state, const rclcpp::Time&) {
+  msg.data = state;
+}
+
+void write_msg(std_msgs::msg::Int32& msg, const int& state, const rclcpp::Time&) {
+  msg.data = state;
+}
+
+void write_msg(std_msgs::msg::String& msg, const std::string& state, const rclcpp::Time&) {
+  msg.data = state;
 }
 }// namespace modulo_new_core::translators

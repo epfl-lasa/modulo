@@ -4,8 +4,19 @@
 #include "modulo_new_core/translators/WriteStateConversion.hpp"
 
 #include <rclcpp/clock.hpp>
+#include <state_representation/exceptions/EmptyStateException.hpp>
 
 using namespace modulo_new_core::translators;
+
+template<typename MsgT, typename DataT>
+static void test_std_messages(const DataT& state, const rclcpp::Time& time) {
+  auto msg = MsgT();
+  write_msg(msg, state, time);
+  EXPECT_EQ(msg.data, state);
+  DataT new_state;
+  read_msg(new_state, msg);
+  EXPECT_EQ(state, new_state);
+}
 
 static void expect_vector_equal(const Eigen::Vector3d& v1, const geometry_msgs::msg::Vector3& v2) {
   EXPECT_FLOAT_EQ(v1.x(), v2.x);
@@ -167,6 +178,23 @@ TEST_F(TranslatorsTest, TestJointState) {
   EXPECT_TRUE(new_state.get_torques().isApprox(joint_state_.get_torques()));
   for (unsigned int i = 0; i < joint_state_.get_size(); ++i) {
     EXPECT_EQ(new_state.get_names().at(i), joint_state_.get_names().at(i));
+  }
+}
+
+TEST_F(TranslatorsTest, TestStdMsgs) {
+  test_std_messages<std_msgs::msg::Bool, bool>(true, clock_.now());
+  test_std_messages<std_msgs::msg::Float64, double>(0.3, clock_.now());
+  test_std_messages<std_msgs::msg::Int32, int>(2, clock_.now());
+  test_std_messages<std_msgs::msg::String, std::string>("test", clock_.now());
+
+  auto msg = std_msgs::msg::Float64MultiArray();
+  std::vector<double> state = {0.3, 0.6};
+  write_msg(msg, state, clock_.now());
+  std::vector<double> new_state;
+  read_msg(new_state, msg);
+  for (std::size_t i = 0; i < state.size(); ++i) {
+    EXPECT_EQ(msg.data.at(i), state.at(i));
+    EXPECT_EQ(state.at(i), new_state.at(i));
   }
 }
 
