@@ -14,13 +14,13 @@ static void test_message_interface(
   EXPECT_EQ(initial_value, msg_pair->write_message().data);
 
   std::shared_ptr<MessagePairInterface> msg_pair_interface(msg_pair);
-  auto msg = msg_pair_interface->template write_message<MsgT, DataT>();
+  auto msg = msg_pair_interface->template write<MsgT, DataT>();
   EXPECT_EQ(initial_value, msg.data);
 
   *data = new_value;
   EXPECT_EQ(new_value, *msg_pair->get_data());
   EXPECT_EQ(new_value, msg_pair->write_message().data);
-  msg = msg_pair_interface->template write_message<MsgT, DataT>();
+  msg = msg_pair_interface->template write<MsgT, DataT>();
   EXPECT_EQ(new_value, msg.data);
 }
 
@@ -52,14 +52,14 @@ TEST_F(MessagePairTest, TestCartesianState) {
   EXPECT_TRUE(initial_value.data().isApprox(msg_pair->get_data()->data()));
 
   std::shared_ptr<MessagePairInterface> msg_pair_interface(msg_pair);
-  auto msg = msg_pair_interface->write_message<modulo_new_core::EncodedState, state_representation::CartesianState>();
+  auto msg = msg_pair_interface->write<modulo_new_core::EncodedState, state_representation::CartesianState>();
   std::string tmp(msg.data.begin(), msg.data.end());
   auto decoded = clproto::decode<state_representation::CartesianState>(tmp);
   EXPECT_TRUE(initial_value.data().isApprox(decoded.data()));
 
   auto new_value = state_representation::CartesianState::Identity("world");
   *data = new_value;
-  msg = msg_pair_interface->write_message<modulo_new_core::EncodedState , state_representation::CartesianState>();
+  msg = msg_pair_interface->write<modulo_new_core::EncodedState , state_representation::CartesianState>();
   tmp = std::string(msg.data.begin(), msg.data.end());
   decoded = clproto::decode<state_representation::CartesianState>(tmp);
   EXPECT_TRUE(new_value.data().isApprox(decoded.data()));
