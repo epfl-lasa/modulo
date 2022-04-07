@@ -19,12 +19,18 @@ private:
   std::shared_ptr<rclcpp::Clock> clock_;
 
 public:
-  MessagePair(std::shared_ptr<DataT> data, std::shared_ptr<rclcpp::Clock> clock);
+  MessagePair(MessageType type, std::shared_ptr<DataT> data, std::shared_ptr<rclcpp::Clock> clock);
 
   [[nodiscard]] MsgT write_message() const;
 
   [[nodiscard]] std::shared_ptr<DataT> get_data() const;
 };
+
+template<typename MsgT, typename DataT>
+MessagePair<MsgT, DataT>::MessagePair(
+    MessageType type, std::shared_ptr<DataT> data, std::shared_ptr<rclcpp::Clock> clock
+) :
+    MessagePairInterface(type), data_(std::move(data)), clock_(std::move(clock)) {}
 
 template<typename MsgT, typename DataT>
 MsgT MessagePair<MsgT, DataT>::write_message() const {
