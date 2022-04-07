@@ -10,8 +10,7 @@
 
 namespace modulo_components {
 
-class LifecycleComponent : public ComponentInterface<rclcpp_lifecycle::LifecycleNode,
-                                                     rclcpp_lifecycle::LifecyclePublisher<modulo_new_core::EncodedState>> {
+class LifecycleComponent : public ComponentInterface<rclcpp_lifecycle::LifecycleNode> {
 
 };
 

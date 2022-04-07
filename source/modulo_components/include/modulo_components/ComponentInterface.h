@@ -9,6 +9,7 @@
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/transform_broadcaster.h>
 
+#include <modulo_new_core/communication/PublisherType.hpp>
 #include <modulo_new_core/translators/ReadStateConversion.hpp>
 #include <modulo_new_core/translators/WriteStateConversion.hpp>
 
@@ -18,7 +19,7 @@
 
 namespace modulo_components {
 
-template<class NodeT, typename PubT>
+template<class NodeT, typename>
 class ComponentInterface : NodeT {
   friend class ComponentInterfaceTest;
 
@@ -27,7 +28,9 @@ public:
    * @brief Constructor from node options
    * @param node_options node options as used in ROS2 Node
    */
-  explicit ComponentInterface(const rclcpp::NodeOptions& node_options);
+  explicit ComponentInterface(
+      const rclcpp::NodeOptions& node_options, modulo_new_core::communication::PublisherType publisher_type
+  );
 
 protected:
   /**
@@ -82,6 +85,8 @@ private:
 
   void step();
 
+  modulo_new_core::communication::PublisherType publisher_type_;
+
   std::map<std::string, utilities::PredicateVariant> predicates_;
   std::map<std::string, std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>>> predicate_publishers_;
 
@@ -94,9 +99,11 @@ private:
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 };
 
-template<class NodeT, class PubT>
-ComponentInterface<NodeT, PubT>::ComponentInterface(const rclcpp::NodeOptions& options) :
-    rclcpp::Node(utilities::parse_node_name(options, "ComponentInterface"), options) {
+template<class NodeT>
+ComponentInterface<NodeT>::ComponentInterface(
+    const rclcpp::NodeOptions& options, modulo_new_core::communication::PublisherType publisher_type
+) :
+    rclcpp::Node(utilities::parse_node_name(options, "ComponentInterface"), options), publisher_type_(publisher_type) {
   this->declare_parameter("period", 2.0);
   this->declare_parameter("has_tf_listener", false);
   this->declare_parameter("has_tf_broadcaster", false);
@@ -119,8 +126,8 @@ ComponentInterface<NodeT, PubT>::ComponentInterface(const rclcpp::NodeOptions& o
   );
 }
 
-template<class NodeT, typename PubT>
-void ComponentInterface<NodeT, PubT>::step() {
+template<class NodeT>
+void ComponentInterface<NodeT>::step() {
   for (const auto& predicate: this->predicates_) {
     std_msgs::msg::Bool msg;
     msg.data = this->get_predicate(predicate.first);
@@ -134,14 +141,14 @@ void ComponentInterface<NodeT, PubT>::step() {
   }
 }
 
-template<class NodeT, class PubT>
-std::string ComponentInterface<NodeT, PubT>::generate_predicate_topic(const std::string& predicate_name) const {
+template<class NodeT>
+std::string ComponentInterface<NodeT>::generate_predicate_topic(const std::string& predicate_name) const {
   return "/predicates/" + std::string(this->get_name()) + "/" + predicate_name;
 }
 
-template<class NodeT, typename PubT>
+template<class NodeT>
 void
-ComponentInterface<NodeT, PubT>::add_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate) {
+ComponentInterface<NodeT>::add_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate) {
   if (this->predicates_.find(name) != this->predicates_.end()) {
     RCLCPP_INFO(this->get_logger(), "Predicate already exists, overwriting");
     this->predicates_.at(name) = predicate;
@@ -154,13 +161,13 @@ ComponentInterface<NodeT, PubT>::add_variant_predicate(const std::string& name, 
   }
 }
 
-template<class NodeT, typename PubT>
-void ComponentInterface<NodeT, PubT>::add_predicate(const std::string& name, bool predicate) {
+template<class NodeT>
+void ComponentInterface<NodeT>::add_predicate(const std::string& name, bool predicate) {
   this->add_variant_predicate(name, utilities::PredicateVariant(predicate));
 }
 
-template<class NodeT, typename PubT>
-void ComponentInterface<NodeT, PubT>::add_predicate(
+template<class NodeT>
+void ComponentInterface<NodeT>::add_predicate(
     const std::string& name, const std::function<bool(void)>& predicate
 ) {
   this->add_variant_predicate(name, utilities::PredicateVariant(predicate));
@@ -182,8 +189,8 @@ bool ComponentInterface<NodeT, PubT>::get_predicate(const std::string& predicate
   return (callback_function)();
 }
 
-template<class NodeT, typename PubT>
-void ComponentInterface<NodeT, PubT>::set_variant_predicate(
+template<class NodeT>
+void ComponentInterface<NodeT>::set_variant_predicate(
     const std::string& name, const utilities::PredicateVariant& predicate
 ) {
   auto predicate_iterator = this->predicates_.find(name);
@@ -193,20 +200,20 @@ void ComponentInterface<NodeT, PubT>::set_variant_predicate(
   this->predicates_.at(name) = predicate;
 }
 
-template<class NodeT, typename PubT>
-void ComponentInterface<NodeT, PubT>::set_predicate(const std::string& name, bool predicate) {
+template<class NodeT>
+void ComponentInterface<NodeT>::set_predicate(const std::string& name, bool predicate) {
   this->set_variant_predicate(name, utilities::PredicateVariant(predicate));
 }
 
-template<class NodeT, typename PubT>
-void ComponentInterface<NodeT, PubT>::set_predicate(
+template<class NodeT>
+void ComponentInterface<NodeT>::set_predicate(
     const std::string& name, const std::function<bool(void)>& predicate
 ) {
   this->set_variant_predicate(name, utilities::PredicateVariant(predicate));
 }
 
-template<class NodeT, typename PubT>
-void ComponentInterface<NodeT, PubT>::send_transform(const state_representation::CartesianPose& transform) {
+template<class NodeT>
+void ComponentInterface<NodeT>::send_transform(const state_representation::CartesianPose& transform) {
   // TODO: throw here?
   if (this->tf_broadcaster_ == nullptr) {
     RCLCPP_FATAL(this->get_logger(), "No tf broadcaster");
@@ -216,8 +223,8 @@ void ComponentInterface<NodeT, PubT>::send_transform(const state_representation:
   this->tf_broadcaster_->sendTransform(tf_message);
 }
 
-template<class NodeT, typename PubT>
-state_representation::CartesianPose ComponentInterface<NodeT, PubT>::lookup_transform(
+template<class NodeT>
+state_representation::CartesianPose ComponentInterface<NodeT>::lookup_transform(
     const std::string& frame_name, const std::string& reference_frame_name
 ) const {
   // TODO: throw here?

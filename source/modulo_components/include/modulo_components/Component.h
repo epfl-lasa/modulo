@@ -7,7 +7,7 @@
 
 namespace modulo_components {
 
-class Component : public ComponentInterface<rclcpp::Node, rclcpp::Publisher<modulo_new_core::EncodedState>> {
+class Component : public ComponentInterface<rclcpp::Node> {
 
 };
 
