@@ -1,9 +1,10 @@
 #pragma once
 
-#include <state_representation/parameters/ParameterMap.hpp>
 #include <state_representation/space/cartesian/CartesianPose.hpp>
 #include <rclcpp/parameter.hpp>
 #include <rclcpp/create_timer.hpp>
+#include <rclcpp/node_options.hpp>
+#include <gtest/gtest.h>
 
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
@@ -19,19 +20,58 @@
 namespace modulo_components {
 
 template<class NodeT, typename PubT>
-class ComponentInterface : public state_representation::ParameterMap, public NodeT {
+class ComponentInterface : NodeT {
+  friend class TestComponentInterface;
+  FRIEND_TEST(TestComponentInterface, test_add_bool_predicate);
+  FRIEND_TEST(TestComponentInterface, test_add_function_predicate);
+  FRIEND_TEST(TestComponentInterface, test_get_predicate_value);
+  FRIEND_TEST(TestComponentInterface, test_set_predicate_value);
 
 public:
+  /**
+   * @brief Constructor from node option
+   * @param node_options node options as used in ROS2 Node
+   */
   explicit ComponentInterface(const rclcpp::NodeOptions& node_options);
 
 protected:
-  void add_predicate(const std::string& name, const std::function<bool(void)>& predicate);
+  /**
+   * @brief Add a predicate to the map of predicates
+   * @param predicate_name the name of the associated predicate
+   * @param predicate_value the boolean value of the predicate
+   */
+  void add_predicate(const std::string& predicate_name, bool predicate_value);
 
-  void add_predicate(const std::string& name, bool predicate);
+  /**
+   * @brief Add a predicate to the map of predicates based on a function to periodically call
+   * @param predicate_name the name of the associated predicate
+   * @param predicate_function the function to periodically call that returns the value of the predicate
+   */
+  void add_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function);
 
-  void set_predicate(const std::string& name, const std::function<bool(void)>& predicate);
+  /**
+   * @brief Get the value of the predicate given as parameter
+   * @param predicate_name the name of the predicate to retrieve from the
+   * map of predicates
+   * @return the value of the predicate as a boolean
+   */
+  [[nodiscard]] bool get_predicate(const std::string& predicate_name) const;
 
-  void set_predicate(const std::string& name, bool predicate);
+  /**
+   * @brief Set the value of the predicate given as parameter
+   * @param predicate_name the name of the predicate to retrieve from the
+   * map of predicates
+   * @param predicate_value the new value of the predicate
+   */
+  void set_predicate(const std::string& predicate_name, bool predicate_value);
+
+  /**
+   * @brief Set the value of the predicate given as parameter
+   * @param predicate_name the name of the predicate to retrieve from the
+   * map of predicates
+   * @param predicate_function the function to periodically call that returns the value of the predicate
+   */
+  void set_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function);
 
   void send_transform(const state_representation::CartesianPose& transform);
 
@@ -41,9 +81,9 @@ protected:
 private:
   [[nodiscard]] std::string generate_predicate_topic(const std::string& predicate_name) const;
 
-  void add_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
+  void add_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
-  void set_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
+  void set_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
   void step();
 
@@ -61,21 +101,22 @@ private:
 
 template<class NodeT, class PubT>
 ComponentInterface<NodeT, PubT>::ComponentInterface(const rclcpp::NodeOptions& options) :
-    rclcpp::Node(utilities::parse_node_name(options, "ComponentInterface")) {
-  this->declare_parameter("period", 1.0);
+    rclcpp::Node(utilities::parse_node_name(options, "ComponentInterface"), options) {
+  this->declare_parameter("period", 2.0);
   this->declare_parameter("has_tf_listener", false);
   this->declare_parameter("has_tf_broadcaster", false);
 
   // here I need to do typename NodeT:: because ParameterMap also has get_parameter
-  period_ = typename NodeT::get_parameter("has_tf_listener");
-  has_tf_listener_ = typename NodeT::get_parameter("has_tf_listener");
-  has_tf_broadcaster_ = typename NodeT::get_parameter("has_tf_broadcaster");
+  period_ = NodeT::get_parameter("period");
+  has_tf_listener_ = NodeT::get_parameter("has_tf_listener");
+  has_tf_broadcaster_ = NodeT::get_parameter("has_tf_broadcaster");
+
   if (has_tf_listener_.as_bool()) {
     this->tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
     this->tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*this->tf_buffer_);
   }
   if (has_tf_broadcaster_.as_bool()) {
-    this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(*this);
+    this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this->shared_from_this());
   }
 
   this->step_timer_ = this->create_wall_timer(
@@ -87,12 +128,7 @@ template<class NodeT, typename PubT>
 void ComponentInterface<NodeT, PubT>::step() {
   for (const auto& predicate: this->predicates_) {
     std_msgs::msg::Bool msg;
-    switch (predicate.second.index()) {
-      case 0:
-        msg.data = std::get<0>(predicate.second);
-      case 1:
-        msg.data = std::get<1>(predicate.second)();
-    }
+    msg.data = this->get_predicate(predicate.first);
     auto predicate_iterator = this->predicate_publishers_.find(predicate.first);
     if (predicate_iterator == this->predicate_publishers_.end()) {
       // TODO throw here
@@ -110,7 +146,7 @@ std::string ComponentInterface<NodeT, PubT>::generate_predicate_topic(const std:
 
 template<class NodeT, typename PubT>
 void
-ComponentInterface<NodeT, PubT>::add_predicate(const std::string& name, const utilities::PredicateVariant& predicate) {
+ComponentInterface<NodeT, PubT>::add_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate) {
   if (this->predicates_.find(name) != this->predicates_.end()) {
     RCLCPP_INFO(this->get_logger(), "Predicate already exists, overwriting");
     this->predicates_.at(name) = predicate;
@@ -125,18 +161,34 @@ ComponentInterface<NodeT, PubT>::add_predicate(const std::string& name, const ut
 
 template<class NodeT, typename PubT>
 void ComponentInterface<NodeT, PubT>::add_predicate(const std::string& name, bool predicate) {
-  this->add_predicate(name, utilities::PredicateVariant(predicate));
+  this->add_variant_predicate(name, utilities::PredicateVariant(predicate));
 }
 
 template<class NodeT, typename PubT>
 void ComponentInterface<NodeT, PubT>::add_predicate(
     const std::string& name, const std::function<bool(void)>& predicate
 ) {
-  this->add_predicate(name, utilities::PredicateVariant(predicate));
+  this->add_variant_predicate(name, utilities::PredicateVariant(predicate));
 }
 
 template<class NodeT, typename PubT>
-void ComponentInterface<NodeT, PubT>::set_predicate(
+bool ComponentInterface<NodeT, PubT>::get_predicate(const std::string& predicate_name) const {
+  auto predicate_iterator = this->predicates_.find(predicate_name);
+  if (predicate_iterator == this->predicates_.end()) {
+    throw exceptions::PredicateNotFoundException(predicate_name);
+  }
+  // try to get the value from the variant as a bool
+  auto* ptr_value = std::get_if<bool>(&predicate_iterator->second);
+  if (ptr_value) {
+    return *ptr_value;
+  }
+  // if previous check failed, it means the variant is actually a callback function
+  auto callback_function = std::get<std::function<bool(void)>>(predicate_iterator->second);
+  return (callback_function)();
+}
+
+template<class NodeT, typename PubT>
+void ComponentInterface<NodeT, PubT>::set_variant_predicate(
     const std::string& name, const utilities::PredicateVariant& predicate
 ) {
   auto predicate_iterator = this->predicates_.find(name);
@@ -148,14 +200,14 @@ void ComponentInterface<NodeT, PubT>::set_predicate(
 
 template<class NodeT, typename PubT>
 void ComponentInterface<NodeT, PubT>::set_predicate(const std::string& name, bool predicate) {
-  this->set_predicate(name, utilities::PredicateVariant(predicate));
+  this->set_variant_predicate(name, utilities::PredicateVariant(predicate));
 }
 
 template<class NodeT, typename PubT>
 void ComponentInterface<NodeT, PubT>::set_predicate(
     const std::string& name, const std::function<bool(void)>& predicate
 ) {
-  this->set_predicate(name, utilities::PredicateVariant(predicate));
+  this->set_variant_predicate(name, utilities::PredicateVariant(predicate));
 }
 
 template<class NodeT, typename PubT>
