@@ -39,8 +39,8 @@ TEST_F(TestComponentInterface, test_add_function_predicate) {
   component_->add_predicate("bar", [&]() { return false; });
   auto predicate_iterator = component_->predicates_.find("bar");
   EXPECT_TRUE(predicate_iterator != component_->predicates_.end());
-  auto value = std::get<std::function<bool(void)>>(predicate_iterator->second);
-  EXPECT_FALSE((value)());
+  auto value_callback = std::get<std::function<bool(void)>>(predicate_iterator->second);
+  EXPECT_FALSE((value_callback)());
 }
 
 TEST_F(TestComponentInterface, test_get_predicate_value) {
