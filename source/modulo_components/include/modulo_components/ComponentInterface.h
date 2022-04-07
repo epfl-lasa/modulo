@@ -29,7 +29,7 @@ class ComponentInterface : NodeT {
 
 public:
   /**
-   * @brief Constructor from node option
+   * @brief Constructor from node options
    * @param node_options node options as used in ROS2 Node
    */
   explicit ComponentInterface(const rclcpp::NodeOptions& node_options);
