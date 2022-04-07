@@ -4,6 +4,6 @@
 
 namespace modulo_components::utilities {
 
-typedef std::variant<bool, std::function<bool(void)>> PredicateType;
+typedef std::variant<bool, std::function<bool(void)>> PredicateVariant;
 
 }// namespace modulo_components::utilities

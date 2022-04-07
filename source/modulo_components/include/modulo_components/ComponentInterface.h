@@ -11,10 +11,10 @@
 
 #include <modulo_new_core/translators/ReadStateConversion.hpp>
 #include <modulo_new_core/translators/WriteStateConversion.hpp>
-#include <exceptions/PredicateNotFoundException.hpp>
 
+#include "modulo_components/exceptions/PredicateNotFoundException.hpp"
 #include "modulo_components/utilities/utilities.h"
-#include "modulo_components/utilities/predicate_type.h"
+#include "modulo_components/utilities/predicate_variant.h"
 
 namespace modulo_components {
 
@@ -41,13 +41,13 @@ protected:
 private:
   [[nodiscard]] std::string generate_predicate_topic(const std::string& predicate_name) const;
 
-  void add_predicate(const std::string& name, const utilities::PredicateType& predicate);
+  void add_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
-  void set_predicate(const std::string& name, const utilities::PredicateType& predicate);
+  void set_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
   void step();
 
-  std::map<std::string, utilities::PredicateType> predicates_;
+  std::map<std::string, utilities::PredicateVariant> predicates_;
   std::map<std::string, std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>>> predicate_publishers_;
 
   std::shared_ptr<rclcpp::TimerBase> step_timer_;
@@ -110,7 +110,7 @@ std::string ComponentInterface<NodeT, PubT>::generate_predicate_topic(const std:
 
 template<class NodeT, typename PubT>
 void
-ComponentInterface<NodeT, PubT>::add_predicate(const std::string& name, const utilities::PredicateType& predicate) {
+ComponentInterface<NodeT, PubT>::add_predicate(const std::string& name, const utilities::PredicateVariant& predicate) {
   if (this->predicates_.find(name) != this->predicates_.end()) {
     RCLCPP_INFO(this->get_logger(), "Predicate already exists, overwriting");
     this->predicates_.at(name) = predicate;
@@ -125,19 +125,19 @@ ComponentInterface<NodeT, PubT>::add_predicate(const std::string& name, const ut
 
 template<class NodeT, typename PubT>
 void ComponentInterface<NodeT, PubT>::add_predicate(const std::string& name, bool predicate) {
-  this->add_predicate(name, utilities::PredicateType(predicate));
+  this->add_predicate(name, utilities::PredicateVariant(predicate));
 }
 
 template<class NodeT, typename PubT>
 void ComponentInterface<NodeT, PubT>::add_predicate(
     const std::string& name, const std::function<bool(void)>& predicate
 ) {
-  this->add_predicate(name, utilities::PredicateType(predicate));
+  this->add_predicate(name, utilities::PredicateVariant(predicate));
 }
 
 template<class NodeT, typename PubT>
 void ComponentInterface<NodeT, PubT>::set_predicate(
-    const std::string& name, const utilities::PredicateType& predicate
+    const std::string& name, const utilities::PredicateVariant& predicate
 ) {
   auto predicate_iterator = this->predicates_.find(name);
   if (predicate_iterator == this->predicates_.end()) {
@@ -148,14 +148,14 @@ void ComponentInterface<NodeT, PubT>::set_predicate(
 
 template<class NodeT, typename PubT>
 void ComponentInterface<NodeT, PubT>::set_predicate(const std::string& name, bool predicate) {
-  this->set_predicate(name, utilities::PredicateType(predicate));
+  this->set_predicate(name, utilities::PredicateVariant(predicate));
 }
 
 template<class NodeT, typename PubT>
 void ComponentInterface<NodeT, PubT>::set_predicate(
     const std::string& name, const std::function<bool(void)>& predicate
 ) {
-  this->set_predicate(name, utilities::PredicateType(predicate));
+  this->set_predicate(name, utilities::PredicateVariant(predicate));
 }
 
 template<class NodeT, typename PubT>
