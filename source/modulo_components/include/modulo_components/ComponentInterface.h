@@ -45,7 +45,7 @@ protected:
   /**
    * @brief Add a predicate to the map of predicates based on a function to periodically call
    * @param predicate_name the name of the associated predicate
-   * @param predicate_function the function to periodically call that returns the value of the predicate
+   * @param predicate_function the function to call that returns the value of the predicate
    */
   void add_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function);
 
