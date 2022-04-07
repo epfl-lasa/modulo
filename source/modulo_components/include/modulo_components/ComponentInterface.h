@@ -1,21 +1,17 @@
 #pragma once
 
 #include <state_representation/parameters/ParameterMap.hpp>
-#include <state_representation/space/cartesian/CartesianState.hpp>
-#include <rclcpp_lifecycle/lifecycle_node.hpp>
-#include <rclcpp_lifecycle/lifecycle_publisher.hpp>
+#include <state_representation/space/cartesian/CartesianPose.hpp>
 #include <rclcpp/parameter.hpp>
 #include <rclcpp/create_timer.hpp>
-#include <rclcpp/subscription.hpp>
-#include <modulo_core/communication/EncodedState.hpp>
 
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/transform_broadcaster.h>
 
-#include <modulo_core/communication/message_passing/ReadStateConversion.hpp>
-#include <modulo_core/communication/message_passing/WriteStateConversion.hpp>
-#include <modulo_core/exceptions/PredicateNotFoundException.hpp>
+#include <modulo_new_core/translators/ReadStateConversion.hpp>
+#include <modulo_new_core/translators/WriteStateConversion.hpp>
+#include <exceptions/PredicateNotFoundException.hpp>
 
 #include "modulo_components/utilities/utilities.h"
 #include "modulo_components/utilities/predicate_type.h"
@@ -29,8 +25,6 @@ public:
   explicit ComponentInterface(const rclcpp::NodeOptions& node_options);
 
 protected:
-  virtual void on_step();
-
   void add_predicate(const std::string& name, const std::function<bool(void)>& predicate);
 
   void add_predicate(const std::string& name, bool predicate);
@@ -39,9 +33,9 @@ protected:
 
   void set_predicate(const std::string& name, bool predicate);
 
-  void send_transform(const state_representation::CartesianState& transform);
+  void send_transform(const state_representation::CartesianPose& transform);
 
-  [[nodiscard]] state_representation::CartesianState
+  [[nodiscard]] state_representation::CartesianPose
   lookup_transform(const std::string& frame_name, const std::string& reference_frame_name = "world") const;
 
 private:
@@ -53,10 +47,8 @@ private:
 
   void step();
 
-  std::map<std::string, PubT> publishers_;
   std::map<std::string, utilities::PredicateType> predicates_;
   std::map<std::string, std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>>> predicate_publishers_;
-  std::map<std::string, rclcpp::Subscription<modulo::core::EncodedState>> subscribers_;
 
   std::shared_ptr<rclcpp::TimerBase> step_timer_;
   rclcpp::Parameter period_;
@@ -74,6 +66,7 @@ ComponentInterface<NodeT, PubT>::ComponentInterface(const rclcpp::NodeOptions& o
   this->declare_parameter("has_tf_listener", false);
   this->declare_parameter("has_tf_broadcaster", false);
 
+  // here I need to do typename NodeT:: because ParameterMap also has get_parameter
   period_ = typename NodeT::get_parameter("has_tf_listener");
   has_tf_listener_ = typename NodeT::get_parameter("has_tf_listener");
   has_tf_broadcaster_ = typename NodeT::get_parameter("has_tf_broadcaster");
@@ -86,7 +79,7 @@ ComponentInterface<NodeT, PubT>::ComponentInterface(const rclcpp::NodeOptions& o
   }
 
   this->step_timer_ = this->create_wall_timer(
-      std::chrono::nanoseconds(static_cast<int64_t>(this->period_.as_double() * 1e9)), [this] { this->on_step(); }
+      std::chrono::nanoseconds(static_cast<int64_t>(this->period_.as_double() * 1e9)), [this] { this->step(); }
   );
 }
 
@@ -108,11 +101,6 @@ void ComponentInterface<NodeT, PubT>::step() {
     }
     predicate_publishers_.at(predicate.first)->publish(msg);
   }
-}
-
-template<class NodeT, typename PubT>
-void ComponentInterface<NodeT, PubT>::on_step() {
-  this->step();
 }
 
 template<class NodeT, class PubT>
@@ -153,7 +141,7 @@ void ComponentInterface<NodeT, PubT>::set_predicate(
 ) {
   auto predicate_iterator = this->predicates_.find(name);
   if (predicate_iterator == this->predicates_.end()) {
-    throw modulo::core::exceptions::PredicateNotFoundException(name);
+    throw exceptions::PredicateNotFoundException(name);
   }
   this->predicates_.at(name) = predicate;
 }
@@ -171,18 +159,18 @@ void ComponentInterface<NodeT, PubT>::set_predicate(
 }
 
 template<class NodeT, typename PubT>
-void ComponentInterface<NodeT, PubT>::send_transform(const state_representation::CartesianState& transform) {
+void ComponentInterface<NodeT, PubT>::send_transform(const state_representation::CartesianPose& transform) {
   // TODO: throw here?
   if (this->tf_broadcaster_ == nullptr) {
     RCLCPP_FATAL(this->get_logger(), "No tf broadcaster");
   }
   geometry_msgs::msg::TransformStamped tf_message;
-  modulo::core::communication::state_conversion::write_msg(tf_message, transform, this->get_clock()->now());
+  modulo_new_core::translators::write_msg(tf_message, transform, this->get_clock()->now());
   this->tf_broadcaster_->sendTransform(tf_message);
 }
 
 template<class NodeT, typename PubT>
-state_representation::CartesianState ComponentInterface<NodeT, PubT>::lookup_transform(
+state_representation::CartesianPose ComponentInterface<NodeT, PubT>::lookup_transform(
     const std::string& frame_name, const std::string& reference_frame_name
 ) const {
   // TODO: throw here?
@@ -195,7 +183,7 @@ state_representation::CartesianState ComponentInterface<NodeT, PubT>::lookup_tra
   transform = this->tf_buffer_->lookupTransform(
       reference_frame_name, frame_name, tf2::TimePoint(std::chrono::microseconds(0)),
       tf2::Duration(std::chrono::microseconds(10)));
-  modulo::core::communication::state_conversion::read_msg(result, transform);
+  modulo_new_core::translators::read_msg(result, transform);
   return result;
 }
 
