@@ -7,13 +7,12 @@
 #include "modulo_new_core/EncodedState.hpp"
 
 namespace modulo_components {
-class TestComponentInterface : public ::testing::Test {
+class ComponentInterfaceTest : public ::testing::Test {
 protected:
   static void SetUpTestSuite() {
     rclcpp::init(0, nullptr);
     if (component_ == nullptr) {
-      component_ =
-          new ComponentInterface<rclcpp::Node, rclcpp::Publisher<modulo_new_core::EncodedState>>(rclcpp::NodeOptions());
+      component_ = std::make_unique<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>>(rclcpp::NodeOptions());
     }
   }
 
@@ -21,13 +20,12 @@ protected:
     component_->predicates_.clear();
   }
 
-  static ComponentInterface<rclcpp::Node, rclcpp::Publisher<modulo_new_core::EncodedState>>* component_;
+  static std::unique_ptr<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>> component_;
 };
 
-ComponentInterface<rclcpp::Node, rclcpp::Publisher<modulo_new_core::EncodedState>>
-    * TestComponentInterface::component_ = nullptr;
+std::unique_ptr<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>> ComponentInterfaceTest::component_ = nullptr;
 
-TEST_F(TestComponentInterface, test_add_bool_predicate) {
+TEST_F(ComponentInterfaceTest, AddBoolPredicate) {
   component_->add_predicate("foo", true);
   auto predicate_iterator = component_->predicates_.find("foo");
   EXPECT_TRUE(predicate_iterator != component_->predicates_.end());
@@ -35,7 +33,7 @@ TEST_F(TestComponentInterface, test_add_bool_predicate) {
   EXPECT_TRUE(value);
 }
 
-TEST_F(TestComponentInterface, test_add_function_predicate) {
+TEST_F(ComponentInterfaceTest, AddFunctionPredicate) {
   component_->add_predicate("bar", [&]() { return false; });
   auto predicate_iterator = component_->predicates_.find("bar");
   EXPECT_TRUE(predicate_iterator != component_->predicates_.end());
@@ -43,7 +41,7 @@ TEST_F(TestComponentInterface, test_add_function_predicate) {
   EXPECT_FALSE((value_callback)());
 }
 
-TEST_F(TestComponentInterface, test_get_predicate_value) {
+TEST_F(ComponentInterfaceTest, GetPredicateValue) {
   component_->add_predicate("foo", true);
   EXPECT_TRUE(component_->get_predicate("foo"));
   component_->add_predicate("bar", [&]() { return false; });
@@ -52,7 +50,7 @@ TEST_F(TestComponentInterface, test_get_predicate_value) {
   EXPECT_THROW(component_->get_predicate("test"), exceptions::PredicateNotFoundException);
 }
 
-TEST_F(TestComponentInterface, test_set_predicate_value) {
+TEST_F(ComponentInterfaceTest, SetPredicateValue) {
   component_->add_predicate("foo", true);
   component_->set_predicate("foo", false);
   EXPECT_FALSE(component_->get_predicate("foo"));

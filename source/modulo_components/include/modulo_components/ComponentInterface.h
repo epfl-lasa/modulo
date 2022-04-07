@@ -21,11 +21,11 @@ namespace modulo_components {
 
 template<class NodeT, typename PubT>
 class ComponentInterface : NodeT {
-  friend class TestComponentInterface;
-  FRIEND_TEST(TestComponentInterface, test_add_bool_predicate);
-  FRIEND_TEST(TestComponentInterface, test_add_function_predicate);
-  FRIEND_TEST(TestComponentInterface, test_get_predicate_value);
-  FRIEND_TEST(TestComponentInterface, test_set_predicate_value);
+  friend class ComponentInterfaceTest;
+  FRIEND_TEST(ComponentInterfaceTest, AddBoolPredicate);
+  FRIEND_TEST(ComponentInterfaceTest, AddFunctionPredicate);
+  FRIEND_TEST(ComponentInterfaceTest, GetPredicateValue);
+  FRIEND_TEST(ComponentInterfaceTest, SetPredicateValue);
 
 public:
   /**
