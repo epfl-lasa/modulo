@@ -11,19 +11,14 @@ class ComponentInterfaceTest : public ::testing::Test {
 protected:
   static void SetUpTestSuite() {
     rclcpp::init(0, nullptr);
-    if (component_ == nullptr) {
-      component_ = std::make_unique<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>>(rclcpp::NodeOptions());
-    }
   }
 
-  void TearDown() override {
-    component_->predicates_.clear();
+  void SetUp() override {
+    component_ = std::make_unique<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>>(rclcpp::NodeOptions());
   }
 
-  static std::unique_ptr<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>> component_;
+  std::unique_ptr<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>> component_;
 };
-
-std::unique_ptr<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>> ComponentInterfaceTest::component_ = nullptr;
 
 TEST_F(ComponentInterfaceTest, AddBoolPredicate) {
   component_->add_predicate("foo", true);
