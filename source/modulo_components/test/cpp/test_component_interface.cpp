@@ -14,7 +14,7 @@ protected:
   }
 
   void SetUp() override {
-    component_ = std::make_unique<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>>(rclcpp::NodeOptions());
+    component_ = std::make_shared<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>>(rclcpp::NodeOptions());
   }
 
   std::map<std::string, utilities::PredicateVariant> get_predicate_map() {
@@ -37,7 +37,7 @@ protected:
     component_->set_predicate(predicate_name, predicate_value);
   }
 
-  std::unique_ptr<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>> component_;
+  std::shared_ptr<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>> component_;
 };
 
 TEST_F(ComponentInterfaceTest, AddBoolPredicate) {
