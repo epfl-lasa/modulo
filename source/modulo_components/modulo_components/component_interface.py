@@ -70,6 +70,12 @@ class ComponentInterface(Node):
         return f'/predicates/{self.get_name()}/{predicate_name}'
 
     def add_predicate(self, predicate_name: str, predicate_value: Union[bool, Callable]):
+        """
+        Add a predicate to the map of predicates.
+
+        :param predicate_name: the name of the associated predicate
+        :param predicate_value: the value of the predicate as a bool or a callable function
+        """
         if predicate_name in self._predicates.keys():
             self.get_logger().debug(f"Predicate {predicate_name} already exists, overwriting.")
         else:
@@ -79,6 +85,13 @@ class ComponentInterface(Node):
         self._predicates[predicate_name] = predicate_value
 
     def get_predicate(self, predicate_name: str) -> bool:
+        """
+        Get the value of the predicate given as parameter, if the predicate is not found or the callable function fails
+        return false.
+
+        :param predicate_name: the name of the predicate to retrieve from the map of predicates
+        :return: the value of the predicate as a boolean
+        """
         if predicate_name not in self._predicates.keys():
             self.get_logger().error(f"Predicate {predicate_name} does not exists, returning false.",
                                     throttle_duration_sec=1.0)
@@ -95,6 +108,12 @@ class ComponentInterface(Node):
         return value
 
     def set_predicate(self, predicate_name: str, predicate_value: Union[bool, Callable]):
+        """
+        Set the value of the predicate given as parameter, if the predicate is not found does not do anything.
+
+        :param predicate_name: the name of the predicate to retrieve from the map of predicates
+        :param predicate_value: the new value of the predicate as a bool or a callable function
+        """
         if predicate_name not in self._predicates.keys():
             self.get_logger().error(f"Predicate {predicate_name} does not exists, can't set it with a new value.",
                                     throttle_duration_sec=1.0)
