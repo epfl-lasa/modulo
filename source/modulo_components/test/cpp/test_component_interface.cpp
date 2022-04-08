@@ -71,8 +71,8 @@ TEST_F(ComponentInterfaceTest, AddFunctionPredicate) {
 TEST_F(ComponentInterfaceTest, GetPredicateValue) {
   add_predicate("foo", true);
   EXPECT_TRUE(get_predicate("foo"));
-  add_predicate("bar", [&]() { return false; });
-  EXPECT_FALSE(get_predicate("bar"));
+  add_predicate("bar", [&]() { return true; });
+  EXPECT_TRUE(get_predicate("bar"));
   // predicate does not exist, expect false
   EXPECT_FALSE(get_predicate("test"));
   // error in callback function except false
