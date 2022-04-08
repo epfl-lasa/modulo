@@ -17,42 +17,63 @@ protected:
     component_ = std::make_unique<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>>(rclcpp::NodeOptions());
   }
 
+  std::map<std::string, utilities::PredicateVariant> get_predicate_map() {
+    return component_->predicates_;
+  }
+
+  void add_predicate(const std::string& name, bool value) {
+    component_->add_predicate(name, value);
+  }
+
+  void add_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function) {
+    component_->add_predicate(predicate_name, predicate_function);
+  }
+
+  bool get_predicate(const std::string& predicate_name) const {
+    return component_->get_predicate(predicate_name);
+  }
+
+  void set_predicate(const std::string& predicate_name, bool predicate_value) {
+    component_->set_predicate(predicate_name, predicate_value);
+  }
+
   std::unique_ptr<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>> component_;
 };
 
 TEST_F(ComponentInterfaceTest, AddBoolPredicate) {
-  component_->add_predicate("foo", true);
-  auto predicate_iterator = component_->predicates_.find("foo");
-  EXPECT_TRUE(predicate_iterator != component_->predicates_.end());
+  add_predicate("foo", true);
+  auto predicates = get_predicate_map();
+  auto predicate_iterator = predicates.find("foo");
+  EXPECT_TRUE(predicate_iterator != predicates.end());
   auto value = std::get<bool>(predicate_iterator->second);
   EXPECT_TRUE(value);
 }
 
 TEST_F(ComponentInterfaceTest, AddFunctionPredicate) {
-  component_->add_predicate("bar", [&]() { return false; });
-  auto predicate_iterator = component_->predicates_.find("bar");
-  EXPECT_TRUE(predicate_iterator != component_->predicates_.end());
+  add_predicate("bar", [&]() { return false; });
+  auto predicates = get_predicate_map();
+  auto predicate_iterator = predicates.find("bar");
+  EXPECT_TRUE(predicate_iterator != predicates.end());
   auto value_callback = std::get<std::function<bool(void)>>(predicate_iterator->second);
   EXPECT_FALSE((value_callback)());
 }
 
 TEST_F(ComponentInterfaceTest, GetPredicateValue) {
-  component_->add_predicate("foo", true);
-  EXPECT_TRUE(component_->get_predicate("foo"));
-  component_->add_predicate("bar", [&]() { return false; });
-  EXPECT_FALSE(component_->get_predicate("bar"));
-  // TODO suppress the no discard warning
-  EXPECT_THROW(component_->get_predicate("test"), exceptions::PredicateNotFoundException);
+  add_predicate("foo", true);
+  EXPECT_TRUE(get_predicate("foo"));
+  add_predicate("bar", [&]() { return false; });
+  EXPECT_FALSE(get_predicate("bar"));
+  EXPECT_THROW(get_predicate("test"), exceptions::PredicateNotFoundException);
 }
 
 TEST_F(ComponentInterfaceTest, SetPredicateValue) {
-  component_->add_predicate("foo", true);
-  component_->set_predicate("foo", false);
-  EXPECT_FALSE(component_->get_predicate("foo"));
-  EXPECT_THROW(component_->set_predicate("bar", true), exceptions::PredicateNotFoundException);
-  component_->add_predicate("bar", [&]() { return false; });
-  component_->set_predicate("bar", true);
-  EXPECT_TRUE(component_->get_predicate("bar"));
+  add_predicate("foo", true);
+  set_predicate("foo", false);
+  EXPECT_FALSE(get_predicate("foo"));
+  EXPECT_THROW(set_predicate("bar", true), exceptions::PredicateNotFoundException);
+  add_predicate("bar", [&]() { return false; });
+  set_predicate("bar", true);
+  EXPECT_TRUE(get_predicate("bar"));
 }
 
 } // namespace modulo_components
