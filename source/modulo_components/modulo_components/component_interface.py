@@ -46,7 +46,7 @@ class ComponentInterface(Node):
         self._has_tf_listener = self.get_parameter('has_tf_listener').get_parameter_value().double_value
         self._has_tf_broadcaster = self.get_parameter('has_tf_broadcaster').get_parameter_value().double_value
         self._predicates = {}
-        self._predicates_publishers = {}
+        self._predicate_publishers = {}
 
         if self._has_tf_listener:
             self.__tf_buffer = Buffer()
@@ -60,11 +60,11 @@ class ComponentInterface(Node):
         for predicate_name in self._predicates.keys():
             msg = Bool()
             msg.data = self.get_predicate(predicate_name)
-            if predicate_name not in self._predicates_publishers.keys():
+            if predicate_name not in self._predicate_publishers.keys():
                 self.get_logger().error(f"No publisher for predicate {predicate_name} found.",
                                         throttle_duration_sec=1.0)
                 return
-            self._predicates_publishers[predicate_name].publish(msg)
+            self._predicate_publishers[predicate_name].publish(msg)
 
     def __generate_predicate_topic(self, predicate_name: str) -> str:
         return f'/predicates/{self.get_name()}/{predicate_name}'
@@ -79,7 +79,7 @@ class ComponentInterface(Node):
         if predicate_name in self._predicates.keys():
             self.get_logger().debug(f"Predicate {predicate_name} already exists, overwriting.")
         else:
-            self._predicates_publishers[predicate_name] = self.create_publisher(Bool, self.__generate_predicate_topic(
+            self._predicate_publishers[predicate_name] = self.create_publisher(Bool, self.__generate_predicate_topic(
                 predicate_name), 10)
         self._predicates[predicate_name] = predicate_value
 
