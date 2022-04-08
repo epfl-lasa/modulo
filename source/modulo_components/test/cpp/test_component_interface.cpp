@@ -3,7 +3,7 @@
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/node_options.hpp>
 
-#include "modulo_components/ComponentInterface.h"
+#include "modulo_components/ComponentInterface.hpp"
 #include "modulo_new_core/EncodedState.hpp"
 
 namespace modulo_components {

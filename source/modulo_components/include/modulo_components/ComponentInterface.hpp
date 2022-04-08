@@ -14,8 +14,8 @@
 #include <modulo_new_core/translators/WriteStateConversion.hpp>
 
 #include "modulo_components/exceptions/PredicateNotFoundException.hpp"
-#include "modulo_components/utilities/utilities.h"
-#include "modulo_components/utilities/predicate_variant.h"
+#include "modulo_components/utilities/utilities.hpp"
+#include "modulo_components/utilities/predicate_variant.hpp"
 
 namespace modulo_components {
 
