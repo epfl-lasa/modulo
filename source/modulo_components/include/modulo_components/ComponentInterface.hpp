@@ -48,8 +48,8 @@ protected:
   void add_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function);
 
   /**
-   * @brief Get the value of the predicate given as parameter, if the predicate is not found or the callable function
-   * fails return false
+   * @brief Get the logical value of a predicate.
+   * @details If the predicate is not found or the callable function fails, the return value is false.
    * @param predicate_name the name of the predicate to retrieve from the
    * map of predicates
    * @return the value of the predicate as a boolean

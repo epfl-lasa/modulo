@@ -85,14 +85,14 @@ class ComponentInterface(Node):
 
     def get_predicate(self, predicate_name: str) -> bool:
         """
-        Get the value of the predicate given as parameter, if the predicate is not found or the callable function fails
+        Get the value of the predicate given as parameter. If the predicate is not found or the callable function fails,
         return false.
 
         :param predicate_name: the name of the predicate to retrieve from the map of predicates
         :return: the value of the predicate as a boolean
         """
         if predicate_name not in self._predicates.keys():
-            self.get_logger().error(f"Predicate {predicate_name} does not exists, returning false.",
+            self.get_logger().error(f"Predicate {predicate_name} does not exist, returning false.",
                                     throttle_duration_sec=1.0)
             return False
         value = self._predicates[predicate_name]
@@ -114,7 +114,7 @@ class ComponentInterface(Node):
         :param predicate_value: the new value of the predicate as a bool or a callable function
         """
         if predicate_name not in self._predicates.keys():
-            self.get_logger().error(f"Predicate {predicate_name} does not exists, can't set it with a new value.",
+            self.get_logger().error(f"Cannot set predicate {predicate_name} with a new value because it does not exist.",
                                     throttle_duration_sec=1.0)
             return
         self._predicates[predicate_name] = predicate_value
