@@ -346,6 +346,7 @@ void ComponentInterface<NodeT>::add_predicate(
 template<class NodeT>
 bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name) {
   auto predicate_iterator = this->predicates_.find(predicate_name);
+  // if there is no predicate with that name simply return false with an error message
   if (predicate_iterator == this->predicates_.end()) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
                                  "No publisher for predicate " << predicate_name << " found.");
