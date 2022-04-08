@@ -1,1 +1,1 @@
-#include "modulo_components/LifecycleComponent.h"
+#include "modulo_components/LifecycleComponent.hpp"

@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "modulo_new_core/communication/MessageType.hpp"
-#include "modulo_new_core/exceptions/InvalidMessagePairCastException.hpp"
+#include "modulo_new_core/exceptions/InvalidPointerCastException.hpp"
 #include "modulo_new_core/exceptions/InvalidPointerException.hpp"
 
 namespace modulo_new_core::communication {
@@ -21,10 +21,10 @@ public:
   MessagePairInterface(const MessagePairInterface& message_pair) = default;
 
   template<typename MsgT, typename DataT>
-  std::shared_ptr<MessagePair<MsgT, DataT>> get_message_pair(bool validate_pointer = true);
+  [[nodiscard]] std::shared_ptr<MessagePair<MsgT, DataT>> get_message_pair(bool validate_pointer = true);
 
   template<typename MsgT, typename DataT>
-  MsgT write_message();
+  [[nodiscard]] MsgT write();
 
   MessageType get_type() const;
 
@@ -43,15 +43,15 @@ inline std::shared_ptr<MessagePair<MsgT, DataT>> MessagePairInterface::get_messa
     }
   }
   if (message_pair_ptr == nullptr && validate_pointer) {
-    throw exceptions::InvalidMessagePairCastException(
-        "Unable to case message pair interface to a message pair pointer of requested type"
+    throw exceptions::InvalidPointerCastException(
+        "Unable to cast message pair interface to a message pair pointer of requested type"
     );
   }
   return message_pair_ptr;
 }
 
 template<typename MsgT, typename DataT>
-inline MsgT MessagePairInterface::write_message() {
+inline MsgT MessagePairInterface::write() {
   return this->template get_message_pair<MsgT, DataT>()->write_message();
 }
 

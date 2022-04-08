@@ -1,1 +1,1 @@
-#include "modulo_components/Component.h"
+#include "modulo_components/Component.hpp"
