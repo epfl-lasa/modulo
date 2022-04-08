@@ -1,5 +1,7 @@
 #pragma once
 
+#include <rclcpp/node.hpp>
+
 #include "modulo_components/ComponentInterface.h"
 #include "modulo_new_core/EncodedState.hpp"
 
