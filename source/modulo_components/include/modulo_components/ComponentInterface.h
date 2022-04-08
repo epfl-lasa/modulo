@@ -4,7 +4,6 @@
 #include <rclcpp/parameter.hpp>
 #include <rclcpp/create_timer.hpp>
 #include <rclcpp/node_options.hpp>
-#include <gtest/gtest.h>
 
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
