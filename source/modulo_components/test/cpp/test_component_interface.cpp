@@ -3,7 +3,7 @@
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/node_options.hpp>
 
-#include "modulo_components/ComponentInterface.h"
+#include "modulo_components/ComponentInterface.hpp"
 #include "modulo_new_core/EncodedState.hpp"
 
 namespace modulo_components {
@@ -14,7 +14,9 @@ protected:
   }
 
   void SetUp() override {
-    component_ = std::make_shared<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>>(rclcpp::NodeOptions());
+    component_ = std::make_shared<ComponentInterface<rclcpp::Node>>(
+        rclcpp::NodeOptions(), modulo_new_core::communication::PublisherType::PUBLISHER
+    );
   }
 
   std::map<std::string, utilities::PredicateVariant> get_predicate_map() {
@@ -37,7 +39,7 @@ protected:
     component_->set_predicate(predicate_name, predicate_value);
   }
 
-  std::shared_ptr<ComponentInterface<rclcpp::Node, rclcpp::GenericPublisher>> component_;
+  std::shared_ptr<ComponentInterface<rclcpp::Node>> component_;
 };
 
 TEST_F(ComponentInterfaceTest, AddBoolPredicate) {

@@ -1,4 +1,4 @@
-#include "modulo_components/ComponentInterface.h"
+#include "modulo_components/ComponentInterface.hpp"
 
 
 namespace modulo_components {
