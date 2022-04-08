@@ -1,5 +1,7 @@
 #include "modulo_core/Recorder.hpp"
 
+#include <state_representation/space/joint/JointState.hpp>
+
 namespace modulo::core {
 Recorder::~Recorder() {
   this->on_shutdown();
@@ -38,10 +40,10 @@ void Recorder::step() {
 
 bool Recorder::record(const state_representation::State& state) const {
   switch (state.get_type()) {
-    case state_representation::StateType::CARTESIANSTATE:
+    case state_representation::StateType::CARTESIAN_STATE:
       return record(static_cast<const state_representation::CartesianState&>(state));
 
-    case state_representation::StateType::JOINTSTATE:
+    case state_representation::StateType::JOINT_STATE:
       return record(static_cast<const state_representation::JointState&>(state));
 
     default:
