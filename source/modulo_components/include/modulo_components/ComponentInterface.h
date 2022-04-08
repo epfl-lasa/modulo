@@ -19,7 +19,7 @@
 
 namespace modulo_components {
 
-template<class NodeT, typename>
+template<class NodeT>
 class ComponentInterface : NodeT {
   friend class ComponentInterfaceTest;
 
@@ -147,8 +147,9 @@ std::string ComponentInterface<NodeT>::generate_predicate_topic(const std::strin
 }
 
 template<class NodeT>
-void
-ComponentInterface<NodeT>::add_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate) {
+void ComponentInterface<NodeT>::add_variant_predicate(
+    const std::string& name, const utilities::PredicateVariant& predicate
+) {
   if (this->predicates_.find(name) != this->predicates_.end()) {
     RCLCPP_INFO(this->get_logger(), "Predicate already exists, overwriting");
     this->predicates_.at(name) = predicate;
@@ -173,8 +174,8 @@ void ComponentInterface<NodeT>::add_predicate(
   this->add_variant_predicate(name, utilities::PredicateVariant(predicate));
 }
 
-template<class NodeT, typename PubT>
-bool ComponentInterface<NodeT, PubT>::get_predicate(const std::string& predicate_name) const {
+template<class NodeT>
+bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name) const {
   auto predicate_iterator = this->predicates_.find(predicate_name);
   if (predicate_iterator == this->predicates_.end()) {
     throw exceptions::PredicateNotFoundException(predicate_name);
