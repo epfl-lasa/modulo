@@ -43,6 +43,10 @@ protected:
     component_->set_predicate(predicate_name, predicate_value);
   }
 
+  void set_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function) {
+    component_->set_predicate(predicate_name, predicate_function);
+  }
+
   std::shared_ptr<ComponentInterface<rclcpp::Node>> component_;
 };
 
@@ -69,17 +73,27 @@ TEST_F(ComponentInterfaceTest, GetPredicateValue) {
   EXPECT_TRUE(get_predicate("foo"));
   add_predicate("bar", [&]() { return false; });
   EXPECT_FALSE(get_predicate("bar"));
-  EXPECT_THROW(get_predicate("test"), exceptions::PredicateNotFoundException);
+  // predicate does not exist, expect false
+  EXPECT_FALSE(get_predicate("test"));
+  // error in callback function except false
+  add_predicate(
+      "error", [&]() {
+        throw std::runtime_error("An error occurred");
+        return false;
+      }
+  );
+  EXPECT_FALSE(get_predicate("error"));
 }
 
 TEST_F(ComponentInterfaceTest, SetPredicateValue) {
   add_predicate("foo", true);
   set_predicate("foo", false);
   EXPECT_FALSE(get_predicate("foo"));
-  EXPECT_THROW(set_predicate("bar", true), exceptions::PredicateNotFoundException);
-  add_predicate("bar", [&]() { return false; });
+  // predicate does not exist but set it anyway
   set_predicate("bar", true);
   EXPECT_TRUE(get_predicate("bar"));
+  set_predicate("bar", [&]() { return false; });
+  EXPECT_FALSE(get_predicate("bar"));
 }
 
 } // namespace modulo_components
