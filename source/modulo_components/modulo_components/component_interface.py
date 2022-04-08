@@ -79,7 +79,6 @@ class ComponentInterface(Node):
         if predicate_name in self._predicates.keys():
             self.get_logger().debug(f"Predicate {predicate_name} already exists, overwriting.")
         else:
-            # TODO: add publisher with message interface
             self._predicates_publishers[predicate_name] = self.create_publisher(Bool, self.__generate_predicate_topic(
                 predicate_name), 10)
         self._predicates[predicate_name] = predicate_value
