@@ -223,7 +223,7 @@ void ComponentInterface<NodeT>::step() {
     auto predicate_iterator = this->predicate_publishers_.find(predicate.first);
     if (predicate_iterator == this->predicate_publishers_.end()) {
       RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
-                                   "No publisher for predicate " << predicate.first << " found");
+                                   "No publisher for predicate " << predicate.first << " found.");
       return;
     }
     predicate_publishers_.at(predicate.first)->publish(msg);
@@ -240,7 +240,7 @@ void ComponentInterface<NodeT>::add_variant_predicate(
     const std::string& name, const utilities::PredicateVariant& predicate
 ) {
   if (this->predicates_.find(name) != this->predicates_.end()) {
-    RCLCPP_INFO(this->get_logger(), "Predicate already exists, overwriting");
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Predicate " << name << " already exists, overwriting.");
     this->predicates_.at(name) = predicate;
   } else {
     this->predicates_.insert(std::make_pair(name, predicate));
@@ -349,7 +349,7 @@ bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name)
   // if there is no predicate with that name simply return false with an error message
   if (predicate_iterator == this->predicates_.end()) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
-                                 "No publisher for predicate " << predicate_name << " found.");
+                                 "Predicate " << predicate_name << " does not exists, returning false.");
     return false;
   }
   // try to get the value from the variant as a bool
@@ -375,10 +375,11 @@ void ComponentInterface<NodeT>::set_variant_predicate(
 ) {
   auto predicate_iterator = this->predicates_.find(name);
   if (predicate_iterator == this->predicates_.end()) {
-    this->add_variant_predicate(name, predicate);
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
+                                 "Predicate " << name << " does not exists, can't set it with a new value.");
     return;
   }
-  this->predicates_.at(name) = predicate;
+  predicate_iterator->second = predicate;
 }
 
 template<class NodeT>

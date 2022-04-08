@@ -89,9 +89,10 @@ TEST_F(ComponentInterfaceTest, SetPredicateValue) {
   add_predicate("foo", true);
   set_predicate("foo", false);
   EXPECT_FALSE(get_predicate("foo"));
-  // predicate does not exist but set it anyway
+  // predicate does not exist so setting won't do anything
   set_predicate("bar", true);
-  EXPECT_TRUE(get_predicate("bar"));
+  EXPECT_FALSE(get_predicate("bar"));
+  add_predicate("bar", true);
   set_predicate("bar", [&]() { return false; });
   EXPECT_FALSE(get_predicate("bar"));
 }
