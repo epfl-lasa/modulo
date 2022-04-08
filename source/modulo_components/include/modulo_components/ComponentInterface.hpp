@@ -17,7 +17,6 @@
 #include <modulo_new_core/translators/message_writers.hpp>
 #include <modulo_new_core/translators/parameter_translators.hpp>
 
-#include "modulo_components/exceptions/PredicateNotFoundException.hpp"
 #include "modulo_components/utilities/utilities.hpp"
 #include "modulo_components/utilities/predicate_variant.hpp"
 
@@ -121,7 +120,7 @@ protected:
    * map of predicates
    * @return the value of the predicate as a boolean
    */
-  [[nodiscard]] bool get_predicate(const std::string& predicate_name) const;
+  [[nodiscard]] bool get_predicate(const std::string& predicate_name);
 
   /**
    * @brief Set the value of the predicate given as parameter, if the predicate is not found does not do anything
@@ -195,6 +194,21 @@ ComponentInterface<NodeT>::ComponentInterface(
         return this->on_set_parameters_callback(parameters);
       });
   this->add_parameter("period", 1.0, "The time interval in seconds for all periodic callbacks", true);
+  this->declare_parameter("has_tf_listener", false);
+  this->declare_parameter("has_tf_broadcaster", false);
+
+  // here I need to do typename NodeT:: because ParameterMap also has get_parameter
+  period_ = NodeT::get_parameter("period");
+  has_tf_listener_ = NodeT::get_parameter("has_tf_listener");
+  has_tf_broadcaster_ = NodeT::get_parameter("has_tf_broadcaster");
+
+  if (has_tf_listener_.as_bool()) {
+    this->tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
+    this->tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*this->tf_buffer_);
+  }
+  if (has_tf_broadcaster_.as_bool()) {
+    this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this->shared_from_this());
+  }
 
   this->step_timer_ = this->create_wall_timer(
       std::chrono::nanoseconds(static_cast<int64_t>(this->get_parameter_value<double>("period") * 1e9)),
@@ -208,8 +222,8 @@ void ComponentInterface<NodeT>::step() {
     msg.data = this->get_predicate(predicate.first);
     auto predicate_iterator = this->predicate_publishers_.find(predicate.first);
     if (predicate_iterator == this->predicate_publishers_.end()) {
-      // TODO throw here
-      RCLCPP_FATAL(this->get_logger(), "no publisher for predicate found");
+      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
+                                   "No publisher for predicate " << predicate.first << " found");
       return;
     }
     predicate_publishers_.at(predicate.first)->publish(msg);
@@ -330,10 +344,12 @@ void ComponentInterface<NodeT>::add_predicate(
 }
 
 template<class NodeT>
-bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name) const {
+bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name) {
   auto predicate_iterator = this->predicates_.find(predicate_name);
   if (predicate_iterator == this->predicates_.end()) {
-    throw exceptions::PredicateNotFoundException(predicate_name);
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
+                                 "No publisher for predicate " << predicate_name << " found.");
+    return false;
   }
   // try to get the value from the variant as a bool
   auto* ptr_value = std::get_if<bool>(&predicate_iterator->second);
@@ -342,7 +358,14 @@ bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name)
   }
   // if previous check failed, it means the variant is actually a callback function
   auto callback_function = std::get<std::function<bool(void)>>(predicate_iterator->second);
-  return (callback_function)();
+  bool value = false;
+  try {
+    value = (callback_function)();
+  } catch (const std::exception& e) {
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
+                                 "Error while evaluating the callback function: " << e.what());
+  }
+  return value;
 }
 
 template<class NodeT>
@@ -351,7 +374,8 @@ void ComponentInterface<NodeT>::set_variant_predicate(
 ) {
   auto predicate_iterator = this->predicates_.find(name);
   if (predicate_iterator == this->predicates_.end()) {
-    throw exceptions::PredicateNotFoundException(name);
+    this->add_variant_predicate(name, predicate);
+    return;
   }
   this->predicates_.at(name) = predicate;
 }
