@@ -1,5 +1,7 @@
 #include "modulo_core/Recorder.hpp"
 
+#include <state_representation/space/joint/JointState.hpp>
+
 namespace modulo::core {
 Recorder::~Recorder() {
   this->on_shutdown();
