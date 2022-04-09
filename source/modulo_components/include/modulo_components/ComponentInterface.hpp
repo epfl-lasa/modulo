@@ -376,7 +376,7 @@ void ComponentInterface<NodeT>::set_variant_predicate(
   auto predicate_iterator = this->predicates_.find(name);
   if (predicate_iterator == this->predicates_.end()) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
-                                 "Predicate " << name << " does not exists, can't set it with a new value.");
+                                 "Cannot set predicate " << name << " with a new value because it does not exist.");
     return;
   }
   predicate_iterator->second = predicate;
