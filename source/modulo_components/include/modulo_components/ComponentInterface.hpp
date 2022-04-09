@@ -48,7 +48,8 @@ protected:
   void add_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function);
 
   /**
-   * @brief Get the value of the predicate given as parameter
+   * @brief Get the logical value of a predicate.
+   * @details If the predicate is not found or the callable function fails, the return value is false.
    * @param predicate_name the name of the predicate to retrieve from the
    * map of predicates
    * @return the value of the predicate as a boolean
@@ -56,7 +57,7 @@ protected:
   [[nodiscard]] bool get_predicate(const std::string& predicate_name) const;
 
   /**
-   * @brief Set the value of the predicate given as parameter
+   * @brief Set the value of the predicate given as parameter, if the predicate is not found does not do anything
    * @param predicate_name the name of the predicate to retrieve from the
    * map of predicates
    * @param predicate_value the new value of the predicate
@@ -64,10 +65,10 @@ protected:
   void set_predicate(const std::string& predicate_name, bool predicate_value);
 
   /**
-   * @brief Set the value of the predicate given as parameter
+   * @brief Set the value of the predicate given as parameter, if the predicate is not found does not do anything
    * @param predicate_name the name of the predicate to retrieve from the
    * map of predicates
-   * @param predicate_function the function to periodically call that returns the value of the predicate
+   * @param predicate_function the function to call that returns the value of the predicate
    */
   void set_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function);
 
@@ -155,7 +156,6 @@ void ComponentInterface<NodeT>::add_variant_predicate(
     this->predicates_.at(name) = predicate;
   } else {
     this->predicates_.insert(std::make_pair(name, predicate));
-    // TODO add publisher with message interface
     this->predicate_publishers_.insert(
         std::make_pair(
             name, this->template create_publisher<std_msgs::msg::Bool>(this->generate_predicate_topic(name), 10)));
