@@ -27,6 +27,7 @@ find_library(clproto REQUIRED)
 include_directories(include)
 
 ament_auto_add_library(modulo_new_core SHARED
+    ${PROJECT_SOURCE_DIR}/src/communication/MessagePair.cpp
     ${PROJECT_SOURCE_DIR}/src/communication/MessagePairInterface.cpp
     ${PROJECT_SOURCE_DIR}/src/communication/PublisherInterface.cpp
     ${PROJECT_SOURCE_DIR}/src/translators/ReadStateConversion.cpp
