@@ -11,7 +11,7 @@ namespace modulo_new_core::communication {
 template<typename MsgT, typename DataT>
 class MessagePair : public MessagePairInterface {
 public:
-  MessagePair(MessageType type, std::shared_ptr<DataT> data, std::shared_ptr<rclcpp::Clock> clock);
+  MessagePair(std::shared_ptr<DataT> data, std::shared_ptr<rclcpp::Clock> clock);
 
   [[nodiscard]] MsgT write_message() const;
 
@@ -23,13 +23,7 @@ private:
 };
 
 template<typename MsgT, typename DataT>
-MessagePair<MsgT, DataT>::MessagePair(
-    MessageType type, std::shared_ptr<DataT> data, std::shared_ptr<rclcpp::Clock> clock
-) :
-    MessagePairInterface(type), data_(std::move(data)), clock_(std::move(clock)) {}
-
-template<typename MsgT, typename DataT>
-MsgT MessagePair<MsgT, DataT>::write_message() const {
+inline MsgT MessagePair<MsgT, DataT>::write_message() const {
   if (this->data_ == nullptr) {
     throw exceptions::NullPointerException("The message pair data is not set, nothing to write");
   }
@@ -38,8 +32,16 @@ MsgT MessagePair<MsgT, DataT>::write_message() const {
   return msg;
 }
 
+template<>
+inline EncodedState MessagePair<EncodedState, state_representation::State>::write_message() const {
+  auto msg = EncodedState();
+  // TODO write the translators
+//  translators::write_msg(msg, this->data_, clock_->now());
+  return msg;
+}
+
 template<typename MsgT, typename DataT>
-std::shared_ptr<DataT> MessagePair<MsgT, DataT>::get_data() const {
+inline std::shared_ptr<DataT> MessagePair<MsgT, DataT>::get_data() const {
   return this->data_;
 }
 }// namespace modulo_new_core::communication
