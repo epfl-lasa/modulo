@@ -22,6 +22,11 @@ static void test_message_interface(
   EXPECT_EQ(new_value, msg_pair->write_message().data);
   msg = msg_pair_interface->template write<MsgT, DataT>();
   EXPECT_EQ(new_value, msg.data);
+
+  msg = MsgT();
+  msg.data = initial_value;
+  msg_pair_interface->template read<MsgT, DataT>(msg);
+  EXPECT_EQ(initial_value, *msg_pair->get_data());
 }
 
 class MessagePairTest : public ::testing::Test {

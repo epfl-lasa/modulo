@@ -26,6 +26,9 @@ public:
   template<typename MsgT, typename DataT>
   [[nodiscard]] MsgT write();
 
+  template<typename MsgT, typename DataT>
+  void read(const MsgT& message);
+
   MessageType get_type() const;
 
 private:
@@ -53,6 +56,11 @@ inline std::shared_ptr<MessagePair<MsgT, DataT>> MessagePairInterface::get_messa
 template<typename MsgT, typename DataT>
 inline MsgT MessagePairInterface::write() {
   return this->template get_message_pair<MsgT, DataT>()->write_message();
+}
+
+template<typename MsgT, typename DataT>
+inline void MessagePairInterface::read(const MsgT& message) {
+  this->template get_message_pair<MsgT, DataT>()->read_message(message);
 }
 
 }// namespace modulo_new_core::communication

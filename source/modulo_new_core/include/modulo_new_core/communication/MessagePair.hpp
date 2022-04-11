@@ -2,6 +2,7 @@
 
 #include "modulo_new_core/communication/MessagePairInterface.hpp"
 #include "modulo_new_core/exceptions/NullPointerException.hpp"
+#include "modulo_new_core/translators/ReadStateConversion.hpp"
 #include "modulo_new_core/translators/WriteStateConversion.hpp"
 
 #include <rclcpp/clock.hpp>
@@ -15,7 +16,11 @@ public:
 
   [[nodiscard]] MsgT write_message() const;
 
+  void read_message(const MsgT& message);
+
   [[nodiscard]] std::shared_ptr<DataT> get_data() const;
+
+  void set_data(const std::shared_ptr<DataT>& data);
 
 private:
   std::shared_ptr<DataT> data_;
@@ -41,7 +46,26 @@ inline EncodedState MessagePair<EncodedState, state_representation::State>::writ
 }
 
 template<typename MsgT, typename DataT>
+inline void MessagePair<MsgT, DataT>::read_message(const MsgT& message) {
+  translators::read_msg(*this->data_, message);
+}
+
+template<>
+inline void MessagePair<EncodedState, state_representation::State>::read_message(const EncodedState& message) {
+  // TODO write the translators
+//  translators::read_msg(this->data_, message, clock_->now());
+}
+
+template<typename MsgT, typename DataT>
 inline std::shared_ptr<DataT> MessagePair<MsgT, DataT>::get_data() const {
   return this->data_;
+}
+
+template<typename MsgT, typename DataT>
+inline void MessagePair<MsgT, DataT>::set_data(const std::shared_ptr<DataT>& data) {
+  if (data == nullptr) {
+    throw exceptions::NullPointerException("Provide a valid pointer");
+  }
+  this->data_ = data;
 }
 }// namespace modulo_new_core::communication
