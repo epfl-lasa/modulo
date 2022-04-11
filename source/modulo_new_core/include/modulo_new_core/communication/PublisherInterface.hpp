@@ -38,4 +38,28 @@ private:
   std::shared_ptr<MessagePairInterface> message_pair_;
 };
 
+template<typename PubT, typename MsgT>
+inline std::shared_ptr<PublisherHandler<PubT, MsgT>> PublisherInterface::get_publisher(bool validate_pointer) {
+  std::shared_ptr<PublisherHandler<PubT, MsgT>> publisher_ptr;
+  try {
+    publisher_ptr = std::dynamic_pointer_cast<PublisherHandler<PubT, MsgT>>(this->shared_from_this());
+  } catch (const std::exception& ex) {
+    if (validate_pointer) {
+      throw exceptions::InvalidPointerException("Publisher interface is not managed by a valid pointer");
+    }
+  }
+  if (publisher_ptr == nullptr && validate_pointer) {
+    throw exceptions::InvalidPointerCastException(
+        "Unable to cast publisher interface to a publisher pointer of requested type"
+    );
+  }
+  return publisher_ptr;
+}
+
+static std::shared_ptr<PublisherInterface> create_publisher_interface(const std::shared_ptr<PublisherInterface>& publisher, const std::shared_ptr<MessagePairInterface>& message_pair) {
+  auto pub = std::shared_ptr<PublisherInterface>(publisher);
+  pub->set_message_pair(message_pair);
+  return pub;
+}
+
 }// namespace modulo_new_core::communication
