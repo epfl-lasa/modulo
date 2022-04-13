@@ -159,74 +159,73 @@ void Cell::add_parameters(
 ) {
   using namespace state_representation;
   using namespace state_representation::exceptions;
-  for (auto& param : parameters) {
-    switch (param->get_type()) {
-      case StateType::PARAMETER_INT: {
+  for (auto& param: parameters) {
+    switch (param->get_parameter_type()) {
+      case ParameterType::INT: {
         this->add_parameter(std::static_pointer_cast<Parameter<int>>(param), prefix);
         break;
       }
 
-      case StateType::PARAMETER_INT_ARRAY: {
+      case ParameterType::INT_ARRAY: {
         this->add_parameter(std::static_pointer_cast<Parameter<std::vector<int>>>(param), prefix);
         break;
       }
 
-      case StateType::PARAMETER_DOUBLE: {
+      case ParameterType::DOUBLE: {
         this->add_parameter(std::static_pointer_cast<Parameter<double>>(param), prefix);
         break;
       }
 
-      case StateType::PARAMETER_DOUBLE_ARRAY: {
+      case ParameterType::DOUBLE_ARRAY: {
         this->add_parameter(std::static_pointer_cast<Parameter<std::vector<double>>>(param), prefix);
         break;
       }
 
-      case StateType::PARAMETER_BOOL: {
+      case ParameterType::BOOL: {
         this->add_parameter(std::static_pointer_cast<Parameter<bool>>(param), prefix);
         break;
       }
 
-      case StateType::PARAMETER_BOOL_ARRAY: {
+      case ParameterType::BOOL_ARRAY: {
         this->add_parameter(std::static_pointer_cast<Parameter<std::vector<double>>>(param), prefix);
         break;
       }
 
-      case StateType::PARAMETER_STRING: {
+      case ParameterType::STRING: {
         this->add_parameter(std::static_pointer_cast<Parameter<std::string>>(param), prefix);
         break;
       }
 
-      case StateType::PARAMETER_STRING_ARRAY: {
+      case ParameterType::STRING_ARRAY: {
         this->add_parameter(std::static_pointer_cast<Parameter<std::vector<std::string>>>(param), prefix);
         break;
       }
 
-      case StateType::PARAMETER_CARTESIANSTATE: {
-        this->add_parameter(std::static_pointer_cast<Parameter<CartesianState>>(param), prefix);
+      case ParameterType::STATE: {
+        switch (param->get_parameter_state_type()) {
+          case StateType::CARTESIAN_STATE:
+            this->add_parameter(std::static_pointer_cast<Parameter<CartesianState>>(param), prefix);
+            break;
+          case StateType::CARTESIAN_POSE:
+            this->add_parameter(std::static_pointer_cast<Parameter<CartesianPose>>(param), prefix);
+            break;
+          case StateType::JOINT_STATE:
+            this->add_parameter(std::static_pointer_cast<Parameter<JointState>>(param), prefix);
+            break;
+          case StateType::JOINT_POSITIONS:
+            this->add_parameter(std::static_pointer_cast<Parameter<JointPositions>>(param), prefix);
+            break;
+          case StateType::GEOMETRY_ELLIPSOID:
+            this->add_parameter(std::static_pointer_cast<Parameter<Ellipsoid>>(param), prefix);
+            break;
+          default: {
+            throw UnrecognizedParameterTypeException("The Parameter state type is not available");
+          }
+        }
         break;
       }
 
-      case StateType::PARAMETER_CARTESIANPOSE: {
-        this->add_parameter(std::static_pointer_cast<Parameter<CartesianPose>>(param), prefix);
-        break;
-      }
-
-      case StateType::PARAMETER_JOINTSTATE: {
-        this->add_parameter(std::static_pointer_cast<Parameter<JointState>>(param), prefix);
-        break;
-      }
-
-      case StateType::PARAMETER_JOINTPOSITIONS: {
-        this->add_parameter(std::static_pointer_cast<Parameter<JointPositions>>(param), prefix);
-        break;
-      }
-
-      case StateType::PARAMETER_ELLIPSOID: {
-        this->add_parameter(std::static_pointer_cast<Parameter<Ellipsoid>>(param), prefix);
-        break;
-      }
-
-      case StateType::PARAMETER_MATRIX: {
+      case ParameterType::MATRIX: {
         this->add_parameter(std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param), prefix);
         break;
       }
@@ -300,73 +299,72 @@ void Cell::set_parameter_value(const std::string& parameter_name, const Eigen::M
 void Cell::set_parameter_value(const std::shared_ptr<state_representation::ParameterInterface>& parameter) {
   using namespace state_representation;
   using namespace state_representation::exceptions;
-  switch (parameter->get_type()) {
-    case StateType::PARAMETER_INT: {
+  switch (parameter->get_parameter_type()) {
+    case ParameterType::INT: {
       this->set_parameter_value(std::static_pointer_cast<Parameter<int>>(parameter));
       break;
     }
 
-    case StateType::PARAMETER_INT_ARRAY: {
+    case ParameterType::INT_ARRAY: {
       this->set_parameter_value(std::static_pointer_cast<Parameter<std::vector<int>>>(parameter));
       break;
     }
 
-    case StateType::PARAMETER_DOUBLE: {
+    case ParameterType::DOUBLE: {
       this->set_parameter_value(std::static_pointer_cast<Parameter<double>>(parameter));
       break;
     }
 
-    case StateType::PARAMETER_DOUBLE_ARRAY: {
+    case ParameterType::DOUBLE_ARRAY: {
       this->set_parameter_value(std::static_pointer_cast<Parameter<std::vector<double>>>(parameter));
       break;
     }
 
-    case StateType::PARAMETER_BOOL: {
+    case ParameterType::BOOL: {
       this->set_parameter_value(std::static_pointer_cast<Parameter<bool>>(parameter));
       break;
     }
 
-    case StateType::PARAMETER_BOOL_ARRAY: {
+    case ParameterType::BOOL_ARRAY: {
       this->set_parameter_value(std::static_pointer_cast<Parameter<std::vector<double>>>(parameter));
       break;
     }
 
-    case StateType::PARAMETER_STRING: {
+    case ParameterType::STRING: {
       this->set_parameter_value(std::static_pointer_cast<Parameter<std::string>>(parameter));
       break;
     }
 
-    case StateType::PARAMETER_STRING_ARRAY: {
+    case ParameterType::STRING_ARRAY: {
       this->set_parameter_value(std::static_pointer_cast<Parameter<std::vector<std::string>>>(parameter));
       break;
     }
 
-    case StateType::PARAMETER_CARTESIANSTATE: {
-      this->set_parameter_value(std::static_pointer_cast<Parameter<CartesianState>>(parameter));
+    case ParameterType::STATE: {
+      switch (parameter->get_parameter_state_type()) {
+        case StateType::CARTESIAN_STATE:
+          this->set_parameter_value(std::static_pointer_cast<Parameter<CartesianState>>(parameter));
+          break;
+        case StateType::CARTESIAN_POSE:
+          this->set_parameter_value(std::static_pointer_cast<Parameter<CartesianPose>>(parameter));
+          break;
+        case StateType::JOINT_STATE:
+          this->set_parameter_value(std::static_pointer_cast<Parameter<JointState>>(parameter));
+          break;
+        case StateType::JOINT_POSITIONS:
+          this->set_parameter_value(std::static_pointer_cast<Parameter<JointPositions>>(parameter));
+          break;
+        case StateType::GEOMETRY_ELLIPSOID:
+          this->set_parameter_value(std::static_pointer_cast<Parameter<Ellipsoid>>(parameter));
+          break;
+        default: {
+          throw UnrecognizedParameterTypeException("The Parameter state type is not available");
+        }
+      }
       break;
     }
 
-    case StateType::PARAMETER_CARTESIANPOSE: {
-      this->set_parameter_value(std::static_pointer_cast<Parameter<CartesianPose>>(parameter));
-      break;
-    }
-
-    case StateType::PARAMETER_JOINTSTATE: {
-      this->set_parameter_value(std::static_pointer_cast<Parameter<JointState>>(parameter));
-      break;
-    }
-
-    case StateType::PARAMETER_JOINTPOSITIONS: {
-      this->set_parameter_value(std::static_pointer_cast<Parameter<JointPositions>>(parameter));
-      break;
-    }
-
-    case StateType::PARAMETER_ELLIPSOID: {
-      this->set_parameter_value(std::static_pointer_cast<Parameter<Ellipsoid>>(parameter));
-      break;
-    }
-
-    case StateType::PARAMETER_MATRIX: {
+    case ParameterType::MATRIX: {
       this->set_parameter_value(std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(parameter));
       break;
     }
@@ -572,88 +570,94 @@ void Cell::update_parameters() {
   using namespace state_representation;
   using namespace state_representation::exceptions;
   try {
-    for (auto& [key, param] : this->parameters_) {
-      switch (param->get_type()) {
-        case StateType::PARAMETER_INT: {
+    for (auto&[key, param]: this->parameters_) {
+      switch (param->get_parameter_type()) {
+        case ParameterType::INT: {
           int value = static_cast<int>(this->get_parameter(param->get_name()).as_int());
           std::static_pointer_cast<Parameter<int>>(param)->set_value(value);
           break;
         }
 
-        case StateType::PARAMETER_INT_ARRAY: {
+        case ParameterType::INT_ARRAY: {
           std::vector<std::int64_t> tmp = this->get_parameter(param->get_name()).as_integer_array();
           std::vector<int> value(tmp.begin(), tmp.end());
           std::static_pointer_cast<Parameter<std::vector<int>>>(param)->set_value(value);
           break;
         }
 
-        case StateType::PARAMETER_DOUBLE: {
+        case ParameterType::DOUBLE: {
           double value = this->get_parameter(param->get_name()).as_double();
           std::static_pointer_cast<Parameter<double>>(param)->set_value(value);
           break;
         }
 
-        case StateType::PARAMETER_DOUBLE_ARRAY: {
+        case ParameterType::DOUBLE_ARRAY: {
           std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
           std::static_pointer_cast<Parameter<std::vector<double>>>(param)->set_value(value);
           break;
         }
 
-        case StateType::PARAMETER_BOOL: {
+        case ParameterType::BOOL: {
           bool value = this->get_parameter(param->get_name()).as_bool();
           std::static_pointer_cast<Parameter<bool>>(param)->set_value(value);
           break;
         }
 
-        case StateType::PARAMETER_BOOL_ARRAY: {
+        case ParameterType::BOOL_ARRAY: {
           std::vector<bool> value = this->get_parameter(param->get_name()).as_bool_array();
           std::static_pointer_cast<Parameter<std::vector<bool>>>(param)->set_value(value);
           break;
         }
 
-        case StateType::PARAMETER_STRING: {
+        case ParameterType::STRING: {
           std::string value = this->get_parameter(param->get_name()).as_string();
           std::static_pointer_cast<Parameter<std::string>>(param)->set_value(value);
           break;
         }
 
-        case StateType::PARAMETER_STRING_ARRAY: {
+        case ParameterType::STRING_ARRAY: {
           std::vector<std::string> value = this->get_parameter(param->get_name()).as_string_array();
           std::static_pointer_cast<Parameter<std::vector<std::string>>>(param)->set_value(value);
           break;
         }
 
-        case StateType::PARAMETER_CARTESIANSTATE: {
-          std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-          std::static_pointer_cast<Parameter<CartesianState>>(param)->get_value().set_data(value);
+        case ParameterType::STATE: {
+          switch (param->get_parameter_state_type()) {
+            case StateType::CARTESIAN_STATE: {
+              std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+              std::static_pointer_cast<Parameter<CartesianState>>(param)->get_value().set_data(value);
+              break;
+            }
+            case StateType::CARTESIAN_POSE: {
+              std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+              std::static_pointer_cast<Parameter<CartesianPose>>(param)->get_value().CartesianPose::set_data(value);
+              break;
+            }
+            case StateType::JOINT_STATE: {
+              std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+              std::static_pointer_cast<Parameter<JointState>>(param)->get_value().set_data(value);
+              break;
+            }
+            case StateType::JOINT_POSITIONS: {
+              std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+              std::static_pointer_cast<Parameter<JointPositions>>(param)->get_value().JointPositions::set_data(
+                  value
+              );
+              break;
+            }
+            case StateType::GEOMETRY_ELLIPSOID: {
+              std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
+              std::static_pointer_cast<Parameter<Ellipsoid>>(param)->get_value().set_data(value);
+              break;
+            }
+            default: {
+              throw UnrecognizedParameterTypeException("The Parameter state type is not available");
+            }
+          }
           break;
         }
 
-        case StateType::PARAMETER_CARTESIANPOSE: {
-          std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-          std::static_pointer_cast<Parameter<CartesianPose>>(param)->get_value().CartesianPose::set_data(value);
-          break;
-        }
-
-        case StateType::PARAMETER_JOINTSTATE: {
-          std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-          std::static_pointer_cast<Parameter<JointState>>(param)->get_value().set_data(value);
-          break;
-        }
-
-        case StateType::PARAMETER_JOINTPOSITIONS: {
-          std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-          std::static_pointer_cast<Parameter<JointPositions>>(param)->get_value().JointPositions::set_data(value);
-          break;
-        }
-
-        case StateType::PARAMETER_ELLIPSOID: {
-          std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
-          std::static_pointer_cast<Parameter<Ellipsoid>>(param)->get_value().set_data(value);
-          break;
-        }
-
-        case StateType::PARAMETER_MATRIX: {
+        case ParameterType::MATRIX: {
           std::vector<double> value = this->get_parameter(param->get_name()).as_double_array();
           size_t rows = std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->get_value().rows();
           size_t cols = std::static_pointer_cast<Parameter<Eigen::MatrixXd>>(param)->get_value().cols();
