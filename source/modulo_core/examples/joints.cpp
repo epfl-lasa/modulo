@@ -21,10 +21,7 @@ public:
       Cell(node_name, period),
       current_positions(std::make_shared<JointState>("robot", 6)),
       desired_velocities(std::make_shared<JointState>("robot", 6)),
-      motion_generator(
-          DynamicalSystemFactory<JointState>::create_dynamical_system(
-              DynamicalSystemFactory<JointState>::DYNAMICAL_SYSTEM::POINT_ATTRACTOR
-          )) {
+      motion_generator(JointDynamicalSystemFactory::create_dynamical_system(DYNAMICAL_SYSTEM_TYPE::POINT_ATTRACTOR)) {
     motion_generator->set_parameter_value("attractor", JointState::Random("robot", 6));
   }
 

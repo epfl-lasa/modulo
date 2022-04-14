@@ -26,9 +26,7 @@ public:
       current_pose(std::make_shared<CartesianPose>("robot_test")),
       desired_twist(std::make_shared<CartesianTwist>("robot_test")),
       motion_generator(
-          DynamicalSystemFactory<CartesianState>::create_dynamical_system(
-              DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::POINT_ATTRACTOR
-          )) {
+          CartesianDynamicalSystemFactory::create_dynamical_system(DYNAMICAL_SYSTEM_TYPE::POINT_ATTRACTOR)) {
     this->motion_generator->set_parameter_value("attractor", CartesianPose::Random("robot_test"));
   }
 
