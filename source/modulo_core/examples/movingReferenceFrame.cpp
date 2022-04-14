@@ -26,10 +26,7 @@ public:
       object_state(std::make_shared<CartesianState>("object", "world")),
       current_pose(std::make_shared<CartesianPose>("robot_test", "world")),
       desired_twist(std::make_shared<CartesianTwist>("robot_test", "world")),
-      motion_generator(
-          DynamicalSystemFactory<CartesianState>::create_dynamical_system(
-              DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::CIRCULAR
-          )) {
+      motion_generator(CartesianDynamicalSystemFactory::create_dynamical_system(DYNAMICAL_SYSTEM_TYPE::CIRCULAR)) {
     motion_generator->set_parameter_value("limit_cycle", Ellipsoid("attractor", "object"));
   }
 
@@ -91,13 +88,16 @@ private:
 
 public:
   explicit SimulatedObject(const std::string& node_name, const std::chrono::milliseconds& period) :
-      Cell(node_name, period), object_pose(
-      std::make_shared<CartesianPose>(
-          CartesianPose::Identity("object"))), object_twist(
-      std::make_shared<CartesianTwist>(CartesianTwist("object"))), motion_generator(
-      DynamicalSystemFactory<CartesianState>::create_dynamical_system(
-          DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::POINT_ATTRACTOR
-      )), dt(period), sign(-1) {
+      Cell(node_name, period),
+      object_pose(
+          std::make_shared<CartesianPose>(
+              CartesianPose::Identity("object"))),
+      object_twist(
+          std::make_shared<CartesianTwist>(CartesianTwist("object"))),
+      motion_generator(
+          CartesianDynamicalSystemFactory::create_dynamical_system(DYNAMICAL_SYSTEM_TYPE::POINT_ATTRACTOR)),
+      dt(period),
+      sign(-1) {
     motion_generator->set_parameter_value("attractor", CartesianPose("object_attractor", 2., 0., 0.));
   }
 

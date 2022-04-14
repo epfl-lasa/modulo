@@ -24,10 +24,7 @@ public:
       Cell(node_name, period),
       current_pose(std::make_shared<CartesianPose>("robot_test")),
       desired_twist(std::make_shared<CartesianTwist>("robot_test")),
-      motion_generator(
-          DynamicalSystemFactory<CartesianState>::create_dynamical_system(
-              DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::CIRCULAR
-          )) {
+      motion_generator(CartesianDynamicalSystemFactory::create_dynamical_system(DYNAMICAL_SYSTEM_TYPE::CIRCULAR)) {
     motion_generator->set_parameter_value("limit_cycle", Ellipsoid("attractor"));
   }
 

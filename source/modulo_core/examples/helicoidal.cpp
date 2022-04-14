@@ -28,14 +28,9 @@ public:
       Cell(node_name, period),
       current_pose(std::make_shared<CartesianPose>("robot_test")),
       desired_twist(std::make_shared<CartesianTwist>("robot_test")),
-      ring_motion_generator(
-          DynamicalSystemFactory<CartesianState>::create_dynamical_system(
-              DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::RING
-          )),
+      ring_motion_generator(CartesianDynamicalSystemFactory::create_dynamical_system(DYNAMICAL_SYSTEM_TYPE::RING)),
       linear_motion_generator(
-          DynamicalSystemFactory<CartesianState>::create_dynamical_system(
-              DynamicalSystemFactory<CartesianState>::DYNAMICAL_SYSTEM::POINT_ATTRACTOR
-          )),
+          CartesianDynamicalSystemFactory::create_dynamical_system(DYNAMICAL_SYSTEM_TYPE::POINT_ATTRACTOR)),
       radius(1.0),
       radius_decay(0.99) {
     this->linear_motion_generator->set_parameter_value("attractor", CartesianPose::Identity("robot_test"));
