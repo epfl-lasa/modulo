@@ -56,9 +56,4 @@ inline std::shared_ptr<PublisherHandler<PubT, MsgT>> PublisherInterface::get_pub
   return publisher_ptr;
 }
 
-static std::shared_ptr<PublisherInterface> create_publisher_interface(const std::shared_ptr<PublisherInterface>& publisher, const std::shared_ptr<MessagePairInterface>& message_pair) {
-  publisher->set_message_pair(message_pair);
-  return publisher;
-}
-
 }// namespace modulo_new_core::communication

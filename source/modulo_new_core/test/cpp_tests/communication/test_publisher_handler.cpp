@@ -25,7 +25,7 @@ static void test_publisher_interface(const std::shared_ptr<rclcpp::Node>& node, 
   publisher_interface->set_message_pair(msg_pair);
   EXPECT_NO_THROW(publisher_interface->publish());
 
-  publisher_interface = create_publisher_interface(publisher_handler, msg_pair);
+  auto publisher_interface_ptr = publisher_handler->create_publisher_interface(msg_pair);
   EXPECT_NO_THROW(publisher_interface->publish());
 }
 
