@@ -30,14 +30,18 @@ static void test_publisher_interface(const std::shared_ptr<rclcpp::Node>& node, 
 }
 
 class PublisherTest : public ::testing::Test {
-protected:
-  void SetUp() {
+public:
+  static void SetUpTestSuite() {
     rclcpp::init(0, nullptr);
-    node = std::make_shared<rclcpp::Node>("test_node");
   }
 
-  void TearDown() {
+  static void TearDownTestSuite() {
     rclcpp::shutdown();
+  }
+
+protected:
+  void SetUp() {
+    node = std::make_shared<rclcpp::Node>("test_node");
   }
 
   std::shared_ptr<rclcpp::Node> node;
