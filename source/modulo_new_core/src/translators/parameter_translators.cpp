@@ -112,53 +112,36 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter(const r
   throw InvalidParameterException("Parameter " + parameter.get_name() + " could not be read!");
 }
 
-void read_parameter(
-    const rclcpp::Parameter& ros_parameter, std::shared_ptr<state_representation::ParameterInterface>& parameter
+std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
+    const rclcpp::Parameter& ros_parameter,
+    const std::shared_ptr<const state_representation::ParameterInterface>& parameter
 ) {
   if (ros_parameter.get_name() != parameter->get_name()) {
     // TODO: throw mismatch parameter exception
   }
   auto new_parameter = read_parameter(ros_parameter);
-  if (new_parameter->get_parameter_type() != parameter->get_parameter_type()
-      && new_parameter->get_parameter_type() != ParameterType::STRING
-      && new_parameter->get_parameter_type() != ParameterType::DOUBLE_ARRAY) {
-    // TODO: throw mismatch parameter exception
+  if (new_parameter->get_parameter_type() == parameter->get_parameter_type()) {
+      return new_parameter;
   }
   switch (new_parameter->get_parameter_type()) {
-    case ParameterType::BOOL:
-      parameter->set_parameter_value<bool>(new_parameter->get_parameter_value<bool>());
-      break;
-    case ParameterType::BOOL_ARRAY:
-      parameter->set_parameter_value<std::vector<bool>>(new_parameter->get_parameter_value<std::vector<bool>>());
-      break;
-    case ParameterType::INT:
-      parameter->set_parameter_value<int>(new_parameter->get_parameter_value<int>());
-      break;
-    case ParameterType::INT_ARRAY:
-      parameter->set_parameter_value<std::vector<int>>(new_parameter->get_parameter_value<std::vector<int>>());
-      break;
-    case ParameterType::DOUBLE:
-      parameter->set_parameter_value<double>(new_parameter->get_parameter_value<double>());
-      break;
     case ParameterType::DOUBLE_ARRAY: {
       auto value = new_parameter->get_parameter_value<std::vector<double>>();
       switch (parameter->get_parameter_type()) {
-        case ParameterType::DOUBLE_ARRAY:
-          parameter->set_parameter_value<std::vector<double>>(value);
-          break;
         case ParameterType::VECTOR: {
           Eigen::VectorXd vector = Eigen::Map<Eigen::VectorXd>(value.data(), static_cast<Eigen::Index>(value.size()));
-          parameter->set_parameter_value<Eigen::VectorXd>(vector);
+          new_parameter = make_shared_parameter(parameter->get_name(), vector);
           break;
         }
         case ParameterType::MATRIX: {
+          /* TODO: get_parameter_value must be const
           auto matrix = parameter->get_parameter_value<Eigen::MatrixXd>();
           if (static_cast<std::size_t>(matrix.size()) != value.size()) {
             // TODO: throw mismatch matrix size
           }
           matrix = Eigen::Map<Eigen::MatrixXd>(value.data(), matrix.rows(), matrix.cols());
-          parameter->set_parameter_value<Eigen::MatrixXd>(matrix);
+          new_parameter = make_shared_parameter(parameter->get_name(), matrix)
           break;
+           */
         }
         default:
           // TODO: throw mismatch parameter exception
@@ -166,16 +149,9 @@ void read_parameter(
       }
       break;
     }
-    case ParameterType::STRING_ARRAY:
-      parameter->set_parameter_value<std::vector<std::string>>(
-          new_parameter->get_parameter_value<std::vector<std::string>>());
-      break;
     case ParameterType::STRING: {
       auto value = new_parameter->get_parameter_value<std::string>();
       switch (parameter->get_parameter_type()) {
-        case ParameterType::STRING:
-          parameter->set_parameter_value<std::string>(value);
-          break;
         case ParameterType::STATE: {
           std::string encoding;
           try {
@@ -186,14 +162,17 @@ void read_parameter(
           }
           try {
             switch (clproto::check_message_type(encoding)) {
+              case clproto::CARTESIAN_STATE_MESSAGE:
+                new_parameter = make_shared_parameter(parameter->get_name(), clproto::decode<CartesianState>(encoding));
+                break;
               case clproto::CARTESIAN_POSE_MESSAGE:
-                parameter->set_parameter_value<CartesianPose>(clproto::decode<CartesianPose>(encoding));
+                new_parameter = make_shared_parameter(parameter->get_name(), clproto::decode<CartesianPose>(encoding));
                 break;
               case clproto::JOINT_STATE_MESSAGE:
-                parameter->set_parameter_value<JointState>(clproto::decode<JointState>(encoding));
+                new_parameter = make_shared_parameter(parameter->get_name(), clproto::decode<JointState>(encoding));
                 break;
               case clproto::JOINT_POSITIONS_MESSAGE:
-                parameter->set_parameter_value<JointPositions>(clproto::decode<JointPositions>(encoding));
+                new_parameter = make_shared_parameter(parameter->get_name(), clproto::decode<JointPositions>(encoding));
                 break;
               default:
                 // TODO: throw unsupported parameter state type
@@ -210,16 +189,17 @@ void read_parameter(
       }
       break;
     }
-    case ParameterType::VECTOR:
-      parameter->set_parameter_value<Eigen::VectorXd>(new_parameter->get_parameter_value<Eigen::VectorXd>());
-      break;
-    case ParameterType::MATRIX:
-      parameter->set_parameter_value<Eigen::MatrixXd>(new_parameter->get_parameter_value<Eigen::MatrixXd>());
-      break;
     default:
+      // TODO: throw mismatch parameter exception
       break;
   }
-  throw InvalidParameterException("Parameter " + ros_parameter.get_name() + " could not be translated!");
+  return new_parameter;
+}
+
+void read_parameter(
+    const rclcpp::Parameter& ros_parameter, std::shared_ptr<state_representation::ParameterInterface>& parameter
+) {
+  parameter = read_parameter_const(ros_parameter, parameter);
 }
 
 }

@@ -19,6 +19,11 @@ rclcpp::Parameter write_parameter(const std::shared_ptr<state_representation::Pa
  */
 std::shared_ptr<state_representation::ParameterInterface> read_parameter(const rclcpp::Parameter& ros_parameter);
 
+std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
+    const rclcpp::Parameter& ros_parameter,
+    const std::shared_ptr<const state_representation::ParameterInterface>& parameter
+);
+
 /**
  * @brief Update the parameter value of a ParameterInterface from a ROS Parameter object.
  * @details The destination ParameterInterface must have a compatible parameter name and type.
