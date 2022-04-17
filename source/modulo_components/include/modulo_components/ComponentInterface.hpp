@@ -10,8 +10,8 @@
 #include <tf2_ros/transform_broadcaster.h>
 
 #include <modulo_new_core/communication/PublisherType.hpp>
-#include <modulo_new_core/translators/ReadStateConversion.hpp>
-#include <modulo_new_core/translators/WriteStateConversion.hpp>
+#include <modulo_new_core/translators/message_readers.hpp>
+#include <modulo_new_core/translators/message_writers.hpp>
 
 #include "modulo_components/exceptions/PredicateNotFoundException.hpp"
 #include "modulo_components/utilities/utilities.hpp"

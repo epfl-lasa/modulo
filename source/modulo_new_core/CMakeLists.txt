@@ -31,8 +31,8 @@ ament_auto_add_library(modulo_new_core SHARED
     ${PROJECT_SOURCE_DIR}/src/communication/MessagePairInterface.cpp
     ${PROJECT_SOURCE_DIR}/src/communication/PublisherInterface.cpp
     ${PROJECT_SOURCE_DIR}/src/translators/parameter_translators.cpp
-    ${PROJECT_SOURCE_DIR}/src/translators/ReadStateConversion.cpp
-    ${PROJECT_SOURCE_DIR}/src/translators/WriteStateConversion.cpp)
+    ${PROJECT_SOURCE_DIR}/src/translators/message_readers.cpp
+    ${PROJECT_SOURCE_DIR}/src/translators/message_writers.cpp)
 
 # install Python modules
 ament_python_install_package(${PROJECT_NAME} SCRIPTS_DESTINATION lib/${PROJECT_NAME})
