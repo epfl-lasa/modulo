@@ -87,12 +87,14 @@ TYPED_TEST_P(ParameterTranslationTest, ConstRead) {
     EXPECT_EQ(new_param->get_parameter_type(), type);
     EXPECT_EQ(new_param->get_parameter_type(), param->get_parameter_type());
     EXPECT_EQ(new_param->get_parameter_value<TypeParam>(), value);
+
+    // the const reader constructs a new parameter, so it should not be possible to reference or modify the original
+    new_param->set_name("other");
+    EXPECT_NE(new_param->get_name(), param->get_name());
   }
 }
 
 REGISTER_TYPED_TEST_SUITE_P(ParameterTranslationTest, Write, ReadAndReWrite, ConstRead);
-//REGISTER_TYPED_TEST_SUITE_P(ParameterTranslationTest, ReadAndReWrite);
-//REGISTER_TYPED_TEST_SUITE_P(ParameterTranslationTest, ConstRead);
 
 using ParameterTestTypes = testing::Types<
     bool, std::vector<bool>, int, std::vector<int>, double, std::vector<double>, std::string, std::vector<std::string>>;
