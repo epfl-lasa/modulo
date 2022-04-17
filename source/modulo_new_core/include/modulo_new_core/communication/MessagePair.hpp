@@ -51,7 +51,7 @@ inline void MessagePair<MsgT, DataT>::read_message(const MsgT& message) {
 }
 
 template<>
-inline void MessagePair<EncodedState, state_representation::State>::read_message(const EncodedState& message) {
+inline void MessagePair<EncodedState, state_representation::State>::read_message(const EncodedState&) {
   // TODO write the translators
 //  translators::read_msg(this->data_, message, clock_->now());
 }
