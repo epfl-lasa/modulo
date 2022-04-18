@@ -22,6 +22,7 @@ find_package(ament_cmake_python REQUIRED)
 ament_auto_find_build_dependencies()
 
 find_package(control_libraries 5.1.0 REQUIRED COMPONENTS state_representation)
+find_library(clproto REQUIRED)
 
 include_directories(include)
 
@@ -29,6 +30,8 @@ ament_auto_add_library(${PROJECT_NAME} SHARED
     ${PROJECT_SOURCE_DIR}/src/ComponentInterface.cpp
     ${PROJECT_SOURCE_DIR}/src/Component.cpp
     ${PROJECT_SOURCE_DIR}/src/LifecycleComponent.cpp)
+
+target_link_libraries(${PROJECT_NAME} clproto)
 
 # Install Python modules
 ament_python_install_package(${PROJECT_NAME} SCRIPTS_DESTINATION lib/${PROJECT_NAME})
@@ -42,7 +45,7 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_cpp_components ${TEST_CPP_SOURCES})
   target_include_directories(test_cpp_components PRIVATE include)
-  target_link_libraries(test_cpp_components ${PROJECT_NAME} state_representation)
+  target_link_libraries(test_cpp_components ${PROJECT_NAME} state_representation clproto)
   target_compile_definitions(test_cpp_components PRIVATE TEST_FIXTURES="${CMAKE_CURRENT_SOURCE_DIR}/test/fixtures/")
 
   # prevent pluginlib from using boost
