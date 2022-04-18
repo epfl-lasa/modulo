@@ -5,11 +5,84 @@
 #include <state_representation/space/joint/JointState.hpp>
 #include <state_representation/space/joint/JointPositions.hpp>
 
+#include "modulo_new_core/exceptions/IncompatibleParameterException.hpp"
+
 #include <clproto.h>
 
 using namespace state_representation;
 
 namespace modulo_new_core::translators {
+
+void copy_parameter_value(
+    const std::shared_ptr<ParameterInterface>& source_parameter, const std::shared_ptr<ParameterInterface>& parameter
+) {
+  if (source_parameter->get_parameter_type() != parameter->get_parameter_type()) {
+    throw exceptions::IncompatibleParameterException(
+        "Source parameter " + source_parameter->get_name()
+            + " to be copied does not have the same type as destination parameter " + parameter->get_name());
+  }
+  switch (source_parameter->get_parameter_type()) {
+    case ParameterType::BOOL:
+      parameter->set_parameter_value(source_parameter->get_parameter_value<bool>());
+      return;
+    case ParameterType::BOOL_ARRAY:
+      parameter->set_parameter_value(source_parameter->get_parameter_value<std::vector<bool>>());
+      return;
+    case ParameterType::INT:
+      parameter->set_parameter_value(source_parameter->get_parameter_value<int>());
+      return;
+    case ParameterType::INT_ARRAY:
+      parameter->set_parameter_value(source_parameter->get_parameter_value<std::vector<int>>());
+      return;
+    case ParameterType::DOUBLE:
+      parameter->set_parameter_value(source_parameter->get_parameter_value<double>());
+      return;
+    case ParameterType::DOUBLE_ARRAY:
+      parameter->set_parameter_value(source_parameter->get_parameter_value<std::vector<double>>());
+      return;
+    case ParameterType::STRING:
+      parameter->set_parameter_value(source_parameter->get_parameter_value<std::string>());
+      return;
+    case ParameterType::STRING_ARRAY:
+      parameter->set_parameter_value(source_parameter->get_parameter_value<std::vector<std::string>>());
+      return;
+    case ParameterType::VECTOR:
+      parameter->set_parameter_value(source_parameter->get_parameter_value<Eigen::VectorXd>());
+      return;
+    case ParameterType::MATRIX:
+      parameter->set_parameter_value(source_parameter->get_parameter_value<Eigen::MatrixXd>());
+      return;
+    case ParameterType::STATE:
+      if (source_parameter->get_parameter_state_type() != parameter->get_parameter_state_type()) {
+        throw exceptions::IncompatibleParameterException(
+            "Source parameter " + source_parameter->get_name()
+                + " to be copied does not have the same parameter state type as destination parameter "
+                + parameter->get_name());
+      }
+      switch (source_parameter->get_parameter_state_type()) {
+        case state_representation::StateType::CARTESIAN_STATE:
+          parameter->set_parameter_value(source_parameter->get_parameter_value<CartesianState>());
+          return;
+        case state_representation::StateType::CARTESIAN_POSE:
+          parameter->set_parameter_value(source_parameter->get_parameter_value<CartesianPose>());
+          return;
+        case state_representation::StateType::JOINT_STATE:
+          parameter->set_parameter_value(source_parameter->get_parameter_value<JointState>());
+          return;
+        case state_representation::StateType::JOINT_POSITIONS:
+          parameter->set_parameter_value(source_parameter->get_parameter_value<JointPositions>());
+          return;
+        default:
+          break;
+      }
+      break;
+    default:
+      break;
+  }
+  throw InvalidParameterException(
+      "Could not copy the value from source parameter " + source_parameter->get_name() + " into parameter "
+          + parameter->get_name());
+}
 
 rclcpp::Parameter write_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter) {
   switch (parameter->get_parameter_type()) {
@@ -106,7 +179,6 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter(const r
       // TODO: try clproto decode, re-use logic from above
       throw InvalidParameterException("Parameter byte arrays are not currently supported.");
     default:
-      // TODO: handle default
       break;
   }
   throw InvalidParameterException("Parameter " + parameter.get_name() + " could not be read!");
@@ -117,11 +189,13 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
     const std::shared_ptr<const state_representation::ParameterInterface>& parameter
 ) {
   if (ros_parameter.get_name() != parameter->get_name()) {
-    // TODO: throw mismatch parameter exception
+    throw exceptions::IncompatibleParameterException(
+        "The ROS parameter " + ros_parameter.get_name()
+            + " to be read does not have the same name as the reference parameter " + parameter->get_name());
   }
   auto new_parameter = read_parameter(ros_parameter);
   if (new_parameter->get_parameter_type() == parameter->get_parameter_type()) {
-      return new_parameter;
+    return new_parameter;
   }
   switch (new_parameter->get_parameter_type()) {
     case ParameterType::DOUBLE_ARRAY: {
@@ -136,7 +210,10 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
           /* TODO: get_parameter_value must be const
           auto matrix = parameter->get_parameter_value<Eigen::MatrixXd>();
           if (static_cast<std::size_t>(matrix.size()) != value.size()) {
-            // TODO: throw mismatch matrix size
+            throw exceptions::IncompatibleParameterException(
+                "The ROS parameter " + ros_parameter.get_name() + " with type double array has size "
+                    + std::to_string(value.size()) + " while the reference parameter matrix " + parameter->get_name()
+                    + " has size " + std::to_string(matrix.size()));
           }
           matrix = Eigen::Map<Eigen::MatrixXd>(value.data(), matrix.rows(), matrix.cols());
           new_parameter = make_shared_parameter(parameter->get_name(), matrix)
@@ -144,62 +221,27 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
            */
         }
         default:
-          // TODO: throw mismatch parameter exception
-          break;
-      }
-      break;
-    }
-    case ParameterType::STRING: {
-      auto value = new_parameter->get_parameter_value<std::string>();
-      switch (parameter->get_parameter_type()) {
-        case ParameterType::STATE: {
-          std::string encoding;
-          try {
-            encoding = clproto::from_json(value);
-          } catch (const clproto::JsonParsingException&) {
-            // TODO: optional handling, otherwise just rethrow
-            throw;
-          }
-          try {
-            switch (clproto::check_message_type(encoding)) {
-              case clproto::CARTESIAN_STATE_MESSAGE:
-                new_parameter = make_shared_parameter(parameter->get_name(), clproto::decode<CartesianState>(encoding));
-                break;
-              case clproto::CARTESIAN_POSE_MESSAGE:
-                new_parameter = make_shared_parameter(parameter->get_name(), clproto::decode<CartesianPose>(encoding));
-                break;
-              case clproto::JOINT_STATE_MESSAGE:
-                new_parameter = make_shared_parameter(parameter->get_name(), clproto::decode<JointState>(encoding));
-                break;
-              case clproto::JOINT_POSITIONS_MESSAGE:
-                new_parameter = make_shared_parameter(parameter->get_name(), clproto::decode<JointPositions>(encoding));
-                break;
-              default:
-                // TODO: throw unsupported parameter state type
-                break;
-            }
-          } catch (const clproto::DecodingException&) {
-            // TODO: optional handling, otherwise just rethrow
-            throw;
-          }
-        }
-        default:
-          // TODO: throw mismatch parameter exception
+          throw exceptions::IncompatibleParameterException(
+              "The ROS parameter " + ros_parameter.get_name()
+                  + " with type double array cannot be interpreted by reference parameter " + parameter->get_name()
+                  + " (type code " + std::to_string(static_cast<int>(parameter->get_parameter_type())) + ")");
           break;
       }
       break;
     }
     default:
-      // TODO: throw mismatch parameter exception
+      throw state_representation::exceptions::InvalidParameterException(
+          "Something went wrong while reading parameter " + parameter->get_name());
       break;
   }
   return new_parameter;
 }
 
 void read_parameter(
-    const rclcpp::Parameter& ros_parameter, std::shared_ptr<state_representation::ParameterInterface>& parameter
+    const rclcpp::Parameter& ros_parameter, const std::shared_ptr<ParameterInterface>& parameter
 ) {
-  parameter = read_parameter_const(ros_parameter, parameter);
+  auto new_parameter = read_parameter_const(ros_parameter, parameter);
+  copy_parameter_value(new_parameter, parameter);
 }
 
 }

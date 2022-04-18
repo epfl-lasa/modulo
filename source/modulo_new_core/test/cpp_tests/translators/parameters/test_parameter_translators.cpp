@@ -64,7 +64,7 @@ TYPED_TEST_P(ParameterTranslationTest, Write) {
 TYPED_TEST_P(ParameterTranslationTest, ReadAndReWrite) {
   for (auto const& [value, type]: this->test_cases_) {
     auto ros_param = rclcpp::Parameter("test", value);
-    auto param = read_parameter(ros_param);
+    std::shared_ptr<state_representation::ParameterInterface> param;
     ASSERT_NO_THROW(param = read_parameter(ros_param));
     EXPECT_EQ(param->get_name(), ros_param.get_name());
     EXPECT_EQ(param->get_parameter_type(), type);
@@ -94,7 +94,26 @@ TYPED_TEST_P(ParameterTranslationTest, ConstRead) {
   }
 }
 
-REGISTER_TYPED_TEST_SUITE_P(ParameterTranslationTest, Write, ReadAndReWrite, ConstRead);
+TYPED_TEST_P(ParameterTranslationTest, NonConstRead) {
+  for (auto const& [value, type]: this->test_cases_) {
+    auto param = std::make_shared<state_representation::Parameter<TypeParam>>("test");
+    rclcpp::Parameter ros_param("test", value);
+
+    // make a copy of the pointer referencing the parameter
+    auto param_ref = param;
+    ASSERT_NO_THROW(read_parameter(ros_param, param));
+    EXPECT_EQ(param->get_name(), ros_param.get_name());
+    EXPECT_EQ(param->get_parameter_type(), type);
+    EXPECT_EQ(param->get_value(), value);
+
+    // The reference should be preserved
+    EXPECT_EQ(param_ref->get_name(), ros_param.get_name());
+    EXPECT_EQ(param_ref->get_parameter_type(), type);
+    EXPECT_EQ(param_ref->get_value(), value);
+  }
+}
+
+REGISTER_TYPED_TEST_SUITE_P(ParameterTranslationTest, Write, ReadAndReWrite, ConstRead, NonConstRead);
 
 using ParameterTestTypes = testing::Types<
     bool, std::vector<bool>, int, std::vector<int>, double, std::vector<double>, std::string, std::vector<std::string>>;
