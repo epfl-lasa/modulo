@@ -1,4 +1,4 @@
-#include "modulo_new_core/translators/WriteStateConversion.hpp"
+#include "modulo_new_core/translators/message_writers.hpp"
 
 #include <state_representation/exceptions/EmptyStateException.hpp>
 #include <state_representation/space/cartesian/CartesianPose.hpp>
