@@ -2,8 +2,8 @@
 
 #include "modulo_new_core/communication/MessagePairInterface.hpp"
 #include "modulo_new_core/exceptions/NullPointerException.hpp"
-#include "modulo_new_core/translators/ReadStateConversion.hpp"
-#include "modulo_new_core/translators/WriteStateConversion.hpp"
+#include "modulo_new_core/translators/message_readers.hpp"
+#include "modulo_new_core/translators/message_writers.hpp"
 
 #include <rclcpp/clock.hpp>
 
@@ -51,7 +51,7 @@ inline void MessagePair<MsgT, DataT>::read_message(const MsgT& message) {
 }
 
 template<>
-inline void MessagePair<EncodedState, state_representation::State>::read_message(const EncodedState& message) {
+inline void MessagePair<EncodedState, state_representation::State>::read_message(const EncodedState&) {
   // TODO write the translators
 //  translators::read_msg(this->data_, message, clock_->now());
 }

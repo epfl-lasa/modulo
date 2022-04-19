@@ -1,4 +1,4 @@
-#include "modulo_new_core/translators/ReadStateConversion.hpp"
+#include "modulo_new_core/translators/message_readers.hpp"
 
 namespace modulo_new_core::translators {
 

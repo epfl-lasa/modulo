@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "modulo_new_core/translators/ReadStateConversion.hpp"
-#include "modulo_new_core/translators/WriteStateConversion.hpp"
+#include "modulo_new_core/translators/message_readers.hpp"
+#include "modulo_new_core/translators/message_writers.hpp"
 
 #include <rclcpp/clock.hpp>
 #include <state_representation/exceptions/EmptyStateException.hpp>
@@ -37,7 +37,7 @@ static void expect_quaternion_equal(const Eigen::Quaterniond& q1, const geometry
   EXPECT_FLOAT_EQ(q1.w(), q2.w);
 }
 
-class TranslatorsTest : public ::testing::Test {
+class MessageTranslatorsTest : public ::testing::Test {
 protected:
   void SetUp() override {
     state_ = state_representation::CartesianState::Random("test", "reference");
@@ -48,7 +48,7 @@ protected:
   rclcpp::Clock clock_;
 };
 
-TEST_F(TranslatorsTest, TestAccel) {
+TEST_F(MessageTranslatorsTest, TestAccel) {
   auto accel = geometry_msgs::msg::Accel();
   write_msg(accel, state_, clock_.now());
   expect_vector_equal(state_.get_linear_acceleration(), accel.linear);
@@ -70,7 +70,7 @@ TEST_F(TranslatorsTest, TestAccel) {
   EXPECT_TRUE(new_state.get_acceleration().isApprox(state_.get_acceleration()));
 }
 
-TEST_F(TranslatorsTest, TestPose) {
+TEST_F(MessageTranslatorsTest, TestPose) {
   auto pose = geometry_msgs::msg::Pose();
   write_msg(pose, state_, clock_.now());
   expect_point_equal(state_.get_position(), pose.position);
@@ -92,7 +92,7 @@ TEST_F(TranslatorsTest, TestPose) {
   EXPECT_TRUE(new_state.get_pose().isApprox(state_.get_pose()));
 }
 
-TEST_F(TranslatorsTest, TestTransform) {
+TEST_F(MessageTranslatorsTest, TestTransform) {
   auto tf = geometry_msgs::msg::Transform();
   write_msg(tf, state_, clock_.now());
   expect_vector_equal(state_.get_position(), tf.translation);
@@ -116,7 +116,7 @@ TEST_F(TranslatorsTest, TestTransform) {
   EXPECT_TRUE(new_state.get_pose().isApprox(state_.get_pose()));
 }
 
-TEST_F(TranslatorsTest, TestTwist) {
+TEST_F(MessageTranslatorsTest, TestTwist) {
   auto twist = geometry_msgs::msg::Twist();
   write_msg(twist, state_, clock_.now());
   expect_vector_equal(state_.get_linear_velocity(), twist.linear);
@@ -138,7 +138,7 @@ TEST_F(TranslatorsTest, TestTwist) {
   EXPECT_TRUE(new_state.get_twist().isApprox(state_.get_twist()));
 }
 
-TEST_F(TranslatorsTest, TestWrench) {
+TEST_F(MessageTranslatorsTest, TestWrench) {
   auto wrench = geometry_msgs::msg::Wrench();
   write_msg(wrench, state_, clock_.now());
   expect_vector_equal(state_.get_force(), wrench.force);
@@ -160,7 +160,7 @@ TEST_F(TranslatorsTest, TestWrench) {
   EXPECT_TRUE(new_state.get_wrench().isApprox(state_.get_wrench()));
 }
 
-TEST_F(TranslatorsTest, TestJointState) {
+TEST_F(MessageTranslatorsTest, TestJointState) {
   auto msg = sensor_msgs::msg::JointState();
   write_msg(msg, joint_state_, clock_.now());
   for (unsigned int i = 0; i < joint_state_.get_size(); ++i) {
@@ -181,7 +181,7 @@ TEST_F(TranslatorsTest, TestJointState) {
   }
 }
 
-TEST_F(TranslatorsTest, TestStdMsgs) {
+TEST_F(MessageTranslatorsTest, TestStdMsgs) {
   test_std_messages<std_msgs::msg::Bool, bool>(true, clock_.now());
   test_std_messages<std_msgs::msg::Float64, double>(0.3, clock_.now());
   test_std_messages<std_msgs::msg::Int32, int>(2, clock_.now());
@@ -198,7 +198,7 @@ TEST_F(TranslatorsTest, TestStdMsgs) {
   }
 }
 
-TEST_F(TranslatorsTest, TestEncodedState) {
+TEST_F(MessageTranslatorsTest, TestEncodedState) {
   auto msg = modulo_new_core::EncodedState();
   write_msg(msg, state_, clock_.now());
   state_representation::CartesianState new_state;
