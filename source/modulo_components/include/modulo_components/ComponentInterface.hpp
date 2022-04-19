@@ -1,17 +1,21 @@
 #pragma once
 
-#include <state_representation/space/cartesian/CartesianPose.hpp>
 #include <rclcpp/parameter.hpp>
 #include <rclcpp/create_timer.hpp>
 #include <rclcpp/node_options.hpp>
+#include <rclcpp/node_interfaces/node_parameters_interface.hpp>
 
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/transform_broadcaster.h>
 
+#include <state_representation/parameters/ParameterMap.hpp>
+#include <state_representation/space/cartesian/CartesianPose.hpp>
+
 #include <modulo_new_core/communication/PublisherType.hpp>
 #include <modulo_new_core/translators/message_readers.hpp>
 #include <modulo_new_core/translators/message_writers.hpp>
+#include <modulo_new_core/translators/parameter_translators.hpp>
 
 #include "modulo_components/exceptions/PredicateNotFoundException.hpp"
 #include "modulo_components/utilities/utilities.hpp"
@@ -24,6 +28,8 @@ class ComponentInterface : NodeT {
   friend class ComponentInterfaceTest;
 
 public:
+  friend class ComponentInterfacePublicInterface;
+
   /**
    * @brief Constructor from node options
    * @param node_options node options as used in ROS2 Node
@@ -33,6 +39,53 @@ public:
   );
 
 protected:
+  /**
+   * @brief Add a parameter.
+   * @details This method stores a pointer reference to an existing Parameter object in the local parameter map
+   * and declares the equivalent ROS parameter on the ROS interface.
+   * @param parameter A ParameterInterface pointer to a Parameter instance.
+   */
+  void add_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
+
+  /**
+   * @brief Add a parameter.
+   * @details This method creates a new Parameter object instance to reference in the local parameter map
+   * and declares the equivalent ROS parameter on the ROS interface.
+   * @tparam T The type of the parameter
+   * @param name The name of the parameter
+   * @param value The value of the parameter
+   */
+  template<typename T>
+  void add_parameter(const std::string& name, const T& value);
+
+  /**
+   * @brief Get a parameter by name.
+   * @param name The name of the parameter
+   * @return The ParameterInterface pointer to a Parameter instance
+   */
+  std::shared_ptr<state_representation::ParameterInterface> get_parameter(const std::string& name) const;
+
+  /**
+   * @brief Get a parameter value by name.
+   * @tparam T The type of the parameter
+   * @param name The name of the parameter
+   * @return The value of the parameter
+   */
+  template<typename T>
+  T get_parameter_value(const std::string& name) const;
+
+  /**
+   * @brief Parameter validation function to be redefined by derived Component classes.
+   * @details This method is automatically invoked whenever the ROS interface tried to modify a parameter.
+   * Validation and sanitization can be performed by reading or writing the value of the parameter through the
+   * ParameterInterface pointer, depending on the parameter name and desired component behaviour. If the validation
+   * returns true, the updated parameter value (including any modifications) is applied. If the validation returns
+   * false, any changes to the parameter are discarded and the parameter value is not changed.
+   * @param parameter A ParameterInterface pointer to a Parameter instance
+   * @return The validation result
+   */
+  virtual bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
+
   /**
    * @brief Add a predicate to the map of predicates
    * @param predicate_name the name of the associated predicate
@@ -78,6 +131,13 @@ protected:
   lookup_transform(const std::string& frame_name, const std::string& reference_frame_name = "world") const;
 
 private:
+  /**
+   * @brief Callback function to validate and update parameters on change.
+   * @param parameters The new parameter objects provided by the ROS interface
+   * @return The result of the validation
+   */
+  rcl_interfaces::msg::SetParametersResult on_set_parameters_callback(const std::vector<rclcpp::Parameter>& parameters);
+
   [[nodiscard]] std::string generate_predicate_topic(const std::string& predicate_name) const;
 
   void add_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
@@ -91,10 +151,10 @@ private:
   std::map<std::string, utilities::PredicateVariant> predicates_;
   std::map<std::string, std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>>> predicate_publishers_;
 
+  state_representation::ParameterMap parameter_map_;
+  std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> parameter_cb_handle_;
+
   std::shared_ptr<rclcpp::TimerBase> step_timer_;
-  rclcpp::Parameter period_;
-  rclcpp::Parameter has_tf_listener_;
-  rclcpp::Parameter has_tf_broadcaster_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
@@ -105,26 +165,26 @@ ComponentInterface<NodeT>::ComponentInterface(
     const rclcpp::NodeOptions& options, modulo_new_core::communication::PublisherType publisher_type
 ) :
     rclcpp::Node(utilities::parse_node_name(options, "ComponentInterface"), options), publisher_type_(publisher_type) {
-  this->declare_parameter("period", 2.0);
-  this->declare_parameter("has_tf_listener", false);
-  this->declare_parameter("has_tf_broadcaster", false);
+  // register the parameter change callback handler
+  parameter_cb_handle_ = NodeT::add_on_set_parameters_callback(
+      [this](const std::vector<rclcpp::Parameter>& parameters) -> rcl_interfaces::msg::SetParametersResult {
+        return this->on_set_parameters_callback(parameters);
+      });
+  this->add_parameter("period", 1.0);
+  this->add_parameter("has_tf_listener", false);
+  this->add_parameter("has_tf_broadcaster", false);
 
-  // here I need to do typename NodeT:: because ParameterMap also has get_parameter
-  period_ = NodeT::get_parameter("period");
-  has_tf_listener_ = NodeT::get_parameter("has_tf_listener");
-  has_tf_broadcaster_ = NodeT::get_parameter("has_tf_broadcaster");
-
-  if (has_tf_listener_.as_bool()) {
+  if (this->get_parameter_value<bool>("has_tf_listener")) {
     this->tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
     this->tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*this->tf_buffer_);
   }
-  if (has_tf_broadcaster_.as_bool()) {
+  if (this->get_parameter_value<bool>("has_tf_broadcaster")) {
     this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this->shared_from_this());
   }
 
   this->step_timer_ = this->create_wall_timer(
-      std::chrono::nanoseconds(static_cast<int64_t>(this->period_.as_double() * 1e9)), [this] { this->step(); }
-  );
+      std::chrono::nanoseconds(static_cast<int64_t>(this->get_parameter_value<double>("period") * 1e9)),
+      [this] { this->step(); });
 }
 
 template<class NodeT>
@@ -160,6 +220,66 @@ void ComponentInterface<NodeT>::add_variant_predicate(
         std::make_pair(
             name, this->template create_publisher<std_msgs::msg::Bool>(this->generate_predicate_topic(name), 10)));
   }
+}
+
+template<class NodeT>
+template<typename T>
+void ComponentInterface<NodeT>::add_parameter(const std::string& name, const T& value) {
+  this->add_parameter(state_representation::make_shared_parameter(name, value));
+}
+
+template<class NodeT>
+template<typename T>
+T ComponentInterface<NodeT>::get_parameter_value(const std::string& name) const {
+  return this->parameter_map_.template get_parameter_value<T>(name);
+}
+
+template<class NodeT>
+void
+ComponentInterface<NodeT>::add_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter) {
+  parameter_map_.set_parameter(parameter);
+  auto ros_param = modulo_new_core::translators::write_parameter(parameter);
+  NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value());
+}
+
+template<class NodeT>
+std::shared_ptr<state_representation::ParameterInterface>
+ComponentInterface<NodeT>::get_parameter(const std::string& name) const {
+  return this->parameter_map_.get_parameter(name);
+}
+
+template<class NodeT>
+bool ComponentInterface<NodeT>::validate_parameter(
+    const std::shared_ptr<state_representation::ParameterInterface>&
+) {
+  return true;
+}
+
+template<class NodeT>
+rcl_interfaces::msg::SetParametersResult
+ComponentInterface<NodeT>::on_set_parameters_callback(const std::vector<rclcpp::Parameter>& parameters) {
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  for (const auto& ros_parameter: parameters) {
+    try {
+      // get the associated parameter interface by name
+      auto parameter = parameter_map_.get_parameter(ros_parameter.get_name());
+
+      // convert the ROS parameter into a ParameterInterface without modifying the original
+      auto new_parameter = modulo_new_core::translators::read_parameter_const(ros_parameter, parameter);
+      if (!validate_parameter(new_parameter)) {
+        result.successful = false;
+        result.reason += "Parameter " + ros_parameter.get_name() + " could not be set! ";
+      } else {
+        // update the value of the parameter in the map
+        modulo_new_core::translators::copy_parameter_value(new_parameter, parameter);
+      }
+    } catch (const std::exception& ex) {
+      result.successful = false;
+      result.reason += ex.what();
+    }
+  }
+  return result;
 }
 
 template<class NodeT>
