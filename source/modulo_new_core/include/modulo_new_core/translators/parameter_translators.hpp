@@ -16,7 +16,7 @@ namespace modulo_new_core::translators {
  * @param parameter The destination ParameterInterface to be updated
  */
 void copy_parameter_value(
-    const std::shared_ptr<state_representation::ParameterInterface>& source_parameter,
+    const std::shared_ptr<const state_representation::ParameterInterface>& source_parameter,
     const std::shared_ptr<state_representation::ParameterInterface>& parameter
 );
 

@@ -36,7 +36,6 @@ TEST(ParameterEigenTranslationTest, EigenVector) {
 
 
 TEST(ParameterEigenTranslationTest, EigenMatrix) {
-  GTEST_SKIP() << "Skipping Matrix translation test until ParameterInterface::get_parameter_value is const";
   Eigen::MatrixXd mat = Eigen::MatrixXd::Random(3,4);
   auto param = state_representation::make_shared_parameter("matrix", mat);
 

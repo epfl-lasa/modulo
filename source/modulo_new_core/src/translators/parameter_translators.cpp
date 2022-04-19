@@ -14,7 +14,8 @@ using namespace state_representation;
 namespace modulo_new_core::translators {
 
 void copy_parameter_value(
-    const std::shared_ptr<ParameterInterface>& source_parameter, const std::shared_ptr<ParameterInterface>& parameter
+    const std::shared_ptr<const ParameterInterface>& source_parameter,
+    const std::shared_ptr<ParameterInterface>& parameter
 ) {
   if (source_parameter->get_parameter_type() != parameter->get_parameter_type()) {
     throw exceptions::IncompatibleParameterException(
@@ -207,7 +208,6 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
           break;
         }
         case ParameterType::MATRIX: {
-          /* TODO: get_parameter_value must be const
           auto matrix = parameter->get_parameter_value<Eigen::MatrixXd>();
           if (static_cast<std::size_t>(matrix.size()) != value.size()) {
             throw exceptions::IncompatibleParameterException(
@@ -216,9 +216,8 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
                     + " has size " + std::to_string(matrix.size()));
           }
           matrix = Eigen::Map<Eigen::MatrixXd>(value.data(), matrix.rows(), matrix.cols());
-          new_parameter = make_shared_parameter(parameter->get_name(), matrix)
+          new_parameter = make_shared_parameter(parameter->get_name(), matrix);
           break;
-           */
         }
         default:
           throw exceptions::IncompatibleParameterException(
