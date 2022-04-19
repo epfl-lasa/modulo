@@ -55,27 +55,26 @@ TEST_F(PublisherTest, BasicTypes) {
   test_publisher_interface<std_msgs::msg::String, std::string>(node, "this");
 }
 
-// FIXME after translators are done
-//TEST_F(PublisherTest, CartesianState) {
-//  // create message pair
-//  auto data =
-//      std::make_shared<state_representation::CartesianState>(state_representation::CartesianState::Random("test"));
-//  auto msg_pair = std::make_shared<MessagePair<modulo_new_core::EncodedState, state_representation::State>>(
-//      data, node->get_clock());
-//
-//  // create publisher handler
-//  auto publisher = node->create_publisher<modulo_new_core::EncodedState>("topic", 10);
-//  auto publisher_handler = std::make_shared<PublisherHandler<rclcpp::Publisher<modulo_new_core::EncodedState>,
-//                                                             modulo_new_core::EncodedState>>(
-//      PublisherType::PUBLISHER, publisher
-//  );
-//
-//  // use in publisher interface
-//  std::shared_ptr<PublisherInterface> publisher_interface(publisher_handler);
-//  EXPECT_THROW(publisher_interface->publish(), modulo_new_core::exceptions::NullPointerException);
-//  publisher_interface->set_message_pair(msg_pair);
-//  EXPECT_NO_THROW(publisher_interface->publish());
-//
-//  publisher_interface = create_publisher_interface(publisher_handler, msg_pair);
-//  EXPECT_NO_THROW(publisher_interface->publish());
-//}
+TEST_F(PublisherTest, CartesianState) {
+  // create message pair
+  auto data =
+      std::make_shared<state_representation::CartesianState>(state_representation::CartesianState::Random("test"));
+  auto msg_pair = std::make_shared<MessagePair<modulo_new_core::EncodedState, state_representation::State>>(
+      data, node->get_clock());
+
+  // create publisher handler
+  auto publisher = node->create_publisher<modulo_new_core::EncodedState>("topic", 10);
+  auto publisher_handler = std::make_shared<PublisherHandler<rclcpp::Publisher<modulo_new_core::EncodedState>,
+                                                             modulo_new_core::EncodedState>>(
+      PublisherType::PUBLISHER, publisher
+  );
+
+  // use in publisher interface
+  std::shared_ptr<PublisherInterface> publisher_interface(publisher_handler);
+  EXPECT_THROW(publisher_interface->publish(), modulo_new_core::exceptions::NullPointerException);
+  publisher_interface->set_message_pair(msg_pair);
+  EXPECT_NO_THROW(publisher_interface->publish());
+
+  publisher_interface = publisher_handler->create_publisher_interface(msg_pair);
+  EXPECT_NO_THROW(publisher_interface->publish());
+}

@@ -134,6 +134,7 @@ void write_msg(U& msg, const state_representation::Parameter<T>& state, const rc
  * @brief Convert a boolean to a ROS std_msgs::msg::Bool
  * @param msg The ROS msg to populate
  * @param state The state to read from
+ * @param time The time of the message
  */
 void write_msg(std_msgs::msg::Bool& msg, const bool& state, const rclcpp::Time& time);
 
@@ -141,6 +142,7 @@ void write_msg(std_msgs::msg::Bool& msg, const bool& state, const rclcpp::Time& 
  * @brief Convert a double to a ROS std_msgs::msg::Float64
  * @param msg The ROS msg to populate
  * @param state The state to read from
+ * @param time The time of the message
  */
 void write_msg(std_msgs::msg::Float64& msg, const double& state, const rclcpp::Time& time);
 
@@ -148,6 +150,7 @@ void write_msg(std_msgs::msg::Float64& msg, const double& state, const rclcpp::T
  * @brief Convert a vector of double to a ROS std_msgs::msg::Float64MultiArray
  * @param msg The ROS msg to populate
  * @param state The state to read from
+ * @param time The time of the message
  */
 void write_msg(std_msgs::msg::Float64MultiArray& msg, const std::vector<double>& state, const rclcpp::Time& time);
 
@@ -155,6 +158,7 @@ void write_msg(std_msgs::msg::Float64MultiArray& msg, const std::vector<double>&
  * @brief Convert an integer to a ROS std_msgs::msg::Int32
  * @param msg The ROS msg to populate
  * @param state The state to read from
+ * @param time The time of the message
  */
 void write_msg(std_msgs::msg::Int32& msg, const int& state, const rclcpp::Time& time);
 
@@ -162,6 +166,7 @@ void write_msg(std_msgs::msg::Int32& msg, const int& state, const rclcpp::Time& 
  * @brief Convert a string to a ROS std_msgs::msg::String
  * @param msg The ROS msg to populate
  * @param state The state to read from
+ * @param time The time of the message
  */
 void write_msg(std_msgs::msg::String& msg, const std::string& state, const rclcpp::Time& time);
 
@@ -172,7 +177,7 @@ void write_msg(std_msgs::msg::String& msg, const std::string& state, const rclcp
  * @param state The state to read from
  * @param time The time of the message
  */
-template <typename T>
+template<typename T>
 inline void write_msg(EncodedState& msg, const T& state, const rclcpp::Time&) {
   std::string tmp = clproto::encode<T>(state);
   msg.data = std::vector<unsigned char>(tmp.begin(), tmp.end());
