@@ -63,7 +63,7 @@ protected:
    * @param name The name of the parameter
    * @return The ParameterInterface pointer to a Parameter instance
    */
-  std::shared_ptr<state_representation::ParameterInterface> get_parameter(const std::string& name);
+  std::shared_ptr<state_representation::ParameterInterface> get_parameter(const std::string& name) const;
 
   /**
    * @brief Get a parameter value by name.
@@ -72,7 +72,7 @@ protected:
    * @return The value of the parameter
    */
   template<typename T>
-  T get_parameter_value(const std::string& name);
+  T get_parameter_value(const std::string& name) const;
 
   /**
    * @brief Parameter validation function to be redefined by derived Component classes.
@@ -230,7 +230,7 @@ void ComponentInterface<NodeT>::add_parameter(const std::string& name, const T& 
 
 template<class NodeT>
 template<typename T>
-T ComponentInterface<NodeT>::get_parameter_value(const std::string& name) {
+T ComponentInterface<NodeT>::get_parameter_value(const std::string& name) const {
   return this->parameter_map_.template get_parameter_value<T>(name);
 }
 
@@ -244,7 +244,7 @@ ComponentInterface<NodeT>::add_parameter(const std::shared_ptr<state_representat
 
 template<class NodeT>
 std::shared_ptr<state_representation::ParameterInterface>
-ComponentInterface<NodeT>::get_parameter(const std::string& name) {
+ComponentInterface<NodeT>::get_parameter(const std::string& name) const {
   return this->parameter_map_.get_parameter(name);
 }
 
