@@ -207,3 +207,15 @@ TEST_F(MessageTranslatorsTest, TestEncodedState) {
   EXPECT_EQ(state_.get_name(), new_state.get_name());
   EXPECT_EQ(state_.get_reference_frame(), new_state.get_reference_frame());
 }
+
+TEST_F(TranslatorsTest, TestEncodedStatePointer) {
+  auto state_ptr = state_representation::make_shared_state(state_);
+  auto msg = modulo_new_core::EncodedState();
+  write_msg(msg, state_ptr, clock_.now());
+  auto new_state_ptr = state_representation::make_shared_state(state_representation::CartesianState());
+  read_msg(new_state_ptr, msg);
+  auto new_state = *std::dynamic_pointer_cast<state_representation::CartesianState>(new_state_ptr);
+  EXPECT_TRUE(state_.data().isApprox(new_state.data()));
+  EXPECT_EQ(state_.get_name(), new_state.get_name());
+  EXPECT_EQ(state_.get_reference_frame(), new_state.get_reference_frame());
+}
