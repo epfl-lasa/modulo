@@ -117,7 +117,7 @@ void write_msg(tf2_msgs::msg::TFMessage& msg, const CartesianState& state, const
   msg.transforms.push_back(transform);
 }
 
-template <typename U, typename T>
+template<typename U, typename T>
 void write_msg(U& msg, const Parameter<T>& state, const rclcpp::Time&) {
   if (state.is_empty()) {
     throw exceptions::EmptyStateException(state.get_name() + " state is empty while attempting to publish it");
@@ -133,17 +133,17 @@ template void write_msg<std_msgs::msg::Bool, bool>(std_msgs::msg::Bool& msg, con
 
 template void write_msg<std_msgs::msg::String, std::string>(std_msgs::msg::String& msg, const Parameter<std::string>& state, const rclcpp::Time&);
 
-template <>
+template<>
 void write_msg(geometry_msgs::msg::Transform& msg, const Parameter<CartesianPose>& state, const rclcpp::Time& time) {
   write_msg(msg, state.get_value(), time);
 }
 
-template <>
+template<>
 void write_msg(geometry_msgs::msg::TransformStamped& msg, const Parameter<CartesianPose>& state, const rclcpp::Time& time) {
   write_msg(msg, state.get_value(), time);
 }
 
-template <>
+template<>
 void write_msg(tf2_msgs::msg::TFMessage& msg, const Parameter<CartesianPose>& state, const rclcpp::Time& time) {
   write_msg(msg, state.get_value(), time);
 }

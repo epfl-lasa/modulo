@@ -48,25 +48,32 @@ TEST_F(MessagePairTest, BasicTypes) {
   test_message_interface<std_msgs::msg::String, std::string>("this", "that", clock_);
 }
 
-// FIXME after translators are finished
-//TEST_F(MessagePairTest, TestCartesianState) {
-//  auto initial_value = state_representation::CartesianState::Random("test");
-//  auto data = std::make_shared<state_representation::CartesianState>(initial_value);
-//  auto msg_pair = std::make_shared<MessagePair<modulo_new_core::EncodedState, state_representation::CartesianState>>(
-//      MessageType::ENCODED_STATE, data, clock_
-//  );
-//  EXPECT_TRUE(initial_value.data().isApprox(msg_pair->get_data()->data()));
-//
-//  std::shared_ptr<MessagePairInterface> msg_pair_interface(msg_pair);
-//  auto msg = msg_pair_interface->write<modulo_new_core::EncodedState, state_representation::CartesianState>();
-//  std::string tmp(msg.data.begin(), msg.data.end());
-//  auto decoded = clproto::decode<state_representation::CartesianState>(tmp);
-//  EXPECT_TRUE(initial_value.data().isApprox(decoded.data()));
-//
-//  auto new_value = state_representation::CartesianState::Identity("world");
-//  *data = new_value;
-//  msg = msg_pair_interface->write<modulo_new_core::EncodedState , state_representation::CartesianState>();
-//  tmp = std::string(msg.data.begin(), msg.data.end());
-//  decoded = clproto::decode<state_representation::CartesianState>(tmp);
-//  EXPECT_TRUE(new_value.data().isApprox(decoded.data()));
-//}
+TEST_F(MessagePairTest, TestCartesianState) {
+  auto initial_value = state_representation::CartesianState::Random("test");
+  auto data = state_representation::make_shared_state(initial_value);
+  auto msg_pair =
+      std::make_shared<MessagePair<modulo_new_core::EncodedState, state_representation::State>>(data, clock_);
+  EXPECT_TRUE(initial_value.data().isApprox(
+      std::dynamic_pointer_cast<state_representation::CartesianState>(msg_pair->get_data())->data()));
+
+  std::shared_ptr<MessagePairInterface> msg_pair_interface(msg_pair);
+  auto msg = msg_pair_interface->write<modulo_new_core::EncodedState, state_representation::State>();
+  std::string tmp(msg.data.begin(), msg.data.end());
+  auto decoded = clproto::decode<state_representation::CartesianState>(tmp);
+  EXPECT_TRUE(initial_value.data().isApprox(decoded.data()));
+
+  auto new_value = state_representation::CartesianState::Identity("world");
+  msg_pair->set_data(state_representation::make_shared_state(new_value));
+  msg = msg_pair_interface->write<modulo_new_core::EncodedState, state_representation::State>();
+  tmp = std::string(msg.data.begin(), msg.data.end());
+  decoded = clproto::decode<state_representation::CartesianState>(tmp);
+  EXPECT_TRUE(new_value.data().isApprox(decoded.data()));
+
+  data = state_representation::make_shared_state(initial_value);
+  msg_pair->set_data(data);
+  msg = modulo_new_core::EncodedState();
+  modulo_new_core::translators::write_msg(msg, data, clock_->now());
+  msg_pair_interface->read<modulo_new_core::EncodedState , state_representation::State>(msg);
+  EXPECT_TRUE(initial_value.data().isApprox(
+      std::dynamic_pointer_cast<state_representation::CartesianState>(msg_pair->get_data())->data()));
+}
