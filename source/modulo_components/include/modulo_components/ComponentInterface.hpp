@@ -78,6 +78,17 @@ protected:
   T get_parameter_value(const std::string& name) const;
 
   /**
+   * @brief Set the value of a parameter.
+   * @details The parameter must have been previously declared. This method preserves the reference
+   * to the original Parameter instance
+   * @tparam T The type of the parameter
+   * @param name The name of the parameter
+   * @return The value of the parameter
+   */
+  template<typename T>
+  void set_parameter_value(const std::string& name, const T& value);
+
+  /**
    * @brief Parameter validation function to be redefined by derived Component classes.
    * @details This method is automatically invoked whenever the ROS interface tried to modify a parameter.
    * Validation and sanitization can be performed by reading or writing the value of the parameter through the
@@ -260,6 +271,16 @@ template<class NodeT>
 std::shared_ptr<state_representation::ParameterInterface>
 ComponentInterface<NodeT>::get_parameter(const std::string& name) const {
   return this->parameter_map_.get_parameter(name);
+}
+
+template<class NodeT>
+template<typename T>
+void ComponentInterface<NodeT>::set_parameter_value(const std::string& name, const T& value) {
+  rcl_interfaces::msg::SetParametersResult result = NodeT::set_parameter(
+      modulo_new_core::translators::write_parameter(state_representation::make_shared_parameter(name, value)));
+  if (!result.successful) {
+    throw state_representation::exceptions::InvalidParameterException(result.reason);
+  }
 }
 
 template<class NodeT>
