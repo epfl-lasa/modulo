@@ -45,7 +45,10 @@ protected:
    * and declares the equivalent ROS parameter on the ROS interface.
    * @param parameter A ParameterInterface pointer to a Parameter instance.
    */
-  void add_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
+  void add_parameter(
+      const std::shared_ptr<state_representation::ParameterInterface>& parameter, const std::string& description,
+      bool read_only = false
+  );
 
   /**
    * @brief Add a parameter.
@@ -56,14 +59,14 @@ protected:
    * @param value The value of the parameter
    */
   template<typename T>
-  void add_parameter(const std::string& name, const T& value);
+  void add_parameter(const std::string& name, const T& value, const std::string& description, bool read_only = false);
 
   /**
    * @brief Get a parameter by name.
    * @param name The name of the parameter
    * @return The ParameterInterface pointer to a Parameter instance
    */
-  std::shared_ptr<state_representation::ParameterInterface> get_parameter(const std::string& name) const;
+  [[nodiscard]] std::shared_ptr<state_representation::ParameterInterface> get_parameter(const std::string& name) const;
 
   /**
    * @brief Get a parameter value by name.
@@ -224,8 +227,10 @@ void ComponentInterface<NodeT>::add_variant_predicate(
 
 template<class NodeT>
 template<typename T>
-void ComponentInterface<NodeT>::add_parameter(const std::string& name, const T& value) {
-  this->add_parameter(state_representation::make_shared_parameter(name, value));
+void ComponentInterface<NodeT>::add_parameter(
+    const std::string& name, const T& value, const std::string& description, bool read_only
+) {
+  this->add_parameter(state_representation::make_shared_parameter(name, value), description, read_only);
 }
 
 template<class NodeT>
@@ -235,11 +240,20 @@ T ComponentInterface<NodeT>::get_parameter_value(const std::string& name) const 
 }
 
 template<class NodeT>
-void
-ComponentInterface<NodeT>::add_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter) {
-  parameter_map_.set_parameter(parameter);
+void ComponentInterface<NodeT>::add_parameter(
+    const std::shared_ptr<state_representation::ParameterInterface>& parameter, const std::string& description,
+    bool read_only
+) {
   auto ros_param = modulo_new_core::translators::write_parameter(parameter);
-  NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value());
+  if (!NodeT::has_parameter(parameter->get_name())) {
+    parameter_map_.set_parameter(parameter);
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description = description;
+    descriptor.read_only = read_only;
+    NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value(), descriptor);
+  } else {
+    NodeT::set_parameter(ros_param);
+  }
 }
 
 template<class NodeT>
