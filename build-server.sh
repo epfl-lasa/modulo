@@ -1,5 +1,5 @@
 #!/bin/bash
-BASE_TAG=galactic-devel-state-type
+BASE_TAG=galactic-devel
 
 IMAGE_NAME=epfl-lasa/modulo
 IMAGE_TAG=latest
