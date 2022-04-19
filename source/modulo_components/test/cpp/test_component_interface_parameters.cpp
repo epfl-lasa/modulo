@@ -19,7 +19,7 @@ public:
   using ComponentInterface<rclcpp::Node>::get_parameter_value;
   using ComponentInterface<rclcpp::Node>::parameter_map_;
 
-  bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter) override {
+  bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>&) override {
     validate_was_called = true;
     return validation_return_value;
   }
