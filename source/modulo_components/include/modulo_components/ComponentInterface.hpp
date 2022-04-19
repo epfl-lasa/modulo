@@ -139,6 +139,16 @@ protected:
    */
   void set_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function);
 
+  /**
+   * @brief Configure a transform broadcaster.
+   */
+  void add_tf_broadcaster();
+
+  /**
+   * @brief Configure a transform buffer and listener.
+   */
+  void add_tf_listener();
+
   void send_transform(const state_representation::CartesianPose& transform);
 
   [[nodiscard]] state_representation::CartesianPose
@@ -184,17 +194,7 @@ ComponentInterface<NodeT>::ComponentInterface(
       [this](const std::vector<rclcpp::Parameter>& parameters) -> rcl_interfaces::msg::SetParametersResult {
         return this->on_set_parameters_callback(parameters);
       });
-  this->add_parameter("period", 1.0);
-  this->add_parameter("has_tf_listener", false);
-  this->add_parameter("has_tf_broadcaster", false);
-
-  if (this->get_parameter_value<bool>("has_tf_listener")) {
-    this->tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
-    this->tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*this->tf_buffer_);
-  }
-  if (this->get_parameter_value<bool>("has_tf_broadcaster")) {
-    this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this->shared_from_this());
-  }
+  this->add_parameter("period", 1.0, "The time interval in seconds for all periodic callbacks", true);
 
   this->step_timer_ = this->create_wall_timer(
       std::chrono::nanoseconds(static_cast<int64_t>(this->get_parameter_value<double>("period") * 1e9)),
@@ -366,6 +366,17 @@ void ComponentInterface<NodeT>::set_predicate(
     const std::string& name, const std::function<bool(void)>& predicate
 ) {
   this->set_variant_predicate(name, utilities::PredicateVariant(predicate));
+}
+
+template<class NodeT>
+void ComponentInterface<NodeT>::add_tf_broadcaster() {
+  this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this->shared_from_this());
+}
+
+template<class NodeT>
+void ComponentInterface<NodeT>::add_tf_listener() {
+  this->tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
+  this->tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*this->tf_buffer_);
 }
 
 template<class NodeT>
