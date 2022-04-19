@@ -13,6 +13,10 @@ protected:
     rclcpp::init(0, nullptr);
   }
 
+  static void TearDownTestSuite() {
+    rclcpp::shutdown();
+  }
+
   void SetUp() override {
     component_ = std::make_shared<ComponentInterface<rclcpp::Node>>(
         rclcpp::NodeOptions(), modulo_new_core::communication::PublisherType::PUBLISHER
