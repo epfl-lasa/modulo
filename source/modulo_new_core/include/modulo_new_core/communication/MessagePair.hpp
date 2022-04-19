@@ -40,8 +40,7 @@ inline MsgT MessagePair<MsgT, DataT>::write_message() const {
 template<>
 inline EncodedState MessagePair<EncodedState, state_representation::State>::write_message() const {
   auto msg = EncodedState();
-  // TODO write the translators
-//  translators::write_msg(msg, this->data_, clock_->now());
+  translators::write_msg(msg, this->data_, clock_->now());
   return msg;
 }
 
@@ -51,9 +50,8 @@ inline void MessagePair<MsgT, DataT>::read_message(const MsgT& message) {
 }
 
 template<>
-inline void MessagePair<EncodedState, state_representation::State>::read_message(const EncodedState&) {
-  // TODO write the translators
-//  translators::read_msg(this->data_, message, clock_->now());
+inline void MessagePair<EncodedState, state_representation::State>::read_message(const EncodedState& message) {
+  translators::read_msg(this->data_, message);
 }
 
 template<typename MsgT, typename DataT>
