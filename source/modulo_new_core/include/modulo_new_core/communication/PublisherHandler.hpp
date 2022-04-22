@@ -30,7 +30,7 @@ PublisherHandler<PubT, MsgT>::PublisherHandler(PublisherType type, std::shared_p
 template<typename PubT, typename MsgT>
 void PublisherHandler<PubT, MsgT>::on_activate() {
   if (this->get_type() != PublisherType::LIFECYCLE_PUBLISHER) {
-    throw modulo_new_core::NotLifecyclePublisherException("Only LifecyclePublishers can be activated");
+    throw exceptions::NotLifecyclePublisherException("Only LifecyclePublishers can be activated");
   }
   this->publisher_->on_activate();
 }
@@ -38,7 +38,7 @@ void PublisherHandler<PubT, MsgT>::on_activate() {
 template<typename PubT, typename MsgT>
 void PublisherHandler<PubT, MsgT>::on_deactivate() {
   if (this->get_type() != PublisherType::LIFECYCLE_PUBLISHER) {
-    throw modulo_new_core::NotLifecyclePublisherException("Only LifecyclePublishers can be deactivated");
+    throw exceptions::NotLifecyclePublisherException("Only LifecyclePublishers can be deactivated");
   }
   this->publisher_->on_deactivate();
 }
