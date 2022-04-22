@@ -12,6 +12,8 @@
 #include <state_representation/parameters/ParameterMap.hpp>
 #include <state_representation/space/cartesian/CartesianPose.hpp>
 
+#include <modulo_new_core/communication/MessagePair.hpp>
+#include <modulo_new_core/communication/PublisherHandler.hpp>
 #include <modulo_new_core/communication/PublisherType.hpp>
 #include <modulo_new_core/translators/message_readers.hpp>
 #include <modulo_new_core/translators/message_writers.hpp>
@@ -23,7 +25,7 @@
 namespace modulo_components {
 
 template<class NodeT>
-class ComponentInterface : NodeT {
+class ComponentInterface : public NodeT {
   friend class ComponentInterfaceTest;
 
 public:
@@ -148,10 +150,17 @@ protected:
    */
   void add_tf_listener();
 
+  template<typename DataT>
+  void create_output(const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false);
+
   void send_transform(const state_representation::CartesianPose& transform);
 
   [[nodiscard]] state_representation::CartesianPose
   lookup_transform(const std::string& frame_name, const std::string& reference_frame_name = "world") const;
+
+  std::map<std::string, std::shared_ptr<modulo_new_core::communication::PublisherInterface>> outputs_;
+
+  rclcpp::QoS qos_ = rclcpp::QoS(10);
 
 private:
   /**
@@ -187,7 +196,7 @@ template<class NodeT>
 ComponentInterface<NodeT>::ComponentInterface(
     const rclcpp::NodeOptions& options, modulo_new_core::communication::PublisherType publisher_type
 ) :
-    rclcpp::Node(utilities::parse_node_name(options, "ComponentInterface"), options), publisher_type_(publisher_type) {
+    NodeT(utilities::parse_node_name(options, "ComponentInterface"), options), publisher_type_(publisher_type) {
   // register the parameter change callback handler
   parameter_cb_handle_ = NodeT::add_on_set_parameters_callback(
       [this](const std::vector<rclcpp::Parameter>& parameters) -> rcl_interfaces::msg::SetParametersResult {
@@ -417,6 +426,22 @@ state_representation::CartesianPose ComponentInterface<NodeT>::lookup_transform(
       tf2::Duration(std::chrono::microseconds(10)));
   modulo_new_core::translators::read_msg(result, transform);
   return result;
+}
+
+template<class NodeT>
+template<typename DataT>
+inline void ComponentInterface<NodeT>::create_output(
+    const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic
+) {
+  using namespace modulo_new_core::communication;
+  auto message_pair = make_shared_message_pair(data, this->get_clock());
+  this->outputs_.insert(
+      std::make_pair(
+          signal_name, std::make_shared<PublisherInterface>(this->publisher_type_, message_pair)));
+  // TODO is default okay
+  this->add_parameter(
+      signal_name + "_topic", "~/" + signal_name, "Output topic name of signal '" + signal_name + "'", fixed_topic
+  );
 }
 
 }// namespace modulo_components
