@@ -66,4 +66,9 @@ inline void MessagePair<MsgT, DataT>::set_data(const std::shared_ptr<DataT>& dat
   }
   this->data_ = data;
 }
+
+template<typename DataT>
+std::shared_ptr<MessagePairInterface>
+make_shared_message_pair(const std::shared_ptr<DataT>& data, const std::shared_ptr<rclcpp::Clock>& clock);
+
 }// namespace modulo_new_core::communication
