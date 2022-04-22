@@ -45,7 +45,10 @@ protected:
    * and declares the equivalent ROS parameter on the ROS interface.
    * @param parameter A ParameterInterface pointer to a Parameter instance.
    */
-  void add_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
+  void add_parameter(
+      const std::shared_ptr<state_representation::ParameterInterface>& parameter, const std::string& description,
+      bool read_only = false
+  );
 
   /**
    * @brief Add a parameter.
@@ -56,14 +59,14 @@ protected:
    * @param value The value of the parameter
    */
   template<typename T>
-  void add_parameter(const std::string& name, const T& value);
+  void add_parameter(const std::string& name, const T& value, const std::string& description, bool read_only = false);
 
   /**
    * @brief Get a parameter by name.
    * @param name The name of the parameter
    * @return The ParameterInterface pointer to a Parameter instance
    */
-  std::shared_ptr<state_representation::ParameterInterface> get_parameter(const std::string& name) const;
+  [[nodiscard]] std::shared_ptr<state_representation::ParameterInterface> get_parameter(const std::string& name) const;
 
   /**
    * @brief Get a parameter value by name.
@@ -73,6 +76,17 @@ protected:
    */
   template<typename T>
   T get_parameter_value(const std::string& name) const;
+
+  /**
+   * @brief Set the value of a parameter.
+   * @details The parameter must have been previously declared. This method preserves the reference
+   * to the original Parameter instance
+   * @tparam T The type of the parameter
+   * @param name The name of the parameter
+   * @return The value of the parameter
+   */
+  template<typename T>
+  void set_parameter_value(const std::string& name, const T& value);
 
   /**
    * @brief Parameter validation function to be redefined by derived Component classes.
@@ -125,6 +139,16 @@ protected:
    */
   void set_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function);
 
+  /**
+   * @brief Configure a transform broadcaster.
+   */
+  void add_tf_broadcaster();
+
+  /**
+   * @brief Configure a transform buffer and listener.
+   */
+  void add_tf_listener();
+
   void send_transform(const state_representation::CartesianPose& transform);
 
   [[nodiscard]] state_representation::CartesianPose
@@ -170,17 +194,7 @@ ComponentInterface<NodeT>::ComponentInterface(
       [this](const std::vector<rclcpp::Parameter>& parameters) -> rcl_interfaces::msg::SetParametersResult {
         return this->on_set_parameters_callback(parameters);
       });
-  this->add_parameter("period", 1.0);
-  this->add_parameter("has_tf_listener", false);
-  this->add_parameter("has_tf_broadcaster", false);
-
-  if (this->get_parameter_value<bool>("has_tf_listener")) {
-    this->tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
-    this->tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*this->tf_buffer_);
-  }
-  if (this->get_parameter_value<bool>("has_tf_broadcaster")) {
-    this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this->shared_from_this());
-  }
+  this->add_parameter("period", 1.0, "The time interval in seconds for all periodic callbacks", true);
 
   this->step_timer_ = this->create_wall_timer(
       std::chrono::nanoseconds(static_cast<int64_t>(this->get_parameter_value<double>("period") * 1e9)),
@@ -224,8 +238,10 @@ void ComponentInterface<NodeT>::add_variant_predicate(
 
 template<class NodeT>
 template<typename T>
-void ComponentInterface<NodeT>::add_parameter(const std::string& name, const T& value) {
-  this->add_parameter(state_representation::make_shared_parameter(name, value));
+void ComponentInterface<NodeT>::add_parameter(
+    const std::string& name, const T& value, const std::string& description, bool read_only
+) {
+  this->add_parameter(state_representation::make_shared_parameter(name, value), description, read_only);
 }
 
 template<class NodeT>
@@ -235,17 +251,36 @@ T ComponentInterface<NodeT>::get_parameter_value(const std::string& name) const 
 }
 
 template<class NodeT>
-void
-ComponentInterface<NodeT>::add_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter) {
-  parameter_map_.set_parameter(parameter);
+void ComponentInterface<NodeT>::add_parameter(
+    const std::shared_ptr<state_representation::ParameterInterface>& parameter, const std::string& description,
+    bool read_only
+) {
   auto ros_param = modulo_new_core::translators::write_parameter(parameter);
-  NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value());
+  if (!NodeT::has_parameter(parameter->get_name())) {
+    parameter_map_.set_parameter(parameter);
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description = description;
+    descriptor.read_only = read_only;
+    NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value(), descriptor);
+  } else {
+    NodeT::set_parameter(ros_param);
+  }
 }
 
 template<class NodeT>
 std::shared_ptr<state_representation::ParameterInterface>
 ComponentInterface<NodeT>::get_parameter(const std::string& name) const {
   return this->parameter_map_.get_parameter(name);
+}
+
+template<class NodeT>
+template<typename T>
+void ComponentInterface<NodeT>::set_parameter_value(const std::string& name, const T& value) {
+  rcl_interfaces::msg::SetParametersResult result = NodeT::set_parameter(
+      modulo_new_core::translators::write_parameter(state_representation::make_shared_parameter(name, value)));
+  if (!result.successful) {
+    throw state_representation::exceptions::InvalidParameterException(result.reason);
+  }
 }
 
 template<class NodeT>
@@ -331,6 +366,17 @@ void ComponentInterface<NodeT>::set_predicate(
     const std::string& name, const std::function<bool(void)>& predicate
 ) {
   this->set_variant_predicate(name, utilities::PredicateVariant(predicate));
+}
+
+template<class NodeT>
+void ComponentInterface<NodeT>::add_tf_broadcaster() {
+  this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this->shared_from_this());
+}
+
+template<class NodeT>
+void ComponentInterface<NodeT>::add_tf_listener() {
+  this->tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
+  this->tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*this->tf_buffer_);
 }
 
 template<class NodeT>
