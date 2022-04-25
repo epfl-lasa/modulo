@@ -31,6 +31,8 @@ template<typename PubT, typename MsgT>
 void PublisherHandler<PubT, MsgT>::on_activate() {
   if (this->get_type() != PublisherType::LIFECYCLE_PUBLISHER) {
     throw exceptions::NotLifecyclePublisherException("Only LifecyclePublishers can be activated");
+  } else if (this->publisher_ == nullptr) {
+    throw exceptions::NullPointerException("Publisher not set");
   }
   this->publisher_->on_activate();
 }
@@ -39,6 +41,8 @@ template<typename PubT, typename MsgT>
 void PublisherHandler<PubT, MsgT>::on_deactivate() {
   if (this->get_type() != PublisherType::LIFECYCLE_PUBLISHER) {
     throw exceptions::NotLifecyclePublisherException("Only LifecyclePublishers can be deactivated");
+  } else if (this->publisher_ == nullptr) {
+    throw exceptions::NullPointerException("Publisher not set");
   }
   this->publisher_->on_deactivate();
 }
