@@ -20,6 +20,10 @@ public:
 protected:
   template<typename DataT>
   void add_output(const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false);
+
+private:
+  using ComponentInterface<rclcpp::Node>::create_output;
+  using ComponentInterface<rclcpp::Node>::qos_;
 };
 
 template<typename DataT>

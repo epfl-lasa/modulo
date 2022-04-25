@@ -27,8 +27,10 @@ protected:
 private:
   void configure_outputs();
 
-  void activate_outputs();
+  bool activate_outputs();
 
+  using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::create_output;
+  using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::qos_;
 };
 
 template<typename DataT>
