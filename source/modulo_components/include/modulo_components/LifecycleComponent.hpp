@@ -25,9 +25,11 @@ protected:
   void add_output(const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false);
 
 private:
-  void configure_outputs();
+  bool configure_outputs();
 
   bool activate_outputs();
+
+  bool deactivate_outputs();
 
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::create_output;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::qos_;
@@ -36,8 +38,12 @@ private:
 template<typename DataT>
 void
 LifecycleComponent::add_output(const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic) {
-  // TODO parse signal name
-  this->create_output(signal_name, data, fixed_topic);
+  try {
+    // TODO parse signal name
+    this->create_output(signal_name, data, fixed_topic);
+  } catch (const std::exception& ex) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add output '" << signal_name << "': " << ex.what());
+  }
 }
 
 }
