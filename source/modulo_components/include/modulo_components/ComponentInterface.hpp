@@ -194,13 +194,12 @@ ComponentInterface<NodeT>::ComponentInterface(
         return this->on_set_parameters_callback(parameters);
       });
   this->add_parameter("period", 1.0, "The time interval in seconds for all periodic callbacks", true);
-  this->declare_parameter("has_tf_listener", false);
-  this->declare_parameter("has_tf_broadcaster", false);
+  this->add_parameter("has_tf_listener", false, "Indicate if the component needs to instantiate a tf listener", true);
+  this->add_parameter("has_tf_broadcaster", false, "Indicate if the component needs to instantiate a tf braodcaster", true);
 
-  // here I need to do typename NodeT:: because ParameterMap also has get_parameter
-  period_ = NodeT::get_parameter("period");
-  has_tf_listener_ = NodeT::get_parameter("has_tf_listener");
-  has_tf_broadcaster_ = NodeT::get_parameter("has_tf_broadcaster");
+  this->period_ = NodeT::get_parameter("period");
+  this->has_tf_listener_ = NodeT::get_parameter("has_tf_listener");
+  this->has_tf_broadcaster_ = NodeT::get_parameter("has_tf_broadcaster");
 
   if (has_tf_listener_.as_bool()) {
     this->tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
