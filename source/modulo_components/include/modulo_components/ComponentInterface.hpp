@@ -17,7 +17,6 @@
 #include <modulo_new_core/translators/message_writers.hpp>
 #include <modulo_new_core/translators/parameter_translators.hpp>
 
-#include "modulo_components/exceptions/PredicateNotFoundException.hpp"
 #include "modulo_components/utilities/utilities.hpp"
 #include "modulo_components/utilities/predicate_variant.hpp"
 
@@ -121,7 +120,7 @@ protected:
    * map of predicates
    * @return the value of the predicate as a boolean
    */
-  [[nodiscard]] bool get_predicate(const std::string& predicate_name) const;
+  [[nodiscard]] bool get_predicate(const std::string& predicate_name);
 
   /**
    * @brief Set the value of the predicate given as parameter, if the predicate is not found does not do anything
@@ -208,8 +207,8 @@ void ComponentInterface<NodeT>::step() {
     msg.data = this->get_predicate(predicate.first);
     auto predicate_iterator = this->predicate_publishers_.find(predicate.first);
     if (predicate_iterator == this->predicate_publishers_.end()) {
-      // TODO throw here
-      RCLCPP_FATAL(this->get_logger(), "no publisher for predicate found");
+      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
+                                   "No publisher for predicate " << predicate.first << " found.");
       return;
     }
     predicate_publishers_.at(predicate.first)->publish(msg);
@@ -226,7 +225,7 @@ void ComponentInterface<NodeT>::add_variant_predicate(
     const std::string& name, const utilities::PredicateVariant& predicate
 ) {
   if (this->predicates_.find(name) != this->predicates_.end()) {
-    RCLCPP_INFO(this->get_logger(), "Predicate already exists, overwriting");
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Predicate " << name << " already exists, overwriting.");
     this->predicates_.at(name) = predicate;
   } else {
     this->predicates_.insert(std::make_pair(name, predicate));
@@ -330,10 +329,13 @@ void ComponentInterface<NodeT>::add_predicate(
 }
 
 template<class NodeT>
-bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name) const {
+bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name) {
   auto predicate_iterator = this->predicates_.find(predicate_name);
+  // if there is no predicate with that name simply return false with an error message
   if (predicate_iterator == this->predicates_.end()) {
-    throw exceptions::PredicateNotFoundException(predicate_name);
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
+                                 "Predicate " << predicate_name << " does not exists, returning false.");
+    return false;
   }
   // try to get the value from the variant as a bool
   auto* ptr_value = std::get_if<bool>(&predicate_iterator->second);
@@ -342,7 +344,14 @@ bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name)
   }
   // if previous check failed, it means the variant is actually a callback function
   auto callback_function = std::get<std::function<bool(void)>>(predicate_iterator->second);
-  return (callback_function)();
+  bool value = false;
+  try {
+    value = (callback_function)();
+  } catch (const std::exception& e) {
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
+                                 "Error while evaluating the callback function: " << e.what());
+  }
+  return value;
 }
 
 template<class NodeT>
@@ -351,9 +360,11 @@ void ComponentInterface<NodeT>::set_variant_predicate(
 ) {
   auto predicate_iterator = this->predicates_.find(name);
   if (predicate_iterator == this->predicates_.end()) {
-    throw exceptions::PredicateNotFoundException(name);
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
+                                 "Cannot set predicate " << name << " with a new value because it does not exist.");
+    return;
   }
-  this->predicates_.at(name) = predicate;
+  predicate_iterator->second = predicate;
 }
 
 template<class NodeT>
