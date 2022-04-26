@@ -36,10 +36,10 @@ protected:
 
 TEST_F(ComponentTest, AddOutput) {
   std::shared_ptr<State> data = make_shared_state(CartesianState::Random("test"));
-  component_->add_output("test", data, true);
-  auto outputs_iterator = component_->outputs_.find("test");
+  component_->add_output("_tEsT_#1@3", data, true);
+  auto outputs_iterator = component_->outputs_.find("test_13");
   EXPECT_TRUE(outputs_iterator != component_->outputs_.end());
-  EXPECT_NO_THROW(component_->outputs_.at("test")->publish());
+  EXPECT_NO_THROW(component_->outputs_.at("test_13")->publish());
 }
 
 } // namespace modulo_components
