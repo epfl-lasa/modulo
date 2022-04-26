@@ -151,7 +151,10 @@ protected:
   void add_tf_listener();
 
   template<typename DataT>
-  void create_output(const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false);
+  void create_output(
+      const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false,
+      const std::string& default_topic = ""
+  );
 
   void send_transform(const state_representation::CartesianPose& transform);
 
@@ -431,16 +434,17 @@ state_representation::CartesianPose ComponentInterface<NodeT>::lookup_transform(
 template<class NodeT>
 template<typename DataT>
 inline void ComponentInterface<NodeT>::create_output(
-    const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic
+    const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
+    const std::string& default_topic
 ) {
   using namespace modulo_new_core::communication;
   auto message_pair = make_shared_message_pair(data, this->get_clock());
   this->outputs_.insert(
       std::make_pair(
           signal_name, std::make_shared<PublisherInterface>(this->publisher_type_, message_pair)));
-  // TODO is default okay
+  std::string topic_name = default_topic.empty() ? "~/" + signal_name : default_topic;
   this->add_parameter(
-      signal_name + "_topic", "~/" + signal_name, "Output topic name of signal '" + signal_name + "'", fixed_topic
+      signal_name + "_topic", topic_name, "Output topic name of signal '" + signal_name + "'", fixed_topic
   );
 }
 

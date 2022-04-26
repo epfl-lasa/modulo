@@ -11,7 +11,6 @@ bool LifecycleComponent::configure_outputs() {
   bool success = true;
   for (auto& [name, interface]: this->outputs_) {
     try {
-      // TODO hardcoded _topic
       auto topic_name = this->get_parameter_value<std::string>(name + "_topic");
       auto message_pair = interface->get_message_pair();
       switch (message_pair->get_type()) {

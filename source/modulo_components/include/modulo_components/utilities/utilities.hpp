@@ -25,6 +25,10 @@ static std::string parse_string_argument(const std::vector<std::string>& args, c
   return result;
 }
 
+static std::string parse_signal_name(const std::string& signal_name) {
+  return signal_name;
+}
+
 /**
  * @brief Parse a string node name from NodeOptions arguments.
  * @param options the NodeOptions structure to parse

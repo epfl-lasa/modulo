@@ -39,8 +39,8 @@ template<typename DataT>
 void
 LifecycleComponent::add_output(const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic) {
   try {
-    // TODO parse signal name
-    this->create_output(signal_name, data, fixed_topic);
+    std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
+    this->create_output(parsed_signal_name, data, fixed_topic);
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add output '" << signal_name << "': " << ex.what());
   }
