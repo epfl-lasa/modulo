@@ -25,6 +25,7 @@ protected:
    * @param signal_name Name of the output signal
    * @param data Data to transmit on the output signal
    * @param fixed_topic If true, the topic name of the output signal is fixed
+   * @param default_topic If set, the default value for the topic name to use
    */
   template<typename DataT>
   void add_output(

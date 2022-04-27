@@ -139,12 +139,28 @@ protected:
    */
   void set_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function);
 
+  /**
+   * @brief Add and configure an input signal of the component.
+   * @tparam DataT Type of the data pointer
+   * @param signal_name Name of the output signal
+   * @param data Data to transmit on the output signal
+   * @param fixed_topic If true, the topic name of the output signal is fixed
+   * @param default_topic If set, the default value for the topic name to use
+   */
   template<typename DataT>
   void add_input(
       const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false,
       const std::string& default_topic = ""
   );
 
+  /**
+   * @brief Add and configure an input signal of the component.
+   * @tparam MsgT The ROS message type of the subscription
+   * @param signal_name Name of the output signal
+   * @param callback The callback to use for the subscription
+   * @param fixed_topic If true, the topic name of the output signal is fixed
+   * @param default_topic If set, the default value for the topic name to use
+   */
   template<typename MsgT>
   void add_input(
       const std::string& signal_name, const std::function<void(const std::shared_ptr<MsgT>)>& callback,
