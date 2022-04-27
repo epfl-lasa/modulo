@@ -150,20 +150,51 @@ protected:
    */
   void add_tf_listener();
 
+  /**
+   * @brief Helper function to parse the signal name and add an unconfigured
+   * PublisherInterface to the map of outputs.
+   * @tparam DataT Type of the data pointer
+   * @param signal_name Name of the output signal
+   * @param data Data to transmit on the output signal
+   * @param fixed_topic If true, the topic name of the output signal is fixed
+   */
   template<typename DataT>
   void create_output(
       const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false,
       const std::string& default_topic = ""
   );
 
+  /**
+   * @brief Getter of the Quality of Service attribute.
+   * @return The Quality of Service attribute
+   */
+  [[nodiscard]] rclcpp::QoS get_qos() const;
+
+  /**
+   * @brief Set the Quality of Service for ROS publishers and subscribers.
+   * @param qos The desired Quality of Service
+   */
+  void set_qos(const rclcpp::QoS& qos);
+
+  /**
+   * @brief Send a transform to TF.
+   * @param transform The transform to send
+   */
   void send_transform(const state_representation::CartesianPose& transform);
 
+  /**
+   * @brief Look up a transform from TF.
+   * @param frame_name The desired frame of the transform
+   * @param reference_frame_name The desired reference frame of the transform
+   * @return If it exists, the requested transform
+   */
   [[nodiscard]] state_representation::CartesianPose
   lookup_transform(const std::string& frame_name, const std::string& reference_frame_name = "world") const;
 
-  std::map<std::string, std::shared_ptr<modulo_new_core::communication::PublisherInterface>> outputs_;
+  std::map<std::string, std::shared_ptr<modulo_new_core::communication::PublisherInterface>>
+      outputs_; ///< Map of outputs
 
-  rclcpp::QoS qos_ = rclcpp::QoS(10);
+  rclcpp::QoS qos_ = rclcpp::QoS(10); ///< Quality of Service for ROS publishers and subscribers
 
 private:
   /**
@@ -181,18 +212,21 @@ private:
 
   void step();
 
-  modulo_new_core::communication::PublisherType publisher_type_;
+  modulo_new_core::communication::PublisherType
+      publisher_type_; ///< Type of the output publishers (one of PUBLISHER, LIFECYCLE_PUBLISHER)
 
-  std::map<std::string, utilities::PredicateVariant> predicates_;
-  std::map<std::string, std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>>> predicate_publishers_;
+  std::map<std::string, utilities::PredicateVariant> predicates_; ///< Map of predicates
+  std::map<std::string, std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>>>
+      predicate_publishers_; ///< Map of predicate publishers
 
-  state_representation::ParameterMap parameter_map_;
-  std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle> parameter_cb_handle_;
+  state_representation::ParameterMap parameter_map_; ///< ParameterMap for handling parameters
+  std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle>
+      parameter_cb_handle_; ///< ROS callback function handle for setting parameters
 
-  std::shared_ptr<rclcpp::TimerBase> step_timer_;
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
-  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
-  std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+  std::shared_ptr<rclcpp::TimerBase> step_timer_; ///< Timer for the step function
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer_; ///< TF buffer
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_; ///< TF listener
+  std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_; ///< TF broadcaster
 };
 
 template<class NodeT>
