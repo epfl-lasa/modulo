@@ -21,14 +21,33 @@ public:
   explicit LifecycleComponent(const rclcpp::NodeOptions& node_options);
 
 protected:
+  /**
+   * @brief Add an output signal of the component.
+   * @tparam DataT Type of the data pointer
+   * @param signal_name Name of the output signal
+   * @param data Data to transmit on the output signal
+   * @param fixed_topic If true, the topic name of the output signal is fixed
+   */
   template<typename DataT>
   void add_output(const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false);
 
 private:
+  /**
+   * @brief Configure all outputs.
+   * @return True configuration was successful
+   */
   bool configure_outputs();
 
+  /**
+   * @brief Activate all outputs.
+   * @return True activation was successful
+   */
   bool activate_outputs();
 
+  /**
+   * @brief Deactivate all outputs.
+   * @return True deactivation was successful
+   */
   bool deactivate_outputs();
 
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::create_output;

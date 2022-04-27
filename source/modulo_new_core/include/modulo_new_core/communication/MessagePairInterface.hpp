@@ -12,27 +12,79 @@ namespace modulo_new_core::communication {
 template<typename MsgT, typename DataT>
 class MessagePair;
 
+/**
+ * @class MessagePairInterface
+ * @brief Interface class to enable non-templated writing and reading ROS messages
+ * from derived MessagePair instances through dynamic downcasting.
+ */
 class MessagePairInterface : public std::enable_shared_from_this<MessagePairInterface> {
 public:
+  /**
+   * @brief Constructor with the message type
+   * @param type The message type of the message pair
+   */
   explicit MessagePairInterface(MessageType type);
 
+  /**
+   * @brief Default virtual destructor.
+   */
   virtual ~MessagePairInterface() = default;
 
+  /**
+   * @brief Copy constructor from another MessagePairInterface.
+   */
   MessagePairInterface(const MessagePairInterface& message_pair) = default;
 
+  /**
+   * @brief Get a pointer to a derived MessagePair instance from a MessagePairInterface pointer.
+   * @details If a MessagePairInterface pointer is used to address a derived MessagePair instance,
+   * this method will return a pointer to that derived instance through dynamic down-casting.
+   * The downcast will fail if the base MessagePairInterface object has no reference count
+   * (if the object is not owned by any pointer), or if the derived object is not a correctly
+   * typed instance of a MessagePair. By default, an InvalidPointerCastException is thrown when
+   * the downcast fails. If this validation is disabled by setting the validate_pointer flag to false,
+   * it will not throw an exception and instead return a null pointer.
+   * @tparam MsgT The ROS message type of the MessagePair
+   * @tparam DataT The data type of the MessagePair
+   * @param validate_pointer If true, throw an exception when downcasting fails
+   * @return A pointer to a derived MessagePair instance of the desired type, or a null pointer
+   * if downcasting failed and validate_pointer was set to false.
+   */
   template<typename MsgT, typename DataT>
   [[nodiscard]] std::shared_ptr<MessagePair<MsgT, DataT>> get_message_pair(bool validate_pointer = true);
 
+  /**
+   * @brief Get the ROS message of a derived MessagePair instance through the MessagePairInterface pointer.
+   * @details This throws an InvalidPointerCastException if the MessagePairInterface does not point to a
+   * valid MessagePair instance or if the specified types does not match the type of the MessagePair instance.
+   * @see MessagePairInterface::get_message_pair()
+   * @tparam MsgT The ROS message type of the MessagePair
+   * @tparam DataT The data type of the MessagePair
+   * @return The ROS message containing the data from the underlying MessagePair instance
+   */
   template<typename MsgT, typename DataT>
   [[nodiscard]] MsgT write();
 
+  /**
+   * @brief Read a ROS message and set the data of the derived MessagePair instance through the
+   * MessagePairInterface pointer.
+   * @details This throws an InvalidPointerCastException if the MessagePairInterface does not point to
+   * a valid MessagePair instance or if the specified types does not match the type of the MessagePair instance.
+   * @tparam MsgT The ROS message type of the MessagePair
+   * @tparam DataT The data type of the MessagePair
+   * @param message The ROS message to read from
+   */
   template<typename MsgT, typename DataT>
   void read(const MsgT& message);
 
+  /**
+   * @brief Get the MessageType of the MessagePairInterface.
+   * @see MessageType
+   */
   MessageType get_type() const;
 
 private:
-  MessageType type_;
+  MessageType type_; ///< The message type of the MessagePairInterface
 };
 
 template<typename MsgT, typename DataT>
