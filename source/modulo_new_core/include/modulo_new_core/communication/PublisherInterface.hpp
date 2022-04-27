@@ -15,16 +15,22 @@ class PublisherHandler;
 
 class PublisherInterface : public std::enable_shared_from_this<PublisherInterface> {
 public:
-  explicit PublisherInterface(PublisherType type);
+  explicit PublisherInterface(PublisherType type, std::shared_ptr<MessagePairInterface> message_pair = nullptr);
 
   PublisherInterface(const PublisherInterface& publisher) = default;
 
   virtual ~PublisherInterface() = default;
 
   template<typename PubT, typename MsgT>
-  std::shared_ptr<PublisherHandler<PubT, MsgT>> get_publisher(bool validate_pointer = true);
+  std::shared_ptr<PublisherHandler<PubT, MsgT>> get_handler(bool validate_pointer = true);
+
+  void activate();
+
+  void deactivate();
 
   void publish();
+
+  [[nodiscard]] std::shared_ptr<MessagePairInterface> get_message_pair() const;
 
   void set_message_pair(const std::shared_ptr<MessagePairInterface>& message_pair);
 
@@ -39,7 +45,7 @@ private:
 };
 
 template<typename PubT, typename MsgT>
-inline std::shared_ptr<PublisherHandler<PubT, MsgT>> PublisherInterface::get_publisher(bool validate_pointer) {
+inline std::shared_ptr<PublisherHandler<PubT, MsgT>> PublisherInterface::get_handler(bool validate_pointer) {
   std::shared_ptr<PublisherHandler<PubT, MsgT>> publisher_ptr;
   try {
     publisher_ptr = std::dynamic_pointer_cast<PublisherHandler<PubT, MsgT>>(this->shared_from_this());

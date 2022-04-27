@@ -43,13 +43,13 @@ if(BUILD_TESTING)
   # add cpp tests
   file(GLOB_RECURSE TEST_CPP_SOURCES ${PROJECT_SOURCE_DIR}/test/ test_*.cpp)
 
-  ament_add_gtest(test_cpp_components ${TEST_CPP_SOURCES})
-  target_include_directories(test_cpp_components PRIVATE include)
-  target_link_libraries(test_cpp_components ${PROJECT_NAME} state_representation clproto)
-  target_compile_definitions(test_cpp_components PRIVATE TEST_FIXTURES="${CMAKE_CURRENT_SOURCE_DIR}/test/fixtures/")
+  ament_add_gtest(test_modulo_components ${TEST_CPP_SOURCES})
+  target_include_directories(test_modulo_components PRIVATE include)
+  target_link_libraries(test_modulo_components ${PROJECT_NAME} state_representation clproto)
+  target_compile_definitions(test_modulo_components PRIVATE TEST_FIXTURES="${CMAKE_CURRENT_SOURCE_DIR}/test/fixtures/")
 
   # prevent pluginlib from using boost
-  target_compile_definitions(test_cpp_components PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
+  target_compile_definitions(test_modulo_components PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
   # add python tests
   file(GLOB_RECURSE TEST_PYTHON_SOURCES ${PROJECT_SOURCE_DIR}/test/ test_*.py)

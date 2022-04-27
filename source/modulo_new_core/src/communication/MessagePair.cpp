@@ -38,4 +38,42 @@ MessagePair<EncodedState, state_representation::State>::MessagePair(
 ) :
     MessagePairInterface(MessageType::ENCODED_STATE), data_(std::move(data)), clock_(std::move(clock)) {}
 
+template<>
+std::shared_ptr<MessagePairInterface>
+make_shared_message_pair(const std::shared_ptr<bool>& data, const std::shared_ptr<rclcpp::Clock>& clock) {
+  return std::make_shared<MessagePair<std_msgs::msg::Bool, bool>>(data, clock);
+}
+
+template<>
+std::shared_ptr<MessagePairInterface>
+make_shared_message_pair(const std::shared_ptr<double>& data, const std::shared_ptr<rclcpp::Clock>& clock) {
+  return std::make_shared<MessagePair<std_msgs::msg::Float64, double>>(data, clock);
+}
+
+template<>
+std::shared_ptr<MessagePairInterface> make_shared_message_pair(
+    const std::shared_ptr<std::vector<double>>& data, const std::shared_ptr<rclcpp::Clock>& clock
+) {
+  return std::make_shared<MessagePair<std_msgs::msg::Float64MultiArray, std::vector<double>>>(data, clock);
+}
+
+template<>
+std::shared_ptr<MessagePairInterface>
+make_shared_message_pair(const std::shared_ptr<int>& data, const std::shared_ptr<rclcpp::Clock>& clock) {
+  return std::make_shared<MessagePair<std_msgs::msg::Int32, int>>(data, clock);
+}
+
+template<>
+std::shared_ptr<MessagePairInterface>
+make_shared_message_pair(const std::shared_ptr<std::string>& data, const std::shared_ptr<rclcpp::Clock>& clock) {
+  return std::make_shared<MessagePair<std_msgs::msg::String, std::string>>(data, clock);
+}
+
+template<>
+std::shared_ptr<MessagePairInterface> make_shared_message_pair(
+    const std::shared_ptr<state_representation::State>& data, const std::shared_ptr<rclcpp::Clock>& clock
+) {
+  return std::make_shared<MessagePair<EncodedState, state_representation::State>>(data, clock);
+}
+
 }// namespace modulo_new_core::communication
