@@ -9,22 +9,49 @@
 
 namespace modulo_new_core::communication {
 
+/**
+ * @class MessagePair
+ * @brief The MessagePair stores a pointer to a variable and
+ * translates the value of this pointer back and forth between
+ * the corresponding ROS messages.
+ * @tparam MsgT ROS message type of the MessagePair
+ * @tparam DataT Data type corresponding to the ROS message type
+ */
 template<typename MsgT, typename DataT>
 class MessagePair : public MessagePairInterface {
 public:
+  /**
+   * @brief Constructor of the MessagePair.
+   * @param data The pointer referring to the data stored in the MessagePair
+   * @param clock The ROS clock for translating messages
+   */
   MessagePair(std::shared_ptr<DataT> data, std::shared_ptr<rclcpp::Clock> clock);
 
+  /**
+   * @brief Write the value of the data pointer to a ROS message.
+   * @return The value of the data pointer as a ROS message
+   */
   [[nodiscard]] MsgT write_message() const;
 
+  /**
+   * @brief Read a ROS message and store the value in the data pointer.
+   * @param message The ROS message to read
+   */
   void read_message(const MsgT& message);
 
+  /**
+   * @brief Get the data pointer.
+   */
   [[nodiscard]] std::shared_ptr<DataT> get_data() const;
 
+  /**
+   * @brief Set the data pointer.
+   */
   void set_data(const std::shared_ptr<DataT>& data);
 
 private:
-  std::shared_ptr<DataT> data_;
-  std::shared_ptr<rclcpp::Clock> clock_;
+  std::shared_ptr<DataT> data_; ///< Pointer referring to the data stored in the MessagePair
+  std::shared_ptr<rclcpp::Clock> clock_; ///< ROS clock for translating messages
 };
 
 template<typename MsgT, typename DataT>
