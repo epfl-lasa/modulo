@@ -7,22 +7,48 @@
 
 namespace modulo_new_core::communication {
 
+/**
+ * @class PublisherHandler
+ * @brief The PublisherHandler handles different types of ROS publishers to activate, deactivate and publish
+ * data with those publishers.
+ * @tparam PubT The ROS publisher type
+ * @tparam MsgT The ROS message type of the ROS publisher
+ */
 template<typename PubT, typename MsgT>
 class PublisherHandler : public PublisherInterface {
 public:
+  /**
+   * @brief Constructor with the publisher type and the pointer to the ROS publisher.
+   * @param type The publisher type
+   * @param publisher The pointer to the ROS publisher
+   */
   PublisherHandler(PublisherType type, std::shared_ptr<PubT> publisher);
 
+  /**
+   * @brief Activate the ROS publisher if applicable.
+   */
   void on_activate();
 
+  /**
+   * @brief Deactivate the ROS publisher if applicable.
+   */
   void on_deactivate();
 
+  /**
+   * @brief Publish the ROS message through the ROS publisher.
+   * @param message The ROS message to publish
+   */
   void publish(const MsgT& message) const;
 
+  /**
+   * @brief Create a PublisherInterface instance from the current PublisherHandler.
+   * @param message_pair The message pair of the PublisherInterface
+   */
   std::shared_ptr<PublisherInterface>
   create_publisher_interface(const std::shared_ptr<MessagePairInterface>& message_pair);
 
 private:
-  std::shared_ptr<PubT> publisher_;
+  std::shared_ptr<PubT> publisher_; ///< The ROS publisher
 };
 
 template<typename PubT, typename MsgT>
