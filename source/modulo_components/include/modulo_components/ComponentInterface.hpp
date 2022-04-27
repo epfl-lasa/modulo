@@ -15,6 +15,7 @@
 #include <modulo_new_core/communication/MessagePair.hpp>
 #include <modulo_new_core/communication/PublisherHandler.hpp>
 #include <modulo_new_core/communication/PublisherType.hpp>
+#include <modulo_new_core/communication/SubscriptionHandler.hpp>
 #include <modulo_new_core/translators/message_readers.hpp>
 #include <modulo_new_core/translators/message_writers.hpp>
 #include <modulo_new_core/translators/parameter_translators.hpp>
@@ -26,8 +27,6 @@ namespace modulo_components {
 
 template<class NodeT>
 class ComponentInterface : public NodeT {
-  friend class ComponentInterfaceTest;
-
 public:
   friend class ComponentInterfacePublicInterface;
 
@@ -140,6 +139,18 @@ protected:
    */
   void set_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function);
 
+  template<typename DataT>
+  void add_input(
+      const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false,
+      const std::string& default_topic = ""
+  );
+
+  template<typename MsgT>
+  void add_input(
+      const std::string& signal_name, const std::function<void(const std::shared_ptr<MsgT>)>& callback,
+      bool fixed_topic = false, const std::string& default_topic = ""
+  );
+
   /**
    * @brief Configure a transform broadcaster.
    */
@@ -218,6 +229,7 @@ private:
   std::map<std::string, utilities::PredicateVariant> predicates_; ///< Map of predicates
   std::map<std::string, std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>>>
       predicate_publishers_; ///< Map of predicate publishers
+  std::map<std::string, std::shared_ptr<modulo_new_core::communication::SubscriptionInterface>> inputs_;
 
   state_representation::ParameterMap parameter_map_; ///< ParameterMap for handling parameters
   std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle>
@@ -238,12 +250,14 @@ ComponentInterface<NodeT>::ComponentInterface(
   parameter_cb_handle_ = NodeT::add_on_set_parameters_callback(
       [this](const std::vector<rclcpp::Parameter>& parameters) -> rcl_interfaces::msg::SetParametersResult {
         return this->on_set_parameters_callback(parameters);
-      });
+      }
+  );
   this->add_parameter("period", 1.0, "The time interval in seconds for all periodic callbacks", true);
 
   this->step_timer_ = this->create_wall_timer(
       std::chrono::nanoseconds(static_cast<int64_t>(this->get_parameter_value<double>("period") * 1e9)),
-      [this] { this->step(); });
+      [this] { this->step(); }
+  );
 }
 
 template<class NodeT>
@@ -423,6 +437,98 @@ void ComponentInterface<NodeT>::set_predicate(
     const std::string& name, const std::function<bool(void)>& predicate
 ) {
   this->set_variant_predicate(name, utilities::PredicateVariant(predicate));
+}
+
+template<class NodeT>
+template<typename DataT>
+void ComponentInterface<NodeT>::add_input(
+    const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
+    const std::string& default_topic
+) {
+  using namespace modulo_new_core::communication;
+  try {
+    std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
+    std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
+    this->add_parameter(
+        parsed_signal_name + "_topic", topic_name, "Output topic name of signal '" + parsed_signal_name + "'",
+        fixed_topic
+    );
+    topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
+    auto message_pair = make_shared_message_pair(data, this->get_clock());
+    std::shared_ptr<SubscriptionInterface> subscription_interface;
+    switch (message_pair->get_type()) {
+      case MessageType::BOOL: {
+        auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::Bool>>(message_pair);
+        auto subscription = NodeT::template create_subscription<std_msgs::msg::Bool>(
+            topic_name, this->qos_, subscription_handler->get_callback());
+        subscription_interface = subscription_handler->create_subscription_interface(subscription);
+        break;
+      }
+      case MessageType::FLOAT64: {
+        auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::Float64>>(message_pair);
+        auto subscription = NodeT::template create_subscription<std_msgs::msg::Float64>(
+            topic_name, this->qos_, subscription_handler->get_callback());
+        subscription_interface = subscription_handler->create_subscription_interface(subscription);
+        break;
+      }
+      case MessageType::FLOAT64_MULTI_ARRAY: {
+        auto subscription_handler =
+            std::make_shared<SubscriptionHandler<std_msgs::msg::Float64MultiArray>>(message_pair);
+        auto subscription = NodeT::template create_subscription<std_msgs::msg::Float64MultiArray>(
+            topic_name, this->qos_, subscription_handler->get_callback());
+        subscription_interface = subscription_handler->create_subscription_interface(subscription);
+        break;
+      }
+      case MessageType::INT32: {
+        auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::Int32>>(message_pair);
+        auto subscription = NodeT::template create_subscription<std_msgs::msg::Int32>(
+            topic_name, this->qos_, subscription_handler->get_callback());
+        subscription_interface = subscription_handler->create_subscription_interface(subscription);
+        break;
+      }
+      case MessageType::STRING: {
+        auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::String>>(message_pair);
+        auto subscription = NodeT::template create_subscription<std_msgs::msg::String>(
+            topic_name, this->qos_, subscription_handler->get_callback());
+        subscription_interface = subscription_handler->create_subscription_interface(subscription);
+        break;
+      }
+      case MessageType::ENCODED_STATE: {
+        auto subscription_handler = std::make_shared<SubscriptionHandler<modulo_new_core::EncodedState>>(message_pair);
+        auto subscription = NodeT::template create_subscription<modulo_new_core::EncodedState>(
+            topic_name, this->qos_, subscription_handler->get_callback());
+        subscription_interface = subscription_handler->create_subscription_interface(subscription);
+        break;
+      }
+    }
+    this->inputs_.insert(std::make_pair(parsed_signal_name, subscription_interface));
+  } catch (const std::exception& ex) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add input '" << signal_name << "': " << ex.what());
+  }
+}
+
+template<class NodeT>
+template<typename MsgT>
+void ComponentInterface<NodeT>::add_input(
+    const std::string& signal_name, const std::function<void(const std::shared_ptr<MsgT>)>& callback, bool fixed_topic,
+    const std::string& default_topic
+) {
+  using namespace modulo_new_core::communication;
+  try {
+    std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
+    std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
+    this->add_parameter(
+        parsed_signal_name + "_topic", topic_name, "Output topic name of signal '" + parsed_signal_name + "'",
+        fixed_topic
+    );
+    topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
+    auto subscription = NodeT::template create_subscription<MsgT>(topic_name, this->qos_, callback);
+    auto subscription_interface =
+        std::make_shared<SubscriptionHandler<MsgT>>()->create_subscription_interface(subscription);
+    this->inputs_.insert(std::make_pair(parsed_signal_name, subscription_interface));
+  } catch (const std::exception& ex) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add input '" << signal_name << "': " << ex.what());
+  }
 }
 
 template<class NodeT>

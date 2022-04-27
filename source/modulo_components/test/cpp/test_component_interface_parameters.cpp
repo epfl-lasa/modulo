@@ -12,7 +12,7 @@ namespace modulo_components {
 
 class ComponentInterfacePublicInterface : public ComponentInterface<rclcpp::Node> {
 public:
-  ComponentInterfacePublicInterface(const rclcpp::NodeOptions& node_options) :
+  explicit ComponentInterfacePublicInterface(const rclcpp::NodeOptions& node_options) :
       ComponentInterface<rclcpp::Node>(node_options, modulo_new_core::communication::PublisherType::PUBLISHER) {}
   using ComponentInterface<rclcpp::Node>::add_parameter;
   using ComponentInterface<rclcpp::Node>::get_parameter;
