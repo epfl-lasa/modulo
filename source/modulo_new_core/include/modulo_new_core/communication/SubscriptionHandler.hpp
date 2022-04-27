@@ -7,7 +7,7 @@ namespace modulo_new_core::communication {
 template<typename MsgT>
 class SubscriptionHandler : public SubscriptionInterface {
 public:
-  explicit SubscriptionHandler(std::shared_ptr<MessagePairInterface> message_pair);
+  explicit SubscriptionHandler(std::shared_ptr<MessagePairInterface> message_pair = nullptr);
 
   [[nodiscard]] std::shared_ptr<rclcpp::Subscription<MsgT>> get_subscription() const;
 
@@ -34,13 +34,6 @@ void SubscriptionHandler<MsgT>::set_subscription(const std::shared_ptr<rclcpp::S
   }
   this->subscription_ = subscription;
 }
-
-//auto handler = std::make_shared<communication::SubscriptionHandler<RecT, MsgT>>(recipient, timeout);
-//handler->set_subscription(this->create_subscription<MsgT>(channel, queue_size, [handler](const std::shared_ptr<MsgT> msg) { handler->subscription_callback(msg); }));
-//this->handlers_.insert(std::make_pair(channel, std::make_pair(handler, always_active)));
-//if (always_active) {
-//handler->activate();
-//}
 
 template<typename MsgT>
 std::shared_ptr<SubscriptionInterface> SubscriptionHandler<MsgT>::create_subscription_interface(

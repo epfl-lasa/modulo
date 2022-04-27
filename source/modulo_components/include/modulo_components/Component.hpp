@@ -34,6 +34,7 @@ protected:
 
 private:
   using ComponentInterface<rclcpp::Node>::create_output;
+  using ComponentInterface<rclcpp::Node>::outputs_;
   using ComponentInterface<rclcpp::Node>::qos_;
 };
 

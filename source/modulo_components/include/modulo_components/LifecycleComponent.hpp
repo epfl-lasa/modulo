@@ -51,6 +51,7 @@ private:
   bool deactivate_outputs();
 
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::create_output;
+  using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::outputs_;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::qos_;
 };
 
