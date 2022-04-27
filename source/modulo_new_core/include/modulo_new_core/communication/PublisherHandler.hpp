@@ -1,6 +1,9 @@
 #pragma once
 
+#include <rclcpp/logging.hpp>
+
 #include "modulo_new_core/communication/PublisherInterface.hpp"
+#include "modulo_new_core/exceptions/NotLifecyclePublisherException.hpp"
 
 namespace modulo_new_core::communication {
 
@@ -8,6 +11,10 @@ template<typename PubT, typename MsgT>
 class PublisherHandler : public PublisherInterface {
 public:
   PublisherHandler(PublisherType type, std::shared_ptr<PubT> publisher);
+
+  void on_activate();
+
+  void on_deactivate();
 
   void publish(const MsgT& message) const;
 
@@ -23,7 +30,34 @@ PublisherHandler<PubT, MsgT>::PublisherHandler(PublisherType type, std::shared_p
     PublisherInterface(type), publisher_(std::move(publisher)) {}
 
 template<typename PubT, typename MsgT>
+void PublisherHandler<PubT, MsgT>::on_activate() {
+  if (this->publisher_ == nullptr) {
+    throw exceptions::NullPointerException("Publisher not set");
+  }
+  if (this->get_type() == PublisherType::LIFECYCLE_PUBLISHER) {
+    this->publisher_->on_activate();
+  } else {
+    RCLCPP_WARN(rclcpp::get_logger("PublisherHandler"), "Only LifecyclePublishers can be deactivated");
+  }
+}
+
+template<typename PubT, typename MsgT>
+void PublisherHandler<PubT, MsgT>::on_deactivate() {
+  if (this->publisher_ == nullptr) {
+    throw exceptions::NullPointerException("Publisher not set");
+  }
+  if (this->get_type() == PublisherType::LIFECYCLE_PUBLISHER) {
+    this->publisher_->on_deactivate();
+  } else {
+    RCLCPP_WARN(rclcpp::get_logger("PublisherHandler"), "Only LifecyclePublishers can be deactivated");
+  }
+}
+
+template<typename PubT, typename MsgT>
 void PublisherHandler<PubT, MsgT>::publish(const MsgT& message) const {
+  if (this->publisher_ == nullptr) {
+    throw exceptions::NullPointerException("Publisher not set");
+  }
   this->publisher_->publish(message);
 }
 
