@@ -1,9 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <chrono>
-#include <memory>
-#include <string>
-
 #include "rclcpp/rclcpp.hpp"
 
 #include "modulo_new_core/communication/MessagePair.hpp"
@@ -35,19 +31,35 @@ class MinimalSubscriber : public rclcpp::Node {
 public:
   MinimalSubscriber(const std::string& topic_name, std::shared_ptr<MessagePairInterface> message_pair) :
       Node("minimal_subscriber") {
-    auto subscription_handler = std::make_shared<SubscriptionHandler<MsgT>>(message_pair);
-    auto subscription = this->create_subscription<MsgT>(topic_name, 10, subscription_handler->get_callback());
-    this->subscription_interface_ = subscription_handler->create_subscription_interface(subscription);
+    this->received_future = this->received_.get_future();
+    this->subscription_interface_ = std::make_shared<SubscriptionHandler<MsgT>>(message_pair);
+    auto subscription = this->create_subscription<MsgT>(
+        topic_name, 10, [this](const std::shared_ptr<MsgT> msg) {
+          this->subscription_interface_->template get_handler<MsgT>()->get_callback()(msg);
+          this->received_.set_value();
+        }
+    );
+    this->subscription_interface_ =
+        this->subscription_interface_->template get_handler<MsgT>()->create_subscription_interface(subscription);
   }
 
   MinimalSubscriber(const std::string& topic_name, std::function<void(std::shared_ptr<MsgT>)> callback) :
       Node("minimal_subscriber") {
-    auto subscription = this->create_subscription<MsgT>(topic_name, 10, callback);
+    this->received_future = this->received_.get_future();
+    auto subscription = this->create_subscription<MsgT>(
+        topic_name, 10, [this, &callback](const std::shared_ptr<MsgT> msg) {
+          callback(msg);
+          this->received_.set_value();
+        }
+    );
     this->subscription_interface_ =
         std::make_shared<SubscriptionHandler<MsgT>>()->create_subscription_interface(subscription);
   }
 
+  std::shared_future<void> received_future;
+
 private:
+  std::promise<void> received_;
   std::shared_ptr<SubscriptionInterface> subscription_interface_;
 };
 
@@ -99,9 +111,9 @@ protected:
     auto sub_message = make_shared_message_pair(sub_data, this->clock_);
     this->add_nodes<MsgT>("/test_topic", pub_message, sub_message);
 
-    for (std::size_t i = 0; i < 20; ++i) {
-      this->exec_->spin_once();
-    }
+    this->exec_->template spin_until_future_complete(
+        std::dynamic_pointer_cast<MinimalSubscriber<MsgT>>(this->sub_node_)->received_future, 500ms
+    );
 
     EXPECT_EQ(*pub_data, *sub_data);
     this->clear_nodes();
