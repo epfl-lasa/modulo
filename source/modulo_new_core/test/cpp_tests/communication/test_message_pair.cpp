@@ -48,7 +48,7 @@ TEST_F(MessagePairTest, BasicTypes) {
   test_message_interface<std_msgs::msg::String, std::string>("this", "that", clock_);
 }
 
-TEST_F(MessagePairTest, TestCartesianState) {
+TEST_F(MessagePairTest, EncodedState) {
   auto initial_value = state_representation::CartesianState::Random("test");
   auto data = state_representation::make_shared_state(initial_value);
   auto msg_pair =

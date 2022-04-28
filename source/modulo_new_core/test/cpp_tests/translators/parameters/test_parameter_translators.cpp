@@ -33,7 +33,7 @@ static std::tuple<
                        std::make_tuple(1.0, state_representation::ParameterType::DOUBLE),
                    }, {
                        std::make_tuple(
-                           std::vector<double>({true, false, true}), state_representation::ParameterType::DOUBLE_ARRAY),
+                           std::vector<double>({1.0, 2.0, 3.0}), state_representation::ParameterType::DOUBLE_ARRAY),
                    }, {
                        std::make_tuple("test", state_representation::ParameterType::STRING),
                    }, {
