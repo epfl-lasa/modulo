@@ -43,19 +43,6 @@ public:
         this->subscription_interface_->template get_handler<MsgT>()->create_subscription_interface(subscription);
   }
 
-  MinimalSubscriber(const std::string& topic_name, std::function<void(std::shared_ptr<MsgT>)> callback) :
-      Node("minimal_subscriber") {
-    this->received_future = this->received_.get_future();
-    auto subscription = this->create_subscription<MsgT>(
-        topic_name, 10, [this, &callback](const std::shared_ptr<MsgT> msg) {
-          callback(msg);
-          this->received_.set_value();
-        }
-    );
-    this->subscription_interface_ =
-        std::make_shared<SubscriptionHandler<MsgT>>()->create_subscription_interface(subscription);
-  }
-
   std::shared_future<void> received_future;
 
 private:
@@ -131,4 +118,24 @@ TEST_F(CommunicationTest, BasicTypes) {
   this->communicate<std_msgs::msg::Float64MultiArray, std::vector<double>>({1.0, 2.0}, {3.0, 4.0});
   this->communicate<std_msgs::msg::Int32, int>(1, 2);
   this->communicate<std_msgs::msg::String, std::string>("this", "that");
+}
+
+TEST_F(CommunicationTest, EncodedState) {
+  using namespace state_representation;
+  auto pub_state = std::make_shared<CartesianState>(CartesianState::Random("this", "world"));
+  std::shared_ptr<State> pub_data = pub_state;
+  auto pub_message = make_shared_message_pair(pub_data, this->clock_);
+  auto sub_state = std::make_shared<CartesianState>(CartesianState::Identity("that", "base"));
+  std::shared_ptr<State> sub_data = sub_state;
+  auto sub_message = make_shared_message_pair(sub_data, this->clock_);
+  this->add_nodes<modulo_new_core::EncodedState>("/test_topic", pub_message, sub_message);
+  this->exec_->template spin_until_future_complete(
+      std::dynamic_pointer_cast<MinimalSubscriber<modulo_new_core::EncodedState>>(this->sub_node_)->received_future,
+      500ms
+  );
+
+  EXPECT_EQ(pub_state->get_name(), sub_state->get_name());
+  EXPECT_EQ(pub_state->get_reference_frame(), sub_state->get_reference_frame());
+  EXPECT_TRUE(std::dynamic_pointer_cast<CartesianState>(pub_data)->data().isApprox(
+      std::dynamic_pointer_cast<CartesianState>(sub_data)->data()));
 }

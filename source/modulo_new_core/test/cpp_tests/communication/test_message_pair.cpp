@@ -73,7 +73,7 @@ TEST_F(MessagePairTest, EncodedState) {
   msg_pair->set_data(data);
   msg = modulo_new_core::EncodedState();
   modulo_new_core::translators::write_msg(msg, data, clock_->now());
-  msg_pair_interface->read<modulo_new_core::EncodedState , state_representation::State>(msg);
+  msg_pair_interface->read<modulo_new_core::EncodedState, state_representation::State>(msg);
   EXPECT_TRUE(initial_value.data().isApprox(
       std::dynamic_pointer_cast<state_representation::CartesianState>(msg_pair->get_data())->data()));
 }
