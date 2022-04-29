@@ -2,12 +2,12 @@
 
 namespace modulo_components {
 
-template<NodeT>
+template<class NodeT>
 rclcpp::QoS ComponentInterface<NodeT>::get_qos() const {
   return this->qos_;
 }
 
-template<NodeT>
+template<class NodeT>
 void ComponentInterface<NodeT>::set_qos(const rclcpp::QoS& qos) {
   this->qos_ = qos;
 }

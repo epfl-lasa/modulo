@@ -52,7 +52,7 @@ def test_pose(cart_state: sr.CartesianState, clock: rclpy.clock.Clock):
     msg = geometry_msgs.msg.Pose()
     modulo_writers.write_msg(msg, cart_state)
     assert_np_array_equal(read_xyz(msg.position), cart_state.get_position())
-    assert_np_array_equal(read_quaternion(msg.orientation), cart_state.get_orientation())
+    assert_np_array_equal(read_quaternion(msg.orientation), cart_state.get_orientation_coefficients())
 
     new_state = sr.CartesianState("new")
     with pytest.raises(RuntimeError):
@@ -64,7 +64,7 @@ def test_pose(cart_state: sr.CartesianState, clock: rclpy.clock.Clock):
     modulo_writers.write_msg_stamped(msg_stamped, cart_state, clock.now().to_msg())
     assert msg_stamped.header.frame_id == cart_state.get_reference_frame()
     assert_np_array_equal(read_xyz(msg.position), cart_state.get_position())
-    assert_np_array_equal(read_quaternion(msg.orientation), cart_state.get_orientation())
+    assert_np_array_equal(read_quaternion(msg.orientation), cart_state.get_orientation_coefficients())
     new_state = sr.CartesianState("new")
     modulo_readers.read_msg_stamped(new_state, msg_stamped)
     assert cart_state.get_reference_frame() == new_state.get_reference_frame()
@@ -75,7 +75,7 @@ def test_transform(cart_state: sr.CartesianState, clock: rclpy.clock.Clock):
     msg = geometry_msgs.msg.Transform()
     modulo_writers.write_msg(msg, cart_state)
     assert_np_array_equal(read_xyz(msg.translation), cart_state.get_position())
-    assert_np_array_equal(read_quaternion(msg.rotation), cart_state.get_orientation())
+    assert_np_array_equal(read_quaternion(msg.rotation), cart_state.get_orientation_coefficients())
 
     new_state = sr.CartesianState("new")
     with pytest.raises(RuntimeError):
@@ -88,7 +88,7 @@ def test_transform(cart_state: sr.CartesianState, clock: rclpy.clock.Clock):
     assert msg_stamped.header.frame_id == cart_state.get_reference_frame()
     assert msg_stamped.child_frame_id == cart_state.get_name()
     assert_np_array_equal(read_xyz(msg.translation), cart_state.get_position())
-    assert_np_array_equal(read_quaternion(msg.rotation), cart_state.get_orientation())
+    assert_np_array_equal(read_quaternion(msg.rotation), cart_state.get_orientation_coefficients())
     new_state = sr.CartesianState("new")
     modulo_readers.read_msg_stamped(new_state, msg_stamped)
     assert cart_state.get_reference_frame() == new_state.get_reference_frame()
