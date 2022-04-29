@@ -48,7 +48,7 @@ def test_parameter_const_read(parameters):
 
 def test_parameter_non_const_read(parameters):
     for name, value_types in parameters.items():
-        param = sr.Parameter(name, value_types[0], value_types[1])
+        param = sr.Parameter(name, value_types[2], value_types[1])
         ros_param = Parameter(name, value=value_types[0])
 
         param_ref = param
@@ -67,7 +67,9 @@ def test_state_parameter_write(state_parameters):
         param = sr.Parameter(name, value_types[0], sr.ParameterType.STATE, value_types[1])
         ros_param = write_parameter(param)
         assert ros_param.name == param.get_name()
-        assert clproto.decode(clproto.from_json(ros_param.value)).get_name() == value_types[0].get_name()
+        state = clproto.decode(clproto.from_json(ros_param.value))
+        assert state.get_name() == value_types[0].get_name()
+        assert_np_array_equal(state.data(), value_types[0].data())
 
 
 def test_state_parameter_read_write(state_parameters):
@@ -75,7 +77,7 @@ def test_state_parameter_read_write(state_parameters):
         json = clproto.to_json(clproto.encode(value_types[0], value_types[2]))
         ros_param = Parameter(name, value=json)
         param = read_parameter(ros_param)
-        assert ros_param.name == param.get_name()
+        assert param.get_name() == ros_param.name
         assert param.get_parameter_type() == sr.ParameterType.STATE
         assert param.get_parameter_state_type() == value_types[1]
 
@@ -127,4 +129,5 @@ def test_matrix_parameter_read_write():
     new_param = read_parameter_const(ros_param, param)
     assert new_param.get_name() == ros_param.name
     assert new_param.get_parameter_type() == sr.ParameterType.MATRIX
-    assert_np_array_equal(new_param.get_value().flatten(), mat.flatten())
+    assert_np_array_equal(new_param.get_value(), mat)
+    assert new_param.get_value().shape == mat.shape
