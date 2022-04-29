@@ -89,9 +89,15 @@ TEST_F(ComponentInterfaceTest, AddInput) {
   EXPECT_TRUE(inputs_iterator != component_->inputs_.end());
 
   EXPECT_NO_THROW(this->component_->template add_input<std_msgs::msg::Bool>(
-      "_tEsT_#1@5", [](const std::shared_ptr<std_msgs::msg::Bool> msg) {}
+      "_tEsT_#1@5", [](const std::shared_ptr<std_msgs::msg::Bool>) {}
   ));
   inputs_iterator = component_->inputs_.find("test_15");
   EXPECT_TRUE(inputs_iterator != component_->inputs_.end());
+
+  this->component_->template add_input<std_msgs::msg::String>(
+      "test_13", [](const std::shared_ptr<std_msgs::msg::String>) {}
+  );
+  EXPECT_EQ(this->component_->inputs_.at("test_13")->get_message_pair()->get_type(),
+            modulo_new_core::communication::MessageType::BOOL);
 }
 }

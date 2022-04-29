@@ -20,6 +20,7 @@
 #include <modulo_new_core/translators/message_writers.hpp>
 #include <modulo_new_core/translators/parameter_translators.hpp>
 
+#include "modulo_components/exceptions/SignalAlreadyExistsException.hpp"
 #include "modulo_components/utilities/utilities.hpp"
 #include "modulo_components/utilities/predicate_variant.hpp"
 
@@ -464,6 +465,9 @@ void ComponentInterface<NodeT>::add_input(
   using namespace modulo_new_core::communication;
   try {
     std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
+    if (this->inputs_.find(parsed_signal_name) != this->inputs_.end()) {
+      throw exceptions::SignalAlreadyExistsException("Input with name '" + signal_name + "' already exists");
+    }
     std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
     this->add_parameter(
         parsed_signal_name + "_topic", topic_name, "Output topic name of signal '" + parsed_signal_name + "'",
@@ -517,7 +521,7 @@ void ComponentInterface<NodeT>::add_input(
         break;
       }
     }
-    this->inputs_.insert(std::make_pair(parsed_signal_name, subscription_interface));
+    this->inputs_.insert_or_assign(parsed_signal_name, subscription_interface);
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add input '" << signal_name << "': " << ex.what());
   }
@@ -532,6 +536,9 @@ void ComponentInterface<NodeT>::add_input(
   using namespace modulo_new_core::communication;
   try {
     std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
+    if (this->inputs_.find(parsed_signal_name) != this->inputs_.end()) {
+      throw exceptions::SignalAlreadyExistsException("Input with name '" + signal_name + "' already exists");
+    }
     std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
     this->add_parameter(
         parsed_signal_name + "_topic", topic_name, "Output topic name of signal '" + parsed_signal_name + "'",
@@ -541,7 +548,7 @@ void ComponentInterface<NodeT>::add_input(
     auto subscription = NodeT::template create_subscription<MsgT>(topic_name, this->qos_, callback);
     auto subscription_interface =
         std::make_shared<SubscriptionHandler<MsgT>>()->create_subscription_interface(subscription);
-    this->inputs_.insert(std::make_pair(parsed_signal_name, subscription_interface));
+    this->inputs_.insert_or_assign(parsed_signal_name, subscription_interface);
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add input '" << signal_name << "': " << ex.what());
   }
@@ -594,10 +601,12 @@ inline void ComponentInterface<NodeT>::create_output(
     const std::string& default_topic
 ) {
   using namespace modulo_new_core::communication;
+  if (this->outputs_.find(signal_name) != this->outputs_.end()) {
+    throw exceptions::SignalAlreadyExistsException("Output with name '" + signal_name + "' already exists");
+  }
   auto message_pair = make_shared_message_pair(data, this->get_clock());
-  this->outputs_.insert(
-      std::make_pair(
-          signal_name, std::make_shared<PublisherInterface>(this->publisher_type_, message_pair)));
+  this->outputs_.insert_or_assign(
+      signal_name, std::make_shared<PublisherInterface>(this->publisher_type_, message_pair));
   std::string topic_name = default_topic.empty() ? "~/" + signal_name : default_topic;
   this->add_parameter(
       signal_name + "_topic", topic_name, "Output topic name of signal '" + signal_name + "'", fixed_topic
