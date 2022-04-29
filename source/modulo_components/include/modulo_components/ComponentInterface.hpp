@@ -303,13 +303,13 @@ void ComponentInterface<NodeT>::add_variant_predicate(
 ) {
   if (this->predicates_.find(name) != this->predicates_.end()) {
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Predicate " << name << " already exists, overwriting.");
-    this->predicates_.at(name) = predicate;
   } else {
-    this->predicates_.insert(std::make_pair(name, predicate));
-    this->predicate_publishers_.insert(
-        std::make_pair(
-            name, this->template create_publisher<std_msgs::msg::Bool>(this->generate_predicate_topic(name), 10)));
+    this->predicate_publishers_.insert_or_assign(
+        name, this->template create_publisher<std_msgs::msg::Bool>(
+            this->generate_predicate_topic(name), 10
+        ));
   }
+  this->predicates_.insert_or_assign(name, predicate);
 }
 
 template<class NodeT>
