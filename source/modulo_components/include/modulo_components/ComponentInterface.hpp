@@ -30,6 +30,7 @@ template<class NodeT>
 class ComponentInterface : public NodeT {
 public:
   friend class ComponentInterfacePublicInterface;
+  friend class ComponentInterfaceParameterPublicInterface;
 
   /**
    * @brief Constructor from node options
