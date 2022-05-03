@@ -30,6 +30,8 @@ ament_auto_add_library(modulo_new_core SHARED
     ${PROJECT_SOURCE_DIR}/src/communication/MessagePair.cpp
     ${PROJECT_SOURCE_DIR}/src/communication/MessagePairInterface.cpp
     ${PROJECT_SOURCE_DIR}/src/communication/PublisherInterface.cpp
+    ${PROJECT_SOURCE_DIR}/src/communication/SubscriptionHandler.cpp
+    ${PROJECT_SOURCE_DIR}/src/communication/SubscriptionInterface.cpp
     ${PROJECT_SOURCE_DIR}/src/translators/parameter_translators.cpp
     ${PROJECT_SOURCE_DIR}/src/translators/message_readers.cpp
     ${PROJECT_SOURCE_DIR}/src/translators/message_writers.cpp)

@@ -10,9 +10,9 @@
 
 namespace modulo_components {
 
-class ComponentInterfacePublicInterface : public ComponentInterface<rclcpp::Node> {
+class ComponentInterfaceParameterPublicInterface : public ComponentInterface<rclcpp::Node> {
 public:
-  ComponentInterfacePublicInterface(const rclcpp::NodeOptions& node_options) :
+  explicit ComponentInterfaceParameterPublicInterface(const rclcpp::NodeOptions& node_options) :
       ComponentInterface<rclcpp::Node>(node_options, modulo_new_core::communication::PublisherType::PUBLISHER) {}
   using ComponentInterface<rclcpp::Node>::add_parameter;
   using ComponentInterface<rclcpp::Node>::get_parameter;
@@ -52,7 +52,7 @@ protected:
   }
 
   void SetUp() override {
-    component_ = std::make_shared<ComponentInterfacePublicInterface>(rclcpp::NodeOptions());
+    component_ = std::make_shared<ComponentInterfaceParameterPublicInterface>(rclcpp::NodeOptions());
     param_ = state_representation::make_shared_parameter("test", 1);
   }
 
@@ -63,7 +63,7 @@ protected:
     EXPECT_EQ(component_->parameter_map_.get_parameter_value<T>("test"), value);
   }
 
-  std::shared_ptr<ComponentInterfacePublicInterface> component_;
+  std::shared_ptr<ComponentInterfaceParameterPublicInterface> component_;
   std::shared_ptr<state_representation::Parameter<int>> param_;
 };
 
