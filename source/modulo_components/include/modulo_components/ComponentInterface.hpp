@@ -15,10 +15,12 @@
 #include <modulo_new_core/communication/MessagePair.hpp>
 #include <modulo_new_core/communication/PublisherHandler.hpp>
 #include <modulo_new_core/communication/PublisherType.hpp>
+#include <modulo_new_core/communication/SubscriptionHandler.hpp>
 #include <modulo_new_core/translators/message_readers.hpp>
 #include <modulo_new_core/translators/message_writers.hpp>
 #include <modulo_new_core/translators/parameter_translators.hpp>
 
+#include "modulo_components/exceptions/SignalAlreadyExistsException.hpp"
 #include "modulo_components/utilities/utilities.hpp"
 #include "modulo_components/utilities/predicate_variant.hpp"
 
@@ -26,10 +28,9 @@ namespace modulo_components {
 
 template<class NodeT>
 class ComponentInterface : public NodeT {
-  friend class ComponentInterfaceTest;
-
 public:
   friend class ComponentInterfacePublicInterface;
+  friend class ComponentInterfaceParameterPublicInterface;
 
   /**
    * @brief Constructor from node options
@@ -141,6 +142,34 @@ protected:
   void set_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function);
 
   /**
+   * @brief Add and configure an input signal of the component.
+   * @tparam DataT Type of the data pointer
+   * @param signal_name Name of the output signal
+   * @param data Data to transmit on the output signal
+   * @param fixed_topic If true, the topic name of the output signal is fixed
+   * @param default_topic If set, the default value for the topic name to use
+   */
+  template<typename DataT>
+  void add_input(
+      const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false,
+      const std::string& default_topic = ""
+  );
+
+  /**
+   * @brief Add and configure an input signal of the component.
+   * @tparam MsgT The ROS message type of the subscription
+   * @param signal_name Name of the output signal
+   * @param callback The callback to use for the subscription
+   * @param fixed_topic If true, the topic name of the output signal is fixed
+   * @param default_topic If set, the default value for the topic name to use
+   */
+  template<typename MsgT>
+  void add_input(
+      const std::string& signal_name, const std::function<void(const std::shared_ptr<MsgT>)>& callback,
+      bool fixed_topic = false, const std::string& default_topic = ""
+  );
+
+  /**
    * @brief Configure a transform broadcaster.
    */
   void add_tf_broadcaster();
@@ -218,6 +247,7 @@ private:
   std::map<std::string, utilities::PredicateVariant> predicates_; ///< Map of predicates
   std::map<std::string, std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>>>
       predicate_publishers_; ///< Map of predicate publishers
+  std::map<std::string, std::shared_ptr<modulo_new_core::communication::SubscriptionInterface>> inputs_;
 
   state_representation::ParameterMap parameter_map_; ///< ParameterMap for handling parameters
   std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle>
@@ -238,12 +268,14 @@ ComponentInterface<NodeT>::ComponentInterface(
   parameter_cb_handle_ = NodeT::add_on_set_parameters_callback(
       [this](const std::vector<rclcpp::Parameter>& parameters) -> rcl_interfaces::msg::SetParametersResult {
         return this->on_set_parameters_callback(parameters);
-      });
+      }
+  );
   this->add_parameter("period", 1.0, "The time interval in seconds for all periodic callbacks", true);
 
   this->step_timer_ = this->create_wall_timer(
       std::chrono::nanoseconds(static_cast<int64_t>(this->get_parameter_value<double>("period") * 1e9)),
-      [this] { this->step(); });
+      [this] { this->step(); }
+  );
 }
 
 template<class NodeT>
@@ -272,13 +304,13 @@ void ComponentInterface<NodeT>::add_variant_predicate(
 ) {
   if (this->predicates_.find(name) != this->predicates_.end()) {
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Predicate " << name << " already exists, overwriting.");
-    this->predicates_.at(name) = predicate;
   } else {
-    this->predicates_.insert(std::make_pair(name, predicate));
-    this->predicate_publishers_.insert(
-        std::make_pair(
-            name, this->template create_publisher<std_msgs::msg::Bool>(this->generate_predicate_topic(name), 10)));
+    this->predicate_publishers_.insert_or_assign(
+        name, this->template create_publisher<std_msgs::msg::Bool>(
+            this->generate_predicate_topic(name), 10
+        ));
   }
+  this->predicates_.insert_or_assign(name, predicate);
 }
 
 template<class NodeT>
@@ -426,6 +458,104 @@ void ComponentInterface<NodeT>::set_predicate(
 }
 
 template<class NodeT>
+template<typename DataT>
+void ComponentInterface<NodeT>::add_input(
+    const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
+    const std::string& default_topic
+) {
+  using namespace modulo_new_core::communication;
+  try {
+    std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
+    if (this->inputs_.find(parsed_signal_name) != this->inputs_.end()) {
+      throw exceptions::SignalAlreadyExistsException("Input with name '" + signal_name + "' already exists");
+    }
+    std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
+    this->add_parameter(
+        parsed_signal_name + "_topic", topic_name, "Output topic name of signal '" + parsed_signal_name + "'",
+        fixed_topic
+    );
+    topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
+    auto message_pair = make_shared_message_pair(data, this->get_clock());
+    std::shared_ptr<SubscriptionInterface> subscription_interface;
+    switch (message_pair->get_type()) {
+      case MessageType::BOOL: {
+        auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::Bool>>(message_pair);
+        auto subscription = NodeT::template create_subscription<std_msgs::msg::Bool>(
+            topic_name, this->qos_, subscription_handler->get_callback());
+        subscription_interface = subscription_handler->create_subscription_interface(subscription);
+        break;
+      }
+      case MessageType::FLOAT64: {
+        auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::Float64>>(message_pair);
+        auto subscription = NodeT::template create_subscription<std_msgs::msg::Float64>(
+            topic_name, this->qos_, subscription_handler->get_callback());
+        subscription_interface = subscription_handler->create_subscription_interface(subscription);
+        break;
+      }
+      case MessageType::FLOAT64_MULTI_ARRAY: {
+        auto subscription_handler =
+            std::make_shared<SubscriptionHandler<std_msgs::msg::Float64MultiArray>>(message_pair);
+        auto subscription = NodeT::template create_subscription<std_msgs::msg::Float64MultiArray>(
+            topic_name, this->qos_, subscription_handler->get_callback());
+        subscription_interface = subscription_handler->create_subscription_interface(subscription);
+        break;
+      }
+      case MessageType::INT32: {
+        auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::Int32>>(message_pair);
+        auto subscription = NodeT::template create_subscription<std_msgs::msg::Int32>(
+            topic_name, this->qos_, subscription_handler->get_callback());
+        subscription_interface = subscription_handler->create_subscription_interface(subscription);
+        break;
+      }
+      case MessageType::STRING: {
+        auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::String>>(message_pair);
+        auto subscription = NodeT::template create_subscription<std_msgs::msg::String>(
+            topic_name, this->qos_, subscription_handler->get_callback());
+        subscription_interface = subscription_handler->create_subscription_interface(subscription);
+        break;
+      }
+      case MessageType::ENCODED_STATE: {
+        auto subscription_handler = std::make_shared<SubscriptionHandler<modulo_new_core::EncodedState>>(message_pair);
+        auto subscription = NodeT::template create_subscription<modulo_new_core::EncodedState>(
+            topic_name, this->qos_, subscription_handler->get_callback());
+        subscription_interface = subscription_handler->create_subscription_interface(subscription);
+        break;
+      }
+    }
+    this->inputs_.insert_or_assign(parsed_signal_name, subscription_interface);
+  } catch (const std::exception& ex) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add input '" << signal_name << "': " << ex.what());
+  }
+}
+
+template<class NodeT>
+template<typename MsgT>
+void ComponentInterface<NodeT>::add_input(
+    const std::string& signal_name, const std::function<void(const std::shared_ptr<MsgT>)>& callback, bool fixed_topic,
+    const std::string& default_topic
+) {
+  using namespace modulo_new_core::communication;
+  try {
+    std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
+    if (this->inputs_.find(parsed_signal_name) != this->inputs_.end()) {
+      throw exceptions::SignalAlreadyExistsException("Input with name '" + signal_name + "' already exists");
+    }
+    std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
+    this->add_parameter(
+        parsed_signal_name + "_topic", topic_name, "Output topic name of signal '" + parsed_signal_name + "'",
+        fixed_topic
+    );
+    topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
+    auto subscription = NodeT::template create_subscription<MsgT>(topic_name, this->qos_, callback);
+    auto subscription_interface =
+        std::make_shared<SubscriptionHandler<MsgT>>()->create_subscription_interface(subscription);
+    this->inputs_.insert_or_assign(parsed_signal_name, subscription_interface);
+  } catch (const std::exception& ex) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add input '" << signal_name << "': " << ex.what());
+  }
+}
+
+template<class NodeT>
 void ComponentInterface<NodeT>::add_tf_broadcaster() {
   this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this->shared_from_this());
 }
@@ -472,10 +602,12 @@ inline void ComponentInterface<NodeT>::create_output(
     const std::string& default_topic
 ) {
   using namespace modulo_new_core::communication;
+  if (this->outputs_.find(signal_name) != this->outputs_.end()) {
+    throw exceptions::SignalAlreadyExistsException("Output with name '" + signal_name + "' already exists");
+  }
   auto message_pair = make_shared_message_pair(data, this->get_clock());
-  this->outputs_.insert(
-      std::make_pair(
-          signal_name, std::make_shared<PublisherInterface>(this->publisher_type_, message_pair)));
+  this->outputs_.insert_or_assign(
+      signal_name, std::make_shared<PublisherInterface>(this->publisher_type_, message_pair));
   std::string topic_name = default_topic.empty() ? "~/" + signal_name : default_topic;
   this->add_parameter(
       signal_name + "_topic", topic_name, "Output topic name of signal '" + signal_name + "'", fixed_topic

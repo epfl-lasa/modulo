@@ -27,6 +27,7 @@ protected:
    * @param signal_name Name of the output signal
    * @param data Data to transmit on the output signal
    * @param fixed_topic If true, the topic name of the output signal is fixed
+   * @param default_topic If set, the default value for the topic name to use
    */
   template<typename DataT>
   void add_output(const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false);
@@ -51,6 +52,7 @@ private:
   bool deactivate_outputs();
 
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::create_output;
+  using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::outputs_;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::qos_;
 };
 
