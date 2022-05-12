@@ -174,6 +174,8 @@ protected:
       bool fixed_topic = false, const std::string& default_topic = ""
   );
 
+  void add_daemon(const std::string& name, const std::function<void(void)>& callback);
+
   /**
    * @brief Configure a transform broadcaster.
    */
@@ -257,6 +259,8 @@ private:
   std::map<std::string, std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>>>
       predicate_publishers_; ///< Map of predicate publishers
   std::map<std::string, std::shared_ptr<modulo_new_core::communication::SubscriptionInterface>> inputs_;
+
+  std::map<std::string, std::function<void(void)>> daemon_callbacks_;
 
   state_representation::ParameterMap parameter_map_; ///< ParameterMap for handling parameters
   std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle>
@@ -557,6 +561,15 @@ inline void ComponentInterface<NodeT>::add_input(
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add input '" << signal_name << "': " << ex.what());
   }
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::add_daemon(const std::string& name, const std::function<void()>& callback) {
+  if (this->daemon_callbacks_.find(name) != this->daemon_callbacks_.end()) {
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                 "Daemon callback " << name << " already exists, overwriting.");
+  }
+  this->daemon_callbacks_.template insert_or_assign(name, callback);
 }
 
 template<class NodeT>
