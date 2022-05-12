@@ -244,8 +244,6 @@ private:
    */
   rcl_interfaces::msg::SetParametersResult on_set_parameters_callback(const std::vector<rclcpp::Parameter>& parameters);
 
-  [[nodiscard]] std::string generate_predicate_topic(const std::string& predicate_name) const;
-
   void add_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
   void set_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
@@ -305,11 +303,6 @@ inline void ComponentInterface<NodeT>::step() {
 }
 
 template<class NodeT>
-inline std::string ComponentInterface<NodeT>::generate_predicate_topic(const std::string& predicate_name) const {
-  return "/predicates/" + std::string(this->get_name()) + "/" + predicate_name;
-}
-
-template<class NodeT>
 inline void ComponentInterface<NodeT>::add_variant_predicate(
     const std::string& name, const utilities::PredicateVariant& predicate
 ) {
@@ -318,7 +311,7 @@ inline void ComponentInterface<NodeT>::add_variant_predicate(
   } else {
     this->predicate_publishers_.insert_or_assign(
         name, this->template create_publisher<std_msgs::msg::Bool>(
-            this->generate_predicate_topic(name), 10
+            utilities::generate_predicate_topic(this->get_name(), name), 10
         ));
   }
   this->predicates_.insert_or_assign(name, predicate);

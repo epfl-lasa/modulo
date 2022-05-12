@@ -13,8 +13,9 @@ namespace modulo_components::utilities {
  * @param result the default argument value that is overwritten by reference if the given pattern is found
  * @return the value of the resultant string
  */
-static std::string parse_string_argument(const std::vector<std::string>& args, const std::string& pattern, std::string& result) {
-  for (const auto& arg : args) {
+static std::string
+parse_string_argument(const std::vector<std::string>& args, const std::string& pattern, std::string& result) {
+  for (const auto& arg: args) {
     std::string::size_type index = arg.find(pattern);
     if (index != std::string::npos) {
       result = arg;
@@ -54,6 +55,10 @@ static std::string parse_signal_name(const std::string& signal_name) {
     }
   }
   return output;
+}
+
+static std::string generate_predicate_topic(const std::string& component_name, const std::string& predicate_name) {
+  return "/predicates/" + component_name + "/" + predicate_name;
 }
 
 }// namespace modulo_components::utilities
