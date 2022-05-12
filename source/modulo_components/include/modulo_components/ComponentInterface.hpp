@@ -40,6 +40,8 @@ public:
       const rclcpp::NodeOptions& node_options, modulo_new_core::communication::PublisherType publisher_type
   );
 
+  virtual ~ComponentInterface() = default;
+
 protected:
   /**
    * @brief Add a parameter.
@@ -219,6 +221,8 @@ protected:
    */
   [[nodiscard]] state_representation::CartesianPose
   lookup_transform(const std::string& frame_name, const std::string& reference_frame_name = "world") const;
+
+  virtual void raise_error();
 
   std::map<std::string, std::shared_ptr<modulo_new_core::communication::PublisherInterface>>
       outputs_; ///< Map of outputs
@@ -613,5 +617,8 @@ inline void ComponentInterface<NodeT>::create_output(
       signal_name + "_topic", topic_name, "Output topic name of signal '" + signal_name + "'", fixed_topic
   );
 }
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::raise_error() {}
 
 }// namespace modulo_components
