@@ -305,21 +305,6 @@ inline void ComponentInterface<NodeT>::step() {
 }
 
 template<class NodeT>
-inline void ComponentInterface<NodeT>::add_variant_predicate(
-    const std::string& name, const utilities::PredicateVariant& predicate
-) {
-  if (this->predicates_.find(name) != this->predicates_.end()) {
-    RCLCPP_DEBUG_STREAM(this->get_logger(), "Predicate " << name << " already exists, overwriting.");
-  } else {
-    this->predicate_publishers_.insert_or_assign(
-        name, this->template create_publisher<std_msgs::msg::Bool>(
-            utilities::generate_predicate_topic(this->get_name(), name), 10
-        ));
-  }
-  this->predicates_.insert_or_assign(name, predicate);
-}
-
-template<class NodeT>
 template<typename T>
 inline void ComponentInterface<NodeT>::add_parameter(
     const std::string& name, const T& value, const std::string& description, bool read_only
@@ -413,6 +398,21 @@ inline void ComponentInterface<NodeT>::add_predicate(
 }
 
 template<class NodeT>
+inline void ComponentInterface<NodeT>::add_variant_predicate(
+    const std::string& name, const utilities::PredicateVariant& predicate
+) {
+  if (this->predicates_.find(name) != this->predicates_.end()) {
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Predicate " << name << " already exists, overwriting.");
+  } else {
+    this->predicate_publishers_.insert_or_assign(
+        name, this->template create_publisher<std_msgs::msg::Bool>(
+            utilities::generate_predicate_topic(this->get_name(), name), 10
+        ));
+  }
+  this->predicates_.insert_or_assign(name, predicate);
+}
+
+template<class NodeT>
 inline bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name) {
   auto predicate_iterator = this->predicates_.find(predicate_name);
   // if there is no predicate with that name simply return false with an error message
@@ -432,7 +432,7 @@ inline bool ComponentInterface<NodeT>::get_predicate(const std::string& predicat
   try {
     value = (callback_function)();
   } catch (const std::exception& e) {
-    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                                  "Error while evaluating the callback function: " << e.what());
   }
   return value;
@@ -444,7 +444,7 @@ inline void ComponentInterface<NodeT>::set_variant_predicate(
 ) {
   auto predicate_iterator = this->predicates_.find(name);
   if (predicate_iterator == this->predicates_.end()) {
-    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                                  "Cannot set predicate " << name << " with a new value because it does not exist.");
     return;
   }
@@ -585,7 +585,7 @@ template<class NodeT>
 inline void ComponentInterface<NodeT>::send_transform(const state_representation::CartesianPose& transform) {
   // TODO: throw here?
   if (this->tf_broadcaster_ == nullptr) {
-    RCLCPP_FATAL(this->get_logger(), "No tf broadcaster");
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock, 1000, "No tf broadcaster");
   }
   geometry_msgs::msg::TransformStamped tf_message;
   modulo_new_core::translators::write_msg(tf_message, transform, this->get_clock()->now());
@@ -598,7 +598,7 @@ inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_tra
 ) const {
   // TODO: throw here?
   if (this->tf_buffer_ == nullptr || this->tf_listener_ == nullptr) {
-    RCLCPP_FATAL(this->get_logger(), "No tf buffer / listener");
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock, 1000, "No tf buffer / listener");
   }
   geometry_msgs::msg::TransformStamped transform;
   state_representation::CartesianPose result(frame_name, reference_frame_name);
