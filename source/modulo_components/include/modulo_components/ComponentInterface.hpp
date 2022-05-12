@@ -252,6 +252,12 @@ private:
 
   void step();
 
+  void publish_predicates();
+
+  void publish_outputs();
+
+  void evaluate_daemon_callbacks();
+
   modulo_new_core::communication::PublisherType
       publisher_type_; ///< Type of the output publishers (one of PUBLISHER, LIFECYCLE_PUBLISHER)
 
@@ -293,17 +299,9 @@ ComponentInterface<NodeT>::ComponentInterface(
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::step() {
-  for (const auto& predicate: this->predicates_) {
-    std_msgs::msg::Bool msg;
-    msg.data = this->get_predicate(predicate.first);
-    auto predicate_iterator = this->predicate_publishers_.find(predicate.first);
-    if (predicate_iterator == this->predicate_publishers_.end()) {
-      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
-                                   "No publisher for predicate " << predicate.first << " found.");
-      return;
-    }
-    predicate_publishers_.at(predicate.first)->publish(msg);
-  }
+  this->publish_predicates();
+  this->publish_outputs();
+  this->evaluate_daemon_callbacks();
 }
 
 template<class NodeT>
@@ -610,6 +608,44 @@ inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_tra
       tf2::Duration(std::chrono::microseconds(10)));
   modulo_new_core::translators::read_msg(result, transform);
   return result;
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::publish_predicates() {
+  for (const auto& predicate: this->predicates_) {
+    std_msgs::msg::Bool msg;
+    msg.data = this->get_predicate(predicate.first);
+    if (this->predicate_publishers_.find(predicate.first) == this->predicate_publishers_.end()) {
+      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                   "No publisher for predicate " << predicate.first << " found.");
+      return;
+    }
+    predicate_publishers_.at(predicate.first)->publish(msg);
+  }
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::publish_outputs() {
+  for (const auto& publisher: this->outputs_) {
+    try {
+      publisher.second->publish();
+    } catch (const std::exception& ex) {
+      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                   "Could not publish output " << publisher.first << ": " << ex.what());
+    }
+  }
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::evaluate_daemon_callbacks() {
+  for (const auto& callback: this->daemon_callbacks_) {
+    try {
+      callback.second();
+    } catch (const std::exception& ex) {
+      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                   "Could not evaluate daemon callback " << callback.first << ": " << ex.what());
+    }
+  }
 }
 
 template<class NodeT>
