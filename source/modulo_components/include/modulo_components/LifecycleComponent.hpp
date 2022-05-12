@@ -57,7 +57,7 @@ private:
 };
 
 template<typename DataT>
-void
+inline void
 LifecycleComponent::add_output(const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic) {
   try {
     std::string parsed_signal_name = utilities::parse_signal_name(signal_name);

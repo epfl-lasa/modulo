@@ -290,7 +290,7 @@ ComponentInterface<NodeT>::ComponentInterface(
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::step() {
+inline void ComponentInterface<NodeT>::step() {
   for (const auto& predicate: this->predicates_) {
     std_msgs::msg::Bool msg;
     msg.data = this->get_predicate(predicate.first);
@@ -305,12 +305,12 @@ void ComponentInterface<NodeT>::step() {
 }
 
 template<class NodeT>
-std::string ComponentInterface<NodeT>::generate_predicate_topic(const std::string& predicate_name) const {
+inline std::string ComponentInterface<NodeT>::generate_predicate_topic(const std::string& predicate_name) const {
   return "/predicates/" + std::string(this->get_name()) + "/" + predicate_name;
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::add_variant_predicate(
+inline void ComponentInterface<NodeT>::add_variant_predicate(
     const std::string& name, const utilities::PredicateVariant& predicate
 ) {
   if (this->predicates_.find(name) != this->predicates_.end()) {
@@ -326,7 +326,7 @@ void ComponentInterface<NodeT>::add_variant_predicate(
 
 template<class NodeT>
 template<typename T>
-void ComponentInterface<NodeT>::add_parameter(
+inline void ComponentInterface<NodeT>::add_parameter(
     const std::string& name, const T& value, const std::string& description, bool read_only
 ) {
   this->add_parameter(state_representation::make_shared_parameter(name, value), description, read_only);
@@ -334,12 +334,12 @@ void ComponentInterface<NodeT>::add_parameter(
 
 template<class NodeT>
 template<typename T>
-T ComponentInterface<NodeT>::get_parameter_value(const std::string& name) const {
+inline T ComponentInterface<NodeT>::get_parameter_value(const std::string& name) const {
   return this->parameter_map_.template get_parameter_value<T>(name);
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::add_parameter(
+inline void ComponentInterface<NodeT>::add_parameter(
     const std::shared_ptr<state_representation::ParameterInterface>& parameter, const std::string& description,
     bool read_only
 ) {
@@ -356,14 +356,14 @@ void ComponentInterface<NodeT>::add_parameter(
 }
 
 template<class NodeT>
-std::shared_ptr<state_representation::ParameterInterface>
+inline std::shared_ptr<state_representation::ParameterInterface>
 ComponentInterface<NodeT>::get_parameter(const std::string& name) const {
   return this->parameter_map_.get_parameter(name);
 }
 
 template<class NodeT>
 template<typename T>
-void ComponentInterface<NodeT>::set_parameter_value(const std::string& name, const T& value) {
+inline void ComponentInterface<NodeT>::set_parameter_value(const std::string& name, const T& value) {
   rcl_interfaces::msg::SetParametersResult result = NodeT::set_parameter(
       modulo_new_core::translators::write_parameter(state_representation::make_shared_parameter(name, value)));
   if (!result.successful) {
@@ -372,14 +372,14 @@ void ComponentInterface<NodeT>::set_parameter_value(const std::string& name, con
 }
 
 template<class NodeT>
-bool ComponentInterface<NodeT>::validate_parameter(
+inline bool ComponentInterface<NodeT>::validate_parameter(
     const std::shared_ptr<state_representation::ParameterInterface>&
 ) {
   return true;
 }
 
 template<class NodeT>
-rcl_interfaces::msg::SetParametersResult
+inline rcl_interfaces::msg::SetParametersResult
 ComponentInterface<NodeT>::on_set_parameters_callback(const std::vector<rclcpp::Parameter>& parameters) {
   rcl_interfaces::msg::SetParametersResult result;
   result.successful = true;
@@ -406,19 +406,19 @@ ComponentInterface<NodeT>::on_set_parameters_callback(const std::vector<rclcpp::
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::add_predicate(const std::string& name, bool predicate) {
+inline void ComponentInterface<NodeT>::add_predicate(const std::string& name, bool predicate) {
   this->add_variant_predicate(name, utilities::PredicateVariant(predicate));
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::add_predicate(
+inline void ComponentInterface<NodeT>::add_predicate(
     const std::string& name, const std::function<bool(void)>& predicate
 ) {
   this->add_variant_predicate(name, utilities::PredicateVariant(predicate));
 }
 
 template<class NodeT>
-bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name) {
+inline bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name) {
   auto predicate_iterator = this->predicates_.find(predicate_name);
   // if there is no predicate with that name simply return false with an error message
   if (predicate_iterator == this->predicates_.end()) {
@@ -444,7 +444,7 @@ bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name)
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::set_variant_predicate(
+inline void ComponentInterface<NodeT>::set_variant_predicate(
     const std::string& name, const utilities::PredicateVariant& predicate
 ) {
   auto predicate_iterator = this->predicates_.find(name);
@@ -457,12 +457,12 @@ void ComponentInterface<NodeT>::set_variant_predicate(
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::set_predicate(const std::string& name, bool predicate) {
+inline void ComponentInterface<NodeT>::set_predicate(const std::string& name, bool predicate) {
   this->set_variant_predicate(name, utilities::PredicateVariant(predicate));
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::set_predicate(
+inline void ComponentInterface<NodeT>::set_predicate(
     const std::string& name, const std::function<bool(void)>& predicate
 ) {
   this->set_variant_predicate(name, utilities::PredicateVariant(predicate));
@@ -470,7 +470,7 @@ void ComponentInterface<NodeT>::set_predicate(
 
 template<class NodeT>
 template<typename DataT>
-void ComponentInterface<NodeT>::add_input(
+inline void ComponentInterface<NodeT>::add_input(
     const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
     const std::string& default_topic
 ) {
@@ -541,7 +541,7 @@ void ComponentInterface<NodeT>::add_input(
 
 template<class NodeT>
 template<typename MsgT>
-void ComponentInterface<NodeT>::add_input(
+inline void ComponentInterface<NodeT>::add_input(
     const std::string& signal_name, const std::function<void(const std::shared_ptr<MsgT>)>& callback, bool fixed_topic,
     const std::string& default_topic
 ) {
@@ -567,18 +567,18 @@ void ComponentInterface<NodeT>::add_input(
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::add_tf_broadcaster() {
+inline void ComponentInterface<NodeT>::add_tf_broadcaster() {
   this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this->shared_from_this());
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::add_tf_listener() {
+inline void ComponentInterface<NodeT>::add_tf_listener() {
   this->tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
   this->tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*this->tf_buffer_);
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::send_transform(const state_representation::CartesianPose& transform) {
+inline void ComponentInterface<NodeT>::send_transform(const state_representation::CartesianPose& transform) {
   // TODO: throw here?
   if (this->tf_broadcaster_ == nullptr) {
     RCLCPP_FATAL(this->get_logger(), "No tf broadcaster");
@@ -589,7 +589,7 @@ void ComponentInterface<NodeT>::send_transform(const state_representation::Carte
 }
 
 template<class NodeT>
-state_representation::CartesianPose ComponentInterface<NodeT>::lookup_transform(
+inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_transform(
     const std::string& frame_name, const std::string& reference_frame_name
 ) const {
   // TODO: throw here?

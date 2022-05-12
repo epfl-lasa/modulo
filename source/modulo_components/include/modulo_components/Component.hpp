@@ -67,7 +67,7 @@ private:
 };
 
 template<typename DataT>
-void Component::add_output(
+inline void Component::add_output(
     const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
     const std::string& default_topic
 ) {
