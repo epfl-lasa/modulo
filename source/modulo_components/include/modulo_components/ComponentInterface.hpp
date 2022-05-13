@@ -252,16 +252,16 @@ private:
   rcl_interfaces::msg::SetParametersResult on_set_parameters_callback(const std::vector<rclcpp::Parameter>& parameters);
 
   /**
-   * @brief
-   * @param name
-   * @param predicate
+   * @brief Add a predicate to the map of predicates.
+   * @param name The name of the predicate
+   * @param predicate The predicate variant
    */
   void add_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
   /**
-   * @brief
-   * @param name
-   * @param predicate
+   * @brief Set the predicate given as parameter, if the predicate is not found does not do anything.
+   * @param name The name of the predicate
+   * @param predicate The predicate variant
    */
   void set_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
