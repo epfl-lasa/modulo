@@ -174,6 +174,11 @@ protected:
       bool fixed_topic = false, const std::string& default_topic = ""
   );
 
+  /**
+   * @brief Function to daemonize the callback function given in input.
+   * @param name The name of the daemon
+   * @param callback The callback of the daemon
+   */
   void add_daemon(const std::string& name, const std::function<void(void)>& callback);
 
   /**
@@ -246,16 +251,39 @@ private:
    */
   rcl_interfaces::msg::SetParametersResult on_set_parameters_callback(const std::vector<rclcpp::Parameter>& parameters);
 
+  /**
+   * @brief
+   * @param name
+   * @param predicate
+   */
   void add_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
+  /**
+   * @brief
+   * @param name
+   * @param predicate
+   */
   void set_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
+  /**
+   * @brief Step function that is called periodically and publishes predicates,
+   * outputs, and evaluates daemon callbacks.
+   */
   void step();
 
+  /**
+   * @brief Helper function to publish all predicates.
+   */
   void publish_predicates();
 
+  /**
+   * @brief Helper function to publish all output signals.
+   */
   void publish_outputs();
 
+  /**
+   * @brief Helper function to evaluate all daemon callbacks.
+   */
   void evaluate_daemon_callbacks();
 
   modulo_new_core::communication::PublisherType
@@ -266,7 +294,7 @@ private:
       predicate_publishers_; ///< Map of predicate publishers
   std::map<std::string, std::shared_ptr<modulo_new_core::communication::SubscriptionInterface>> inputs_;
 
-  std::map<std::string, std::function<void(void)>> daemon_callbacks_;
+  std::map<std::string, std::function<void(void)>> daemon_callbacks_; ///< Map of daemon callbacks
 
   state_representation::ParameterMap parameter_map_; ///< ParameterMap for handling parameters
   std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle>
