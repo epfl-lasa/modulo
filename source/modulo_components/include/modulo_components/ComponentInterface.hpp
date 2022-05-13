@@ -626,24 +626,24 @@ inline void ComponentInterface<NodeT>::publish_predicates() {
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::publish_outputs() {
-  for (const auto& publisher: this->outputs_) {
+  for (const auto& [signal, publisher]: this->outputs_) {
     try {
-      publisher.second->publish();
+      publisher->publish();
     } catch (const std::exception& ex) {
       RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                   "Could not publish output " << publisher.first << ": " << ex.what());
+                                   "Could not publish output " << signal << ": " << ex.what());
     }
   }
 }
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::evaluate_daemon_callbacks() {
-  for (const auto& callback: this->daemon_callbacks_) {
+  for (const auto& [daemon, callback]: this->daemon_callbacks_) {
     try {
-      callback.second();
+      callback();
     } catch (const std::exception& ex) {
       RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                   "Could not evaluate daemon callback " << callback.first << ": " << ex.what());
+                                   "Could not evaluate daemon callback " << daemon << ": " << ex.what());
     }
   }
 }
