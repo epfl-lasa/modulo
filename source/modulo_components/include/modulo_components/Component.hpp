@@ -14,14 +14,21 @@ public:
   friend class ComponentPublicInterface;
 
   /**
-   * @brief Constructor from node options
+   * @brief Constructor from node options.
    * @param node_options node options as used in ROS2 Node
    */
   explicit Component(const rclcpp::NodeOptions& node_options, bool start_thread = true);
 
 protected:
+  /**
+   * @brief Start the execution thread.
+   */
   void start_thread();
 
+  /**
+   * @brief Execute the component logic. To be redefined in derived classes.
+   * @return True, if the execution was successful, false otherwise
+   */
   virtual bool execute();
 
   /**
@@ -39,8 +46,16 @@ protected:
   );
 
 private:
+  /**
+   * @brief Run the execution function in a try catch block and
+   * set the predicates according to the outcome of the execution.
+   */
   void run();
 
+  /**
+   * @brief Put the component in error state by setting the
+   * 'in_error_state' predicate to true.
+   */
   void raise_error() override;
 
   using ComponentInterface<rclcpp::Node>::create_output;
