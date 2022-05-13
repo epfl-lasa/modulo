@@ -2,9 +2,9 @@ import clproto
 import geometry_msgs.msg
 import numpy as np
 import pytest
-import rclpy
 import sensor_msgs.msg
 import state_representation as sr
+from rclpy.clock import Clock
 
 import modulo_new_core.translators.message_readers as modulo_readers
 import modulo_new_core.translators.message_writers as modulo_writers
@@ -25,7 +25,7 @@ def assert_np_array_equal(a: np.array, b: np.array, places=3):
         pytest.fail(f'{e}')
 
 
-def test_accel(cart_state: sr.CartesianState, clock: rclpy.clock.Clock):
+def test_accel(cart_state: sr.CartesianState, clock: Clock):
     msg = geometry_msgs.msg.Accel()
     modulo_writers.write_msg(msg, cart_state)
     assert_np_array_equal(read_xyz(msg.linear), cart_state.get_linear_acceleration())
@@ -38,17 +38,17 @@ def test_accel(cart_state: sr.CartesianState, clock: rclpy.clock.Clock):
     assert_np_array_equal(cart_state.get_acceleration(), new_state.get_acceleration())
 
     msg_stamped = geometry_msgs.msg.AccelStamped()
-    modulo_writers.write_msg_stamped(msg_stamped, cart_state, clock.now().to_msg())
+    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now().to_msg())
     assert msg_stamped.header.frame_id == cart_state.get_reference_frame()
     assert_np_array_equal(read_xyz(msg.linear), cart_state.get_linear_acceleration())
     assert_np_array_equal(read_xyz(msg.angular), cart_state.get_angular_acceleration())
     new_state = sr.CartesianState("new")
-    modulo_readers.read_msg_stamped(new_state, msg_stamped)
+    modulo_readers.read_stamped_msg(new_state, msg_stamped)
     assert cart_state.get_reference_frame() == new_state.get_reference_frame()
     assert_np_array_equal(cart_state.get_acceleration(), new_state.get_acceleration())
 
 
-def test_pose(cart_state: sr.CartesianState, clock: rclpy.clock.Clock):
+def test_pose(cart_state: sr.CartesianState, clock: Clock):
     msg = geometry_msgs.msg.Pose()
     modulo_writers.write_msg(msg, cart_state)
     assert_np_array_equal(read_xyz(msg.position), cart_state.get_position())
@@ -61,17 +61,17 @@ def test_pose(cart_state: sr.CartesianState, clock: rclpy.clock.Clock):
     assert_np_array_equal(cart_state.get_pose(), new_state.get_pose())
 
     msg_stamped = geometry_msgs.msg.PoseStamped()
-    modulo_writers.write_msg_stamped(msg_stamped, cart_state, clock.now().to_msg())
+    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now().to_msg())
     assert msg_stamped.header.frame_id == cart_state.get_reference_frame()
     assert_np_array_equal(read_xyz(msg.position), cart_state.get_position())
     assert_np_array_equal(read_quaternion(msg.orientation), cart_state.get_orientation_coefficients())
     new_state = sr.CartesianState("new")
-    modulo_readers.read_msg_stamped(new_state, msg_stamped)
+    modulo_readers.read_stamped_msg(new_state, msg_stamped)
     assert cart_state.get_reference_frame() == new_state.get_reference_frame()
     assert_np_array_equal(cart_state.get_pose(), new_state.get_pose())
 
 
-def test_transform(cart_state: sr.CartesianState, clock: rclpy.clock.Clock):
+def test_transform(cart_state: sr.CartesianState, clock: Clock):
     msg = geometry_msgs.msg.Transform()
     modulo_writers.write_msg(msg, cart_state)
     assert_np_array_equal(read_xyz(msg.translation), cart_state.get_position())
@@ -84,19 +84,19 @@ def test_transform(cart_state: sr.CartesianState, clock: rclpy.clock.Clock):
     assert_np_array_equal(cart_state.get_pose(), new_state.get_pose())
 
     msg_stamped = geometry_msgs.msg.TransformStamped()
-    modulo_writers.write_msg_stamped(msg_stamped, cart_state, clock.now().to_msg())
+    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now().to_msg())
     assert msg_stamped.header.frame_id == cart_state.get_reference_frame()
     assert msg_stamped.child_frame_id == cart_state.get_name()
     assert_np_array_equal(read_xyz(msg.translation), cart_state.get_position())
     assert_np_array_equal(read_quaternion(msg.rotation), cart_state.get_orientation_coefficients())
     new_state = sr.CartesianState("new")
-    modulo_readers.read_msg_stamped(new_state, msg_stamped)
+    modulo_readers.read_stamped_msg(new_state, msg_stamped)
     assert cart_state.get_reference_frame() == new_state.get_reference_frame()
     assert cart_state.get_name() == new_state.get_name()
     assert_np_array_equal(cart_state.get_pose(), new_state.get_pose())
 
 
-def test_twist(cart_state: sr.CartesianState, clock: rclpy.clock.Clock):
+def test_twist(cart_state: sr.CartesianState, clock: Clock):
     msg = geometry_msgs.msg.Twist()
     modulo_writers.write_msg(msg, cart_state)
     assert_np_array_equal(read_xyz(msg.linear), cart_state.get_linear_velocity())
@@ -109,17 +109,17 @@ def test_twist(cart_state: sr.CartesianState, clock: rclpy.clock.Clock):
     assert_np_array_equal(cart_state.get_twist(), new_state.get_twist())
 
     msg_stamped = geometry_msgs.msg.TwistStamped()
-    modulo_writers.write_msg_stamped(msg_stamped, cart_state, clock.now().to_msg())
+    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now().to_msg())
     assert msg_stamped.header.frame_id == cart_state.get_reference_frame()
     assert_np_array_equal(read_xyz(msg.linear), cart_state.get_linear_velocity())
     assert_np_array_equal(read_xyz(msg.angular), cart_state.get_angular_velocity())
     new_state = sr.CartesianState("new")
-    modulo_readers.read_msg_stamped(new_state, msg_stamped)
+    modulo_readers.read_stamped_msg(new_state, msg_stamped)
     assert cart_state.get_reference_frame() == new_state.get_reference_frame()
     assert_np_array_equal(cart_state.get_twist(), new_state.get_twist())
 
 
-def test_wrench(cart_state: sr.CartesianState, clock: rclpy.clock.Clock):
+def test_wrench(cart_state: sr.CartesianState, clock: Clock):
     msg = geometry_msgs.msg.Wrench()
     modulo_writers.write_msg(msg, cart_state)
     assert_np_array_equal(read_xyz(msg.force), cart_state.get_force())
@@ -132,12 +132,12 @@ def test_wrench(cart_state: sr.CartesianState, clock: rclpy.clock.Clock):
     assert_np_array_equal(cart_state.get_wrench(), new_state.get_wrench())
 
     msg_stamped = geometry_msgs.msg.WrenchStamped()
-    modulo_writers.write_msg_stamped(msg_stamped, cart_state, clock.now().to_msg())
+    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now().to_msg())
     assert msg_stamped.header.frame_id == cart_state.get_reference_frame()
     assert_np_array_equal(read_xyz(msg.force), cart_state.get_force())
     assert_np_array_equal(read_xyz(msg.torque), cart_state.get_torque())
     new_state = sr.CartesianState("new")
-    modulo_readers.read_msg_stamped(new_state, msg_stamped)
+    modulo_readers.read_stamped_msg(new_state, msg_stamped)
     assert cart_state.get_reference_frame() == new_state.get_reference_frame()
     assert_np_array_equal(cart_state.get_wrench(), new_state.get_wrench())
 
