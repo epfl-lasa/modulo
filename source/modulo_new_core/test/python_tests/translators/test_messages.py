@@ -6,8 +6,8 @@ import rclpy
 import sensor_msgs.msg
 import state_representation as sr
 
-import modulo_new_core.translators.read_state_conversion as modulo_readers
-import modulo_new_core.translators.write_state_conversion as modulo_writers
+import modulo_new_core.translators.message_readers as modulo_readers
+import modulo_new_core.translators.message_writers as modulo_writers
 
 
 def read_xyz(msg):
