@@ -22,7 +22,6 @@ void Component::start_thread() {
   }
   this->started_ = true;
   this->run_thread_ = std::thread([this]() { this->run(); });
-  this->run_thread_.join();
 }
 
 void Component::run() {
