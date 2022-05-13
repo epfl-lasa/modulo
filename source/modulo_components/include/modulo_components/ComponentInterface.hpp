@@ -149,9 +149,9 @@ protected:
   /**
    * @brief Add and configure an input signal of the component.
    * @tparam DataT Type of the data pointer
-   * @param signal_name Name of the output signal
-   * @param data Data to transmit on the output signal
-   * @param fixed_topic If true, the topic name of the output signal is fixed
+   * @param signal_name Name of the input signal
+   * @param data Data to receive on the input signal
+   * @param fixed_topic If true, the topic name of the input signal is fixed
    * @param default_topic If set, the default value for the topic name to use
    */
   template<typename DataT>
@@ -163,9 +163,9 @@ protected:
   /**
    * @brief Add and configure an input signal of the component.
    * @tparam MsgT The ROS message type of the subscription
-   * @param signal_name Name of the output signal
+   * @param signal_name Name of the input signal
    * @param callback The callback to use for the subscription
-   * @param fixed_topic If true, the topic name of the output signal is fixed
+   * @param fixed_topic If true, the topic name of the input signal is fixed
    * @param default_topic If set, the default value for the topic name to use
    */
   template<typename MsgT>
@@ -406,7 +406,7 @@ inline void ComponentInterface<NodeT>::add_variant_predicate(
   } else {
     this->predicate_publishers_.insert_or_assign(
         name, this->template create_publisher<std_msgs::msg::Bool>(
-            utilities::generate_predicate_topic(this->get_name(), name), 10
+            utilities::generate_predicate_topic(this->get_name(), name), this->qos_
         ));
   }
   this->predicates_.insert_or_assign(name, predicate);
