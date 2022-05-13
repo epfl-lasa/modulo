@@ -1,5 +1,6 @@
 #pragma once
 
+#include <thread>
 #include <rclcpp/node.hpp>
 
 #include "modulo_components/ComponentInterface.hpp"
@@ -13,12 +14,23 @@ public:
   friend class ComponentPublicInterface;
 
   /**
-   * @brief Constructor from node options
+   * @brief Constructor from node options.
    * @param node_options node options as used in ROS2 Node
    */
-  explicit Component(const rclcpp::NodeOptions& node_options);
+  explicit Component(const rclcpp::NodeOptions& node_options, bool start_thread = true);
 
 protected:
+  /**
+   * @brief Start the execution thread.
+   */
+  void start_thread();
+
+  /**
+   * @brief Execute the component logic. To be redefined in derived classes.
+   * @return True, if the execution was successful, false otherwise
+   */
+  virtual bool execute();
+
   /**
    * @brief Add and configure an output signal of the component.
    * @tparam DataT Type of the data pointer
@@ -34,9 +46,24 @@ protected:
   );
 
 private:
+  /**
+   * @brief Run the execution function in a try catch block and
+   * set the predicates according to the outcome of the execution.
+   */
+  void run();
+
+  /**
+   * @brief Put the component in error state by setting the
+   * 'in_error_state' predicate to true.
+   */
+  void raise_error() override;
+
   using ComponentInterface<rclcpp::Node>::create_output;
   using ComponentInterface<rclcpp::Node>::outputs_;
   using ComponentInterface<rclcpp::Node>::qos_;
+
+  std::thread run_thread_;
+  bool started_;
 };
 
 template<typename DataT>
@@ -103,8 +130,9 @@ void Component::add_output(
       }
     }
   } catch (const std::exception& ex) {
-    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add output '" << signal_name << "': " << ex.what());
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                 "Failed to add output '" << signal_name << "': " << ex.what());
   }
 }
 
-}
+}// namespace modulo_components

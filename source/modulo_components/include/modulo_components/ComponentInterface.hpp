@@ -33,12 +33,17 @@ public:
   friend class ComponentInterfaceParameterPublicInterface;
 
   /**
-   * @brief Constructor from node options
+   * @brief Constructor from node options.
    * @param node_options node options as used in ROS2 Node
    */
   explicit ComponentInterface(
       const rclcpp::NodeOptions& node_options, modulo_new_core::communication::PublisherType publisher_type
   );
+
+  /**
+   * @brief Virtual default destructor.
+   */
+  virtual ~ComponentInterface() = default;
 
 protected:
   /**
@@ -219,6 +224,12 @@ protected:
    */
   [[nodiscard]] state_representation::CartesianPose
   lookup_transform(const std::string& frame_name, const std::string& reference_frame_name = "world") const;
+
+  /**
+   * @brief Raise an error, or set the component into error state.
+   * To be redefined in derived classes.
+   */
+  virtual void raise_error();
 
   std::map<std::string, std::shared_ptr<modulo_new_core::communication::PublisherInterface>>
       outputs_; ///< Map of outputs
@@ -613,5 +624,8 @@ inline void ComponentInterface<NodeT>::create_output(
       signal_name + "_topic", topic_name, "Output topic name of signal '" + signal_name + "'", fixed_topic
   );
 }
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::raise_error() {}
 
 }// namespace modulo_components
