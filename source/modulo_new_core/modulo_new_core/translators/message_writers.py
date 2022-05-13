@@ -12,7 +12,7 @@ MsgT = TypeVar('MsgT')
 StateT = TypeVar('StateT')
 
 
-def __write_xyz(msg: Union[geometry.Point, geometry.Vector3], vector: np.array):
+def write_xyz(msg: Union[geometry.Point, geometry.Vector3], vector: np.array):
     """
     Helper function to write a vector to a Point or Vector3 message.
 
@@ -26,7 +26,7 @@ def __write_xyz(msg: Union[geometry.Point, geometry.Vector3], vector: np.array):
     msg.z = vector[2]
 
 
-def __write_quaternion(msg: geometry.Quaternion, quat: np.array):
+def write_quaternion(msg: geometry.Quaternion, quat: np.array):
     """
     Helper function to write a vector of quaternion coefficients (w,x,y,z) to a Quaternion message.
 
@@ -54,20 +54,20 @@ def write_msg(msg: MsgT, state: StateT):
         raise RuntimeError(f"{state.get_name()} state is empty while attempting to write it to message.")
     if isinstance(state, sr.CartesianState):
         if isinstance(msg, geometry.Accel):
-            __write_xyz(msg.linear, state.get_linear_acceleration())
-            __write_xyz(msg.angular, state.get_angular_acceleration())
+            write_xyz(msg.linear, state.get_linear_acceleration())
+            write_xyz(msg.angular, state.get_angular_acceleration())
         elif isinstance(msg, geometry.Pose):
-            __write_xyz(msg.position, state.get_position())
-            __write_quaternion(msg.orientation, state.get_orientation_coefficients())
+            write_xyz(msg.position, state.get_position())
+            write_quaternion(msg.orientation, state.get_orientation_coefficients())
         elif isinstance(msg, geometry.Transform):
-            __write_xyz(msg.translation, state.get_position())
-            __write_quaternion(msg.rotation, state.get_orientation_coefficients())
+            write_xyz(msg.translation, state.get_position())
+            write_quaternion(msg.rotation, state.get_orientation_coefficients())
         elif isinstance(msg, geometry.Twist):
-            __write_xyz(msg.linear, state.get_linear_velocity())
-            __write_xyz(msg.angular, state.get_angular_velocity())
+            write_xyz(msg.linear, state.get_linear_velocity())
+            write_xyz(msg.angular, state.get_angular_velocity())
         elif isinstance(msg, geometry.Wrench):
-            __write_xyz(msg.force, state.get_force())
-            __write_xyz(msg.torque, state.get_torque())
+            write_xyz(msg.force, state.get_force())
+            write_xyz(msg.torque, state.get_torque())
         else:
             raise RuntimeError("The provided combination of state type and message type is not supported")
     elif isinstance(msg, sensor_msgs.msg.JointState) and isinstance(state, sr.JointState):

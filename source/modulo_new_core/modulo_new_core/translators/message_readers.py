@@ -12,7 +12,7 @@ MsgT = TypeVar('MsgT')
 StateT = TypeVar('StateT')
 
 
-def __read_xyz(msg: Union[geometry.Point, geometry.Vector3]) -> List[float]:
+def read_xyz(msg: Union[geometry.Point, geometry.Vector3]) -> List[float]:
     """
     Helper function to read a list from a Point or Vector3 message.
 
@@ -21,7 +21,7 @@ def __read_xyz(msg: Union[geometry.Point, geometry.Vector3]) -> List[float]:
     return [msg.x, msg.y, msg.z]
 
 
-def __read_quaternion(msg: geometry.Quaternion) -> List[float]:
+def read_quaternion(msg: geometry.Quaternion) -> List[float]:
     """
     Helper function to read a list of quaternion coefficients (w,x,y,z) from a Quaternion message.
 
@@ -41,20 +41,20 @@ def read_msg(state: StateT, msg: MsgT):
         raise RuntimeError("This state type is not supported.")
     if isinstance(state, sr.CartesianState):
         if isinstance(msg, geometry.Accel):
-            state.set_linear_acceleration(__read_xyz(msg.linear))
-            state.set_angular_acceleration(__read_xyz(msg.angular))
+            state.set_linear_acceleration(read_xyz(msg.linear))
+            state.set_angular_acceleration(read_xyz(msg.angular))
         elif isinstance(msg, geometry.Pose):
-            state.set_position(__read_xyz(msg.position))
-            state.set_orientation(__read_quaternion(msg.orientation))
+            state.set_position(read_xyz(msg.position))
+            state.set_orientation(read_quaternion(msg.orientation))
         elif isinstance(msg, geometry.Transform):
-            state.set_position(__read_xyz(msg.translation))
-            state.set_orientation(__read_quaternion(msg.rotation))
+            state.set_position(read_xyz(msg.translation))
+            state.set_orientation(read_quaternion(msg.rotation))
         elif isinstance(msg, geometry.Twist):
-            state.set_linear_velocity(__read_xyz(msg.linear))
-            state.set_angular_velocity(__read_xyz(msg.angular))
+            state.set_linear_velocity(read_xyz(msg.linear))
+            state.set_angular_velocity(read_xyz(msg.angular))
         elif isinstance(msg, geometry.Wrench):
-            state.set_force(__read_xyz(msg.force))
-            state.set_torque(__read_xyz(msg.torque))
+            state.set_force(read_xyz(msg.force))
+            state.set_torque(read_xyz(msg.torque))
         else:
             raise RuntimeError("The provided combination of state type and message type is not supported")
     elif isinstance(msg, sensor_msgs.msg.JointState) and isinstance(state, sr.JointState):
