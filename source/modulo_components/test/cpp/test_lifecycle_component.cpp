@@ -44,6 +44,11 @@ TEST_F(LifecycleComponentTest, AddOutput) {
   EXPECT_NO_THROW(component_->configure_outputs());
   EXPECT_NO_THROW(component_->activate_outputs());
   EXPECT_NO_THROW(component_->outputs_.at("test")->publish());
+
+  auto new_data = std::make_shared<bool>(false);
+  component_->add_output("test", new_data, true);
+  EXPECT_EQ(component_->outputs_.at("test")->get_message_pair()->get_type(),
+            modulo_new_core::communication::MessageType::ENCODED_STATE);
 }
 
 } // namespace modulo_components
