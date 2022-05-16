@@ -62,8 +62,8 @@ private:
   using ComponentInterface<rclcpp::Node>::outputs_;
   using ComponentInterface<rclcpp::Node>::qos_;
 
-  std::thread run_thread_;
-  bool started_;
+  std::thread run_thread_; ///< The execution thread of the component
+  bool started_; ///< Flag that indicates if execution has started or not
 };
 
 template<typename DataT>
