@@ -20,8 +20,6 @@
 
 #include "modulo_new_core/EncodedState.hpp"
 
-#include <rclcpp/rclcpp.hpp>
-
 namespace modulo_new_core::translators {
 
 /**
