@@ -722,4 +722,14 @@ inline void ComponentInterface<NodeT>::raise_error() {
   this->set_predicate("in_error_state", true);
 }
 
+template<class NodeT>
+inline rclcpp::QoS ComponentInterface<NodeT>::get_qos() const {
+  return this->qos_;
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::set_qos(const rclcpp::QoS& qos) {
+  this->qos_ = qos;
+}
+
 }// namespace modulo_components
