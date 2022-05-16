@@ -15,8 +15,18 @@ public:
   using ComponentInterface<NodeT>::get_predicate;
   using ComponentInterface<NodeT>::set_predicate;
   using ComponentInterface<NodeT>::predicates_;
+  using ComponentInterface<NodeT>::get_parameter_value;
   using ComponentInterface<NodeT>::add_input;
   using ComponentInterface<NodeT>::inputs_;
+  using ComponentInterface<NodeT>::create_output;
+  using ComponentInterface<NodeT>::outputs_;
+  using ComponentInterface<NodeT>::raise_error;
+  using ComponentInterface<NodeT>::get_qos;
+  using ComponentInterface<NodeT>::set_qos;
+  using ComponentInterface<NodeT>::add_tf_broadcaster;
+  using ComponentInterface<NodeT>::add_tf_listener;
+  using ComponentInterface<NodeT>::send_transform;
+  using ComponentInterface<NodeT>::lookup_transform;
 };
 
 template<class NodeT>
@@ -43,6 +53,7 @@ protected:
   }
 
   std::shared_ptr<ComponentInterfacePublicInterface<NodeT>> component_;
+  std::shared_ptr<NodeT> node_;
 };
 
 using NodeTypes = ::testing::Types<rclcpp::Node, rclcpp_lifecycle::LifecycleNode>;
@@ -96,12 +107,14 @@ TYPED_TEST(ComponentInterfaceTest, SetPredicateValue) {
 TYPED_TEST(ComponentInterfaceTest, AddInput) {
   auto data = std::make_shared<bool>(true);
   EXPECT_NO_THROW(this->component_->add_input("_tEsT_#1@3", data, true));
-  EXPECT_TRUE(this->component_->inputs_.find("test_13") != this->component_->inputs_.end());
+  EXPECT_FALSE(this->component_->inputs_.find("test_13") == this->component_->inputs_.end());
+  EXPECT_EQ(this->component_->template get_parameter_value<std::string>("test_13_topic"), "~/test_13");
 
   EXPECT_NO_THROW(this->component_->template add_input<std_msgs::msg::Bool>(
-      "_tEsT_#1@5", [](const std::shared_ptr<std_msgs::msg::Bool>) {}
+      "_tEsT_#1@5", [](const std::shared_ptr<std_msgs::msg::Bool>) {}, true, "/topic"
   ));
-  EXPECT_TRUE(this->component_->inputs_.find("test_15") != this->component_->inputs_.end());
+  EXPECT_FALSE(this->component_->inputs_.find("test_15") == this->component_->inputs_.end());
+  EXPECT_EQ(this->component_->template get_parameter_value<std::string>("test_15_topic"), "/topic");
 
   this->component_->template add_input<std_msgs::msg::String>(
       "test_13", [](const std::shared_ptr<std_msgs::msg::String>) {}
@@ -110,7 +123,30 @@ TYPED_TEST(ComponentInterfaceTest, AddInput) {
             modulo_new_core::communication::MessageType::BOOL);
 }
 
-TEST_F(ComponentInterfaceTest, RaiseError) {
+TYPED_TEST(ComponentInterfaceTest, CreateOutput) {
+  auto data = std::make_shared<bool>(true);
+  EXPECT_NO_THROW(this->component_->create_output("test", data, true, "/topic"));
+  EXPECT_FALSE(this->component_->outputs_.find("test") == this->component_->outputs_.end());
+  EXPECT_EQ(this->component_->template get_parameter_value<std::string>("test_topic"), "/topic");
+
+  auto pub_interface = this->component_->outputs_.at("test");
+  if (typeid(this->node_) == typeid(rclcpp::Node)) {
+    EXPECT_EQ(pub_interface->get_type(), modulo_new_core::communication::PublisherType::PUBLISHER);
+  } else if (typeid(this->node_) == typeid(rclcpp_lifecycle::LifecycleNode)) {
+    EXPECT_EQ(pub_interface->get_type(), modulo_new_core::communication::PublisherType::LIFECYCLE_PUBLISHER);
+  }
+  EXPECT_EQ(pub_interface->get_message_pair()->get_type(), modulo_new_core::communication::MessageType::BOOL);
+  EXPECT_THROW(pub_interface->publish(), modulo_new_core::exceptions::InvalidPointerCastException);
+}
+
+TYPED_TEST(ComponentInterfaceTest, GetSetQoS) {
+  auto qos = rclcpp::QoS(5);
+  this->component_->set_qos(qos);
+  EXPECT_EQ(qos, this->component_->get_qos());
+}
+
+
+TYPED_TEST(ComponentInterfaceTest, RaiseError) {
   EXPECT_FALSE(this->component_->get_predicate("in_error_state"));
   this->component_->raise_error();
   EXPECT_TRUE(this->component_->get_predicate("in_error_state"));
