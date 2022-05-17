@@ -47,6 +47,11 @@ public:
 
 protected:
   /**
+   * @brief Step function that is called periodically.
+   */
+  virtual void step();
+
+  /**
    * @brief Add a parameter.
    * @details This method stores a pointer reference to an existing Parameter object in the local parameter map
    * and declares the equivalent ROS parameter on the ROS interface.
@@ -233,6 +238,21 @@ protected:
   lookup_transform(const std::string& frame_name, const std::string& reference_frame_name = "world") const;
 
   /**
+   * @brief Helper function to publish all predicates.
+   */
+  void publish_predicates();
+
+  /**
+   * @brief Helper function to publish all output signals.
+   */
+  void publish_outputs();
+
+  /**
+   * @brief Helper function to evaluate all daemon callbacks.
+   */
+  void evaluate_daemon_callbacks();
+
+  /**
    * @brief Raise an error, or set the component into error state.
    * To be redefined in derived classes.
    */
@@ -264,27 +284,6 @@ private:
    * @param predicate The predicate variant
    */
   void set_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
-
-  /**
-   * @brief Step function that is called periodically and publishes predicates,
-   * outputs, and evaluates daemon callbacks.
-   */
-  void step();
-
-  /**
-   * @brief Helper function to publish all predicates.
-   */
-  void publish_predicates();
-
-  /**
-   * @brief Helper function to publish all output signals.
-   */
-  void publish_outputs();
-
-  /**
-   * @brief Helper function to evaluate all daemon callbacks.
-   */
-  void evaluate_daemon_callbacks();
 
   modulo_new_core::communication::PublisherType
       publisher_type_; ///< Type of the output publishers (one of PUBLISHER, LIFECYCLE_PUBLISHER)
@@ -326,11 +325,7 @@ ComponentInterface<NodeT>::ComponentInterface(
 }
 
 template<class NodeT>
-inline void ComponentInterface<NodeT>::step() {
-  this->publish_predicates();
-  this->publish_outputs();
-  this->evaluate_daemon_callbacks();
-}
+inline void ComponentInterface<NodeT>::step() {}
 
 template<class NodeT>
 template<typename T>
