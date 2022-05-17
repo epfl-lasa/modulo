@@ -7,6 +7,14 @@ namespace modulo_components {
 LifecycleComponent::LifecycleComponent(const rclcpp::NodeOptions& node_options) :
     ComponentInterface<rclcpp_lifecycle::LifecycleNode>(node_options, PublisherType::LIFECYCLE_PUBLISHER) {}
 
+void LifecycleComponent::step() {
+  // TODO do this only if active and add on_step
+//  this->publish_predicates();
+//  this->publish_outputs();
+//  this->evaluate_daemon_callbacks();
+//  this->on_step();
+}
+
 bool LifecycleComponent::configure_outputs() {
   bool success = true;
   for (auto& [name, interface]: this->outputs_) {
