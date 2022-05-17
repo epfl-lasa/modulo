@@ -74,17 +74,6 @@ protected:
     exec_->add_node(sub_node_);
   }
 
-  template<typename MsgT>
-  void add_nodes(
-      const std::string& topic_name, const std::shared_ptr<MessagePairInterface>& pub_message,
-      std::function<void(std::shared_ptr<MsgT>)> callback
-  ) {
-    pub_node_ = std::make_shared<MinimalPublisher<MsgT>>(topic_name, pub_message);
-    sub_node_ = std::make_shared<MinimalSubscriber<MsgT>>(topic_name, callback);
-    exec_->add_node(pub_node_);
-    exec_->add_node(sub_node_);
-  }
-
   void clear_nodes() {
     pub_node_.reset();
     sub_node_.reset();
