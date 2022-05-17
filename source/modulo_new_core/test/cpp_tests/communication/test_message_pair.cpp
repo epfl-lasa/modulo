@@ -48,7 +48,7 @@ TEST_F(MessagePairTest, BasicTypes) {
   test_message_interface<std_msgs::msg::String, std::string>("this", "that", clock_);
 }
 
-TEST_F(MessagePairTest, TestCartesianState) {
+TEST_F(MessagePairTest, EncodedState) {
   auto initial_value = state_representation::CartesianState::Random("test");
   auto data = state_representation::make_shared_state(initial_value);
   auto msg_pair =
@@ -73,7 +73,7 @@ TEST_F(MessagePairTest, TestCartesianState) {
   msg_pair->set_data(data);
   msg = modulo_new_core::EncodedState();
   modulo_new_core::translators::write_msg(msg, data, clock_->now());
-  msg_pair_interface->read<modulo_new_core::EncodedState , state_representation::State>(msg);
+  msg_pair_interface->read<modulo_new_core::EncodedState, state_representation::State>(msg);
   EXPECT_TRUE(initial_value.data().isApprox(
       std::dynamic_pointer_cast<state_representation::CartesianState>(msg_pair->get_data())->data()));
 }
