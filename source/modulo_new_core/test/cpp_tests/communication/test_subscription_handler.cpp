@@ -48,7 +48,7 @@ TEST_F(SubscriptionTest, BasicTypes) {
   test_subscription_interface<std_msgs::msg::String, std::string>(node, "this");
 }
 
-TEST_F(SubscriptionTest, CartesianState) {
+TEST_F(SubscriptionTest, EncodedState) {
   // create message pair
   auto data =
       std::make_shared<state_representation::CartesianState>(state_representation::CartesianState::Random("test"));

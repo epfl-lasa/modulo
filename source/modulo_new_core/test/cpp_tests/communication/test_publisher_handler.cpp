@@ -55,7 +55,7 @@ TEST_F(PublisherTest, BasicTypes) {
   test_publisher_interface<std_msgs::msg::String, std::string>(node, "this");
 }
 
-TEST_F(PublisherTest, CartesianState) {
+TEST_F(PublisherTest, EncodedState) {
   // create message pair
   auto data =
       std::make_shared<state_representation::CartesianState>(state_representation::CartesianState::Random("test"));
