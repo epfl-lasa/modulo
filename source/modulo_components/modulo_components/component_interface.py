@@ -26,7 +26,7 @@ class ComponentInterface(Node):
         has_tf_broadcaster (bool): if true, add a tf broadcaster to enable the publishing of transforms.
     """
 
-    def __init__(self, node_name, *kargs, **kwargs):
+    def __init__(self, node_name: str, *kargs, **kwargs):
         """
         Constructs all the necessary attributes and declare all the parameters.
             Parameters:
