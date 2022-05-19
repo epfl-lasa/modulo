@@ -254,8 +254,8 @@ protected:
   void evaluate_periodic_callbacks();
 
   /**
-   * @brief Raise an error, or set the component into error state.
-   * To be redefined in derived classes.
+   * @brief Put the component in error state by setting the
+   * 'in_error_state' predicate to true.
    */
   virtual void raise_error();
 
@@ -318,6 +318,8 @@ ComponentInterface<NodeT>::ComponentInterface(
       }
   );
   this->add_parameter("period", 1.0, "The time interval in seconds for all periodic callbacks", true);
+
+  this->add_predicate("in_error_state", false);
 
   this->step_timer_ = this->create_wall_timer(
       std::chrono::nanoseconds(static_cast<int64_t>(this->get_parameter_value<double>("period") * 1e9)),
@@ -693,6 +695,8 @@ inline void ComponentInterface<NodeT>::create_output(
 }
 
 template<class NodeT>
-inline void ComponentInterface<NodeT>::raise_error() {}
+inline void ComponentInterface<NodeT>::raise_error() {
+  this->set_predicate("in_error_state", true);
+}
 
 }// namespace modulo_components

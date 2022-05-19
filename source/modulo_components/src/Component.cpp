@@ -6,7 +6,6 @@ namespace modulo_components {
 
 Component::Component(const rclcpp::NodeOptions& node_options, bool start_thread) :
     ComponentInterface<rclcpp::Node>(node_options, PublisherType::PUBLISHER), started_(false) {
-  this->add_predicate("in_error_state", false);
   this->add_predicate("is_finished", false);
 
   if (start_thread) {
@@ -47,10 +46,6 @@ void Component::run() {
 
 bool Component::execute() {
   return true;
-}
-
-void Component::raise_error() {
-  this->set_predicate("in_error_state", true);
 }
 
 }// namespace modulo_components

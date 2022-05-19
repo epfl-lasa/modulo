@@ -63,12 +63,6 @@ private:
    */
   void run();
 
-  /**
-   * @brief Put the component in error state by setting the
-   * 'in_error_state' predicate to true.
-   */
-  void raise_error() override;
-
   using ComponentInterface<rclcpp::Node>::create_output;
   using ComponentInterface<rclcpp::Node>::outputs_;
   using ComponentInterface<rclcpp::Node>::qos_;
