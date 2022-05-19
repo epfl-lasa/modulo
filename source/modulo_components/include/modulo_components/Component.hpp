@@ -15,9 +15,14 @@ public:
 
   /**
    * @brief Constructor from node options.
-   * @param node_options node options as used in ROS2 Node
+   * @param node_options Node options as used in ROS2 Node
    */
   explicit Component(const rclcpp::NodeOptions& node_options, bool start_thread = true);
+
+  /**
+   * @brief Virtual default destructor.
+   */
+  virtual ~Component() = default;
 
 protected:
   /**

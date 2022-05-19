@@ -15,10 +15,15 @@ public:
   friend class LifecycleComponentPublicInterface;
 
   /**
-   * @brief Constructor from node options
-   * @param node_options node options as used in ROS2 Node
+   * @brief Constructor from node options.
+   * @param node_options Node options as used in ROS2 LifecycleNode
    */
   explicit LifecycleComponent(const rclcpp::NodeOptions& node_options);
+
+  /**
+   * @brief Virtual default destructor.
+   */
+  virtual ~LifecycleComponent() = default;
 
 protected:
   /**

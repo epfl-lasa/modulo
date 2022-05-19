@@ -34,7 +34,7 @@ public:
 
   /**
    * @brief Constructor from node options.
-   * @param node_options node options as used in ROS2 Node
+   * @param node_options Node options as used in ROS2 Node / LifecycleNode
    */
   explicit ComponentInterface(
       const rclcpp::NodeOptions& node_options, modulo_new_core::communication::PublisherType publisher_type
