@@ -47,6 +47,11 @@ public:
 
 protected:
   /**
+   * @brief Step function that is called periodically.
+   */
+  virtual void step();
+
+  /**
    * @brief Add a parameter.
    * @details This method stores a pointer reference to an existing Parameter object in the local parameter map
    * and declares the equivalent ROS parameter on the ROS interface.
@@ -149,9 +154,9 @@ protected:
   /**
    * @brief Add and configure an input signal of the component.
    * @tparam DataT Type of the data pointer
-   * @param signal_name Name of the output signal
-   * @param data Data to transmit on the output signal
-   * @param fixed_topic If true, the topic name of the output signal is fixed
+   * @param signal_name Name of the input signal
+   * @param data Data to receive on the input signal
+   * @param fixed_topic If true, the topic name of the input signal is fixed
    * @param default_topic If set, the default value for the topic name to use
    */
   template<typename DataT>
@@ -163,9 +168,9 @@ protected:
   /**
    * @brief Add and configure an input signal of the component.
    * @tparam MsgT The ROS message type of the subscription
-   * @param signal_name Name of the output signal
+   * @param signal_name Name of the input signal
    * @param callback The callback to use for the subscription
-   * @param fixed_topic If true, the topic name of the output signal is fixed
+   * @param fixed_topic If true, the topic name of the input signal is fixed
    * @param default_topic If set, the default value for the topic name to use
    */
   template<typename MsgT>
@@ -173,6 +178,13 @@ protected:
       const std::string& signal_name, const std::function<void(const std::shared_ptr<MsgT>)>& callback,
       bool fixed_topic = false, const std::string& default_topic = ""
   );
+
+  /**
+   * @brief Function to daemonize the callback function given in input.
+   * @param name The name of the daemon
+   * @param callback The callback of the daemon
+   */
+  void add_daemon(const std::string& name, const std::function<void(void)>& callback);
 
   /**
    * @brief Configure a transform broadcaster.
@@ -226,6 +238,21 @@ protected:
   lookup_transform(const std::string& frame_name, const std::string& reference_frame_name = "world") const;
 
   /**
+   * @brief Helper function to publish all predicates.
+   */
+  void publish_predicates();
+
+  /**
+   * @brief Helper function to publish all output signals.
+   */
+  void publish_outputs();
+
+  /**
+   * @brief Helper function to evaluate all daemon callbacks.
+   */
+  void evaluate_daemon_callbacks();
+
+  /**
    * @brief Raise an error, or set the component into error state.
    * To be redefined in derived classes.
    */
@@ -244,13 +271,19 @@ private:
    */
   rcl_interfaces::msg::SetParametersResult on_set_parameters_callback(const std::vector<rclcpp::Parameter>& parameters);
 
-  [[nodiscard]] std::string generate_predicate_topic(const std::string& predicate_name) const;
-
+  /**
+   * @brief Add a predicate to the map of predicates.
+   * @param name The name of the predicate
+   * @param predicate The predicate variant
+   */
   void add_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
+  /**
+   * @brief Set the predicate given as parameter, if the predicate is not found does not do anything.
+   * @param name The name of the predicate
+   * @param predicate The predicate variant
+   */
   void set_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
-
-  void step();
 
   modulo_new_core::communication::PublisherType
       publisher_type_; ///< Type of the output publishers (one of PUBLISHER, LIFECYCLE_PUBLISHER)
@@ -259,6 +292,8 @@ private:
   std::map<std::string, std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>>>
       predicate_publishers_; ///< Map of predicate publishers
   std::map<std::string, std::shared_ptr<modulo_new_core::communication::SubscriptionInterface>> inputs_;
+
+  std::map<std::string, std::function<void(void)>> daemon_callbacks_; ///< Map of daemon callbacks
 
   state_representation::ParameterMap parameter_map_; ///< ParameterMap for handling parameters
   std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle>
@@ -290,43 +325,11 @@ ComponentInterface<NodeT>::ComponentInterface(
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::step() {
-  for (const auto& predicate: this->predicates_) {
-    std_msgs::msg::Bool msg;
-    msg.data = this->get_predicate(predicate.first);
-    auto predicate_iterator = this->predicate_publishers_.find(predicate.first);
-    if (predicate_iterator == this->predicate_publishers_.end()) {
-      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
-                                   "No publisher for predicate " << predicate.first << " found.");
-      return;
-    }
-    predicate_publishers_.at(predicate.first)->publish(msg);
-  }
-}
-
-template<class NodeT>
-std::string ComponentInterface<NodeT>::generate_predicate_topic(const std::string& predicate_name) const {
-  return "/predicates/" + std::string(this->get_name()) + "/" + predicate_name;
-}
-
-template<class NodeT>
-void ComponentInterface<NodeT>::add_variant_predicate(
-    const std::string& name, const utilities::PredicateVariant& predicate
-) {
-  if (this->predicates_.find(name) != this->predicates_.end()) {
-    RCLCPP_DEBUG_STREAM(this->get_logger(), "Predicate " << name << " already exists, overwriting.");
-  } else {
-    this->predicate_publishers_.insert_or_assign(
-        name, this->template create_publisher<std_msgs::msg::Bool>(
-            this->generate_predicate_topic(name), 10
-        ));
-  }
-  this->predicates_.insert_or_assign(name, predicate);
-}
+inline void ComponentInterface<NodeT>::step() {}
 
 template<class NodeT>
 template<typename T>
-void ComponentInterface<NodeT>::add_parameter(
+inline void ComponentInterface<NodeT>::add_parameter(
     const std::string& name, const T& value, const std::string& description, bool read_only
 ) {
   this->add_parameter(state_representation::make_shared_parameter(name, value), description, read_only);
@@ -334,12 +337,12 @@ void ComponentInterface<NodeT>::add_parameter(
 
 template<class NodeT>
 template<typename T>
-T ComponentInterface<NodeT>::get_parameter_value(const std::string& name) const {
+inline T ComponentInterface<NodeT>::get_parameter_value(const std::string& name) const {
   return this->parameter_map_.template get_parameter_value<T>(name);
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::add_parameter(
+inline void ComponentInterface<NodeT>::add_parameter(
     const std::shared_ptr<state_representation::ParameterInterface>& parameter, const std::string& description,
     bool read_only
 ) {
@@ -356,14 +359,14 @@ void ComponentInterface<NodeT>::add_parameter(
 }
 
 template<class NodeT>
-std::shared_ptr<state_representation::ParameterInterface>
+inline std::shared_ptr<state_representation::ParameterInterface>
 ComponentInterface<NodeT>::get_parameter(const std::string& name) const {
   return this->parameter_map_.get_parameter(name);
 }
 
 template<class NodeT>
 template<typename T>
-void ComponentInterface<NodeT>::set_parameter_value(const std::string& name, const T& value) {
+inline void ComponentInterface<NodeT>::set_parameter_value(const std::string& name, const T& value) {
   rcl_interfaces::msg::SetParametersResult result = NodeT::set_parameter(
       modulo_new_core::translators::write_parameter(state_representation::make_shared_parameter(name, value)));
   if (!result.successful) {
@@ -372,14 +375,14 @@ void ComponentInterface<NodeT>::set_parameter_value(const std::string& name, con
 }
 
 template<class NodeT>
-bool ComponentInterface<NodeT>::validate_parameter(
+inline bool ComponentInterface<NodeT>::validate_parameter(
     const std::shared_ptr<state_representation::ParameterInterface>&
 ) {
   return true;
 }
 
 template<class NodeT>
-rcl_interfaces::msg::SetParametersResult
+inline rcl_interfaces::msg::SetParametersResult
 ComponentInterface<NodeT>::on_set_parameters_callback(const std::vector<rclcpp::Parameter>& parameters) {
   rcl_interfaces::msg::SetParametersResult result;
   result.successful = true;
@@ -406,19 +409,34 @@ ComponentInterface<NodeT>::on_set_parameters_callback(const std::vector<rclcpp::
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::add_predicate(const std::string& name, bool predicate) {
+inline void ComponentInterface<NodeT>::add_predicate(const std::string& name, bool predicate) {
   this->add_variant_predicate(name, utilities::PredicateVariant(predicate));
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::add_predicate(
+inline void ComponentInterface<NodeT>::add_predicate(
     const std::string& name, const std::function<bool(void)>& predicate
 ) {
   this->add_variant_predicate(name, utilities::PredicateVariant(predicate));
 }
 
 template<class NodeT>
-bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name) {
+inline void ComponentInterface<NodeT>::add_variant_predicate(
+    const std::string& name, const utilities::PredicateVariant& predicate
+) {
+  if (this->predicates_.find(name) != this->predicates_.end()) {
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Predicate " << name << " already exists, overwriting.");
+  } else {
+    this->predicate_publishers_.insert_or_assign(
+        name, this->template create_publisher<std_msgs::msg::Bool>(
+            utilities::generate_predicate_topic(this->get_name(), name), this->qos_
+        ));
+  }
+  this->predicates_.insert_or_assign(name, predicate);
+}
+
+template<class NodeT>
+inline bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name) {
   auto predicate_iterator = this->predicates_.find(predicate_name);
   // if there is no predicate with that name simply return false with an error message
   if (predicate_iterator == this->predicates_.end()) {
@@ -437,19 +455,19 @@ bool ComponentInterface<NodeT>::get_predicate(const std::string& predicate_name)
   try {
     value = (callback_function)();
   } catch (const std::exception& e) {
-    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                                  "Error while evaluating the callback function: " << e.what());
   }
   return value;
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::set_variant_predicate(
+inline void ComponentInterface<NodeT>::set_variant_predicate(
     const std::string& name, const utilities::PredicateVariant& predicate
 ) {
   auto predicate_iterator = this->predicates_.find(name);
   if (predicate_iterator == this->predicates_.end()) {
-    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                                  "Cannot set predicate " << name << " with a new value because it does not exist.");
     return;
   }
@@ -457,12 +475,12 @@ void ComponentInterface<NodeT>::set_variant_predicate(
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::set_predicate(const std::string& name, bool predicate) {
+inline void ComponentInterface<NodeT>::set_predicate(const std::string& name, bool predicate) {
   this->set_variant_predicate(name, utilities::PredicateVariant(predicate));
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::set_predicate(
+inline void ComponentInterface<NodeT>::set_predicate(
     const std::string& name, const std::function<bool(void)>& predicate
 ) {
   this->set_variant_predicate(name, utilities::PredicateVariant(predicate));
@@ -470,7 +488,7 @@ void ComponentInterface<NodeT>::set_predicate(
 
 template<class NodeT>
 template<typename DataT>
-void ComponentInterface<NodeT>::add_input(
+inline void ComponentInterface<NodeT>::add_input(
     const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
     const std::string& default_topic
 ) {
@@ -541,7 +559,7 @@ void ComponentInterface<NodeT>::add_input(
 
 template<class NodeT>
 template<typename MsgT>
-void ComponentInterface<NodeT>::add_input(
+inline void ComponentInterface<NodeT>::add_input(
     const std::string& signal_name, const std::function<void(const std::shared_ptr<MsgT>)>& callback, bool fixed_topic,
     const std::string& default_topic
 ) {
@@ -567,21 +585,30 @@ void ComponentInterface<NodeT>::add_input(
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::add_tf_broadcaster() {
+inline void ComponentInterface<NodeT>::add_daemon(const std::string& name, const std::function<void()>& callback) {
+  if (this->daemon_callbacks_.find(name) != this->daemon_callbacks_.end()) {
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                 "Daemon callback " << name << " already exists, overwriting.");
+  }
+  this->daemon_callbacks_.template insert_or_assign(name, callback);
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::add_tf_broadcaster() {
   this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this->shared_from_this());
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::add_tf_listener() {
+inline void ComponentInterface<NodeT>::add_tf_listener() {
   this->tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
   this->tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*this->tf_buffer_);
 }
 
 template<class NodeT>
-void ComponentInterface<NodeT>::send_transform(const state_representation::CartesianPose& transform) {
+inline void ComponentInterface<NodeT>::send_transform(const state_representation::CartesianPose& transform) {
   // TODO: throw here?
   if (this->tf_broadcaster_ == nullptr) {
-    RCLCPP_FATAL(this->get_logger(), "No tf broadcaster");
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock, 1000, "No tf broadcaster");
   }
   geometry_msgs::msg::TransformStamped tf_message;
   modulo_new_core::translators::write_msg(tf_message, transform, this->get_clock()->now());
@@ -589,12 +616,12 @@ void ComponentInterface<NodeT>::send_transform(const state_representation::Carte
 }
 
 template<class NodeT>
-state_representation::CartesianPose ComponentInterface<NodeT>::lookup_transform(
+inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_transform(
     const std::string& frame_name, const std::string& reference_frame_name
 ) const {
   // TODO: throw here?
   if (this->tf_buffer_ == nullptr || this->tf_listener_ == nullptr) {
-    RCLCPP_FATAL(this->get_logger(), "No tf buffer / listener");
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock, 1000, "No tf buffer / listener");
   }
   geometry_msgs::msg::TransformStamped transform;
   state_representation::CartesianPose result(frame_name, reference_frame_name);
@@ -604,6 +631,44 @@ state_representation::CartesianPose ComponentInterface<NodeT>::lookup_transform(
       tf2::Duration(std::chrono::microseconds(10)));
   modulo_new_core::translators::read_msg(result, transform);
   return result;
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::publish_predicates() {
+  for (const auto& predicate: this->predicates_) {
+    std_msgs::msg::Bool msg;
+    msg.data = this->get_predicate(predicate.first);
+    if (this->predicate_publishers_.find(predicate.first) == this->predicate_publishers_.end()) {
+      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                   "No publisher for predicate " << predicate.first << " found.");
+      return;
+    }
+    predicate_publishers_.at(predicate.first)->publish(msg);
+  }
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::publish_outputs() {
+  for (const auto& [signal, publisher]: this->outputs_) {
+    try {
+      publisher->publish();
+    } catch (const std::exception& ex) {
+      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                   "Could not publish output " << signal << ": " << ex.what());
+    }
+  }
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::evaluate_daemon_callbacks() {
+  for (const auto& [daemon, callback]: this->daemon_callbacks_) {
+    try {
+      callback();
+    } catch (const std::exception& ex) {
+      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                   "Could not evaluate daemon callback " << daemon << ": " << ex.what());
+    }
+  }
 }
 
 template<class NodeT>

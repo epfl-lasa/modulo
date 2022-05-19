@@ -14,6 +14,12 @@ Component::Component(const rclcpp::NodeOptions& node_options, bool start_thread)
   }
 }
 
+void Component::step() {
+  this->publish_predicates();
+  this->publish_outputs();
+  this->evaluate_daemon_callbacks();
+}
+
 void Component::start_thread() {
   if (this->started_) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
