@@ -34,6 +34,13 @@ protected:
 
 private:
   /**
+   * @brief Step function that is called periodically and publishes predicates,
+   * outputs, evaluates daemon callbacks, and calls the on_step function redefined
+   * in the derived components.
+   */
+  void step() override;
+
+  /**
    * @brief Configure all outputs.
    * @return True configuration was successful
    */
@@ -54,10 +61,13 @@ private:
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::create_output;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::outputs_;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::qos_;
+  using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::publish_predicates;
+  using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::publish_outputs;
+  using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::evaluate_daemon_callbacks;
 };
 
 template<typename DataT>
-void
+inline void
 LifecycleComponent::add_output(const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic) {
   try {
     std::string parsed_signal_name = utilities::parse_signal_name(signal_name);

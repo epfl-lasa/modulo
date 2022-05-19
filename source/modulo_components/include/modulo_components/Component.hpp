@@ -47,6 +47,12 @@ protected:
 
 private:
   /**
+   * @brief Step function that is called periodically and publishes predicates,
+   * outputs, and evaluates daemon callbacks.
+   */
+  void step() override;
+
+  /**
    * @brief Run the execution function in a try catch block and
    * set the predicates according to the outcome of the execution.
    */
@@ -61,13 +67,16 @@ private:
   using ComponentInterface<rclcpp::Node>::create_output;
   using ComponentInterface<rclcpp::Node>::outputs_;
   using ComponentInterface<rclcpp::Node>::qos_;
+  using ComponentInterface<rclcpp::Node>::publish_predicates;
+  using ComponentInterface<rclcpp::Node>::publish_outputs;
+  using ComponentInterface<rclcpp::Node>::evaluate_daemon_callbacks;
 
   std::thread run_thread_;
   bool started_;
 };
 
 template<typename DataT>
-void Component::add_output(
+inline void Component::add_output(
     const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
     const std::string& default_topic
 ) {
