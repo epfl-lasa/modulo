@@ -17,7 +17,7 @@ Component::Component(const rclcpp::NodeOptions& node_options, bool start_thread)
 void Component::step() {
   this->publish_predicates();
   this->publish_outputs();
-  this->evaluate_daemon_callbacks();
+  this->evaluate_periodic_callbacks();
 }
 
 void Component::start_thread() {

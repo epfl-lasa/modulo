@@ -68,7 +68,7 @@ private:
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::qos_;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::publish_predicates;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::publish_outputs;
-  using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::evaluate_daemon_callbacks;
+  using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::evaluate_periodic_callbacks;
 };
 
 template<typename DataT>

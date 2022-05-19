@@ -180,11 +180,12 @@ protected:
   );
 
   /**
-   * @brief Function to daemonize the callback function given in input.
-   * @param name The name of the daemon
-   * @param callback The callback of the daemon
+   * @brief Add a periodic callback function.
+   * @details The provided function is evaluated periodically at the component step period.
+   * @param name The name of the callback
+   * @param callback The callback function that is evaluated periodically
    */
-  void add_daemon(const std::string& name, const std::function<void(void)>& callback);
+  void add_periodic_function(const std::string& name, const std::function<void(void)>& callback);
 
   /**
    * @brief Configure a transform broadcaster.
@@ -248,9 +249,9 @@ protected:
   void publish_outputs();
 
   /**
-   * @brief Helper function to evaluate all daemon callbacks.
+   * @brief Helper function to evaluate all periodic function callbacks.
    */
-  void evaluate_daemon_callbacks();
+  void evaluate_periodic_callbacks();
 
   /**
    * @brief Raise an error, or set the component into error state.
@@ -293,7 +294,7 @@ private:
       predicate_publishers_; ///< Map of predicate publishers
   std::map<std::string, std::shared_ptr<modulo_new_core::communication::SubscriptionInterface>> inputs_;
 
-  std::map<std::string, std::function<void(void)>> daemon_callbacks_; ///< Map of daemon callbacks
+  std::map<std::string, std::function<void(void)>> periodic_callbacks_; ///< Map of periodic function callbacks
 
   state_representation::ParameterMap parameter_map_; ///< ParameterMap for handling parameters
   std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle>
@@ -585,12 +586,13 @@ inline void ComponentInterface<NodeT>::add_input(
 }
 
 template<class NodeT>
-inline void ComponentInterface<NodeT>::add_daemon(const std::string& name, const std::function<void()>& callback) {
-  if (this->daemon_callbacks_.find(name) != this->daemon_callbacks_.end()) {
+inline void
+ComponentInterface<NodeT>::add_periodic_function(const std::string& name, const std::function<void()>& callback) {
+  if (this->periodic_callbacks_.find(name) != this->periodic_callbacks_.end()) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                                  "Daemon callback " << name << " already exists, overwriting.");
   }
-  this->daemon_callbacks_.template insert_or_assign(name, callback);
+  this->periodic_callbacks_.template insert_or_assign(name, callback);
 }
 
 template<class NodeT>
@@ -660,8 +662,8 @@ inline void ComponentInterface<NodeT>::publish_outputs() {
 }
 
 template<class NodeT>
-inline void ComponentInterface<NodeT>::evaluate_daemon_callbacks() {
-  for (const auto& [daemon, callback]: this->daemon_callbacks_) {
+inline void ComponentInterface<NodeT>::evaluate_periodic_callbacks() {
+  for (const auto& [daemon, callback]: this->periodic_callbacks_) {
     try {
       callback();
     } catch (const std::exception& ex) {
