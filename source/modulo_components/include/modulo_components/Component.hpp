@@ -63,6 +63,7 @@ private:
    */
   void run();
 
+  using rclcpp::Node::create_publisher;
   using ComponentInterface<rclcpp::Node>::create_output;
   using ComponentInterface<rclcpp::Node>::outputs_;
   using ComponentInterface<rclcpp::Node>::qos_;

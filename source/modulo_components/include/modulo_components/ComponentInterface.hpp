@@ -27,7 +27,7 @@
 namespace modulo_components {
 
 template<class NodeT>
-class ComponentInterface : public NodeT {
+class ComponentInterface : private NodeT {
 public:
   friend class ComponentInterfacePublicInterface;
   friend class ComponentInterfaceParameterPublicInterface;
@@ -44,6 +44,11 @@ public:
    * @brief Virtual default destructor.
    */
   virtual ~ComponentInterface() = default;
+
+  using NodeT::get_node_base_interface;
+  using NodeT::get_name;
+  using NodeT::get_clock;
+  using NodeT::get_logger;
 
 protected:
   /**
@@ -263,6 +268,8 @@ protected:
    */
   virtual void raise_error();
 
+  using NodeT::create_publisher;
+
   std::map<std::string, std::shared_ptr<modulo_new_core::communication::PublisherInterface>>
       outputs_; ///< Map of outputs
 
@@ -289,22 +296,6 @@ private:
    * @param predicate The predicate variant
    */
   void set_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
-
-  using NodeT::declare_parameter;
-  using NodeT::declare_parameters;
-  using NodeT::undeclare_parameter;
-  using NodeT::get_parameter_or;
-  using NodeT::get_parameter_types;
-  using NodeT::get_parameters;
-  using NodeT::set_parameter;
-  using NodeT::set_parameters;
-  using NodeT::set_parameters_atomically;
-  using NodeT::list_parameters;
-  using NodeT::has_parameter;
-  using NodeT::describe_parameter;
-  using NodeT::describe_parameters;
-  using NodeT::add_on_set_parameters_callback;
-  using NodeT::remove_on_set_parameters_callback;
 
   modulo_new_core::communication::PublisherType
       publisher_type_; ///< Type of the output publishers (one of PUBLISHER, LIFECYCLE_PUBLISHER)
