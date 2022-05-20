@@ -27,6 +27,35 @@ public:
 
 protected:
   /**
+   * @brief Steps to execute when configuring the component.
+   */
+  bool on_configure();
+
+  /**
+   * @brief Steps to execute when cleaning up the component.
+   */
+  bool on_cleanup();
+
+  /**
+   * @brief Steps to execute when activating the component.
+   */
+  bool on_activate();
+
+  /**
+   * @brief Steps to execute when deactivating the component.
+   */
+  bool on_deactivate();
+
+  /**
+   * @brief Steps to execute when shutting down the component.
+   */
+  bool on_shutdown();
+  /**
+   * @brief Steps to execute periodically. To be redefined by derived Component classes.
+   */
+  virtual void on_step();
+
+  /**
    * @brief Add an output signal of the component.
    * @tparam DataT Type of the data pointer
    * @param signal_name Name of the output signal
@@ -39,9 +68,64 @@ protected:
 
 private:
   /**
+   * @brief Transition callback for state 'Configuring'.
+   * @details on_configure callback is being called when the lifecycle node enters the 'Configuring' state.
+   * Depending on the return value of this function, the node may either transition to the 'Inactive' state via the
+   * 'configure' transition or stays 'Unconfigured.\n
+   * TRANSITION_CALLBACK_SUCCESS transitions to 'Inactive'\n
+   * TRANSITION_CALLBACK_FAILURE transitions to 'Unconfigured'\n
+   * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
+   */
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_configure(const rclcpp_lifecycle::State&) override;
+
+  /**
+    * @brief Transition callback for state 'CleaningUp'.
+    * @details on_cleanup callback is being called when the lifecycle node enters the 'CleaningUp' state.
+    * Depending on the return value of this function, the node may either transition to the 'Unconfigured' state via the
+    * 'cleanup' transition or goes to 'ErrorProcessing'.\n
+    * TRANSITION_CALLBACK_SUCCESS transitions to 'Unconfigured'\n
+    * TRANSITION_CALLBACK_FAILURE, TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
+    */
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_cleanup(const rclcpp_lifecycle::State&) override;
+
+  /**
+  * @brief Transition callback for state 'Activating'.
+  * @details on_activate callback is being called when the lifecycle node enters the 'Activating' state.
+  * Depending on the return value of this function, the node may either transition to the 'Active' state via the
+  * 'activate' transition or goes to 'ErrorProcessing'.\n
+  * TRANSITION_CALLBACK_SUCCESS transitions to 'Active'\n
+  * TRANSITION_CALLBACK_FAILURE, TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
+  */
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_activate(const rclcpp_lifecycle::State&) override;
+
+  /**
+    * @brief Transition callback for state 'Deactivating'.
+    * @details on_deactivate callback is being called when the lifecycle node enters the 'Deactivating' state.
+    * Depending on the return value of this function, the node may either transition to the 'Inactive' state via the
+    * 'deactivate' transition or goes to 'ErrorProcessing'.\n
+    * TRANSITION_CALLBACK_SUCCESS transitions to 'Inactive'\n
+    * TRANSITION_CALLBACK_FAILURE, TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
+    */
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_deactivate(const rclcpp_lifecycle::State&) override;
+
+  /**
+    * @brief Transition callback for state 'Deactivating'.
+    * @details on_deactivate callback is being called when the lifecycle node enters the 'Deactivating' state.
+    * Depending on the return value of this function, the node may either transition to the 'Inactive' state via the
+    * 'deactivate' transition or goes to 'ErrorProcessing'.\n
+    * TRANSITION_CALLBACK_SUCCESS transitions to "Inactive"\n
+    * TRANSITION_CALLBACK_FAILURE, TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
+    */
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_shutdown(const rclcpp_lifecycle::State& state) override;
+
+  /**
    * @brief Step function that is called periodically and publishes predicates,
-   * outputs, evaluates daemon callbacks, and calls the on_step function redefined
-   * in the derived components.
+   * outputs, evaluates daemon callbacks, and calls the on_step function.
    */
   void step() override;
 
@@ -72,6 +156,8 @@ private:
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::evaluate_periodic_callbacks;
 };
 
+inline void LifecycleComponent::on_step() {}
+
 template<typename DataT>
 inline void
 LifecycleComponent::add_output(const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic) {
@@ -83,4 +169,7 @@ LifecycleComponent::add_output(const std::string& signal_name, const std::shared
   }
 }
 
-}// namespace modulo_components
+// TODO, if we raise error we need to manually call the lifecycle change state callback,
+// call callback function that this service calls
+
+} //namespace modulo_components
