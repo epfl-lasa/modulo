@@ -91,6 +91,7 @@ protected:
   /**
    * @brief Get a parameter by name.
    * @param name The name of the parameter
+   * @throws ComponentParameterException if the parameter could not be found
    * @return The ParameterInterface pointer to a Parameter instance
    */
   [[nodiscard]] std::shared_ptr<state_representation::ParameterInterface> get_parameter(const std::string& name) const;
@@ -99,6 +100,7 @@ protected:
    * @brief Get a parameter value by name.
    * @tparam T The type of the parameter
    * @param name The name of the parameter
+   * @throws ComponentParameterException if the parameter value could not be accessed
    * @return The value of the parameter
    */
   template<typename T>
@@ -128,14 +130,14 @@ protected:
   virtual bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
 
   /**
-   * @brief Add a predicate to the map of predicates
+   * @brief Add a predicate to the map of predicates.
    * @param predicate_name the name of the associated predicate
    * @param predicate_value the boolean value of the predicate
    */
   void add_predicate(const std::string& predicate_name, bool predicate_value);
 
   /**
-   * @brief Add a predicate to the map of predicates based on a function to periodically call
+   * @brief Add a predicate to the map of predicates based on a function to periodically call.
    * @param predicate_name the name of the associated predicate
    * @param predicate_function the function to call that returns the value of the predicate
    */
@@ -144,24 +146,21 @@ protected:
   /**
    * @brief Get the logical value of a predicate.
    * @details If the predicate is not found or the callable function fails, the return value is false.
-   * @param predicate_name the name of the predicate to retrieve from the
-   * map of predicates
+   * @param predicate_name the name of the predicate to retrieve from the map of predicates
    * @return the value of the predicate as a boolean
    */
   [[nodiscard]] bool get_predicate(const std::string& predicate_name);
 
   /**
-   * @brief Set the value of the predicate given as parameter, if the predicate is not found does not do anything
-   * @param predicate_name the name of the predicate to retrieve from the
-   * map of predicates
+   * @brief Set the value of the predicate given as parameter, if the predicate is not found does not do anything.
+   * @param predicate_name the name of the predicate to retrieve from the map of predicates
    * @param predicate_value the new value of the predicate
    */
   void set_predicate(const std::string& predicate_name, bool predicate_value);
 
   /**
-   * @brief Set the value of the predicate given as parameter, if the predicate is not found does not do anything
-   * @param predicate_name the name of the predicate to retrieve from the
-   * map of predicates
+   * @brief Set the value of the predicate given as parameter, if the predicate is not found does not do anything.
+   * @param predicate_name the name of the predicate to retrieve from the map of predicates
    * @param predicate_function the function to call that returns the value of the predicate
    */
   void set_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function);
@@ -213,12 +212,12 @@ protected:
   void add_tf_listener();
 
   /**
-   * @brief Helper function to parse the signal name and add an unconfigured
-   * PublisherInterface to the map of outputs.
+   * @brief Helper function to parse the signal name and add an unconfigured PublisherInterface to the map of outputs.
    * @tparam DataT Type of the data pointer
    * @param signal_name Name of the output signal
    * @param data Data to transmit on the output signal
    * @param fixed_topic If true, the topic name of the output signal is fixed
+   * @throws AddSignalException if the output could not be created (empty name, already registered)
    */
   template<typename DataT>
   void create_output(
@@ -250,6 +249,7 @@ protected:
    * @param reference_frame_name The desired reference frame of the transform
    * @param time_point The time at which the value of the transform is desired (default: 0, will get the latest)
    * @param duration How long to block the lookup call before failing
+   * @throws LookupTransformException if TF buffer/listener are unconfigured or if the lookupTransform call failed
    * @return If it exists, the requested transform
    */
   [[nodiscard]] state_representation::CartesianPose lookup_transform(
@@ -750,12 +750,12 @@ inline void ComponentInterface<NodeT>::publish_outputs() {
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::evaluate_periodic_callbacks() {
-  for (const auto& [daemon, callback]: this->periodic_callbacks_) {
+  for (const auto& [name, callback]: this->periodic_callbacks_) {
     try {
       callback();
     } catch (const std::exception& ex) {
       RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                   "Failed to evaluate daemon callback '" << daemon << "': " << ex.what());
+                                   "Failed to evaluate periodic function callback '" << name << "': " << ex.what());
     }
   }
 }
