@@ -83,4 +83,4 @@ LifecycleComponent::add_output(const std::string& signal_name, const std::shared
   }
 }
 
-}
+}// namespace modulo_components
