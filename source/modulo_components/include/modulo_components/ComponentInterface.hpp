@@ -286,6 +286,22 @@ private:
    */
   void set_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
+  using NodeT::declare_parameter;
+  using NodeT::declare_parameters;
+  using NodeT::undeclare_parameter;
+  using NodeT::get_parameter_or;
+  using NodeT::get_parameter_types;
+  using NodeT::get_parameters;
+  using NodeT::set_parameter;
+  using NodeT::set_parameters;
+  using NodeT::set_parameters_atomically;
+  using NodeT::list_parameters;
+  using NodeT::has_parameter;
+  using NodeT::describe_parameter;
+  using NodeT::describe_parameters;
+  using NodeT::add_on_set_parameters_callback;
+  using NodeT::remove_on_set_parameters_callback;
+
   modulo_new_core::communication::PublisherType
       publisher_type_; ///< Type of the output publishers (one of PUBLISHER, LIFECYCLE_PUBLISHER)
 
