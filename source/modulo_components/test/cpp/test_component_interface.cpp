@@ -18,6 +18,7 @@ public:
   using ComponentInterface<rclcpp::Node>::predicates_;
   using ComponentInterface<rclcpp::Node>::add_input;
   using ComponentInterface<rclcpp::Node>::inputs_;
+  using ComponentInterface<rclcpp::Node>::raise_error;
 };
 
 class ComponentInterfaceTest : public ::testing::Test {
@@ -99,5 +100,11 @@ TEST_F(ComponentInterfaceTest, AddInput) {
   );
   EXPECT_EQ(this->component_->inputs_.at("test_13")->get_message_pair()->get_type(),
             modulo_new_core::communication::MessageType::BOOL);
+}
+
+TEST_F(ComponentInterfaceTest, RaiseError) {
+  EXPECT_FALSE(this->component_->get_predicate("in_error_state"));
+  this->component_->raise_error();
+  EXPECT_TRUE(this->component_->get_predicate("in_error_state"));
 }
 }
