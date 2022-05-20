@@ -233,10 +233,14 @@ protected:
    * @brief Look up a transform from TF.
    * @param frame_name The desired frame of the transform
    * @param reference_frame_name The desired reference frame of the transform
+   * @param time_point The time at which the value of the transform is desired (default: 0, will get the latest)
+   * @param duration How long to block the lookup call before failing
    * @return If it exists, the requested transform
    */
-  [[nodiscard]] state_representation::CartesianPose
-  lookup_transform(const std::string& frame_name, const std::string& reference_frame_name = "world") const;
+  [[nodiscard]] state_representation::CartesianPose lookup_transform(
+      const std::string& frame_name, const std::string& reference_frame_name = "world",
+      const tf2::TimePoint& time_point = tf2::TimePoint(std::chrono::microseconds(0)),
+      const tf2::Duration& duration = tf2::Duration(std::chrono::microseconds(10))) const;
 
   /**
    * @brief Helper function to publish all predicates.
@@ -637,7 +641,8 @@ inline void ComponentInterface<NodeT>::send_transform(const state_representation
 
 template<class NodeT>
 inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_transform(
-    const std::string& frame_name, const std::string& reference_frame_name
+    const std::string& frame_name, const std::string& reference_frame_name, const tf2::TimePoint& time_point,
+    const tf2::Duration& duration
 ) const {
   // TODO: throw here?
   if (this->tf_buffer_ == nullptr || this->tf_listener_ == nullptr) {
@@ -645,10 +650,8 @@ inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_tra
   }
   geometry_msgs::msg::TransformStamped transform;
   state_representation::CartesianPose result(frame_name, reference_frame_name);
-  // TODO: timeout
-  transform = this->tf_buffer_->lookupTransform(
-      reference_frame_name, frame_name, tf2::TimePoint(std::chrono::microseconds(0)),
-      tf2::Duration(std::chrono::microseconds(10)));
+  // TODO: catch exception and rethrow
+  transform = this->tf_buffer_->lookupTransform(reference_frame_name, frame_name, time_point, duration);
   modulo_new_core::translators::read_msg(result, transform);
   return result;
 }
