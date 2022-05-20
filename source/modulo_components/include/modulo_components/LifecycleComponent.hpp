@@ -47,19 +47,19 @@ private:
 
   /**
    * @brief Configure all outputs.
-   * @return True configuration was successful
+   * @return True if configuration was successful
    */
   bool configure_outputs();
 
   /**
    * @brief Activate all outputs.
-   * @return True activation was successful
+   * @return True if activation was successful
    */
   bool activate_outputs();
 
   /**
    * @brief Deactivate all outputs.
-   * @return True deactivation was successful
+   * @return True if deactivation was successful
    */
   bool deactivate_outputs();
 
