@@ -21,7 +21,9 @@
 #include <modulo_new_core/translators/message_writers.hpp>
 #include <modulo_new_core/translators/parameter_translators.hpp>
 
-#include "modulo_components/exceptions/SignalAlreadyExistsException.hpp"
+#include "modulo_components/exceptions/AddSignalException.hpp"
+#include "modulo_components/exceptions/ComponentParameterException.hpp"
+#include "modulo_components/exceptions/LookupTransformException.hpp"
 #include "modulo_components/utilities/utilities.hpp"
 #include "modulo_components/utilities/predicate_variant.hpp"
 
@@ -354,13 +356,22 @@ template<typename T>
 inline void ComponentInterface<NodeT>::add_parameter(
     const std::string& name, const T& value, const std::string& description, bool read_only
 ) {
+  if (name.empty()) {
+    RCLCPP_ERROR(this->get_logger(), "Failed to add parameter: Provide a non empty string as a name.");
+    return;
+  }
   this->add_parameter(state_representation::make_shared_parameter(name, value), description, read_only);
 }
 
 template<class NodeT>
 template<typename T>
 inline T ComponentInterface<NodeT>::get_parameter_value(const std::string& name) const {
-  return this->parameter_map_.template get_parameter_value<T>(name);
+  try {
+    return this->parameter_map_.template get_parameter_value<T>(name);
+  } catch (const state_representation::exceptions::InvalidParameterException& ex) {
+    throw exceptions::ComponentParameterException(
+        "Failed to get parameter value of parameter '" + name + "': " + ex.what());
+  }
 }
 
 template<class NodeT>
@@ -368,32 +379,48 @@ inline void ComponentInterface<NodeT>::add_parameter(
     const std::shared_ptr<state_representation::ParameterInterface>& parameter, const std::string& description,
     bool read_only
 ) {
-  auto ros_param = modulo_new_core::translators::write_parameter(parameter);
-  if (!NodeT::has_parameter(parameter->get_name())) {
-    parameter_map_.set_parameter(parameter);
-    rcl_interfaces::msg::ParameterDescriptor descriptor;
-    descriptor.description = description;
-    descriptor.read_only = read_only;
-    NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value(), descriptor);
-  } else {
-    NodeT::set_parameter(ros_param);
+  try {
+    auto ros_param = modulo_new_core::translators::write_parameter(parameter);
+    if (!NodeT::has_parameter(parameter->get_name())) {
+      RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding parameter '" << parameter->get_name() << "'.");
+      parameter_map_.set_parameter(parameter);
+      rcl_interfaces::msg::ParameterDescriptor descriptor;
+      descriptor.description = description;
+      descriptor.read_only = read_only;
+      NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value(), descriptor);
+    } else {
+      RCLCPP_DEBUG_STREAM(this->get_logger(),
+                          "Parameter '" << parameter->get_name() << "' already exists, overwriting.");
+      NodeT::set_parameter(ros_param);
+    }
+  } catch (const std::exception& ex) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add parameter '" << parameter->get_name() << "': " << ex.what());
   }
 }
 
 template<class NodeT>
 inline std::shared_ptr<state_representation::ParameterInterface>
 ComponentInterface<NodeT>::get_parameter(const std::string& name) const {
-  return this->parameter_map_.get_parameter(name);
+  try {
+    return this->parameter_map_.get_parameter(name);
+  } catch (const state_representation::exceptions::InvalidParameterException& ex) {
+    throw exceptions::ComponentParameterException("Failed to get parameter '" + name + "': " + ex.what());
+  }
 }
 
 template<class NodeT>
 template<typename T>
 inline void ComponentInterface<NodeT>::set_parameter_value(const std::string& name, const T& value) {
-  rcl_interfaces::msg::SetParametersResult result = NodeT::set_parameter(
-      modulo_new_core::translators::write_parameter(state_representation::make_shared_parameter(name, value)));
-  if (!result.successful) {
-    // TODO not throw here
-    throw state_representation::exceptions::InvalidParameterException(result.reason);
+  try {
+    rcl_interfaces::msg::SetParametersResult result = NodeT::set_parameter(
+        modulo_new_core::translators::write_parameter(state_representation::make_shared_parameter(name, value)));
+    if (!result.successful) {
+      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                   "Failed to set parameter value of parameter '" << name << "': " << result.reason);
+    }
+  } catch (const std::exception& ex) {
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                 "Failed to set parameter value of parameter '" << name << "': " << ex.what());
   }
 }
 
@@ -447,9 +474,14 @@ template<class NodeT>
 inline void ComponentInterface<NodeT>::add_variant_predicate(
     const std::string& name, const utilities::PredicateVariant& predicate
 ) {
+  if (name.empty()) {
+    RCLCPP_ERROR(this->get_logger(), "Failed to add predicate: Provide a non empty string as a name.");
+    return;
+  }
   if (this->predicates_.find(name) != this->predicates_.end()) {
-    RCLCPP_DEBUG_STREAM(this->get_logger(), "Predicate " << name << " already exists, overwriting.");
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Predicate '" << name << "' already exists, overwriting.");
   } else {
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding predicate '" << name << "'.");
     this->predicate_publishers_.insert_or_assign(
         name, this->template create_publisher<std_msgs::msg::Bool>(
             utilities::generate_predicate_topic(this->get_name(), name), this->qos_
@@ -463,8 +495,9 @@ inline bool ComponentInterface<NodeT>::get_predicate(const std::string& predicat
   auto predicate_iterator = this->predicates_.find(predicate_name);
   // if there is no predicate with that name simply return false with an error message
   if (predicate_iterator == this->predicates_.end()) {
-    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
-                                 "Predicate " << predicate_name << " does not exists, returning false.");
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                 "Failed to get predicate '" << predicate_name
+                                                             << "': Predicate does not exists, returning false.");
     return false;
   }
   // try to get the value from the variant as a bool
@@ -477,9 +510,9 @@ inline bool ComponentInterface<NodeT>::get_predicate(const std::string& predicat
   bool value = false;
   try {
     value = (callback_function)();
-  } catch (const std::exception& e) {
+  } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                 "Error while evaluating the callback function: " << e.what());
+                                 "Failed to evaluate callback of predicate'" << predicate_name << "':" << ex.what());
   }
   return value;
 }
@@ -491,7 +524,7 @@ inline void ComponentInterface<NodeT>::set_variant_predicate(
   auto predicate_iterator = this->predicates_.find(name);
   if (predicate_iterator == this->predicates_.end()) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                 "Cannot set predicate " << name << " with a new value because it does not exist.");
+                                 "Failed to set predicate '" << name << "': Predicate does not exist.");
     return;
   }
   predicate_iterator->second = predicate;
@@ -518,8 +551,13 @@ inline void ComponentInterface<NodeT>::add_input(
   using namespace modulo_new_core::communication;
   try {
     std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
+    if (parsed_signal_name.empty()) {
+      throw exceptions::AddSignalException(
+          "Failed to add input '" + signal_name + "': Parsed signal name is empty."
+      );
+    }
     if (this->inputs_.find(parsed_signal_name) != this->inputs_.end()) {
-      throw exceptions::SignalAlreadyExistsException("Input with name '" + signal_name + "' already exists");
+      throw exceptions::AddSignalException("Failed to add input '" + signal_name + "': Input already exists");
     }
     std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
     this->add_parameter(
@@ -527,6 +565,8 @@ inline void ComponentInterface<NodeT>::add_input(
         fixed_topic
     );
     topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
+    RCLCPP_DEBUG_STREAM(this->get_logger(),
+                        "Adding input '" << signal_name << "' with topic name '" << topic_name << "'.");
     auto message_pair = make_shared_message_pair(data, this->get_clock());
     std::shared_ptr<SubscriptionInterface> subscription_interface;
     switch (message_pair->get_type()) {
@@ -589,8 +629,13 @@ inline void ComponentInterface<NodeT>::add_input(
   using namespace modulo_new_core::communication;
   try {
     std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
+    if (parsed_signal_name.empty()) {
+      throw exceptions::AddSignalException(
+          "Failed to add input '" + signal_name + "': Parsed signal name is empty."
+      );
+    }
     if (this->inputs_.find(parsed_signal_name) != this->inputs_.end()) {
-      throw exceptions::SignalAlreadyExistsException("Input with name '" + signal_name + "' already exists");
+      throw exceptions::AddSignalException("Failed to add input '" + signal_name + "': Input already exists");
     }
     std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
     this->add_parameter(
@@ -598,6 +643,8 @@ inline void ComponentInterface<NodeT>::add_input(
         fixed_topic
     );
     topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
+    RCLCPP_DEBUG_STREAM(this->get_logger(),
+                        "Adding input '" << signal_name << "' with topic name '" << topic_name << "'.");
     auto subscription = NodeT::template create_subscription<MsgT>(topic_name, this->qos_, callback);
     auto subscription_interface =
         std::make_shared<SubscriptionHandler<MsgT>>()->create_subscription_interface(subscription);
@@ -610,30 +657,47 @@ inline void ComponentInterface<NodeT>::add_input(
 template<class NodeT>
 inline void
 ComponentInterface<NodeT>::add_periodic_function(const std::string& name, const std::function<void()>& callback) {
+  if (name.empty()) {
+    RCLCPP_ERROR(this->get_logger(), "Failed to add periodic function: Provide a non empty string as a name.");
+    return;
+  }
   if (this->periodic_callbacks_.find(name) != this->periodic_callbacks_.end()) {
-    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                 "Daemon callback " << name << " already exists, overwriting.");
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Periodic function '" << name << "' already exists, overwriting.");
+  } else {
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding periodic function '" << name << "'.");
   }
   this->periodic_callbacks_.template insert_or_assign(name, callback);
 }
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::add_tf_broadcaster() {
-  this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this->shared_from_this());
+  if (this->tf_broadcaster_ == nullptr) {
+    RCLCPP_DEBUG(this->get_logger(), "Adding TF broadcaster.");
+    this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this->shared_from_this());
+  } else {
+    RCLCPP_DEBUG(this->get_logger(), "TF broadcaster already exists.");
+  }
 }
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::add_tf_listener() {
-  this->tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
-  this->tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*this->tf_buffer_);
+  if (this->tf_buffer_ == nullptr || this->tf_listener_ == nullptr) {
+    RCLCPP_DEBUG(this->get_logger(), "Adding TF buffer and listener.");
+    this->tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
+    this->tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*this->tf_buffer_);
+  } else {
+    RCLCPP_DEBUG(this->get_logger(), "TF buffer and listener already exist.");
+  }
 }
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::send_transform(const state_representation::CartesianPose& transform) {
-  // TODO: throw here?
   if (this->tf_broadcaster_ == nullptr) {
-    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock, 1000, "No tf broadcaster");
+    RCLCPP_ERROR_THROTTLE(this->get_logger(), *this->get_clock, 1000,
+                          "Failed to send transform: No tf broadcaster configured.");
+    return;
   }
+  // TODO try catch here
   geometry_msgs::msg::TransformStamped tf_message;
   modulo_new_core::translators::write_msg(tf_message, transform, this->get_clock()->now());
   this->tf_broadcaster_->sendTransform(tf_message);
@@ -644,14 +708,16 @@ inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_tra
     const std::string& frame_name, const std::string& reference_frame_name, const tf2::TimePoint& time_point,
     const tf2::Duration& duration
 ) const {
-  // TODO: throw here?
   if (this->tf_buffer_ == nullptr || this->tf_listener_ == nullptr) {
-    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock, 1000, "No tf buffer / listener");
+    throw exceptions::LookupTransformException("Failed to lookup transform: To TF buffer / listener configured.");
   }
   geometry_msgs::msg::TransformStamped transform;
   state_representation::CartesianPose result(frame_name, reference_frame_name);
-  // TODO: catch exception and rethrow
-  transform = this->tf_buffer_->lookupTransform(reference_frame_name, frame_name, time_point, duration);
+  try {
+    transform = this->tf_buffer_->lookupTransform(reference_frame_name, frame_name, time_point, duration);
+  } catch (const tf2::TransformException& ex) {
+    throw exceptions::LookupTransformException(std::string("Failed to lookup transform: ").append(ex.what()));
+  }
   modulo_new_core::translators::read_msg(result, transform);
   return result;
 }
@@ -677,7 +743,7 @@ inline void ComponentInterface<NodeT>::publish_outputs() {
       publisher->publish();
     } catch (const std::exception& ex) {
       RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                   "Could not publish output " << signal << ": " << ex.what());
+                                   "Failed to publish output '" << signal << "': " << ex.what());
     }
   }
 }
@@ -689,7 +755,7 @@ inline void ComponentInterface<NodeT>::evaluate_periodic_callbacks() {
       callback();
     } catch (const std::exception& ex) {
       RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                   "Could not evaluate daemon callback " << daemon << ": " << ex.what());
+                                   "Failed to evaluate daemon callback '" << daemon << "': " << ex.what());
     }
   }
 }
@@ -701,8 +767,11 @@ inline void ComponentInterface<NodeT>::create_output(
     const std::string& default_topic
 ) {
   using namespace modulo_new_core::communication;
+  if (signal_name.empty()) {
+    throw exceptions::AddSignalException("Failed to add output: Provide a non empty string as a name.");
+  }
   if (this->outputs_.find(signal_name) != this->outputs_.end()) {
-    throw exceptions::SignalAlreadyExistsException("Output with name '" + signal_name + "' already exists");
+    throw exceptions::AddSignalException("Output with name '" + signal_name + "' already exists");
   }
   auto message_pair = make_shared_message_pair(data, this->get_clock());
   this->outputs_.insert_or_assign(
@@ -715,6 +784,7 @@ inline void ComponentInterface<NodeT>::create_output(
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::raise_error() {
+  RCLCPP_DEBUG(this->get_logger(), "raise_error called: Setting predicate 'in_error_state' to true.");
   this->set_predicate("in_error_state", true);
 }
 

@@ -139,8 +139,7 @@ inline void Component::add_output(
       }
     }
   } catch (const std::exception& ex) {
-    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                 "Failed to add output '" << signal_name << "': " << ex.what());
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add output '" << signal_name << "': " << ex.what());
   }
 }
 
