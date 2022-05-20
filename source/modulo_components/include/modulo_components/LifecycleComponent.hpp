@@ -172,4 +172,4 @@ LifecycleComponent::add_output(const std::string& signal_name, const std::shared
 // TODO, if we raise error we need to manually call the lifecycle change state callback,
 // call callback function that this service calls
 
-} //namespace modulo_components
+}// namespace modulo_components

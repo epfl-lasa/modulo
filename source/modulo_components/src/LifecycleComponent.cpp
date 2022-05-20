@@ -231,4 +231,4 @@ bool LifecycleComponent::deactivate_outputs() {
   return success;
 }
 
-}
+}// namespace modulo_components
