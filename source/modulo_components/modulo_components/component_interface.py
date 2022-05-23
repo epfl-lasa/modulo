@@ -53,7 +53,10 @@ class ComponentInterface(Node):
 
         self.create_timer(self.get_parameter_value("period"), self.__step)
 
-    def __step(self):
+    def __step(self) -> None:
+        """
+        Step function that is called periodically.
+        """
         for predicate_name in self._predicates.keys():
             msg = Bool()
             msg.data = self.get_predicate(predicate_name)
@@ -64,9 +67,26 @@ class ComponentInterface(Node):
             self._predicate_publishers[predicate_name].publish(msg)
 
     def __generate_predicate_topic(self, predicate_name: str) -> str:
-        return f'/predicates/{self.get_name()}/{predicate_name}'
+        """
+        Generate the predicate topic name from the name of the predicate.
+
+        :param predicate_name: The predicate name
+        :return: The predicate topic as /predicates/component_name/predicate_name
+        """
+        return f"/predicates/{self.get_name()}/{predicate_name}"
 
     def add_parameter(self, parameter: Union[str, sr.Parameter], description: str, read_only=False) -> None:
+        """
+        Add a parameter. This method stores either the name of the attribute corresponding to the parameter object or
+        a parameter object directly in the local parameter dictionary and declares the equivalent ROS parameter on the
+        ROS interface. If an attribute name is provided, changing the ROS parameter will also update the provided
+        attribute and vice versa. If the provided parameter is not an attribute name or a Parameter object, does not
+        do anything.
+
+        :param parameter: Either the name of the parameter attribute or the parameter itself
+        :param description: The parameter description
+        :param read_only: If True, the value of the parameter cannot be changed after declaration
+        """
         try:
             if isinstance(parameter, sr.Parameter):
                 sr_parameter = parameter
@@ -86,7 +106,15 @@ class ComponentInterface(Node):
         else:
             self.set_parameters([ros_param])
 
-    def get_parameter(self, name: str) -> sr.Parameter:
+    def get_parameter(self, name: str) -> Union[sr.Parameter, rclpy.parameter.Parameter]:
+        """
+        Get a parameter by name. If this method is called from a file that contains 'rclpy' in its path, the
+        rclpy.node.Node.get_parameter method will be invoked, otherwise return the parameter from the local parameter
+        dictionary.
+
+        :param name: The name of the parameter
+        :return: The requested parameter
+        """
         co_filename = sys._getframe().f_back.f_code.co_filename
         self.get_logger().debug(f"get_parameter called from {co_filename}")
         if "rclpy" in co_filename:
@@ -95,6 +123,13 @@ class ComponentInterface(Node):
             return self._get_component_parameter(name)
 
     def _get_component_parameter(self, name: str) -> sr.Parameter:
+        """
+        Get the parameter from the parameter dictionary by its name.
+
+        :param name: The name of the parameter
+        :return: The parameter, if it exists
+        :raises ComponentParameterError if the parameter does not exist
+        """
         if name not in self._parameter_dict.keys():
             raise ComponentParameterError(f"Failed to get parameter '{name}'")
         if isinstance(self._parameter_dict[name], str):
@@ -103,17 +138,47 @@ class ComponentInterface(Node):
             return self._parameter_dict[name]
 
     def get_parameter_value(self, name: str) -> T:
+        """
+        Get the parameter value from the parameter dictionary by its name.
+
+        :param name: The name of the parameter
+        :return: The value of the parameter, if the parameter exists
+        :raises ComponentParameterError if the parameter does not exist
+        """
         return self._get_component_parameter(name).get_value()
 
     def set_parameter_value(self, name: str, value: T, parameter_type: sr.ParameterType) -> None:
+        """
+        Set the value of a parameter. The parameter must have been previously declared. If the parameter is an
+        attribute, the attribute is updated.
+
+        :param name: The name of the parameter
+        :param value: The value of the parameter
+        :param parameter_type: The type of the parameter
+        """
         result = self.set_parameters([write_parameter(sr.Parameter(name, value, parameter_type))])[0]
         if not result.successful:
             raise RuntimeError(result.reason)
 
     def _validate_parameter(self, parameter: sr.Parameter) -> bool:
+        """
+        Parameter validation function to be redefined by derived Component classes. This method is automatically invoked
+        whenever the ROS interface tried to modify a parameter. If the validation returns True, the updated parameter
+        value (including any modifications) is applied. If the validation returns False, any changes to the parameter
+        are discarded and the parameter value is not changed.
+
+        :param parameter: The parameter to be validated
+        :return: The validation result
+        """
         return True
 
     def __on_set_parameters_callback(self, ros_parameters: List[rclpy.Parameter]) -> SetParametersResult:
+        """
+        Callback function to validate and update parameters on change.
+
+        :param ros_parameters: The new parameter objects provided by the ROS interface
+        :return: The result of the validation
+        """
         result = SetParametersResult(successful=True)
         for ros_param in ros_parameters:
             try:
@@ -136,23 +201,24 @@ class ComponentInterface(Node):
         """
         Add a predicate to the map of predicates.
 
-        :param predicate_name: the name of the associated predicate
-        :param predicate_value: the value of the predicate as a bool or a callable function
+        :param predicate_name: The name of the associated predicate
+        :param predicate_value: The value of the predicate as a bool or a callable function
         """
         if predicate_name in self._predicates.keys():
             self.get_logger().debug(f"Predicate {predicate_name} already exists, overwriting.")
         else:
-            self._predicate_publishers[predicate_name] = self.create_publisher(Bool, self.__generate_predicate_topic(
-                predicate_name), 10)
+            self._predicate_publishers[predicate_name] = self.create_publisher(Bool,
+                                                                               self.__generate_predicate_topic(
+                                                                                   predicate_name), 10)
         self._predicates[predicate_name] = predicate_value
 
     def get_predicate(self, predicate_name: str) -> bool:
         """
         Get the value of the predicate given as parameter. If the predicate is not found or the callable function fails,
-        return false.
+        this method returns False.
 
-        :param predicate_name: the name of the predicate to retrieve from the map of predicates
-        :return: the value of the predicate as a boolean
+        :param predicate_name: The name of the predicate to retrieve from the map of predicates
+        :return: The value of the predicate as a boolean
         """
         if predicate_name not in self._predicates.keys():
             self.get_logger().error(f"Predicate {predicate_name} does not exist, returning false.",
@@ -173,11 +239,12 @@ class ComponentInterface(Node):
         """
         Set the value of the predicate given as parameter, if the predicate is not found does not do anything.
 
-        :param predicate_name: the name of the predicate to retrieve from the map of predicates
-        :param predicate_value: the new value of the predicate as a bool or a callable function
+        :param predicate_name: The name of the predicate to retrieve from the map of predicates
+        :param predicate_value: The new value of the predicate as a bool or a callable function
         """
         if predicate_name not in self._predicates.keys():
-            self.get_logger().error(f"Cannot set predicate {predicate_name} with a new value because it does not exist.",
-                                    throttle_duration_sec=1.0)
+            self.get_logger().error(
+                f"Cannot set predicate {predicate_name} with a new value because it does not exist.",
+                throttle_duration_sec=1.0)
             return
         self._predicates[predicate_name] = predicate_value
