@@ -69,6 +69,72 @@ class ComponentInterface(Node):
     def __generate_predicate_topic(self, predicate_name: str) -> str:
         return f'/predicates/{self.get_name()}/{predicate_name}'
 
+    def add_parameter(self, parameter: Union[str, sr.Parameter], description: str, read_only=False) -> None:
+        try:
+            if isinstance(parameter, sr.Parameter):
+                sr_parameter = parameter
+            elif isinstance(parameter, str):
+                sr_parameter = self.__getattribute__(parameter)
+            else:
+                raise TypeError("Provide either a state_representation.Parameter object or a string "
+                                "containing the name of the attribute that refers to the parameter to add.")
+        except (AttributeError, TypeError) as e:
+            self.get_logger().error(f"Failed to add parameter: {e}")
+            return
+        ros_param = write_parameter(sr_parameter)
+        if not self.has_parameter(sr_parameter.get_name()):
+            self._parameter_dict[sr_parameter.get_name()] = parameter
+            self.declare_parameter(ros_param.name, ros_param.value,
+                                   descriptor=ParameterDescriptor(description=description), ignore_override=read_only)
+        else:
+            self.set_parameters([ros_param])
+
+    def get_parameter(self, name: str) -> sr.Parameter:
+        co_filename = sys._getframe().f_back.f_code.co_filename
+        self.get_logger().debug(f"get_parameter called from {co_filename}")
+        if "rclpy" in co_filename:
+            return rclpy.node.Node.get_parameter(self, name)
+        else:
+            return self._get_component_parameter(name)
+
+    def _get_component_parameter(self, name: str) -> sr.Parameter:
+        if name not in self._parameter_dict.keys():
+            raise ComponentParameterError(f"Failed to get parameter '{name}'")
+        if isinstance(self._parameter_dict[name], str):
+            return self.__getattribute__(self._parameter_dict[name])
+        else:
+            return self._parameter_dict[name]
+
+    def get_parameter_value(self, name: str) -> T:
+        return self._get_component_parameter(name).get_value()
+
+    def set_parameter_value(self, name: str, value: T, parameter_type: sr.ParameterType) -> None:
+        result = self.set_parameters([write_parameter(sr.Parameter(name, value, parameter_type))])[0]
+        if not result.successful:
+            raise RuntimeError(result.reason)
+
+    def _validate_parameter(self, parameter: sr.Parameter) -> bool:
+        return True
+
+    def __on_set_parameters_callback(self, ros_parameters: List[rclpy.Parameter]) -> SetParametersResult:
+        result = SetParametersResult(successful=True)
+        for ros_param in ros_parameters:
+            try:
+                parameter = self._get_component_parameter(ros_param.name)
+                new_parameter = read_parameter_const(ros_param, parameter)
+                if not self._validate_parameter(new_parameter):
+                    result.successful = False
+                    result.reason = f"Parameter {ros_param.name} could not be set!"
+                else:
+                    if isinstance(self._parameter_dict[ros_param.name], str):
+                        self.__setattr__(self._parameter_dict[ros_param.name], new_parameter)
+                    else:
+                        self._parameter_dict[ros_param.name] = new_parameter
+            except Exception as e:
+                result.successful = False
+                result.reason += str(e)
+        return result
+
     def add_predicate(self, predicate_name: str, predicate_value: Union[bool, Callable]):
         """
         Add a predicate to the map of predicates.
