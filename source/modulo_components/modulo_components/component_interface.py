@@ -1,12 +1,19 @@
+import sys
+from typing import Union, TypeVar, Callable, List
+
+import rclpy
+import state_representation as sr
+from modulo_components.exceptions.component_exceptions import ComponentParameterError
+from modulo_new_core.translators.parameter_translators import write_parameter, read_parameter_const
+from rcl_interfaces.msg import ParameterDescriptor
+from rcl_interfaces.msg import SetParametersResult
 from rclpy.node import Node
+from tf2_ros import TransformBroadcaster
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
-from tf2_ros import TransformBroadcaster
-from rcl_interfaces.msg import ParameterDescriptor
 from std_msgs.msg import Bool
 
-from typing import Union
-from typing import Callable
+T = TypeVar('T')
 
 
 class ComponentInterface(Node):
@@ -17,13 +24,12 @@ class ComponentInterface(Node):
     Attributes:
         predicates (dict(Parameters(bool))): map of predicates added to the Component.
         predicate_publishers (dict(rclpy.Publisher(Bool))): map of publishers associated to each predicate.
+        parameter_dict: dict of parameters
         tf_buffer (tf2_ros.Buffer): the buffer to lookup transforms published on tf2.
         tf_listener (tf2_ros.TransformListener): the listener to lookup transforms published on tf2.
         tf_broadcaster (tf2_ros.TransformBroadcaster): the broadcaster to publish transforms on tf2
     Parameters:
         period (double): period (in s) between step function calls.
-        has_tf_listener (bool): if true, add a tf listener to enable calls to lookup transforms.
-        has_tf_broadcaster (bool): if true, add a tf broadcaster to enable the publishing of transforms.
     """
 
     def __init__(self, node_name: str, *kargs, **kwargs):
@@ -33,28 +39,19 @@ class ComponentInterface(Node):
                 node_name (str): name of the node to be passed to the base Node class
         """
         super().__init__(node_name, *kargs, **kwargs)
-        self.declare_parameter('period', 0.1,
-                               ParameterDescriptor(description="Period (in s) between step function calls."))
-        self.declare_parameter('has_tf_listener', False,
-                               ParameterDescriptor(
-                                   description="If true, add a tf listener to enable calls to lookup transforms."))
-        self.declare_parameter('has_tf_broadcaster', False,
-                               ParameterDescriptor(
-                                   description="If true, add a tf broadcaster to enable the publishing of transforms."))
-
-        self._period = self.get_parameter('period').get_parameter_value().double_value
-        self._has_tf_listener = self.get_parameter('has_tf_listener').get_parameter_value().double_value
-        self._has_tf_broadcaster = self.get_parameter('has_tf_broadcaster').get_parameter_value().double_value
+        self._parameter_dict = {}
         self._predicates = {}
         self._predicate_publishers = {}
+        # TODO add_XXX
+        self.__tf_buffer = None
+        self.__tf_listener = None
+        self.__tf_broadcaster = None
 
-        if self._has_tf_listener:
-            self.__tf_buffer = Buffer()
-            self.__tf_listener = TransformListener(self.__tf_buffer, self)
-        if self._has_tf_broadcaster:
-            self.__tf_broadcaster = TransformBroadcaster(self)
+        self.add_on_set_parameters_callback(self.__on_set_parameters_callback)
+        self.add_parameter(sr.Parameter("period", 0.1, sr.ParameterType.DOUBLE),
+                           "Period (in s) between step function calls.")
 
-        self.create_timer(self._period, self.__step)
+        self.create_timer(self.get_parameter_value("period"), self.__step)
 
     def __step(self):
         for predicate_name in self._predicates.keys():
