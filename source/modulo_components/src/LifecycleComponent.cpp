@@ -18,7 +18,7 @@ void LifecycleComponent::step() {
   if (this->get_predicate("is_active")) {
     this->publish_predicates();
     this->publish_outputs();
-    this->evaluate_daemon_callbacks();
+    this->evaluate_periodic_callbacks();
     this->on_step();
   }
 }
@@ -34,26 +34,27 @@ LifecycleComponent::on_configure(const rclcpp_lifecycle::State&) {
     RCLCPP_ERROR(get_logger(), "Failed to configure component.");
     // TODO need reset?
 //    this->reset();
-    return LifecycleNodeInterface::CallbackReturn::FAILURE;
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
   this->set_predicate("is_unconfigured", false);
   this->set_predicate("is_inactive", true);
-  return LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 bool LifecycleComponent::on_cleanup() {
   return true;
 }
+
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 LifecycleComponent::on_cleanup(const rclcpp_lifecycle::State&) {
   RCLCPP_DEBUG(this->get_logger(), "on_cleanup is called.");
   if (!this->on_cleanup()) {
     RCLCPP_ERROR(get_logger(), "Failed to clean up component.");
-    return LifecycleNodeInterface::CallbackReturn::FAILURE;
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
   // TODO
 //  this->reset();
-  return LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 bool LifecycleComponent::on_activate() {
@@ -65,11 +66,11 @@ LifecycleComponent::on_activate(const rclcpp_lifecycle::State&) {
   RCLCPP_DEBUG(this->get_logger(), "on_activate is called.");
   if (!this->on_activate()) {
     RCLCPP_ERROR(get_logger(), "Failed to activate component.");
-    return LifecycleNodeInterface::CallbackReturn::FAILURE;
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
   this->set_predicate("is_inactive", false);
   this->set_predicate("is_active", true);
-  return LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 bool LifecycleComponent::on_deactivate() {
@@ -81,11 +82,11 @@ LifecycleComponent::on_deactivate(const rclcpp_lifecycle::State&) {
   RCLCPP_DEBUG(this->get_logger(), "on_deactivate is called.");
   if (!this->on_deactivate()) {
     RCLCPP_ERROR(get_logger(), "Failed to deactivate component.");
-    return LifecycleNodeInterface::CallbackReturn::FAILURE;
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
   this->set_predicate("is_active", false);
   this->set_predicate("is_inactive", true);
-  return LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 bool LifecycleComponent::on_shutdown() {
@@ -98,28 +99,28 @@ LifecycleComponent::on_shutdown(const rclcpp_lifecycle::State& state) {
   auto current_state = state.id();
   // if the node is already shutdown just return success
   if (current_state == lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED) {
-    return LifecycleNodeInterface::CallbackReturn::SUCCESS;
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
   }
   // check current state and eventually deactivate and unconfigure
   if (current_state == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
     RCLCPP_DEBUG(this->get_logger(), "Component is active, deactivating it before shutdown.");
-    auto callback_return = this->on_deactivate(this->get_current_state());
-    if (callback_return != LifecycleNodeInterface::CallbackReturn::SUCCESS) {
+    auto callback_return = this->on_deactivate(state);
+    if (callback_return != rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS) {
       return callback_return;
     }
     current_state = lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE;
   }
   if (current_state == lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE) {
     RCLCPP_DEBUG(this->get_logger(), "Component is active, cleaning it up before shutdown.");
-    auto callback_return = this->on_cleanup(this->get_current_state());
-    if (callback_return != LifecycleNodeInterface::CallbackReturn::SUCCESS) {
+    auto callback_return = this->on_cleanup(state);
+    if (callback_return != rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS) {
       return callback_return;
     }
     current_state = lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED;
   }
   if (!this->on_shutdown()) {
     RCLCPP_ERROR(get_logger(), "Failed to shut down component.");
-    return LifecycleNodeInterface::CallbackReturn::FAILURE;
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
   // TODO reset
 //  this->reset();
@@ -132,7 +133,7 @@ LifecycleComponent::on_shutdown(const rclcpp_lifecycle::State& state) {
   this->set_predicate("is_active", false);
   // TODO where do we set shutdown to true otherwise?
   this->set_predicate("is_shutdown", true);
-  return LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 bool LifecycleComponent::configure_outputs() {
