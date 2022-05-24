@@ -101,6 +101,7 @@ class ComponentInterface(Node):
         ros_param = write_parameter(sr_parameter)
         if not self.has_parameter(sr_parameter.get_name()):
             self._parameter_dict[sr_parameter.get_name()] = parameter
+            # TODO ignore override
             self.declare_parameter(ros_param.name, ros_param.value,
                                    descriptor=ParameterDescriptor(description=description), ignore_override=read_only)
         else:
