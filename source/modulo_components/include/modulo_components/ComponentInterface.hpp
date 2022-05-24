@@ -60,7 +60,9 @@ protected:
    * @brief Add a parameter.
    * @details This method stores a pointer reference to an existing Parameter object in the local parameter map
    * and declares the equivalent ROS parameter on the ROS interface.
-   * @param parameter A ParameterInterface pointer to a Parameter instance.
+   * @param parameter A ParameterInterface pointer to a Parameter instance
+   * @param description The description of the parameter
+   * @param read_only If true, the value of the parameter cannot be changed after declaration
    */
   void add_parameter(
       const std::shared_ptr<state_representation::ParameterInterface>& parameter, const std::string& description,
@@ -74,6 +76,8 @@ protected:
    * @tparam T The type of the parameter
    * @param name The name of the parameter
    * @param value The value of the parameter
+   * @param description The description of the parameter
+   * @param read_only If true, the value of the parameter cannot be changed after declaration
    */
   template<typename T>
   void add_parameter(const std::string& name, const T& value, const std::string& description, bool read_only = false);

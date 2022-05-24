@@ -57,6 +57,12 @@ static std::string parse_signal_name(const std::string& signal_name) {
   return output;
 }
 
+/**
+ * @brief Generate the topic name for a predicate from component name and predicate name.
+ * @param component_name The name of the component which the predicate belongs to
+ * @param predicate_name The name of the predicate
+ * @return The generated predicate topic as /predicates/component_name/predicate_name
+ */
 static std::string generate_predicate_topic(const std::string& component_name, const std::string& predicate_name) {
   return "/predicates/" + component_name + "/" + predicate_name;
 }
