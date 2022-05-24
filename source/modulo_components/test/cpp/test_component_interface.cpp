@@ -23,10 +23,6 @@ public:
   using ComponentInterface<NodeT>::raise_error;
   using ComponentInterface<NodeT>::get_qos;
   using ComponentInterface<NodeT>::set_qos;
-  using ComponentInterface<NodeT>::add_tf_broadcaster;
-  using ComponentInterface<NodeT>::add_tf_listener;
-  using ComponentInterface<NodeT>::send_transform;
-  using ComponentInterface<NodeT>::lookup_transform;
 };
 
 template<class NodeT>
