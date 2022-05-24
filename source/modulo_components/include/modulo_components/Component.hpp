@@ -15,9 +15,14 @@ public:
 
   /**
    * @brief Constructor from node options.
-   * @param node_options node options as used in ROS2 Node
+   * @param node_options Node options as used in ROS2 Node
    */
   explicit Component(const rclcpp::NodeOptions& node_options, bool start_thread = true);
+
+  /**
+   * @brief Virtual default destructor.
+   */
+  virtual ~Component() = default;
 
 protected:
   /**
@@ -58,18 +63,13 @@ private:
    */
   void run();
 
-  /**
-   * @brief Put the component in error state by setting the
-   * 'in_error_state' predicate to true.
-   */
-  void raise_error() override;
-
+  using rclcpp::Node::create_publisher;
   using ComponentInterface<rclcpp::Node>::create_output;
   using ComponentInterface<rclcpp::Node>::outputs_;
   using ComponentInterface<rclcpp::Node>::qos_;
   using ComponentInterface<rclcpp::Node>::publish_predicates;
   using ComponentInterface<rclcpp::Node>::publish_outputs;
-  using ComponentInterface<rclcpp::Node>::evaluate_daemon_callbacks;
+  using ComponentInterface<rclcpp::Node>::evaluate_periodic_callbacks;
 
   std::thread run_thread_; ///< The execution thread of the component
   bool started_; ///< Flag that indicates if execution has started or not
