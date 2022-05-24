@@ -15,10 +15,15 @@ public:
   friend class LifecycleComponentPublicInterface;
 
   /**
-   * @brief Constructor from node options
-   * @param node_options node options as used in ROS2 Node
+   * @brief Constructor from node options.
+   * @param node_options Node options as used in ROS2 LifecycleNode
    */
   explicit LifecycleComponent(const rclcpp::NodeOptions& node_options);
+
+  /**
+   * @brief Virtual default destructor.
+   */
+  virtual ~LifecycleComponent() = default;
 
 protected:
   /**
@@ -42,28 +47,29 @@ private:
 
   /**
    * @brief Configure all outputs.
-   * @return True configuration was successful
+   * @return True if configuration was successful
    */
   bool configure_outputs();
 
   /**
    * @brief Activate all outputs.
-   * @return True activation was successful
+   * @return True if activation was successful
    */
   bool activate_outputs();
 
   /**
    * @brief Deactivate all outputs.
-   * @return True deactivation was successful
+   * @return True if deactivation was successful
    */
   bool deactivate_outputs();
 
+  using rclcpp_lifecycle::LifecycleNode::create_publisher;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::create_output;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::outputs_;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::qos_;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::publish_predicates;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::publish_outputs;
-  using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::evaluate_daemon_callbacks;
+  using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::evaluate_periodic_callbacks;
 };
 
 template<typename DataT>
@@ -77,4 +83,4 @@ LifecycleComponent::add_output(const std::string& signal_name, const std::shared
   }
 }
 
-}
+}// namespace modulo_components

@@ -27,14 +27,14 @@
 namespace modulo_components {
 
 template<class NodeT>
-class ComponentInterface : public NodeT {
+class ComponentInterface : private NodeT {
 public:
   friend class ComponentInterfacePublicInterface;
   friend class ComponentInterfaceParameterPublicInterface;
 
   /**
    * @brief Constructor from node options.
-   * @param node_options node options as used in ROS2 Node
+   * @param node_options Node options as used in ROS2 Node / LifecycleNode
    */
   explicit ComponentInterface(
       const rclcpp::NodeOptions& node_options, modulo_new_core::communication::PublisherType publisher_type
@@ -44,6 +44,11 @@ public:
    * @brief Virtual default destructor.
    */
   virtual ~ComponentInterface() = default;
+
+  using NodeT::get_node_base_interface;
+  using NodeT::get_name;
+  using NodeT::get_clock;
+  using NodeT::get_logger;
 
 protected:
   /**
@@ -55,7 +60,9 @@ protected:
    * @brief Add a parameter.
    * @details This method stores a pointer reference to an existing Parameter object in the local parameter map
    * and declares the equivalent ROS parameter on the ROS interface.
-   * @param parameter A ParameterInterface pointer to a Parameter instance.
+   * @param parameter A ParameterInterface pointer to a Parameter instance
+   * @param description The description of the parameter
+   * @param read_only If true, the value of the parameter cannot be changed after declaration
    */
   void add_parameter(
       const std::shared_ptr<state_representation::ParameterInterface>& parameter, const std::string& description,
@@ -69,6 +76,8 @@ protected:
    * @tparam T The type of the parameter
    * @param name The name of the parameter
    * @param value The value of the parameter
+   * @param description The description of the parameter
+   * @param read_only If true, the value of the parameter cannot be changed after declaration
    */
   template<typename T>
   void add_parameter(const std::string& name, const T& value, const std::string& description, bool read_only = false);
@@ -180,11 +189,12 @@ protected:
   );
 
   /**
-   * @brief Function to daemonize the callback function given in input.
-   * @param name The name of the daemon
-   * @param callback The callback of the daemon
+   * @brief Add a periodic callback function.
+   * @details The provided function is evaluated periodically at the component step period.
+   * @param name The name of the callback
+   * @param callback The callback function that is evaluated periodically
    */
-  void add_daemon(const std::string& name, const std::function<void(void)>& callback);
+  void add_periodic_function(const std::string& name, const std::function<void(void)>& callback);
 
   /**
    * @brief Configure a transform broadcaster.
@@ -232,10 +242,14 @@ protected:
    * @brief Look up a transform from TF.
    * @param frame_name The desired frame of the transform
    * @param reference_frame_name The desired reference frame of the transform
+   * @param time_point The time at which the value of the transform is desired (default: 0, will get the latest)
+   * @param duration How long to block the lookup call before failing
    * @return If it exists, the requested transform
    */
-  [[nodiscard]] state_representation::CartesianPose
-  lookup_transform(const std::string& frame_name, const std::string& reference_frame_name = "world") const;
+  [[nodiscard]] state_representation::CartesianPose lookup_transform(
+      const std::string& frame_name, const std::string& reference_frame_name = "world",
+      const tf2::TimePoint& time_point = tf2::TimePoint(std::chrono::microseconds(0)),
+      const tf2::Duration& duration = tf2::Duration(std::chrono::microseconds(10))) const;
 
   /**
    * @brief Helper function to publish all predicates.
@@ -248,15 +262,17 @@ protected:
   void publish_outputs();
 
   /**
-   * @brief Helper function to evaluate all daemon callbacks.
+   * @brief Helper function to evaluate all periodic function callbacks.
    */
-  void evaluate_daemon_callbacks();
+  void evaluate_periodic_callbacks();
 
   /**
-   * @brief Raise an error, or set the component into error state.
-   * To be redefined in derived classes.
+   * @brief Put the component in error state by setting the
+   * 'in_error_state' predicate to true.
    */
   virtual void raise_error();
+
+  using NodeT::create_publisher;
 
   std::map<std::string, std::shared_ptr<modulo_new_core::communication::PublisherInterface>>
       outputs_; ///< Map of outputs
@@ -293,7 +309,7 @@ private:
       predicate_publishers_; ///< Map of predicate publishers
   std::map<std::string, std::shared_ptr<modulo_new_core::communication::SubscriptionInterface>> inputs_;
 
-  std::map<std::string, std::function<void(void)>> daemon_callbacks_; ///< Map of daemon callbacks
+  std::map<std::string, std::function<void(void)>> periodic_callbacks_; ///< Map of periodic function callbacks
 
   state_representation::ParameterMap parameter_map_; ///< ParameterMap for handling parameters
   std::shared_ptr<rclcpp::node_interfaces::OnSetParametersCallbackHandle>
@@ -317,6 +333,8 @@ ComponentInterface<NodeT>::ComponentInterface(
       }
   );
   this->add_parameter("period", 1.0, "The time interval in seconds for all periodic callbacks", true);
+
+  this->add_predicate("in_error_state", false);
 
   this->step_timer_ = this->create_wall_timer(
       std::chrono::nanoseconds(static_cast<int64_t>(this->get_parameter_value<double>("period") * 1e9)),
@@ -585,12 +603,13 @@ inline void ComponentInterface<NodeT>::add_input(
 }
 
 template<class NodeT>
-inline void ComponentInterface<NodeT>::add_daemon(const std::string& name, const std::function<void()>& callback) {
-  if (this->daemon_callbacks_.find(name) != this->daemon_callbacks_.end()) {
+inline void
+ComponentInterface<NodeT>::add_periodic_function(const std::string& name, const std::function<void()>& callback) {
+  if (this->periodic_callbacks_.find(name) != this->periodic_callbacks_.end()) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                                  "Daemon callback " << name << " already exists, overwriting.");
   }
-  this->daemon_callbacks_.template insert_or_assign(name, callback);
+  this->periodic_callbacks_.template insert_or_assign(name, callback);
 }
 
 template<class NodeT>
@@ -617,7 +636,8 @@ inline void ComponentInterface<NodeT>::send_transform(const state_representation
 
 template<class NodeT>
 inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_transform(
-    const std::string& frame_name, const std::string& reference_frame_name
+    const std::string& frame_name, const std::string& reference_frame_name, const tf2::TimePoint& time_point,
+    const tf2::Duration& duration
 ) const {
   // TODO: throw here?
   if (this->tf_buffer_ == nullptr || this->tf_listener_ == nullptr) {
@@ -625,10 +645,8 @@ inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_tra
   }
   geometry_msgs::msg::TransformStamped transform;
   state_representation::CartesianPose result(frame_name, reference_frame_name);
-  // TODO: timeout
-  transform = this->tf_buffer_->lookupTransform(
-      reference_frame_name, frame_name, tf2::TimePoint(std::chrono::microseconds(0)),
-      tf2::Duration(std::chrono::microseconds(10)));
+  // TODO: catch exception and rethrow
+  transform = this->tf_buffer_->lookupTransform(reference_frame_name, frame_name, time_point, duration);
   modulo_new_core::translators::read_msg(result, transform);
   return result;
 }
@@ -660,8 +678,8 @@ inline void ComponentInterface<NodeT>::publish_outputs() {
 }
 
 template<class NodeT>
-inline void ComponentInterface<NodeT>::evaluate_daemon_callbacks() {
-  for (const auto& [daemon, callback]: this->daemon_callbacks_) {
+inline void ComponentInterface<NodeT>::evaluate_periodic_callbacks() {
+  for (const auto& [daemon, callback]: this->periodic_callbacks_) {
     try {
       callback();
     } catch (const std::exception& ex) {
@@ -691,6 +709,8 @@ inline void ComponentInterface<NodeT>::create_output(
 }
 
 template<class NodeT>
-inline void ComponentInterface<NodeT>::raise_error() {}
+inline void ComponentInterface<NodeT>::raise_error() {
+  this->set_predicate("in_error_state", true);
+}
 
 }// namespace modulo_components
