@@ -19,7 +19,7 @@ void Component::step() {
     this->publish_outputs();
     this->evaluate_periodic_callbacks();
   } catch (const std::exception& ex) {
-    RCLCPP_FATAL_STREAM(this->get_logger(), "Failed to execute step function:" << ex.what());
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to execute step function:" << ex.what());
     this->raise_error();
   }
 }

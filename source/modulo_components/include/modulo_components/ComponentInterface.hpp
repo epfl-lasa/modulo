@@ -512,7 +512,8 @@ inline bool ComponentInterface<NodeT>::get_predicate(const std::string& predicat
     value = (callback_function)();
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                 "Failed to evaluate callback of predicate'" << predicate_name << "':" << ex.what());
+                                 "Failed to evaluate callback of predicate'" << predicate_name << "', returning false:"
+                                                                             << ex.what());
   }
   return value;
 }
@@ -697,10 +698,13 @@ inline void ComponentInterface<NodeT>::send_transform(const state_representation
                           "Failed to send transform: No tf broadcaster configured.");
     return;
   }
-  // TODO try catch here
-  geometry_msgs::msg::TransformStamped tf_message;
-  modulo_new_core::translators::write_msg(tf_message, transform, this->get_clock()->now());
-  this->tf_broadcaster_->sendTransform(tf_message);
+  try {
+    geometry_msgs::msg::TransformStamped tf_message;
+    modulo_new_core::translators::write_msg(tf_message, transform, this->get_clock()->now());
+    this->tf_broadcaster_->sendTransform(tf_message);
+  } catch (const std::exception& ex) {
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock, 1000, "Failed to send transform: " << ex.what());
+  }
 }
 
 template<class NodeT>
