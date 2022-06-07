@@ -388,6 +388,7 @@ inline void ComponentInterface<NodeT>::set_parameter_value(const std::string& na
   rcl_interfaces::msg::SetParametersResult result = NodeT::set_parameter(
       modulo_new_core::translators::write_parameter(state_representation::make_shared_parameter(name, value)));
   if (!result.successful) {
+    // TODO not throw here
     throw state_representation::exceptions::InvalidParameterException(result.reason);
   }
 }

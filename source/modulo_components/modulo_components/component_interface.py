@@ -80,8 +80,8 @@ class ComponentInterface(Node):
         Add a parameter. This method stores either the name of the attribute corresponding to the parameter object or
         a parameter object directly in the local parameter dictionary and declares the equivalent ROS parameter on the
         ROS interface. If an attribute name is provided, changing the ROS parameter will also update the provided
-        attribute and vice versa. If the provided parameter is not an attribute name or a Parameter object, does not
-        do anything.
+        attribute and vice versa. If the provided argument is not an attribute name or a Parameter object, nothing
+        happens.
 
         :param parameter: Either the name of the parameter attribute or the parameter itself
         :param description: The parameter description
@@ -91,7 +91,11 @@ class ComponentInterface(Node):
             if isinstance(parameter, sr.Parameter):
                 sr_parameter = parameter
             elif isinstance(parameter, str):
-                sr_parameter = self.__getattribute__(parameter)
+                attr = self.__getattribute__(parameter)
+                if isinstance(attr, sr.Parameter):
+                    sr_parameter = attr
+                else:
+                    raise TypeError("The attribute with the provided name does not contain a Parameter object.")
             else:
                 raise TypeError("Provide either a state_representation.Parameter object or a string "
                                 "containing the name of the attribute that refers to the parameter to add.")
@@ -157,8 +161,10 @@ class ComponentInterface(Node):
         :param value: The value of the parameter
         :param parameter_type: The type of the parameter
         """
-        result = self.set_parameters([write_parameter(sr.Parameter(name, value, parameter_type))])[0]
+        ros_param = write_parameter(sr.Parameter(name, value, parameter_type))
+        result = self.set_parameters([ros_param])[0]
         if not result.successful:
+            # TODO not throw here
             raise RuntimeError(result.reason)
 
     def _validate_parameter(self, parameter: sr.Parameter) -> bool:
