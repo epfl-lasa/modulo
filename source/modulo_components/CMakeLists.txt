@@ -39,7 +39,7 @@ ament_python_install_package(${PROJECT_NAME} SCRIPTS_DESTINATION lib/${PROJECT_N
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_cmake_pytest REQUIRED)
-  include_directories(test/cpp/include)
+  include_directories(${PROJECT_SOURCE_DIR}/test/cpp/include)
 
   # add cpp tests
   file(GLOB_RECURSE TEST_CPP_SOURCES ${PROJECT_SOURCE_DIR}/test/ test_*.cpp)
