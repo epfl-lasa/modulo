@@ -5,19 +5,11 @@
 #include "modulo_components/LifecycleComponent.hpp"
 #include "modulo_new_core/EncodedState.hpp"
 
+#include "test_modulo_components/component_public_interfaces.hpp"
+
 using namespace state_representation;
 
 namespace modulo_components {
-
-class LifecycleComponentPublicInterface : public LifecycleComponent {
-public:
-  explicit LifecycleComponentPublicInterface(const rclcpp::NodeOptions& node_options) : LifecycleComponent(node_options) {}
-  using LifecycleComponent::add_output;
-  using LifecycleComponent::configure_outputs;
-  using LifecycleComponent::activate_outputs;
-  using LifecycleComponent::outputs_;
-  using LifecycleComponent::get_clock;
-};
 
 class LifecycleComponentTest : public ::testing::Test {
 protected:

@@ -31,15 +31,10 @@ template<class NodeT>
 class ComponentInterfacePublicInterface;
 
 template<class NodeT>
-class ComponentInterfaceParameterPublicInterface;
-
-template<class NodeT>
 class ComponentInterface : private NodeT {
 public:
   friend class ComponentInterfacePublicInterface<rclcpp::Node>;
   friend class ComponentInterfacePublicInterface<rclcpp_lifecycle::LifecycleNode>;
-  friend class ComponentInterfaceParameterPublicInterface<rclcpp::Node>;
-  friend class ComponentInterfaceParameterPublicInterface<rclcpp_lifecycle::LifecycleNode>;
 
   /**
    * @brief Constructor from node options.

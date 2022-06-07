@@ -5,18 +5,11 @@
 #include "modulo_components/Component.hpp"
 #include "modulo_new_core/EncodedState.hpp"
 
+#include "test_modulo_components/component_public_interfaces.hpp"
+
 using namespace state_representation;
 
 namespace modulo_components {
-
-class ComponentPublicInterface : public Component {
-public:
-  explicit ComponentPublicInterface(const rclcpp::NodeOptions& node_options, bool start_thread = true) :
-      Component(node_options, start_thread) {}
-  using Component::add_output;
-  using Component::outputs_;
-  using Component::get_clock;
-};
 
 class ComponentTest : public ::testing::Test {
 protected:

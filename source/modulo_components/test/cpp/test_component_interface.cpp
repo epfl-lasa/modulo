@@ -3,27 +3,9 @@
 #include "modulo_components/ComponentInterface.hpp"
 #include "modulo_new_core/EncodedState.hpp"
 
-namespace modulo_components {
+#include "test_modulo_components/component_public_interfaces.hpp"
 
-template<class NodeT>
-class ComponentInterfacePublicInterface : public ComponentInterface<NodeT> {
-public:
-  explicit ComponentInterfacePublicInterface(
-      const rclcpp::NodeOptions& node_options, modulo_new_core::communication::PublisherType publisher_type
-  ) : ComponentInterface<NodeT>(node_options, publisher_type) {}
-  using ComponentInterface<NodeT>::add_predicate;
-  using ComponentInterface<NodeT>::get_predicate;
-  using ComponentInterface<NodeT>::set_predicate;
-  using ComponentInterface<NodeT>::predicates_;
-  using ComponentInterface<NodeT>::get_parameter_value;
-  using ComponentInterface<NodeT>::add_input;
-  using ComponentInterface<NodeT>::inputs_;
-  using ComponentInterface<NodeT>::create_output;
-  using ComponentInterface<NodeT>::outputs_;
-  using ComponentInterface<NodeT>::raise_error;
-  using ComponentInterface<NodeT>::get_qos;
-  using ComponentInterface<NodeT>::set_qos;
-};
+namespace modulo_components {
 
 template<class NodeT>
 class ComponentInterfaceTest : public ::testing::Test {
