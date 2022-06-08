@@ -4,6 +4,7 @@
 #include <rclcpp/create_timer.hpp>
 #include <rclcpp/node_options.hpp>
 #include <rclcpp/node_interfaces/node_parameters_interface.hpp>
+#include <rclcpp_lifecycle/lifecycle_node.hpp>
 
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
@@ -27,10 +28,13 @@
 namespace modulo_components {
 
 template<class NodeT>
+class ComponentInterfacePublicInterface;
+
+template<class NodeT>
 class ComponentInterface : private NodeT {
 public:
-  friend class ComponentInterfacePublicInterface;
-  friend class ComponentInterfaceParameterPublicInterface;
+  friend class ComponentInterfacePublicInterface<rclcpp::Node>;
+  friend class ComponentInterfacePublicInterface<rclcpp_lifecycle::LifecycleNode>;
 
   /**
    * @brief Constructor from node options.
@@ -711,6 +715,16 @@ inline void ComponentInterface<NodeT>::create_output(
 template<class NodeT>
 inline void ComponentInterface<NodeT>::raise_error() {
   this->set_predicate("in_error_state", true);
+}
+
+template<class NodeT>
+inline rclcpp::QoS ComponentInterface<NodeT>::get_qos() const {
+  return this->qos_;
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::set_qos(const rclcpp::QoS& qos) {
+  this->qos_ = qos;
 }
 
 }// namespace modulo_components

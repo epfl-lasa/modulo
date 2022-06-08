@@ -1,0 +1,75 @@
+#pragma once
+
+#include "modulo_components/ComponentInterface.hpp"
+#include "modulo_components/Component.hpp"
+#include "modulo_components/LifecycleComponent.hpp"
+
+using namespace state_representation;
+
+namespace modulo_components {
+
+template<class NodeT>
+class ComponentInterfacePublicInterface : public ComponentInterface<NodeT> {
+public:
+  explicit ComponentInterfacePublicInterface(
+      const rclcpp::NodeOptions& node_options, modulo_new_core::communication::PublisherType publisher_type
+  ) : ComponentInterface<NodeT>(node_options, publisher_type) {}
+  using ComponentInterface<NodeT>::add_parameter;
+  using ComponentInterface<NodeT>::get_parameter;
+  using ComponentInterface<NodeT>::get_parameter_value;
+  using ComponentInterface<NodeT>::set_parameter_value;
+  using ComponentInterface<NodeT>::parameter_map_;
+  using ComponentInterface<NodeT>::add_predicate;
+  using ComponentInterface<NodeT>::get_predicate;
+  using ComponentInterface<NodeT>::set_predicate;
+  using ComponentInterface<NodeT>::predicates_;
+  using ComponentInterface<NodeT>::add_input;
+  using ComponentInterface<NodeT>::inputs_;
+  using ComponentInterface<NodeT>::create_output;
+  using ComponentInterface<NodeT>::outputs_;
+  using ComponentInterface<NodeT>::raise_error;
+  using ComponentInterface<NodeT>::get_qos;
+  using ComponentInterface<NodeT>::set_qos;
+
+  bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>&) override {
+    validate_parameter_was_called = true;
+    return validate_parameter_return_value;
+  }
+
+  rclcpp::Parameter get_ros_parameter(const std::string& name) {
+    return NodeT::get_parameter(name);
+  }
+
+  rcl_interfaces::msg::SetParametersResult set_ros_parameter(const rclcpp::Parameter& parameter) {
+    return NodeT::set_parameter(parameter);
+  }
+
+  std::string get_parameter_description(const std::string& name) {
+    return NodeT::describe_parameter(name).description;
+  }
+
+  bool validate_parameter_was_called = false;
+  bool validate_parameter_return_value = true;
+};
+
+class ComponentPublicInterface : public Component {
+public:
+  explicit ComponentPublicInterface(const rclcpp::NodeOptions& node_options, bool start_thread = true) :
+      Component(node_options, start_thread) {}
+  using Component::add_output;
+  using Component::outputs_;
+  using Component::get_clock;
+};
+
+class LifecycleComponentPublicInterface : public LifecycleComponent {
+public:
+  explicit LifecycleComponentPublicInterface(const rclcpp::NodeOptions& node_options) : LifecycleComponent(node_options) {}
+  using LifecycleComponent::add_output;
+  using LifecycleComponent::configure_outputs;
+  using LifecycleComponent::activate_outputs;
+  using LifecycleComponent::outputs_;
+  using LifecycleComponent::get_clock;
+};
+
+
+}
