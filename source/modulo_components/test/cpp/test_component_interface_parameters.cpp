@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "modulo_components//exceptions/ComponentParameterException.hpp"
+#include "modulo_components/exceptions/ComponentParameterException.hpp"
 #include "modulo_new_core/EncodedState.hpp"
 
 #include "test_modulo_components/component_public_interfaces.hpp"

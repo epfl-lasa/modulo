@@ -20,6 +20,8 @@ bool LifecycleComponent::configure_outputs() {
   for (auto& [name, interface]: this->outputs_) {
     try {
       auto topic_name = this->get_parameter_value<std::string>(name + "_topic");
+      RCLCPP_DEBUG_STREAM(this->get_logger(),
+                          "Configuring output '" << name << "' with topic name '" << topic_name << "'.");
       auto message_pair = interface->get_message_pair();
       switch (message_pair->get_type()) {
         case MessageType::BOOL: {
