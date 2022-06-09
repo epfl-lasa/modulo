@@ -1,8 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <state_representation/exceptions/InvalidParameterException.hpp>
-
-#include "modulo_components/ComponentInterface.hpp"
+#include "modulo_components/exceptions/ComponentParameterException.hpp"
 #include "modulo_new_core/EncodedState.hpp"
 
 #include "test_modulo_components/component_public_interfaces.hpp"
@@ -47,8 +45,7 @@ using NodeTypes = ::testing::Types<rclcpp::Node, rclcpp_lifecycle::LifecycleNode
 TYPED_TEST_SUITE(ComponentInterfaceParameterTest, NodeTypes);
 
 TYPED_TEST(ComponentInterfaceParameterTest, AddParameter) {
-  EXPECT_THROW(auto discard = this->component_->get_parameter("test"),
-               state_representation::exceptions::InvalidParameterException);
+  EXPECT_THROW(auto discard = this->component_->get_parameter("test"), exceptions::ComponentParameterException);
   EXPECT_THROW(this->component_->get_ros_parameter("test"), rclcpp::exceptions::ParameterNotDeclaredException);
   this->component_->add_parameter(this->param_, "Test parameter");
 
@@ -60,8 +57,7 @@ TYPED_TEST(ComponentInterfaceParameterTest, AddParameter) {
 }
 
 TYPED_TEST(ComponentInterfaceParameterTest, AddNameValueParameter) {
-  EXPECT_THROW(auto discard = this->component_->get_parameter("test"),
-               state_representation::exceptions::InvalidParameterException);
+  EXPECT_THROW(auto discard = this->component_->get_parameter("test"), exceptions::ComponentParameterException);
   EXPECT_THROW(this->component_->get_ros_parameter("test"), rclcpp::exceptions::ParameterNotDeclaredException);
   this->component_->add_parameter("test", 1, "Test parameter");
 
@@ -73,9 +69,7 @@ TYPED_TEST(ComponentInterfaceParameterTest, AddNameValueParameter) {
 }
 
 TYPED_TEST(ComponentInterfaceParameterTest, AddParameterAgain) {
-  EXPECT_THROW(auto
-                   discard = this->component_->get_parameter("test"),
-               state_representation::exceptions::InvalidParameterException);
+  EXPECT_THROW(auto discard = this->component_->get_parameter("test"), exceptions::ComponentParameterException);
   EXPECT_THROW(this->component_->get_ros_parameter("test"), rclcpp::exceptions::ParameterNotDeclaredException);
   this->component_->add_parameter(this->param_, "Test parameter");
 
@@ -88,8 +82,9 @@ TYPED_TEST(ComponentInterfaceParameterTest, AddParameterAgain) {
 }
 
 TYPED_TEST(ComponentInterfaceParameterTest, SetParameter) {
-  // setting before adding should not work
-  EXPECT_THROW(this->component_->set_parameter_value("test", 1), rclcpp::exceptions::ParameterNotDeclaredException);
+  // setting before adding should not work and parameter should not be created
+  this->component_->set_parameter_value("test", 1);
+  EXPECT_THROW(this->component_->template get_parameter_value<int>("test"), exceptions::ComponentParameterException);
 
   // validation should not be invoked as the parameter did not exist
   EXPECT_FALSE(this->component_->validate_parameter_was_called);
@@ -107,15 +102,13 @@ TYPED_TEST(ComponentInterfaceParameterTest, SetParameter) {
   // If the validation function returns false, setting the parameter value should _not_ update the referenced value
   this->component_->validate_parameter_was_called = false;
   this->component_->validate_parameter_return_value = false;
-  EXPECT_THROW(this->component_->set_parameter_value("test", 3),
-               state_representation::exceptions::InvalidParameterException);
+  this->component_->set_parameter_value("test", 3);
   EXPECT_TRUE(this->component_->validate_parameter_was_called);
   this->template expect_parameter_value<int>(2);
   EXPECT_EQ(this->param_->get_value(), 2);
 
   // Setting a value with an incompatible type should not update the parameter
-  EXPECT_THROW(this->component_->template set_parameter_value<std::string>("test", "foo"),
-               state_representation::exceptions::InvalidParameterException);
+  this->component_->template set_parameter_value<std::string>("test", "foo");
   EXPECT_TRUE(this->component_->validate_parameter_was_called);
   this->template expect_parameter_value<int>(2);
   EXPECT_EQ(this->param_->get_value(), 2);
@@ -159,8 +152,7 @@ TYPED_TEST(ComponentInterfaceParameterTest, ReadOnlyParameter) {
 
   // Trying to set the value of the read-only parameter should fail before the validation step
   this->component_->validate_parameter_was_called = false;
-  EXPECT_THROW(this->component_->set_parameter_value("test", 2),
-               state_representation::exceptions::InvalidParameterException);
+  this->component_->set_parameter_value("test", 2);
   EXPECT_FALSE(this->component_->validate_parameter_was_called);
   this->template expect_parameter_value<int>(1);
   EXPECT_EQ(this->param_->get_value(), 1);

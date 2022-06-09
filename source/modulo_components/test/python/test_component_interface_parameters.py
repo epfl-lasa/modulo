@@ -81,8 +81,7 @@ def test_add_parameter_again_not_attribute(component_interface):
 
 def test_set_parameter(component_interface):
     assert not component_interface.validate_was_called
-    with pytest.raises(rclpy.exceptions.ParameterNotDeclaredException):
-        component_interface.set_parameter_value("test", 1, sr.ParameterType.INT)
+    component_interface.set_parameter_value("test", 1, sr.ParameterType.INT)
     assert not component_interface.validate_was_called
     with pytest.raises(rclpy.exceptions.ParameterNotDeclaredException):
         component_interface.get_ros_parameter("test")
@@ -97,14 +96,12 @@ def test_set_parameter(component_interface):
 
     component_interface.validate_was_called = False
     component_interface.validation_return_value = False
-    with pytest.raises(RuntimeError):
-        component_interface.set_parameter_value("test", 3, sr.ParameterType.INT)
+    component_interface.set_parameter_value("test", 3, sr.ParameterType.INT)
     assert component_interface.validate_was_called
     assert_param_value_equal(component_interface, "test", 2)
     assert component_interface.param.get_value() == 2
 
-    with pytest.raises(RuntimeError):
-        component_interface.set_parameter_value("test", "test", sr.ParameterType.STRING)
+    component_interface.set_parameter_value("test", "test", sr.ParameterType.STRING)
     assert component_interface.validate_was_called
     assert_param_value_equal(component_interface, "test", 2)
     assert component_interface.param.get_value() == 2

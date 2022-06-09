@@ -85,6 +85,8 @@ inline void Component::add_output(
     std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
     this->create_output(parsed_signal_name, data, fixed_topic, default_topic);
     auto topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
+    RCLCPP_DEBUG_STREAM(this->get_logger(),
+                        "Adding output '" << signal_name << "' with topic name '" << topic_name << "'.");
     auto message_pair = this->outputs_.at(parsed_signal_name)->get_message_pair();
     switch (message_pair->get_type()) {
       case MessageType::BOOL: {
@@ -139,8 +141,7 @@ inline void Component::add_output(
       }
     }
   } catch (const std::exception& ex) {
-    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                 "Failed to add output '" << signal_name << "': " << ex.what());
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add output '" << signal_name << "': " << ex.what());
   }
 }
 
