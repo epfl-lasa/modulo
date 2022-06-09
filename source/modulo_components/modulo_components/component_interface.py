@@ -95,21 +95,24 @@ class ComponentInterface(Node):
                 if isinstance(attr, sr.Parameter):
                     sr_parameter = attr
                 else:
-                    raise TypeError("The attribute with the provided name does not contain a Parameter object.")
+                    raise TypeError(
+                        f"The attribute with the provided name '{parameter}' does not contain a Parameter object.")
             else:
                 raise TypeError("Provide either a state_representation.Parameter object or a string "
                                 "containing the name of the attribute that refers to the parameter to add.")
-        except (AttributeError, TypeError) as e:
+            ros_param = write_parameter(sr_parameter)
+            if not self.has_parameter(sr_parameter.get_name()):
+                self.get_logger().debug(f"Adding parameter '{sr_parameter.get_name()}'.")
+                self._parameter_dict[sr_parameter.get_name()] = parameter
+                # TODO ignore override
+                self.declare_parameter(ros_param.name, ros_param.value,
+                                       descriptor=ParameterDescriptor(description=description),
+                                       ignore_override=read_only)
+            else:
+                self.get_logger().debug(f"Parameter '{sr_parameter.get_name()}' already exists, overwriting.")
+                self.set_parameters([ros_param])
+        except Exception as e:
             self.get_logger().error(f"Failed to add parameter: {e}")
-            return
-        ros_param = write_parameter(sr_parameter)
-        if not self.has_parameter(sr_parameter.get_name()):
-            self._parameter_dict[sr_parameter.get_name()] = parameter
-            # TODO ignore override
-            self.declare_parameter(ros_param.name, ros_param.value,
-                                   descriptor=ParameterDescriptor(description=description), ignore_override=read_only)
-        else:
-            self.set_parameters([ros_param])
 
     def get_parameter(self, name: str) -> Union[sr.Parameter, rclpy.parameter.Parameter]:
         """
@@ -118,37 +121,44 @@ class ComponentInterface(Node):
         dictionary.
 
         :param name: The name of the parameter
+        :raises ComponentParameterError if the parameter does not exist
         :return: The requested parameter
         """
-        co_filename = sys._getframe().f_back.f_code.co_filename
-        self.get_logger().debug(f"get_parameter called from {co_filename}")
-        if "rclpy" in co_filename:
-            return rclpy.node.Node.get_parameter(self, name)
-        else:
-            return self._get_component_parameter(name)
+        try:
+            co_filename = sys._getframe().f_back.f_code.co_filename
+            self.get_logger().debug(f"get_parameter called from {co_filename}")
+            if "rclpy" in co_filename:
+                return rclpy.node.Node.get_parameter(self, name)
+            else:
+                return self._get_component_parameter(name)
+        except Exception as e:
+            raise ComponentParameterError(f"Failed to get parameter '{name}': {e}")
 
     def _get_component_parameter(self, name: str) -> sr.Parameter:
         """
         Get the parameter from the parameter dictionary by its name.
 
         :param name: The name of the parameter
-        :return: The parameter, if it exists
         :raises ComponentParameterError if the parameter does not exist
+        :return: The parameter, if it exists
         """
         if name not in self._parameter_dict.keys():
-            raise ComponentParameterError(f"Failed to get parameter '{name}'")
-        if isinstance(self._parameter_dict[name], str):
-            return self.__getattribute__(self._parameter_dict[name])
-        else:
-            return self._parameter_dict[name]
+            raise ComponentParameterError(f"Parameter '{name}' is not in the dict of parameters")
+        try:
+            if isinstance(self._parameter_dict[name], str):
+                return self.__getattribute__(self._parameter_dict[name])
+            else:
+                return self._parameter_dict[name]
+        except AttributeError as e:
+            raise ComponentParameterError(f"{e}")
 
     def get_parameter_value(self, name: str) -> T:
         """
         Get the parameter value from the parameter dictionary by its name.
 
         :param name: The name of the parameter
-        :return: The value of the parameter, if the parameter exists
         :raises ComponentParameterError if the parameter does not exist
+        :return: The value of the parameter, if the parameter exists
         """
         return self._get_component_parameter(name).get_value()
 
@@ -161,11 +171,15 @@ class ComponentInterface(Node):
         :param value: The value of the parameter
         :param parameter_type: The type of the parameter
         """
-        ros_param = write_parameter(sr.Parameter(name, value, parameter_type))
-        result = self.set_parameters([ros_param])[0]
-        if not result.successful:
-            # TODO not throw here
-            raise RuntimeError(result.reason)
+        try:
+            ros_param = write_parameter(sr.Parameter(name, value, parameter_type))
+            result = self.set_parameters([ros_param])[0]
+            if not result.successful:
+                self.get_logger().error(f"Failed to set parameter value of parameter '{name}': {result.reason}",
+                                        throttle_duration_sec=1.0)
+        except Exception as e:
+            self.get_logger().error(f"Failed to set parameter value of parameter '{name}': {e}",
+                                    throttle_duration_sec=1.0)
 
     def _validate_parameter(self, parameter: sr.Parameter) -> bool:
         """
@@ -211,9 +225,12 @@ class ComponentInterface(Node):
         :param predicate_name: The name of the associated predicate
         :param predicate_value: The value of the predicate as a bool or a callable function
         """
+        if not predicate_name:
+            self.get_logger().error("Failed to add predicate: Provide a non empty string as a name.")
         if predicate_name in self._predicates.keys():
             self.get_logger().debug(f"Predicate {predicate_name} already exists, overwriting.")
         else:
+            self.get_logger().debug(f"Adding predicate '{predicate_name}'.")
             self._predicate_publishers[predicate_name] = self.create_publisher(Bool,
                                                                                self.__generate_predicate_topic(
                                                                                    predicate_name), 10)
