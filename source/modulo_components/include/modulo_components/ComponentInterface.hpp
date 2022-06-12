@@ -200,7 +200,7 @@ protected:
    * @param name The name of the callback
    * @param callback The callback function that is evaluated periodically
    */
-  void add_periodic_function(const std::string& name, const std::function<void(void)>& callback);
+  void add_periodic_callback(const std::string& name, const std::function<void(void)>& callback);
 
   /**
    * @brief Configure a transform broadcaster.
@@ -284,8 +284,7 @@ protected:
   void evaluate_periodic_callbacks();
 
   /**
-   * @brief Put the component in error state by setting the
-   * 'in_error_state' predicate to true.
+   * @brief Put the component in error state by setting the 'in_error_state' predicate to true.
    */
   virtual void raise_error();
 
@@ -572,7 +571,7 @@ inline void ComponentInterface<NodeT>::add_input(
       );
     }
     if (this->inputs_.find(parsed_signal_name) != this->inputs_.end()) {
-      throw exceptions::AddSignalException("Failed to add input '" + signal_name + "': Input already exists");
+      throw exceptions::AddSignalException("Failed to add input '" + parsed_signal_name + "': Input already exists");
     }
     std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
     this->add_parameter(
@@ -581,7 +580,7 @@ inline void ComponentInterface<NodeT>::add_input(
     );
     topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
     RCLCPP_DEBUG_STREAM(this->get_logger(),
-                        "Adding input '" << signal_name << "' with topic name '" << topic_name << "'.");
+                        "Adding input '" << parsed_signal_name << "' with topic name '" << topic_name << "'.");
     auto message_pair = make_shared_message_pair(data, this->get_clock());
     std::shared_ptr<SubscriptionInterface> subscription_interface;
     switch (message_pair->get_type()) {
@@ -650,7 +649,7 @@ inline void ComponentInterface<NodeT>::add_input(
       );
     }
     if (this->inputs_.find(parsed_signal_name) != this->inputs_.end()) {
-      throw exceptions::AddSignalException("Failed to add input '" + signal_name + "': Input already exists");
+      throw exceptions::AddSignalException("Failed to add input '" + parsed_signal_name + "': Input already exists");
     }
     std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
     this->add_parameter(
@@ -659,7 +658,7 @@ inline void ComponentInterface<NodeT>::add_input(
     );
     topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
     RCLCPP_DEBUG_STREAM(this->get_logger(),
-                        "Adding input '" << signal_name << "' with topic name '" << topic_name << "'.");
+                        "Adding input '" << parsed_signal_name << "' with topic name '" << topic_name << "'.");
     auto subscription = NodeT::template create_subscription<MsgT>(topic_name, this->qos_, callback);
     auto subscription_interface =
         std::make_shared<SubscriptionHandler<MsgT>>()->create_subscription_interface(subscription);
@@ -671,7 +670,7 @@ inline void ComponentInterface<NodeT>::add_input(
 
 template<class NodeT>
 inline void
-ComponentInterface<NodeT>::add_periodic_function(const std::string& name, const std::function<void()>& callback) {
+ComponentInterface<NodeT>::add_periodic_callback(const std::string& name, const std::function<void()>& callback) {
   if (name.empty()) {
     RCLCPP_ERROR(this->get_logger(), "Failed to add periodic function: Provide a non empty string as a name.");
     return;

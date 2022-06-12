@@ -89,7 +89,7 @@ inline void Component::add_output(
     this->create_output(parsed_signal_name, data, fixed_topic, default_topic);
     auto topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
     RCLCPP_DEBUG_STREAM(this->get_logger(),
-                        "Adding output '" << signal_name << "' with topic name '" << topic_name << "'.");
+                        "Adding output '" << parsed_signal_name << "' with topic name '" << topic_name << "'.");
     auto message_pair = this->outputs_.at(parsed_signal_name)->get_message_pair();
     switch (message_pair->get_type()) {
       case MessageType::BOOL: {
