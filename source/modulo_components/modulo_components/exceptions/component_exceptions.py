@@ -11,3 +11,8 @@ class ComponentParameterError(ComponentError):
 class LookupTransformError(ComponentError):
     def __init__(self, message):
         super().__init__(message)
+
+
+class AddSignalError(ComponentError):
+    def __init__(self, message):
+        super().__init__(message)

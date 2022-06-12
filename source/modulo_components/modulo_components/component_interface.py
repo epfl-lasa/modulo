@@ -237,8 +237,8 @@ class ComponentInterface(Node):
         else:
             self.get_logger().debug(f"Adding predicate '{predicate_name}'.")
             self._predicate_publishers[predicate_name] = self.create_publisher(Bool,
-                                                                               self.__generate_predicate_topic(
-                                                                                   predicate_name), 10)
+                                                                               generate_predicate_topic(
+                                                                                   self.get_name(), predicate_name), 10)
         self._predicates[predicate_name] = predicate_value
 
     def get_predicate(self, predicate_name: str) -> bool:
@@ -336,3 +336,9 @@ class ComponentInterface(Node):
             return result
         except tf2_py.TransformException as e:
             raise LookupTransformError(f"Failed to lookup transform: {e}")
+
+    def raise_error(self):
+        """
+        Put the component in error state by setting the 'in_error_state' predicate to true.
+        """
+        self.set_predicate("in_error_state", True)

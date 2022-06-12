@@ -48,11 +48,11 @@ class Component(ComponentInterface):
         """
         try:
             if not self.execute():
-                self._raise_error()
+                self.raise_error()
                 return
         except Exception as e:
             self.get_logger().error(f"Failed to run component {self.get_name()}: {e}", throttle_duration_sec=1.0)
-            self._raise_error()
+            self.raise_error()
             return
         self.set_predicate("is_finished", True)
 
@@ -63,10 +63,3 @@ class Component(ComponentInterface):
         :return: True, if the execution was successful, false otherwise
         """
         return True
-
-    def _raise_error(self):
-        """
-        Put the component in error state by setting the 'in_error_state'
-        predicate to true.
-        """
-        self.set_predicate("in_error_state", True)
