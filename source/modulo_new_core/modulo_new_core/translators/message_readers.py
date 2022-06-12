@@ -8,6 +8,7 @@ import sensor_msgs.msg
 import state_representation as sr
 from modulo_new_core.encoded_state import EncodedState
 
+DataT = TypeVar('DataT')
 MsgT = TypeVar('MsgT')
 StateT = TypeVar('StateT')
 
@@ -91,12 +92,22 @@ def read_stamped_msg(state: StateT, msg: MsgT):
     else:
         raise RuntimeError("The provided combination of state type and message type is not supported")
     state.set_reference_frame(msg.header.frame_id)
+    return state
+
+
+def read_std_msg(msg: MsgT) -> DataT:
+    """
+    Read the data field of an std_msg.msg message.
+
+    :param msg: The message to read from
+    """
+    return msg.data
 
 
 def read_clproto_msg(msg: EncodedState) -> StateT:
     """
     Convert an EncodedState message to a state_representation State.
 
-    :param msg: The EncodedState msg to read from
+    :param msg: The EncodedState message to read from
     """
     return clproto.decode(msg.data.tobytes())

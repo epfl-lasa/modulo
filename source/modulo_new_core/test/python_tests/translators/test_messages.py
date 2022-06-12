@@ -1,13 +1,13 @@
 import clproto
 import geometry_msgs.msg
+import modulo_new_core.translators.message_readers as modulo_readers
+import modulo_new_core.translators.message_writers as modulo_writers
 import numpy as np
 import pytest
 import sensor_msgs.msg
 import state_representation as sr
+from modulo_new_core.encoded_state import EncodedState
 from rclpy.clock import Clock
-
-import modulo_new_core.translators.message_readers as modulo_readers
-import modulo_new_core.translators.message_writers as modulo_writers
 
 
 def read_xyz(msg):
@@ -163,7 +163,8 @@ def test_joint_state(joint_state: sr.JointState):
 
 
 def test_encoded_state(cart_state: sr.CartesianState):
-    msg = modulo_writers.write_clproto_msg(cart_state, clproto.MessageType.CARTESIAN_STATE_MESSAGE)
+    msg = EncodedState()
+    modulo_writers.write_clproto_msg(msg, cart_state, clproto.MessageType.CARTESIAN_STATE_MESSAGE)
 
     new_state = modulo_readers.read_clproto_msg(msg)
     assert_np_array_equal(new_state.data(), cart_state.data())

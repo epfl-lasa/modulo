@@ -32,7 +32,7 @@ void read_msg(state_representation::CartesianState& state, const geometry_msgs::
 /**
  * @brief Convert a ROS geometry_msgs::msg::AccelStamped to a CartesianState
  * @param state The CartesianState to populate
- * @param msg The ROS msg to read from
+ * @param msg The ROS message to read from
  */
 void read_msg(state_representation::CartesianState& state, const geometry_msgs::msg::AccelStamped& msg);
 

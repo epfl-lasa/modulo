@@ -25,7 +25,7 @@ namespace modulo_new_core::translators {
 
 /**
  * @brief Convert a CartesianState to a ROS geometry_msgs::msg::Accel
- * @param msg The ROS msg to populate
+ * @param msg The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
  */
@@ -173,7 +173,7 @@ void write_msg(std_msgs::msg::String& msg, const std::string& state, const rclcp
 /**
  * @brief Convert a state to a ROS std_msgs::msg::UInt8MultiArray message using protobuf encoding
  * @tparam a state_representation::State type object
- * @param msg The ROS msg to populate
+ * @param msg The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
  */
