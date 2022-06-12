@@ -1,13 +1,19 @@
 import sys
+from functools import partial
 from typing import Union, TypeVar, Callable, List
 
+import clproto
+import modulo_new_core.translators.message_readers as modulo_readers
+import modulo_new_core.translators.message_writers as modulo_writers
 import rclpy
 import state_representation as sr
 import tf2_py
 from geometry_msgs.msg import TransformStamped
-from modulo_components.exceptions.component_exceptions import ComponentParameterError, LookupTransformError
+from modulo_components.exceptions.component_exceptions import ComponentParameterError, LookupTransformError, AddSignalError
+from modulo_components.utilities.utilities import generate_predicate_topic, parse_signal_name
 from modulo_new_core.translators.message_readers import read_stamped_msg
 from modulo_new_core.translators.message_writers import write_stamped_msg
+from modulo_new_core.encoded_state import EncodedState
 from modulo_new_core.translators.parameter_translators import write_parameter, read_parameter_const
 from rcl_interfaces.msg import ParameterDescriptor
 from rcl_interfaces.msg import SetParametersResult
@@ -15,11 +21,12 @@ from rclpy.duration import Duration
 from rclpy.node import Node
 from rclpy.time import Time
 from rclpy.qos import QoSProfile
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Int32, Float64, Float64MultiArray, String
 from tf2_ros import TransformBroadcaster
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
 
+MsgT = TypeVar('MsgT')
 T = TypeVar('T')
 
 
@@ -32,6 +39,8 @@ class ComponentInterface(Node):
         predicates (dict(Parameters(bool))): map of predicates added to the Component.
         predicate_publishers (dict(rclpy.Publisher(Bool))): map of publishers associated to each predicate.
         parameter_dict: dict of parameters
+        inputs: dict of inputs
+        periodic_callbacks: dict of periodic callback functions
         tf_buffer (tf2_ros.Buffer): the buffer to lookup transforms published on tf2.
         tf_listener (tf2_ros.TransformListener): the listener to lookup transforms published on tf2.
         tf_broadcaster (tf2_ros.TransformBroadcaster): the broadcaster to publish transforms on tf2
@@ -49,6 +58,9 @@ class ComponentInterface(Node):
         self._parameter_dict = {}
         self._predicates = {}
         self._predicate_publishers = {}
+        self._inputs = {}
+        self._outputs = {}
+        self._periodic_callbacks = {}
         self.__tf_buffer: Buffer = None
         self.__tf_listener: TransformListener = None
         self.__tf_broadcaster: TransformBroadcaster = None
@@ -59,29 +71,17 @@ class ComponentInterface(Node):
         self.add_parameter(sr.Parameter("period", 0.1, sr.ParameterType.DOUBLE),
                            "Period (in s) between step function calls.")
 
+        self.add_predicate("in_error_state", False)
+
         self.create_timer(self.get_parameter_value("period"), self.__step)
 
     def __step(self) -> None:
         """
         Step function that is called periodically.
         """
-        for predicate_name in self._predicates.keys():
-            msg = Bool()
-            msg.data = self.get_predicate(predicate_name)
-            if predicate_name not in self._predicate_publishers.keys():
-                self.get_logger().error(f"No publisher for predicate {predicate_name} found.",
-                                        throttle_duration_sec=1.0)
-                return
-            self._predicate_publishers[predicate_name].publish(msg)
-
-    def __generate_predicate_topic(self, predicate_name: str) -> str:
-        """
-        Generate the predicate topic name from the name of the predicate.
-
-        :param predicate_name: The predicate name
-        :return: The predicate topic as /predicates/component_name/predicate_name
-        """
-        return f"/predicates/{self.get_name()}/{predicate_name}"
+        self.__publish_predicates()
+        self.__publish_outputs()
+        self.__evaluate_periodic_callbacks()
 
     def add_parameter(self, parameter: Union[str, sr.Parameter], description: str, read_only=False) -> None:
         """
@@ -281,6 +281,86 @@ class ComponentInterface(Node):
             return
         self._predicates[predicate_name] = predicate_value
 
+    def add_output(self, signal_name: str, data, message_type: MsgT, fixed_topic=False, default_topic=""):
+        try:
+            parsed_signal_name = parse_signal_name(signal_name)
+            if not parsed_signal_name:
+                raise AddSignalError("Failed to add output: Provide a non empty string as a name.")
+            if parsed_signal_name in self._outputs.keys():
+                raise AddSignalError(f"Output with name '{parsed_signal_name}' already exists")
+            topic_name = default_topic if default_topic else "~/" + parsed_signal_name
+            self.add_parameter(sr.Parameter(parsed_signal_name + "_topic", topic_name, sr.ParameterType.STRING),
+                               f"Output topic name of signal '{parsed_signal_name}'", fixed_topic)
+            translator = None
+            if message_type == Bool or message_type == Float64 or \
+                    message_type == Float64MultiArray or message_type == Int32 or message_type == String:
+                translator = modulo_writers.write_std_msg
+            elif message_type == EncodedState:
+                # TODO switch case to find message type
+                translator = partial(modulo_writers.write_clproto_msg,
+                                     clproto_message_type=clproto.MessageType.STATE_MESSAGE)
+            else:
+                raise TypeError("The provided message type is not supported to create a component output")
+            topic_name = self.get_parameter_value(parsed_signal_name + "_topic")
+            self.get_logger().debug(f"Adding output '{parsed_signal_name}' with topic name '{topic_name}'.")
+            publisher = self.create_publisher(message_type, topic_name, self.__qos)
+            self._outputs[signal_name] = {"attribute": data, "message_type": message_type,
+                                          "translator": translator, "publisher": publisher}
+        except Exception as e:
+            self.get_logger().error(f"Failed to add output '{signal_name}': {e}")
+
+    def __subscription_callback(self, msg: MsgT, attribute_name: str, reader: Callable):
+        try:
+            self.__setattr__(attribute_name, reader(msg))
+        except Exception as e:
+            self.get_logger().error(f"Failed to read message for attribute {attribute_name}", throttle_duration_sec=1.0)
+
+    def add_input(self, signal_name: str, subscription: Union[str, Callable], message_type: MsgT, fixed_topic=False,
+                  default_topic=""):
+        """
+        Add and configure an input signal of the component.
+
+        :param signal_name: Name of the output signal
+        :param subscription: The callback to use for the subscription
+        :param message_type: ROS message type of the subscription
+        :param fixed_topic: If true, the topic name of the output signal is fixed
+        :param default_topic: If set, the default value for the topic name to use
+        """
+        try:
+            parsed_signal_name = parse_signal_name(signal_name)
+            if not parsed_signal_name:
+                raise AddSignalError(f"Failed to add input '{signal_name}': Parsed signal name is empty.")
+            if parsed_signal_name in self._inputs.keys():
+                raise AddSignalError(f"Failed to add input '{parsed_signal_name}': Input already exists")
+            topic_name = default_topic if default_topic else "~/" + parsed_signal_name
+            self.add_parameter(sr.Parameter(parsed_signal_name + "_topic", topic_name, sr.ParameterType.STRING),
+                               f"Output topic name of signal '{parsed_signal_name}'", fixed_topic)
+            topic_name = self.get_parameter_value(parsed_signal_name + "_topic")
+            self.get_logger().debug(f"Adding input '{parsed_signal_name}' with topic name '{topic_name}'.")
+            if isinstance(subscription, Callable):
+                self._inputs[parsed_signal_name] = self.create_subscription(message_type, topic_name, subscription,
+                                                                            self.__qos)
+            elif isinstance(subscription, str):
+                if message_type == Bool or message_type == Float64 or \
+                        message_type == Float64MultiArray or message_type == Int32 or message_type == String:
+                    self._inputs[parsed_signal_name] = self.create_subscription(message_type, topic_name,
+                                                                                partial(self.__subscription_callback,
+                                                                                        attribute_name=subscription,
+                                                                                        reader=modulo_readers.read_std_msg),
+                                                                                self.__qos)
+                elif message_type == EncodedState:
+                    self._inputs[parsed_signal_name] = self.create_subscription(message_type, topic_name,
+                                                                                partial(self.__subscription_callback,
+                                                                                        attribute_name=subscription,
+                                                                                        reader=modulo_readers.read_clproto_msg),
+                                                                                self.__qos)
+                else:
+                    raise TypeError("The provided message type is not supported to create a component input")
+            else:
+                raise TypeError("Provide either a string containing the name of an attribute or a callable.")
+        except Exception as e:
+            self.get_logger().error(f"Failed to add input '{signal_name}': {e}")
+
     def add_tf_broadcaster(self):
         """
         Configure a transform broadcaster.
@@ -369,6 +449,42 @@ class ComponentInterface(Node):
         else:
             self.get_logger().debug(f"Adding periodic function '{name}'.")
         self._periodic_callbacks[name] = callback
+
+    def __evaluate_periodic_callbacks(self):
+        """
+        Helper function to evaluate all periodic function callbacks.
+        """
+        for name, callback in self._periodic_callbacks.items():
+            try:
+                callback()
+            except Exception as e:
+                self.get_logger().error(f"Failed to evaluate periodic function callback '{name}': {e}",
+                                        throttle_duration_sec=1.0)
+
+    def __publish_predicates(self):
+        """
+        Helper function to publish all predicates.
+        """
+        for predicate_name in self._predicates.keys():
+            msg = Bool()
+            msg.data = self.get_predicate(predicate_name)
+            if predicate_name not in self._predicate_publishers.keys():
+                self.get_logger().error(f"No publisher for predicate {predicate_name} found.",
+                                        throttle_duration_sec=1.0)
+                return
+            self._predicate_publishers[predicate_name].publish(msg)
+
+    def __publish_outputs(self):
+        """
+        Helper function to publish all outputs.
+        """
+        for signal, output_dict in self._outputs.items():
+            try:
+                message = output_dict["message_type"]()
+                output_dict["translator"](message, self.__getattribute__(output_dict["attribute"]))
+                output_dict["publisher"].publish(message)
+            except Exception as e:
+                self.get_logger().error(f"{e}")
 
     def raise_error(self):
         """
