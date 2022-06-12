@@ -14,6 +14,7 @@ from rcl_interfaces.msg import SetParametersResult
 from rclpy.duration import Duration
 from rclpy.node import Node
 from rclpy.time import Time
+from rclpy.qos import QoSProfile
 from std_msgs.msg import Bool
 from tf2_ros import TransformBroadcaster
 from tf2_ros.buffer import Buffer
@@ -51,6 +52,8 @@ class ComponentInterface(Node):
         self.__tf_buffer: Buffer = None
         self.__tf_listener: TransformListener = None
         self.__tf_broadcaster: TransformBroadcaster = None
+
+        self.__qos = QoSProfile(depth=10)
 
         self.add_on_set_parameters_callback(self.__on_set_parameters_callback)
         self.add_parameter(sr.Parameter("period", 0.1, sr.ParameterType.DOUBLE),
@@ -336,6 +339,36 @@ class ComponentInterface(Node):
             return result
         except tf2_py.TransformException as e:
             raise LookupTransformError(f"Failed to lookup transform: {e}")
+
+    def get_qos(self) -> QoSProfile:
+        """
+        Getter of the Quality of Service attribute.
+        """
+        return self.__qos
+
+    def set_qos(self, qos: QoSProfile):
+        """
+        Setter of the Quality of Service for ROS publishers and subscribers.
+
+        :param qos: The desired Quality of Service
+        """
+        self.__qos = qos
+
+    def add_periodic_callback(self, name: str, callback: Callable):
+        """
+        Add a periodic callback function. The provided function is evaluated periodically at the component step period.
+
+        :param name: The name of the callback
+        :param callback: The callback function that is evaluated periodically
+        """
+        if not name:
+            self.get_logger().error("Failed to add periodic function: Provide a non empty string as a name.")
+            return
+        if name in self._periodic_callbacks.keys():
+            self.get_logger().debug(f"Periodic function '{name}' already exists, overwriting.")
+        else:
+            self.get_logger().debug(f"Adding periodic function '{name}'.")
+        self._periodic_callbacks[name] = callback
 
     def raise_error(self):
         """
