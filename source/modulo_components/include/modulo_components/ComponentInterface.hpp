@@ -493,10 +493,11 @@ inline void ComponentInterface<NodeT>::add_variant_predicate(
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Predicate '" << name << "' already exists, overwriting.");
   } else {
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding predicate '" << name << "'.");
+    auto publisher = this->template create_publisher<std_msgs::msg::Bool>(
+        utilities::generate_predicate_topic(this->get_name(), name), this->qos_
+    );
     this->predicate_publishers_.insert_or_assign(
-        name, this->template create_publisher<std_msgs::msg::Bool>(
-            utilities::generate_predicate_topic(this->get_name(), name), this->qos_
-        ));
+        name, std::static_pointer_cast<rclcpp::Publisher<std_msgs::msg::Bool>>(publisher));
   }
   this->predicates_.insert_or_assign(name, predicate);
 }
