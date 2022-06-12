@@ -117,12 +117,24 @@ TYPED_TEST(ComponentInterfaceTest, CreateOutput) {
   EXPECT_THROW(pub_interface->publish(), modulo_new_core::exceptions::InvalidPointerCastException);
 }
 
+TYPED_TEST(ComponentInterfaceTest, TF) {
+  this->component_->add_tf_broadcaster();
+  this->component_->add_tf_listener();
+  this->component_->activate_tf_broadcaster();
+  auto send_tf = state_representation::CartesianPose::Random("test", "world");
+  EXPECT_NO_THROW(this->component_->send_transform(send_tf));
+  EXPECT_THROW(auto throw_tf = this->component_->lookup_transform("dummy", "world"), exceptions::LookupTransformException);
+  auto lookup_tf = this->component_->lookup_transform("test", "world");
+  auto identity = send_tf * lookup_tf.inverse();
+  EXPECT_FLOAT_EQ(identity.data().norm(), 1.);
+  EXPECT_FLOAT_EQ(abs(identity.get_orientation().w()), 1.);
+}
+
 TYPED_TEST(ComponentInterfaceTest, GetSetQoS) {
   auto qos = rclcpp::QoS(5);
   this->component_->set_qos(qos);
   EXPECT_EQ(qos, this->component_->get_qos());
 }
-
 
 TYPED_TEST(ComponentInterfaceTest, RaiseError) {
   EXPECT_FALSE(this->component_->get_predicate("in_error_state"));
