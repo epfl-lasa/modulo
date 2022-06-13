@@ -232,7 +232,9 @@ bool LifecycleComponent::configure_outputs() {
 }
 
 bool LifecycleComponent::cleanup_signals() {
-  // TODO: destroy input / output interfaces
+  RCLCPP_DEBUG(this->get_logger(), "Clearing all inputs and outputs");
+  this->inputs_.clear();
+  this->outputs_.clear();
   return true;
 }
 

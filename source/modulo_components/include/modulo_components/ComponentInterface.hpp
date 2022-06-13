@@ -291,6 +291,8 @@ protected:
 
   using NodeT::create_publisher;
 
+  std::map<std::string, std::shared_ptr<modulo_new_core::communication::SubscriptionInterface>>
+      inputs_; ///< Map of inputs
   std::map<std::string, std::shared_ptr<modulo_new_core::communication::PublisherInterface>>
       outputs_; ///< Map of outputs
 
@@ -324,7 +326,6 @@ private:
   std::map<std::string, utilities::PredicateVariant> predicates_; ///< Map of predicates
   std::map<std::string, std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>>>
       predicate_publishers_; ///< Map of predicate publishers
-  std::map<std::string, std::shared_ptr<modulo_new_core::communication::SubscriptionInterface>> inputs_;
 
   std::map<std::string, std::function<void(void)>> periodic_callbacks_; ///< Map of periodic function callbacks
 
