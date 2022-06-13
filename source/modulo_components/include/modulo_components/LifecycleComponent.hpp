@@ -28,33 +28,51 @@ public:
 protected:
   /**
    * @brief Steps to execute when configuring the component.
+   * @details This method can be overridden by derived Component classes.
+   * Configuration generally involves reading parameters and adding inputs and outputs.
+   * @return True if configuration is successful, false otherwise
    */
-  bool on_configure();
+  virtual bool on_configure();
 
   /**
    * @brief Steps to execute when cleaning up the component.
+   * @details This method can be overridden by derived Component classes.
+   * Cleanup generally involves resetting the properties and states to initial conditions.
+   * @return True if cleanup is successful, false otherwise
    */
-  bool on_cleanup();
+  virtual bool on_cleanup();
 
   /**
    * @brief Steps to execute when activating the component.
+   * @details This method can be overridden by derived Component classes.
+   * Activation generally involves final setup steps before the on_step callback is periodically evaluated.
+   * @return True if activation is successful, false otherwise
    */
-  bool on_activate();
+  virtual bool on_activate();
 
   /**
    * @brief Steps to execute when deactivating the component.
+   * @details This method can be overridden by derived Component classes.
+   * Deactivation generally involves any steps to reset the component to an inactive state.
+   * @return True if deactivation is successful, false otherwise
    */
-  bool on_deactivate();
+  virtual bool on_deactivate();
 
   /**
    * @brief Steps to execute when shutting down the component.
+   * @details This method can be overridden by derived Component classes.
+   * Shutdown generally involves the destruction of any threads or properties not handled by the base class.
+   * @return True if shutdown is successful, false otherwise
    */
-  bool on_shutdown();
+  virtual bool on_shutdown();
 
   /**
    * @brief Steps to execute when handling errors.
+   * @details This method can be overridden by derived Component classes.
+   * Error handling generally involves recovering and resetting the component to an unconfigured state.
+   * @return True if error handling is successful, false otherwise
    */
-  bool on_error();
+  virtual bool on_error();
 
   /**
    * @brief Steps to execute periodically. To be redefined by derived Component classes.
@@ -87,6 +105,13 @@ private:
   on_configure(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
+   * @brief Configuration handler.
+   * @details This method configures outputs and invokes the virtual on_configure callback.
+   * @return True if configuration is successful, false otherwise
+   */
+  bool configure();
+
+  /**
     * @brief Transition callback for state 'CleaningUp'.
     * @details on_cleanup callback is called when the lifecycle component enters the 'CleaningUp' transition state.
     * The component must be in the 'Inactive' state.
@@ -97,6 +122,13 @@ private:
     */
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_cleanup(const rclcpp_lifecycle::State& previous_state) override;
+
+  /**
+   * @brief Cleanup handler.
+   * @details This method resets inputs and outputs and invokes the virtual on_cleanup callback.
+   * @return True if cleanup is successful, false otherwise
+   */
+  bool cleanup();
 
   /**
   * @brief Transition callback for state 'Activating'.
@@ -112,6 +144,13 @@ private:
   on_activate(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
+   * @brief Activation handler.
+   * @details This method activates outputs and invokes the virtual on_activate callback.
+   * @return True if activation is successful, false otherwise
+   */
+  bool activate();
+
+  /**
     * @brief Transition callback for state 'Deactivating'.
     * @details on_deactivate callback is called when the lifecycle component enters the 'Deactivating' transition state.
     * The component must be in the 'Active' state.
@@ -122,6 +161,13 @@ private:
     */
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
+
+  /**
+   * @brief Deactivation handler.
+   * @details This method deactivates outputs and invokes the virtual on_deactivate callback.
+   * @return True if deactivation is successful, false otherwise
+   */
+  bool deactivate();
 
   /**
     * @brief Transition callback for state 'ShuttingDown'.
@@ -136,6 +182,13 @@ private:
   on_shutdown(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
+   * @brief Shutdown handler.
+   * @details This method invokes the virtual on_shutdown callback.
+   * @return True if shutdown is successful, false otherwise
+   */
+  bool shutdown();
+
+  /**
     * @brief Transition callback for state 'ErrorProcessing'.
     * @details on_error callback is called when the lifecycle component enters the 'ErrorProcessing' transition state.
     * This transition can originate from any step.
@@ -147,6 +200,13 @@ private:
     */
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_error(const rclcpp_lifecycle::State& previous_state) override;
+
+  /**
+   * @brief Error handler.
+   * @details This method invokes the virtual on_error callback.
+   * @return True if error handling is successful, false otherwise
+   */
+  bool handle_error();
 
   /**
    * @brief Step function that is called periodically and publishes predicates,
