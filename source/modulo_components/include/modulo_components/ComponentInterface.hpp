@@ -707,7 +707,7 @@ inline void ComponentInterface<NodeT>::add_tf_listener() {
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::activate_tf_broadcaster() {
-  if (this->publisher_type_ == modulo_new_core::communication::PublisherType::PUBLISHER) {
+  if (this->publisher_type_ != modulo_new_core::communication::PublisherType::LIFECYCLE_PUBLISHER) {
     return;
   }
   try {
