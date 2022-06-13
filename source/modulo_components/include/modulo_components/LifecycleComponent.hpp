@@ -52,6 +52,11 @@ protected:
   bool on_shutdown();
 
   /**
+   * @brief Steps to execute when handling errors.
+   */
+  bool on_error();
+
+  /**
    * @brief Steps to execute periodically. To be redefined by derived Component classes.
    */
   virtual void on_step();
@@ -120,15 +125,28 @@ private:
 
   /**
     * @brief Transition callback for state 'ShuttingDown'.
-    * @details on_shutdown callback is being called when the lifecycle node enters the 'ShuttingDown' state.
+    * @details on_shutdown callback is called when the lifecycle component enters the 'ShuttingDown' transition state.
     * This transition can be called from the 'Unconfigured', 'Inactive' and 'Active' states.
-    * Depending on the return value of this function, the node may either transition to the 'Finalized' state via the
-    * 'shutdown' transition or goes to 'ErrorProcessing'.\n
-    * TRANSITION_CALLBACK_SUCCESS transitions to "Finalized"\n
+    * Depending on the return value of this function, the component may either transition to the 'Finalized' state
+    * via the 'shutdown' transition or go to 'ErrorProcessing'.\n
+    * TRANSITION_CALLBACK_SUCCESS transitions to 'Finalized'\n
     * TRANSITION_CALLBACK_FAILURE, TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
     */
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_shutdown(const rclcpp_lifecycle::State& previous_state) override;
+
+  /**
+    * @brief Transition callback for state 'ErrorProcessing'.
+    * @details on_error callback is called when the lifecycle component enters the 'ErrorProcessing' transition state.
+    * This transition can originate from any step.
+    * Depending on the return value of this function, the component may either transition to the 'Unconfigured' state
+    * or go to 'Finalized'.\n
+    * TRANSITION_CALLBACK_SUCCESS transitions to 'Unconfigured'\n
+    * TRANSITION_CALLBACK_FAILURE transitions to 'Finalized'\n
+    * TRANSITION_CALLBACK_ERROR should not be returned, and any exceptions should be caught and returned as a failure\n
+    */
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_error(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
    * @brief Step function that is called periodically and publishes predicates,

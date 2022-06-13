@@ -161,6 +161,32 @@ LifecycleComponent::on_shutdown(const rclcpp_lifecycle::State& previous_state) {
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
 }
 
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+LifecycleComponent::on_error(const rclcpp_lifecycle::State& previous_state) {
+  RCLCPP_DEBUG(this->get_logger(), "on_error called from previous state %s", previous_state.label().c_str());
+  this->set_predicate("is_unconfigured", false);
+  this->set_predicate("is_inactive", false);
+  this->set_predicate("is_active", false);
+  this->set_predicate("is_finalized", false);
+  this->set_predicate("in_error_state", true);
+  bool error_handled;
+  try {
+    error_handled = this->on_error();
+  } catch (const std::exception& ex) {
+    RCLCPP_DEBUG(this->get_logger(), "Exception caught during on_error handling: %s", ex.what());
+    error_handled = false;
+  }
+  if (!error_handled) {
+    RCLCPP_ERROR(get_logger(), "Error processing failed! Entering into the finalized state.");
+    // TODO: reset and finalize all needed properties
+    this->set_predicate("is_finalized", true);
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
+  }
+  this->set_predicate("in_error_state", false);
+  this->set_predicate("is_unconfigured", true);
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+}
+
 bool LifecycleComponent::configure_outputs() {
   bool success = true;
   for (auto& [name, interface]: this->outputs_) {
