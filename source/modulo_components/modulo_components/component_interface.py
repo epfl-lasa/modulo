@@ -3,15 +3,21 @@ from typing import Union, TypeVar, Callable, List
 
 import rclpy
 import state_representation as sr
-from modulo_components.exceptions.component_exceptions import ComponentParameterError
+import tf2_py
+from geometry_msgs.msg import TransformStamped
+from modulo_components.exceptions.component_exceptions import ComponentParameterError, LookupTransformError
+from modulo_new_core.translators.message_readers import read_stamped_msg
+from modulo_new_core.translators.message_writers import write_stamped_msg
 from modulo_new_core.translators.parameter_translators import write_parameter, read_parameter_const
 from rcl_interfaces.msg import ParameterDescriptor
 from rcl_interfaces.msg import SetParametersResult
+from rclpy.duration import Duration
 from rclpy.node import Node
+from rclpy.time import Time
+from std_msgs.msg import Bool
 from tf2_ros import TransformBroadcaster
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
-from std_msgs.msg import Bool
 
 T = TypeVar('T')
 
@@ -42,10 +48,9 @@ class ComponentInterface(Node):
         self._parameter_dict = {}
         self._predicates = {}
         self._predicate_publishers = {}
-        # TODO add_XXX
-        self.__tf_buffer = None
-        self.__tf_listener = None
-        self.__tf_broadcaster = None
+        self.__tf_buffer: Buffer = None
+        self.__tf_listener: TransformListener = None
+        self.__tf_broadcaster: TransformBroadcaster = None
 
         self.add_on_set_parameters_callback(self.__on_set_parameters_callback)
         self.add_parameter(sr.Parameter("period", 0.1, sr.ParameterType.DOUBLE),
@@ -272,3 +277,62 @@ class ComponentInterface(Node):
                 throttle_duration_sec=1.0)
             return
         self._predicates[predicate_name] = predicate_value
+
+    def add_tf_broadcaster(self):
+        """
+        Configure a transform broadcaster.
+        """
+        if not self.__tf_broadcaster:
+            self.get_logger().debug("Adding TF broadcaster.")
+            self.__tf_broadcaster = TransformBroadcaster(self)
+        else:
+            self.get_logger().error("TF broadcaster already exists.")
+
+    def add_tf_listener(self):
+        """
+        Configure a transform buffer and listener.
+        """
+        if not self.__tf_buffer or not self.__tf_listener:
+            self.get_logger().debug("Adding TF buffer and listener.")
+            self.__tf_buffer = Buffer()
+            self.__tf_listener = TransformListener(self.__tf_buffer, self)
+        else:
+            self.get_logger().error("TF buffer and listener already exist.")
+
+    def send_transform(self, transform: sr.CartesianPose):
+        """
+        Send a transform to TF.
+
+        :param transform: The transform to send
+        """
+        if not self.__tf_broadcaster:
+            self.get_logger().error("Failed to send transform: No TF broadcaster configured.",
+                                    throttle_duration_sec=1.0)
+            return
+        try:
+            transform_message = TransformStamped()
+            write_stamped_msg(transform_message, transform, self.get_clock().now())
+            self.__tf_broadcaster.sendTransform(transform_message)
+        except tf2_py.TransformException as e:
+            self.get_logger().error(f"Failed to send transform: {e}", throttle_duration_sec=1.0)
+
+    def lookup_transform(self, frame_name: str, reference_frame_name="world", time_point=Time(),
+                         duration=Duration(nanoseconds=1e4)) -> sr.CartesianPose:
+        """
+        Look up a transform from TF.
+
+        :param frame_name: The desired frame of the transform
+        :param reference_frame_name: The desired reference frame of the transform
+        :param time_point: The time at which the value of the transform is desired (default: 0, will get the latest)
+        :param duration: How long to block the lookup call before failing
+        :return: If it exists, the requested transform
+        """
+        if not self.__tf_buffer or not self.__tf_listener:
+            raise LookupTransformError("Failed to lookup transform: To TF buffer / listener configured.")
+        try:
+            result = sr.CartesianPose(frame_name, reference_frame_name)
+            transform = self.__tf_buffer.lookup_transform(reference_frame_name, frame_name, time_point, duration)
+            read_stamped_msg(result, transform)
+            return result
+        except tf2_py.TransformException as e:
+            raise LookupTransformError(f"Failed to lookup transform: {e}")

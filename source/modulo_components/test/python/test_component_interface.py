@@ -1,6 +1,9 @@
+import numpy as np
 import pytest
-
+import rclpy
+import state_representation as sr
 from modulo_components.component_interface import ComponentInterface
+from modulo_components.exceptions.component_exceptions import LookupTransformError
 
 
 def raise_(ex):
@@ -46,3 +49,18 @@ def test_set_predicate(component_interface):
     component_interface.add_predicate('bar', True)
     component_interface.set_predicate('bar', lambda: False)
     assert not component_interface.get_predicate('bar')
+
+
+def test_tf(component_interface):
+    component_interface.add_tf_broadcaster()
+    component_interface.add_tf_listener()
+    send_tf = sr.CartesianPose().Random("test", "world")
+    component_interface.send_transform(send_tf)
+    for i in range(10):
+        rclpy.spin_once(component_interface)
+    with pytest.raises(LookupTransformError):
+        component_interface.lookup_transform("dummy", "world")
+    lookup_tf = component_interface.lookup_transform("test", "world")
+    identity = send_tf * lookup_tf.inverse()
+    assert np.linalg.norm(identity.data()) - 1 < 1e-3
+    assert abs(identity.get_orientation().w) - 1 < 1e-3

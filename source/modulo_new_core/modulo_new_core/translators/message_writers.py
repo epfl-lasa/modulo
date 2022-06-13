@@ -100,7 +100,7 @@ def write_stamped_msg(msg: MsgT, state: StateT, time: rclpy.time.Time):
         write_msg(msg.wrench, state)
     else:
         raise RuntimeError("The provided combination of state type and message type is not supported")
-    msg.header.stamp = time
+    msg.header.stamp = time.to_msg()
     msg.header.frame_id = state.get_reference_frame()
 
 
