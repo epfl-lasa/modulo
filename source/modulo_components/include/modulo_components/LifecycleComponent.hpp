@@ -50,6 +50,7 @@ protected:
    * @brief Steps to execute when shutting down the component.
    */
   bool on_shutdown();
+
   /**
    * @brief Steps to execute periodically. To be redefined by derived Component classes.
    */
@@ -69,49 +70,53 @@ protected:
 private:
   /**
    * @brief Transition callback for state 'Configuring'.
-   * @details on_configure callback is being called when the lifecycle node enters the 'Configuring' state.
-   * Depending on the return value of this function, the node may either transition to the 'Inactive' state via the
-   * 'configure' transition, stay 'Unconfigured' or go to 'ErrorProcessing'.\n
+   * @details on_configure callback is called when the lifecycle component enters the 'Configuring' transition state.
+   * The component must be in the 'Unconfigured' state.
+   * Depending on the return value of this function, the component may either transition to the 'Inactive' state
+   * via the 'configure' transition, stay 'Unconfigured' or go to 'ErrorProcessing'.\n
    * TRANSITION_CALLBACK_SUCCESS transitions to 'Inactive'\n
    * TRANSITION_CALLBACK_FAILURE transitions to 'Unconfigured'\n
    * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
    */
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-  on_configure(const rclcpp_lifecycle::State&) override;
+  on_configure(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
     * @brief Transition callback for state 'CleaningUp'.
-    * @details on_cleanup callback is being called when the lifecycle node enters the 'CleaningUp' state.
-    * Depending on the return value of this function, the node may either transition to the 'Unconfigured' state via the
-    * 'cleanup' transition or goes to 'ErrorProcessing'.\n
+    * @details on_cleanup callback is called when the lifecycle component enters the 'CleaningUp' transition state.
+    * The component must be in the 'Inactive' state.
+    * Depending on the return value of this function, the component may either transition to the 'Unconfigured' state
+    * via the 'cleanup' transition or go to 'ErrorProcessing'.\n
     * TRANSITION_CALLBACK_SUCCESS transitions to 'Unconfigured'\n
     * TRANSITION_CALLBACK_FAILURE, TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
     */
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-  on_cleanup(const rclcpp_lifecycle::State&) override;
+  on_cleanup(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
   * @brief Transition callback for state 'Activating'.
-  * @details on_activate callback is being called when the lifecycle node enters the 'Activating' state.
-  * Depending on the return value of this function, the node may either transition to the 'Active' state via the
-  * 'activate' transition, stay 'Inactive' or go to 'ErrorProcessing'.\n
+  * @details on_activate callback is called when the lifecycle component enters the 'Activating' transition state.
+  * The component must be in the 'Inactive' state.
+  * Depending on the return value of this function, the component may either transition to the 'Active' state
+  * via the 'activate' transition, stay 'Inactive' or go to 'ErrorProcessing'.\n
   * TRANSITION_CALLBACK_SUCCESS transitions to 'Active'\n
   * TRANSITION_CALLBACK_FAILURE transitions to 'Inactive'\n
   * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
   */
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-  on_activate(const rclcpp_lifecycle::State&) override;
+  on_activate(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
     * @brief Transition callback for state 'Deactivating'.
-    * @details on_deactivate callback is being called when the lifecycle node enters the 'Deactivating' state.
-    * Depending on the return value of this function, the node may either transition to the 'Inactive' state via the
-    * 'deactivate' transition or goes to 'ErrorProcessing'.\n
+    * @details on_deactivate callback is called when the lifecycle component enters the 'Deactivating' transition state.
+    * The component must be in the 'Active' state.
+    * Depending on the return value of this function, the component may either transition to the 'Inactive' state
+    * via the 'deactivate' transition or go to 'ErrorProcessing'.\n
     * TRANSITION_CALLBACK_SUCCESS transitions to 'Inactive'\n
     * TRANSITION_CALLBACK_FAILURE, TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
     */
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-  on_deactivate(const rclcpp_lifecycle::State&) override;
+  on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
     * @brief Transition callback for state 'ShuttingDown'.
@@ -123,7 +128,7 @@ private:
     * TRANSITION_CALLBACK_FAILURE, TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
     */
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-  on_shutdown(const rclcpp_lifecycle::State& state) override;
+  on_shutdown(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
    * @brief Step function that is called periodically and publishes predicates,
@@ -148,6 +153,11 @@ private:
    * @return True if deactivation was successful
    */
   bool deactivate_outputs();
+
+  /**
+   * @brief Cleanup all inputs and outputs.
+   */
+  bool cleanup_signals();
 
   using rclcpp_lifecycle::LifecycleNode::create_publisher;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::create_output;
