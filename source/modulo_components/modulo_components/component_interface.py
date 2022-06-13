@@ -284,7 +284,12 @@ class ComponentInterface(Node):
             return
         self._predicates[predicate_name] = predicate_value
 
-    def add_output(self, signal_name: str, data, message_type: MsgT, fixed_topic=False, default_topic=""):
+    def add_output(self, signal_name: str, data, message_type: MsgT,
+                   clproto_message_type=clproto.MessageType.UNKNOWN_MESSAGE, fixed_topic=False, default_topic=""):
+        if message_type == EncodedState and clproto_message_type == clproto.MessageType.UNKNOWN_MESSAGE:
+            self.get_logger().error(f"Failed to add output '{signal_name}': Provide a valid clproto "
+                                    f"message type for outputs of type EncodedState.")
+            return
         try:
             parsed_signal_name = parse_signal_name(signal_name)
             if not parsed_signal_name:
@@ -299,9 +304,8 @@ class ComponentInterface(Node):
                     message_type == Float64MultiArray or message_type == Int32 or message_type == String:
                 translator = modulo_writers.write_std_msg
             elif message_type == EncodedState:
-                # TODO switch case to find message type
                 translator = partial(modulo_writers.write_clproto_msg,
-                                     clproto_message_type=clproto.MessageType.STATE_MESSAGE)
+                                     clproto_message_type=clproto_message_type)
             else:
                 raise TypeError("The provided message type is not supported to create a component output")
             topic_name = self.get_parameter_value(parsed_signal_name + "_topic")
