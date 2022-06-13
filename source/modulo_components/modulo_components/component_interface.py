@@ -40,7 +40,9 @@ class ComponentInterface(Node):
         predicate_publishers (dict(rclpy.Publisher(Bool))): map of publishers associated to each predicate.
         parameter_dict: dict of parameters
         inputs: dict of inputs
+        outputs: dict of output
         periodic_callbacks: dict of periodic callback functions
+        qos: the Quality of Service for publishers and subscribers
         tf_buffer (tf2_ros.Buffer): the buffer to lookup transforms published on tf2.
         tf_listener (tf2_ros.TransformListener): the listener to lookup transforms published on tf2.
         tf_broadcaster (tf2_ros.TransformBroadcaster): the broadcaster to publish transforms on tf2
