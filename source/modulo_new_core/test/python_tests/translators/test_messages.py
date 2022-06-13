@@ -38,7 +38,7 @@ def test_accel(cart_state: sr.CartesianState, clock: Clock):
     assert_np_array_equal(cart_state.get_acceleration(), new_state.get_acceleration())
 
     msg_stamped = geometry_msgs.msg.AccelStamped()
-    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now().to_msg())
+    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now())
     assert msg_stamped.header.frame_id == cart_state.get_reference_frame()
     assert_np_array_equal(read_xyz(msg.linear), cart_state.get_linear_acceleration())
     assert_np_array_equal(read_xyz(msg.angular), cart_state.get_angular_acceleration())
@@ -61,7 +61,7 @@ def test_pose(cart_state: sr.CartesianState, clock: Clock):
     assert_np_array_equal(cart_state.get_pose(), new_state.get_pose())
 
     msg_stamped = geometry_msgs.msg.PoseStamped()
-    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now().to_msg())
+    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now())
     assert msg_stamped.header.frame_id == cart_state.get_reference_frame()
     assert_np_array_equal(read_xyz(msg.position), cart_state.get_position())
     assert_np_array_equal(read_quaternion(msg.orientation), cart_state.get_orientation_coefficients())
@@ -84,7 +84,7 @@ def test_transform(cart_state: sr.CartesianState, clock: Clock):
     assert_np_array_equal(cart_state.get_pose(), new_state.get_pose())
 
     msg_stamped = geometry_msgs.msg.TransformStamped()
-    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now().to_msg())
+    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now())
     assert msg_stamped.header.frame_id == cart_state.get_reference_frame()
     assert msg_stamped.child_frame_id == cart_state.get_name()
     assert_np_array_equal(read_xyz(msg.translation), cart_state.get_position())
@@ -109,7 +109,7 @@ def test_twist(cart_state: sr.CartesianState, clock: Clock):
     assert_np_array_equal(cart_state.get_twist(), new_state.get_twist())
 
     msg_stamped = geometry_msgs.msg.TwistStamped()
-    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now().to_msg())
+    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now())
     assert msg_stamped.header.frame_id == cart_state.get_reference_frame()
     assert_np_array_equal(read_xyz(msg.linear), cart_state.get_linear_velocity())
     assert_np_array_equal(read_xyz(msg.angular), cart_state.get_angular_velocity())
@@ -132,7 +132,7 @@ def test_wrench(cart_state: sr.CartesianState, clock: Clock):
     assert_np_array_equal(cart_state.get_wrench(), new_state.get_wrench())
 
     msg_stamped = geometry_msgs.msg.WrenchStamped()
-    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now().to_msg())
+    modulo_writers.write_stamped_msg(msg_stamped, cart_state, clock.now())
     assert msg_stamped.header.frame_id == cart_state.get_reference_frame()
     assert_np_array_equal(read_xyz(msg.force), cart_state.get_force())
     assert_np_array_equal(read_xyz(msg.torque), cart_state.get_torque())
