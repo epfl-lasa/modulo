@@ -336,6 +336,7 @@ private:
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_; ///< TF buffer
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_; ///< TF listener
   std::shared_ptr<rclcpp::Publisher<tf2_msgs::msg::TFMessage>> tf_broadcaster_; ///< TF broadcaster
+  // TODO maybe add a static tf broadcaster
 };
 
 template<class NodeT>
