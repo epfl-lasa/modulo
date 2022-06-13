@@ -71,7 +71,7 @@ private:
    * @brief Transition callback for state 'Configuring'.
    * @details on_configure callback is being called when the lifecycle node enters the 'Configuring' state.
    * Depending on the return value of this function, the node may either transition to the 'Inactive' state via the
-   * 'configure' transition or stays 'Unconfigured.\n
+   * 'configure' transition, stay 'Unconfigured' or go to 'ErrorProcessing'.\n
    * TRANSITION_CALLBACK_SUCCESS transitions to 'Inactive'\n
    * TRANSITION_CALLBACK_FAILURE transitions to 'Unconfigured'\n
    * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
@@ -94,9 +94,10 @@ private:
   * @brief Transition callback for state 'Activating'.
   * @details on_activate callback is being called when the lifecycle node enters the 'Activating' state.
   * Depending on the return value of this function, the node may either transition to the 'Active' state via the
-  * 'activate' transition or goes to 'ErrorProcessing'.\n
+  * 'activate' transition, stay 'Inactive' or go to 'ErrorProcessing'.\n
   * TRANSITION_CALLBACK_SUCCESS transitions to 'Active'\n
-  * TRANSITION_CALLBACK_FAILURE, TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
+  * TRANSITION_CALLBACK_FAILURE transitions to 'Inactive'\n
+  * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
   */
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_activate(const rclcpp_lifecycle::State&) override;
@@ -113,11 +114,12 @@ private:
   on_deactivate(const rclcpp_lifecycle::State&) override;
 
   /**
-    * @brief Transition callback for state 'Deactivating'.
-    * @details on_deactivate callback is being called when the lifecycle node enters the 'Deactivating' state.
-    * Depending on the return value of this function, the node may either transition to the 'Inactive' state via the
-    * 'deactivate' transition or goes to 'ErrorProcessing'.\n
-    * TRANSITION_CALLBACK_SUCCESS transitions to "Inactive"\n
+    * @brief Transition callback for state 'ShuttingDown'.
+    * @details on_shutdown callback is being called when the lifecycle node enters the 'ShuttingDown' state.
+    * This transition can be called from the 'Unconfigured', 'Inactive' and 'Active' states.
+    * Depending on the return value of this function, the node may either transition to the 'Finalized' state via the
+    * 'shutdown' transition or goes to 'ErrorProcessing'.\n
+    * TRANSITION_CALLBACK_SUCCESS transitions to "Finalized"\n
     * TRANSITION_CALLBACK_FAILURE, TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'\n
     */
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
