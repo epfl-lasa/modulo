@@ -29,7 +29,6 @@ public:
   using ComponentInterface<NodeT>::outputs_;
   using ComponentInterface<NodeT>::add_tf_broadcaster;
   using ComponentInterface<NodeT>::add_tf_listener;
-  using ComponentInterface<NodeT>::activate_tf_broadcaster;
   using ComponentInterface<NodeT>::send_transform;
   using ComponentInterface<NodeT>::lookup_transform;
   using ComponentInterface<NodeT>::raise_error;

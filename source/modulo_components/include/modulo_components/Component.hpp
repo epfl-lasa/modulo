@@ -75,8 +75,6 @@ private:
   using ComponentInterface<rclcpp::Node>::publish_predicates;
   using ComponentInterface<rclcpp::Node>::publish_outputs;
   using ComponentInterface<rclcpp::Node>::evaluate_periodic_callbacks;
-  using ComponentInterface<rclcpp::Node>::activate_tf_broadcaster;
-  using ComponentInterface<rclcpp::Node>::deactivate_tf_broadcaster;
 
   std::thread run_thread_; ///< The execution thread of the component
   bool started_; ///< Flag that indicates if execution has started or not

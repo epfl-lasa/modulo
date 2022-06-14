@@ -120,7 +120,6 @@ TYPED_TEST(ComponentInterfaceTest, CreateOutput) {
 TYPED_TEST(ComponentInterfaceTest, TF) {
   this->component_->add_tf_broadcaster();
   this->component_->add_tf_listener();
-  this->component_->activate_tf_broadcaster();
   auto send_tf = state_representation::CartesianPose::Random("test", "world");
   EXPECT_NO_THROW(this->component_->send_transform(send_tf));
   EXPECT_THROW(auto throw_tf = this->component_->lookup_transform("dummy", "world"), exceptions::LookupTransformException);
