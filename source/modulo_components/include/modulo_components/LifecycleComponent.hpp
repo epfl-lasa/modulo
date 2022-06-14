@@ -88,7 +88,10 @@ protected:
    * @param default_topic If set, the default value for the topic name to use
    */
   template<typename DataT>
-  void add_output(const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false);
+  void add_output(
+      const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false,
+      const std::string& default_topic = ""
+  );
 
 private:
   /**
@@ -250,11 +253,13 @@ private:
 inline void LifecycleComponent::on_step() {}
 
 template<typename DataT>
-inline void
-LifecycleComponent::add_output(const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic) {
+inline void LifecycleComponent::add_output(
+    const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
+    const std::string& default_topic
+) {
   try {
     std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
-    this->create_output(parsed_signal_name, data, fixed_topic);
+    this->create_output(parsed_signal_name, data, fixed_topic, default_topic);
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add output '" << signal_name << "': " << ex.what());
   }
