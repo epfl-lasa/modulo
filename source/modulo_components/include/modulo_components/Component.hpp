@@ -67,7 +67,7 @@ private:
    */
   void run();
 
-  using rclcpp::Node::create_publisher;
+  // TODO hide ROS methods
   using ComponentInterface<rclcpp::Node>::create_output;
   using ComponentInterface<rclcpp::Node>::inputs_;
   using ComponentInterface<rclcpp::Node>::outputs_;

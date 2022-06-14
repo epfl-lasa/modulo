@@ -43,7 +43,7 @@ class ComponentInterfacePublicInterface;
  * @tparam NodeT
  */
 template<class NodeT>
-class ComponentInterface : private NodeT {
+class ComponentInterface : public NodeT {
 public:
   friend class ComponentInterfacePublicInterface<rclcpp::Node>;
   friend class ComponentInterfacePublicInterface<rclcpp_lifecycle::LifecycleNode>;
@@ -61,10 +61,7 @@ public:
    */
   virtual ~ComponentInterface() = default;
 
-  using NodeT::get_node_base_interface;
-  using NodeT::get_name;
-  using NodeT::get_clock;
-  using NodeT::get_logger;
+  // TODO hide ROS methods
 
 protected:
   /**
@@ -296,8 +293,6 @@ protected:
    * @brief Put the component in error state by setting the 'in_error_state' predicate to true.
    */
   virtual void raise_error();
-
-  using NodeT::create_publisher;
 
   std::map<std::string, std::shared_ptr<modulo_new_core::communication::SubscriptionInterface>>
       inputs_; ///< Map of inputs

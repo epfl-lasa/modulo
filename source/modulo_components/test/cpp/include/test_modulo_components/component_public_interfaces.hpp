@@ -63,7 +63,6 @@ public:
       Component(node_options, start_thread) {}
   using Component::add_output;
   using Component::outputs_;
-  using Component::get_clock;
 };
 
 class LifecycleComponentPublicInterface : public LifecycleComponent {
@@ -73,6 +72,5 @@ public:
   using LifecycleComponent::configure_outputs;
   using LifecycleComponent::activate_outputs;
   using LifecycleComponent::outputs_;
-  using LifecycleComponent::get_clock;
 };
 }// namespace modulo_components
