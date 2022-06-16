@@ -23,7 +23,6 @@ class Component(ComponentInterface):
         super().__init__(node_name, *kargs, **kwargs)
         self.__started = False
         self.__run_thread = None
-        self.add_predicate("in_error_state", False)
         self.add_predicate("is_finished", False)
 
         if start_thread:
