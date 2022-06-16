@@ -76,15 +76,13 @@ class ComponentInterface(Node):
 
         self.add_predicate("in_error_state", False)
 
-        self.create_timer(self.get_parameter_value("period"), self.__step)
+        self.create_timer(self.get_parameter_value("period"), self._step)
 
-    def __step(self) -> None:
+    def _step(self) -> None:
         """
         Step function that is called periodically.
         """
-        self.__publish_predicates()
-        self.__publish_outputs()
-        self.__evaluate_periodic_callbacks()
+        pass
 
     def add_parameter(self, parameter: Union[str, sr.Parameter], description: str, read_only=False) -> None:
         """

@@ -28,6 +28,17 @@ class Component(ComponentInterface):
         if start_thread:
             self.start_thread()
 
+    def _step(self):
+        """
+        Step function that is called periodically.
+        """
+        try:
+            self.__publish_predicates()
+            self.__publish_outputs()
+            self.__evaluate_periodic_callbacks()
+        except Exception as e:
+            self.get_logger().error(f"Failed to execute step function: {e}", throttle_duration_sec=1.0)
+
     def start_thread(self):
         """
         Start the execution thread.
