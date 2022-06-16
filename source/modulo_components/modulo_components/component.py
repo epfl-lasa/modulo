@@ -53,8 +53,8 @@ class Component(ComponentInterface):
 
     def __run(self):
         """
-        Run the execution function in a try catch block and set
-        the predicates according to the outcome of the execution.
+        Run the execution function in a try catch block and set the predicates according to the outcome of the
+        execution.
         """
         try:
             if not self.execute():

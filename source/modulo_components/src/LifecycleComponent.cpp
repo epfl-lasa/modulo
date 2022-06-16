@@ -15,6 +15,7 @@ LifecycleComponent::LifecycleComponent(const rclcpp::NodeOptions& node_options) 
 }
 
 void LifecycleComponent::step() {
+  // TODO try catch
   if (this->get_predicate("is_active")) {
     this->publish_predicates();
     this->publish_outputs();
@@ -290,7 +291,7 @@ bool LifecycleComponent::configure_outputs() {
 }
 
 bool LifecycleComponent::cleanup_signals() {
-  RCLCPP_DEBUG(this->get_logger(), "Clearing all inputs and outputs");
+  RCLCPP_DEBUG(this->get_logger(), "Clearing all inputs and outputs.");
   this->inputs_.clear();
   this->outputs_.clear();
   return true;

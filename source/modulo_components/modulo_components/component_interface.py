@@ -1,6 +1,6 @@
 import sys
 from functools import partial
-from typing import Union, TypeVar, Callable, List
+from typing import Optional, Union, TypeVar, Callable, List
 
 import clproto
 import modulo_new_core.translators.message_readers as modulo_readers
@@ -64,9 +64,9 @@ class ComponentInterface(Node):
         self._inputs = {}
         self._outputs = {}
         self._periodic_callbacks = {}
-        self.__tf_buffer: Buffer = None
-        self.__tf_listener: TransformListener = None
-        self.__tf_broadcaster: TransformBroadcaster = None
+        self.__tf_buffer: Optional[Buffer] = None
+        self.__tf_listener: Optional[TransformListener] = None
+        self.__tf_broadcaster: Optional[TransformBroadcaster] = None
 
         self.__qos = QoSProfile(depth=10)
 
@@ -309,8 +309,8 @@ class ComponentInterface(Node):
             topic_name = self.get_parameter_value(parsed_signal_name + "_topic")
             self.get_logger().debug(f"Adding output '{parsed_signal_name}' with topic name '{topic_name}'.")
             publisher = self.create_publisher(message_type, topic_name, self.__qos)
-            self._outputs[signal_name] = {"attribute": data, "message_type": message_type,
-                                          "translator": translator, "publisher": publisher}
+            self._outputs[parsed_signal_name] = {"attribute": data, "message_type": message_type,
+                                                 "translator": translator, "publisher": publisher}
         except Exception as e:
             self.get_logger().error(f"Failed to add output '{signal_name}': {e}")
 
