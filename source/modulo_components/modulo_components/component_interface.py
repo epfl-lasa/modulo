@@ -6,6 +6,7 @@ import state_representation as sr
 import tf2_py
 from geometry_msgs.msg import TransformStamped
 from modulo_components.exceptions.component_exceptions import ComponentParameterError, LookupTransformError
+from modulo_components.utilities.utilities import generate_predicate_topic
 from modulo_new_core.translators.message_readers import read_stamped_message
 from modulo_new_core.translators.message_writers import write_stamped_message
 from modulo_new_core.translators.parameter_translators import write_parameter, read_parameter_const
@@ -69,23 +70,8 @@ class ComponentInterface(Node):
         """
         Step function that is called periodically.
         """
-        for predicate_name in self._predicates.keys():
-            message = Bool()
-            message.data = self.get_predicate(predicate_name)
-            if predicate_name not in self._predicate_publishers.keys():
-                self.get_logger().error(f"No publisher for predicate {predicate_name} found.",
-                                        throttle_duration_sec=1.0)
-                return
-            self._predicate_publishers[predicate_name].publish(message)
-
-    def __generate_predicate_topic(self, predicate_name: str) -> str:
-        """
-        Generate the predicate topic name from the name of the predicate.
-
-        :param predicate_name: The predicate name
-        :return: The predicate topic as /predicates/component_name/predicate_name
-        """
-        return f"/predicates/{self.get_name()}/{predicate_name}"
+        self._publish_predicates()
+        self._evaluate_periodic_callbacks()
 
     def add_parameter(self, parameter: Union[str, sr.Parameter], description: str, read_only=False) -> None:
         """
@@ -230,37 +216,37 @@ class ComponentInterface(Node):
                 result.reason += str(e)
         return result
 
-    def add_predicate(self, predicate_name: str, predicate_value: Union[bool, Callable[[], bool]]):
+    def add_predicate(self, name: str, value: Union[bool, Callable[[], bool]]):
         """
         Add a predicate to the map of predicates.
 
-        :param predicate_name: The name of the associated predicate
-        :param predicate_value: The value of the predicate as a bool or a callable function
+        :param name: The name of the associated predicate
+        :param value: The value of the predicate as a bool or a callable function
         """
-        if not predicate_name:
+        if not name:
             self.get_logger().error("Failed to add predicate: Provide a non empty string as a name.")
-        if predicate_name in self._predicates.keys():
-            self.get_logger().debug(f"Predicate {predicate_name} already exists, overwriting.")
+        if name in self._predicates.keys():
+            self.get_logger().debug(f"Predicate {name} already exists, overwriting.")
         else:
-            self.get_logger().debug(f"Adding predicate '{predicate_name}'.")
-            self._predicate_publishers[predicate_name] = self.create_publisher(Bool,
-                                                                               self.__generate_predicate_topic(
-                                                                                   predicate_name), 10)
-        self._predicates[predicate_name] = predicate_value
+            self.get_logger().debug(f"Adding predicate '{name}'.")
+            self._predicate_publishers[name] = self.create_publisher(Bool,
+                                                                     generate_predicate_topic(self.get_name(), name),
+                                                                     10)
+        self._predicates[name] = value
 
-    def get_predicate(self, predicate_name: str) -> bool:
+    def get_predicate(self, name: str) -> bool:
         """
         Get the value of the predicate given as parameter. If the predicate is not found or the callable function fails,
         this method returns False.
 
-        :param predicate_name: The name of the predicate to retrieve from the map of predicates
+        :param name: The name of the predicate to retrieve from the map of predicates
         :return: The value of the predicate as a boolean
         """
-        if predicate_name not in self._predicates.keys():
-            self.get_logger().error(f"Predicate {predicate_name} does not exist, returning false.",
+        if name not in self._predicates.keys():
+            self.get_logger().error(f"Predicate {name} does not exist, returning false.",
                                     throttle_duration_sec=1.0)
             return False
-        value = self._predicates[predicate_name]
+        value = self._predicates[name]
         if callable(value):
             bool_value = False
             try:
@@ -271,19 +257,19 @@ class ComponentInterface(Node):
             return bool_value
         return value
 
-    def set_predicate(self, predicate_name: str, predicate_value: Union[bool, Callable[[], bool]]):
+    def set_predicate(self, name: str, value: Union[bool, Callable[[], bool]]):
         """
         Set the value of the predicate given as parameter, if the predicate is not found does not do anything.
 
-        :param predicate_name: The name of the predicate to retrieve from the map of predicates
-        :param predicate_value: The new value of the predicate as a bool or a callable function
+        :param name: The name of the predicate to retrieve from the map of predicates
+        :param value: The new value of the predicate as a bool or a callable function
         """
-        if predicate_name not in self._predicates.keys():
+        if name not in self._predicates.keys():
             self.get_logger().error(
-                f"Cannot set predicate {predicate_name} with a new value because it does not exist.",
+                f"Cannot set predicate {name} with a new value because it does not exist.",
                 throttle_duration_sec=1.0)
             return
-        self._predicates[predicate_name] = predicate_value
+        self._predicates[name] = value
 
     def add_tf_broadcaster(self):
         """
@@ -373,6 +359,18 @@ class ComponentInterface(Node):
         else:
             self.get_logger().debug(f"Adding periodic function '{name}'.")
         self._periodic_callbacks[name] = callback
+
+    def _publish_predicates(self):
+        """
+        Helper function to publish all predicates.
+        """
+        for name in self._predicates.keys():
+            message = Bool()
+            message.data = self.get_predicate(name)
+            if name not in self._predicate_publishers.keys():
+                self.get_logger().error(f"No publisher for predicate {name} found.", throttle_duration_sec=1.0)
+                return
+            self._predicate_publishers[name].publish(message)
 
     def _evaluate_periodic_callbacks(self):
         """
