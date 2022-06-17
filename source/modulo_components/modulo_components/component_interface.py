@@ -14,6 +14,7 @@ from rcl_interfaces.msg import SetParametersResult
 from rclpy.duration import Duration
 from rclpy.node import Node
 from rclpy.publisher import Publisher
+from rclpy.qos import QoSProfile
 from rclpy.time import Time
 from std_msgs.msg import Bool
 from tf2_ros import TransformBroadcaster
@@ -33,6 +34,7 @@ class ComponentInterface(Node):
         predicate_publishers (dict(rclpy.Publisher(Bool))): map of publishers associated to each predicate.
         parameter_dict: dict of parameters
         periodic_callbacks: dict of periodic callback functions
+        qos: the Quality of Service for publishers and subscribers
         tf_buffer (tf2_ros.Buffer): the buffer to lookup transforms published on tf2.
         tf_listener (tf2_ros.TransformListener): the listener to lookup transforms published on tf2.
         tf_broadcaster (tf2_ros.TransformBroadcaster): the broadcaster to publish transforms on tf2
@@ -54,6 +56,8 @@ class ComponentInterface(Node):
         self.__tf_buffer: Optional[Buffer] = None
         self.__tf_listener: Optional[TransformListener] = None
         self.__tf_broadcaster: Optional[TransformBroadcaster] = None
+
+        self._qos = QoSProfile(depth=10)
 
         self.add_on_set_parameters_callback(self.__on_set_parameters_callback)
         self.add_parameter(sr.Parameter("period", 0.1, sr.ParameterType.DOUBLE),
@@ -339,6 +343,20 @@ class ComponentInterface(Node):
             return result
         except tf2_py.TransformException as e:
             raise LookupTransformError(f"Failed to lookup transform: {e}")
+
+    def get_qos(self) -> QoSProfile:
+        """
+        Getter of the Quality of Service attribute.
+        """
+        return self._qos
+
+    def set_qos(self, qos: QoSProfile):
+        """
+        Setter of the Quality of Service for ROS publishers and subscribers.
+
+        :param qos: The desired Quality of Service
+        """
+        self._qos = qos
 
     def add_periodic_callback(self, name: str, callback: Callable[[], None]):
         """
