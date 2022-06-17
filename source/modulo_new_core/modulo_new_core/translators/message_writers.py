@@ -8,6 +8,7 @@ import state_representation as sr
 from modulo_new_core.encoded_state import EncodedState
 from sensor_msgs.msg import JointState
 
+DataT = TypeVar('DataT')
 MsgT = TypeVar('MsgT')
 StateT = TypeVar('StateT')
 
@@ -108,17 +109,25 @@ def write_stamped_message(message: MsgT, state: StateT, time: rclpy.time.Time):
     message.header.frame_id = state.get_reference_frame()
 
 
-def write_clproto_message(state: StateT, clproto_message_type: clproto.MessageType) -> EncodedState():
+def write_std_message(message: MsgT, data: DataT):
     """
-    Convert a state_representation State type to an EncodedState message.
+    Convert to a std_msgs.msg message.
 
+    :param message: The std_msgs.msg message to populate
+    :param data: The data to read from
+    """
+    message.data = data
+
+
+def write_clproto_message(message: EncodedState, state: StateT, clproto_message_type: clproto.MessageType):
+    """
+    Convert a state_representation State to an EncodedState message.
+
+    :param message: The EncodedState message to populate
     :param state: The state to read from
     :param clproto_message_type: The clproto message type to encode the state
     :raises Exception if the message could not be written
-    :return: The populated message
     """
     if not isinstance(state, sr.State):
         raise RuntimeError("This state type is not supported.")
-    message = EncodedState()
     message.data = clproto.encode(state, clproto_message_type)
-    return message
