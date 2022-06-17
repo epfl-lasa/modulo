@@ -99,7 +99,7 @@ PublisherHandler<RecT, MsgT>::PublisherHandler(const std::shared_ptr<rclcpp::Clo
 template <class RecT, typename MsgT>
 void PublisherHandler<RecT, MsgT>::publish(const RecT& recipient) {
   auto out_msg = std::make_unique<MsgT>();
-  modulo_new_core::translators::write_msg(*out_msg, recipient, this->get_clock().now());
+  modulo_new_core::translators::write_message(*out_msg, recipient, this->get_clock().now());
   this->publisher_->publish(std::move(out_msg));
 }
 

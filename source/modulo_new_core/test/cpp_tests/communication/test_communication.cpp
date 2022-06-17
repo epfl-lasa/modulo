@@ -34,8 +34,8 @@ public:
     this->received_future = this->received_.get_future();
     this->subscription_interface_ = std::make_shared<SubscriptionHandler<MsgT>>(message_pair);
     auto subscription = this->create_subscription<MsgT>(
-        topic_name, 10, [this](const std::shared_ptr<MsgT> msg) {
-          this->subscription_interface_->template get_handler<MsgT>()->get_callback()(msg);
+        topic_name, 10, [this](const std::shared_ptr<MsgT> message) {
+          this->subscription_interface_->template get_handler<MsgT>()->get_callback()(message);
           this->received_.set_value();
         }
     );

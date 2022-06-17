@@ -6,8 +6,8 @@ import state_representation as sr
 import tf2_py
 from geometry_msgs.msg import TransformStamped
 from modulo_components.exceptions.component_exceptions import ComponentParameterError, LookupTransformError
-from modulo_new_core.translators.message_readers import read_stamped_msg
-from modulo_new_core.translators.message_writers import write_stamped_msg
+from modulo_new_core.translators.message_readers import read_stamped_message
+from modulo_new_core.translators.message_writers import write_stamped_message
 from modulo_new_core.translators.parameter_translators import write_parameter, read_parameter_const
 from rcl_interfaces.msg import ParameterDescriptor
 from rcl_interfaces.msg import SetParametersResult
@@ -63,13 +63,13 @@ class ComponentInterface(Node):
         Step function that is called periodically.
         """
         for predicate_name in self._predicates.keys():
-            msg = Bool()
-            msg.data = self.get_predicate(predicate_name)
+            message = Bool()
+            message.data = self.get_predicate(predicate_name)
             if predicate_name not in self._predicate_publishers.keys():
                 self.get_logger().error(f"No publisher for predicate {predicate_name} found.",
                                         throttle_duration_sec=1.0)
                 return
-            self._predicate_publishers[predicate_name].publish(msg)
+            self._predicate_publishers[predicate_name].publish(message)
 
     def __generate_predicate_topic(self, predicate_name: str) -> str:
         """
@@ -311,7 +311,7 @@ class ComponentInterface(Node):
             return
         try:
             transform_message = TransformStamped()
-            write_stamped_msg(transform_message, transform, self.get_clock().now())
+            write_stamped_message(transform_message, transform, self.get_clock().now())
             self.__tf_broadcaster.sendTransform(transform_message)
         except tf2_py.TransformException as e:
             self.get_logger().error(f"Failed to send transform: {e}", throttle_duration_sec=1.0)
@@ -332,7 +332,7 @@ class ComponentInterface(Node):
         try:
             result = sr.CartesianPose(frame_name, reference_frame_name)
             transform = self.__tf_buffer.lookup_transform(reference_frame_name, frame_name, time_point, duration)
-            read_stamped_msg(result, transform)
+            read_stamped_message(result, transform)
             return result
         except tf2_py.TransformException as e:
             raise LookupTransformError(f"Failed to lookup transform: {e}")
