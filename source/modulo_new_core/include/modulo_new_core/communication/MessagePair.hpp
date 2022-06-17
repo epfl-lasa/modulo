@@ -1,18 +1,17 @@
 #pragma once
 
+#include <rclcpp/clock.hpp>
+
 #include "modulo_new_core/communication/MessagePairInterface.hpp"
 #include "modulo_new_core/exceptions/NullPointerException.hpp"
 #include "modulo_new_core/translators/message_readers.hpp"
 #include "modulo_new_core/translators/message_writers.hpp"
 
-#include <rclcpp/clock.hpp>
-
 namespace modulo_new_core::communication {
 
 /**
  * @class MessagePair
- * @brief The MessagePair stores a pointer to a variable and
- * translates the value of this pointer back and forth between
+ * @brief The MessagePair stores a pointer to a variable and translates the value of this pointer back and forth between
  * the corresponding ROS messages.
  * @tparam MsgT ROS message type of the MessagePair
  * @tparam DataT Data type corresponding to the ROS message type
@@ -30,12 +29,14 @@ public:
   /**
    * @brief Write the value of the data pointer to a ROS message.
    * @return The value of the data pointer as a ROS message
+   * @throws NullPointerException if the data pointer is null
    */
   [[nodiscard]] MsgT write_message() const;
 
   /**
    * @brief Read a ROS message and store the value in the data pointer.
    * @param message The ROS message to read
+   * @throws NullPointerException if the data pointer is null
    */
   void read_message(const MsgT& message);
 
@@ -46,6 +47,7 @@ public:
 
   /**
    * @brief Set the data pointer.
+   * @throws NullPointerException if the provided data pointer is null
    */
   void set_data(const std::shared_ptr<DataT>& data);
 

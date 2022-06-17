@@ -132,5 +132,4 @@ void PublisherInterface::set_message_pair(const std::shared_ptr<MessagePairInter
 PublisherType PublisherInterface::get_type() const {
   return this->type_;
 }
-
 }// namespace modulo_new_core::communication

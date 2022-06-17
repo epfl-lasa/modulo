@@ -75,5 +75,4 @@ std::function<void(const std::shared_ptr<EncodedState>)> SubscriptionHandler<Enc
     this->get_message_pair()->template read<EncodedState, state_representation::State>(*message);
   };
 }
-
 }// namespace modulo_new_core::communication
