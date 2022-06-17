@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <rclcpp/publisher.hpp>
+
 #include <rclcpp/node_options.hpp>
 
 #include "modulo_components/LifecycleComponent.hpp"
@@ -42,5 +42,4 @@ TEST_F(LifecycleComponentTest, AddOutput) {
   EXPECT_EQ(component_->outputs_.at("test")->get_message_pair()->get_type(),
             modulo_new_core::communication::MessageType::ENCODED_STATE);
 }
-
 } // namespace modulo_components

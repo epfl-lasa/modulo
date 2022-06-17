@@ -3,13 +3,13 @@
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 
 #include "modulo_components/ComponentInterface.hpp"
-
 #include "modulo_new_core/EncodedState.hpp"
-#include <rclcpp_lifecycle/lifecycle_node.hpp>
-#include <rclcpp_lifecycle/lifecycle_publisher.hpp>
 
 namespace modulo_components {
 
+/**
+ * @brief TODO
+ */
 class LifecycleComponent : public ComponentInterface<rclcpp_lifecycle::LifecycleNode> {
 public:
   friend class LifecycleComponentPublicInterface;
@@ -267,5 +267,4 @@ inline void LifecycleComponent::add_output(
 
 // TODO, if we raise error we need to manually call the lifecycle change state callback,
 // call callback function that this service calls
-
 }// namespace modulo_components

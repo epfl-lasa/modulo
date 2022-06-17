@@ -14,5 +14,4 @@ class ComponentException : public std::runtime_error {
 public:
   explicit ComponentException(const std::string& msg) : std::runtime_error(msg) {};
 };
-
 }// namespace modulo_components::exceptions

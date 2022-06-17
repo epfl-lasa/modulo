@@ -1,5 +1,6 @@
 #pragma once
 
+// TODO sort includes
 #include <rclcpp/parameter.hpp>
 #include <rclcpp/create_timer.hpp>
 #include <rclcpp/node_options.hpp>
@@ -30,9 +31,17 @@
 
 namespace modulo_components {
 
+/**
+ * @brief TODO
+ * @tparam NodeT
+ */
 template<class NodeT>
 class ComponentInterfacePublicInterface;
 
+/**
+ * @brief TODO
+ * @tparam NodeT
+ */
 template<class NodeT>
 class ComponentInterface : private NodeT {
 public:
@@ -65,8 +74,8 @@ protected:
 
   /**
    * @brief Add a parameter.
-   * @details This method stores a pointer reference to an existing Parameter object in the local parameter map
-   * and declares the equivalent ROS parameter on the ROS interface.
+   * @details This method stores a pointer reference to an existing Parameter object in the local parameter map and
+   * declares the equivalent ROS parameter on the ROS interface.
    * @param parameter A ParameterInterface pointer to a Parameter instance
    * @param description The description of the parameter
    * @param read_only If true, the value of the parameter cannot be changed after declaration
@@ -78,8 +87,8 @@ protected:
 
   /**
    * @brief Add a parameter.
-   * @details This method creates a new Parameter object instance to reference in the local parameter map
-   * and declares the equivalent ROS parameter on the ROS interface.
+   * @details This method creates a new Parameter object instance to reference in the local parameter map and declares
+   * the equivalent ROS parameter on the ROS interface.
    * @tparam T The type of the parameter
    * @param name The name of the parameter
    * @param value The value of the parameter
@@ -109,8 +118,8 @@ protected:
 
   /**
    * @brief Set the value of a parameter.
-   * @details The parameter must have been previously declared. This method preserves the reference
-   * to the original Parameter instance
+   * @details The parameter must have been previously declared. This method preserves the reference to the original
+   * Parameter instance
    * @tparam T The type of the parameter
    * @param name The name of the parameter
    * @return The value of the parameter
@@ -120,11 +129,11 @@ protected:
 
   /**
    * @brief Parameter validation function to be redefined by derived Component classes.
-   * @details This method is automatically invoked whenever the ROS interface tried to modify a parameter.
-   * Validation and sanitization can be performed by reading or writing the value of the parameter through the
-   * ParameterInterface pointer, depending on the parameter name and desired component behaviour. If the validation
-   * returns true, the updated parameter value (including any modifications) is applied. If the validation returns
-   * false, any changes to the parameter are discarded and the parameter value is not changed.
+   * @details This method is automatically invoked whenever the ROS interface tried to modify a parameter. Validation
+   * and sanitization can be performed by reading or writing the value of the parameter through the ParameterInterface
+   * pointer, depending on the parameter name and desired component behaviour. If the validation returns true, the
+   * updated parameter value (including any modifications) is applied. If the validation returns false, any changes to
+   * the parameter are discarded and the parameter value is not changed.
    * @param parameter A ParameterInterface pointer to a Parameter instance
    * @return The validation result
    */
@@ -284,8 +293,7 @@ protected:
   void evaluate_periodic_callbacks();
 
   /**
-   * @brief Put the component in error state by setting the
-   * 'in_error_state' predicate to true.
+   * @brief Put the component in error state by setting the 'in_error_state' predicate to true.
    */
   virtual void raise_error();
 
@@ -851,5 +859,4 @@ template<class NodeT>
 inline void ComponentInterface<NodeT>::set_qos(const rclcpp::QoS& qos) {
   this->qos_ = qos;
 }
-
 }// namespace modulo_components
