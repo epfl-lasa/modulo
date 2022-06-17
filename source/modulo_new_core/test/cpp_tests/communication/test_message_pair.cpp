@@ -9,24 +9,24 @@ static void test_message_interface(
     const DataT& initial_value, const DataT& new_value, const std::shared_ptr<rclcpp::Clock> clock
 ) {
   auto data = std::make_shared<DataT>(initial_value);
-  auto msg_pair = std::make_shared<MessagePair<MsgT, DataT>>(data, clock);
-  EXPECT_EQ(initial_value, *msg_pair->get_data());
-  EXPECT_EQ(initial_value, msg_pair->write_message().data);
+  auto message_pair = std::make_shared<MessagePair<MsgT, DataT>>(data, clock);
+  EXPECT_EQ(initial_value, *message_pair->get_data());
+  EXPECT_EQ(initial_value, message_pair->write_message().data);
 
-  std::shared_ptr<MessagePairInterface> msg_pair_interface(msg_pair);
-  auto msg = msg_pair_interface->template write<MsgT, DataT>();
-  EXPECT_EQ(initial_value, msg.data);
+  std::shared_ptr<MessagePairInterface> message_pair_interface(message_pair);
+  auto message = message_pair_interface->template write<MsgT, DataT>();
+  EXPECT_EQ(initial_value, message.data);
 
   *data = new_value;
-  EXPECT_EQ(new_value, *msg_pair->get_data());
-  EXPECT_EQ(new_value, msg_pair->write_message().data);
-  msg = msg_pair_interface->template write<MsgT, DataT>();
-  EXPECT_EQ(new_value, msg.data);
+  EXPECT_EQ(new_value, *message_pair->get_data());
+  EXPECT_EQ(new_value, message_pair->write_message().data);
+  message = message_pair_interface->template write<MsgT, DataT>();
+  EXPECT_EQ(new_value, message.data);
 
-  msg = MsgT();
-  msg.data = initial_value;
-  msg_pair_interface->template read<MsgT, DataT>(msg);
-  EXPECT_EQ(initial_value, *msg_pair->get_data());
+  message = MsgT();
+  message.data = initial_value;
+  message_pair_interface->template read<MsgT, DataT>(message);
+  EXPECT_EQ(initial_value, *message_pair->get_data());
 }
 
 class MessagePairTest : public ::testing::Test {
@@ -51,29 +51,29 @@ TEST_F(MessagePairTest, BasicTypes) {
 TEST_F(MessagePairTest, EncodedState) {
   auto initial_value = state_representation::CartesianState::Random("test");
   auto data = state_representation::make_shared_state(initial_value);
-  auto msg_pair =
+  auto message_pair =
       std::make_shared<MessagePair<modulo_new_core::EncodedState, state_representation::State>>(data, clock_);
   EXPECT_TRUE(initial_value.data().isApprox(
-      std::dynamic_pointer_cast<state_representation::CartesianState>(msg_pair->get_data())->data()));
+      std::dynamic_pointer_cast<state_representation::CartesianState>(message_pair->get_data())->data()));
 
-  std::shared_ptr<MessagePairInterface> msg_pair_interface(msg_pair);
-  auto msg = msg_pair_interface->write<modulo_new_core::EncodedState, state_representation::State>();
-  std::string tmp(msg.data.begin(), msg.data.end());
+  std::shared_ptr<MessagePairInterface> message_pair_interface(message_pair);
+  auto message = message_pair_interface->write<modulo_new_core::EncodedState, state_representation::State>();
+  std::string tmp(message.data.begin(), message.data.end());
   auto decoded = clproto::decode<state_representation::CartesianState>(tmp);
   EXPECT_TRUE(initial_value.data().isApprox(decoded.data()));
 
   auto new_value = state_representation::CartesianState::Identity("world");
-  msg_pair->set_data(state_representation::make_shared_state(new_value));
-  msg = msg_pair_interface->write<modulo_new_core::EncodedState, state_representation::State>();
-  tmp = std::string(msg.data.begin(), msg.data.end());
+  message_pair->set_data(state_representation::make_shared_state(new_value));
+  message = message_pair_interface->write<modulo_new_core::EncodedState, state_representation::State>();
+  tmp = std::string(message.data.begin(), message.data.end());
   decoded = clproto::decode<state_representation::CartesianState>(tmp);
   EXPECT_TRUE(new_value.data().isApprox(decoded.data()));
 
   data = state_representation::make_shared_state(initial_value);
-  msg_pair->set_data(data);
-  msg = modulo_new_core::EncodedState();
-  modulo_new_core::translators::write_msg(msg, data, clock_->now());
-  msg_pair_interface->read<modulo_new_core::EncodedState, state_representation::State>(msg);
+  message_pair->set_data(data);
+  message = modulo_new_core::EncodedState();
+  modulo_new_core::translators::write_message(message, data, clock_->now());
+  message_pair_interface->read<modulo_new_core::EncodedState, state_representation::State>(message);
   EXPECT_TRUE(initial_value.data().isApprox(
-      std::dynamic_pointer_cast<state_representation::CartesianState>(msg_pair->get_data())->data()));
+      std::dynamic_pointer_cast<state_representation::CartesianState>(message_pair->get_data())->data()));
 }

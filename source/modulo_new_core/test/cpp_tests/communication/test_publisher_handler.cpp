@@ -12,7 +12,7 @@ template<typename MsgT, typename DataT>
 static void test_publisher_interface(const std::shared_ptr<rclcpp::Node>& node, const DataT& value) {
   // create message pair
   auto data = std::make_shared<DataT>(value);
-  auto msg_pair = std::make_shared<MessagePair<MsgT, DataT>>(data, node->get_clock());
+  auto message_pair = std::make_shared<MessagePair<MsgT, DataT>>(data, node->get_clock());
 
   // create publisher handler
   auto publisher = node->create_publisher<MsgT>("topic", 10);
@@ -22,10 +22,10 @@ static void test_publisher_interface(const std::shared_ptr<rclcpp::Node>& node, 
   // use in publisher interface
   std::shared_ptr<PublisherInterface> publisher_interface(publisher_handler);
   EXPECT_THROW(publisher_interface->publish(), modulo_new_core::exceptions::NullPointerException);
-  publisher_interface->set_message_pair(msg_pair);
+  publisher_interface->set_message_pair(message_pair);
   EXPECT_NO_THROW(publisher_interface->publish());
 
-  auto publisher_interface_ptr = publisher_handler->create_publisher_interface(msg_pair);
+  auto publisher_interface_ptr = publisher_handler->create_publisher_interface(message_pair);
   EXPECT_NO_THROW(publisher_interface->publish());
 }
 
@@ -59,7 +59,7 @@ TEST_F(PublisherTest, EncodedState) {
   // create message pair
   auto data =
       std::make_shared<state_representation::CartesianState>(state_representation::CartesianState::Random("test"));
-  auto msg_pair = std::make_shared<MessagePair<modulo_new_core::EncodedState, state_representation::State>>(
+  auto message_pair = std::make_shared<MessagePair<modulo_new_core::EncodedState, state_representation::State>>(
       data, node->get_clock());
 
   // create publisher handler
@@ -72,9 +72,9 @@ TEST_F(PublisherTest, EncodedState) {
   // use in publisher interface
   std::shared_ptr<PublisherInterface> publisher_interface(publisher_handler);
   EXPECT_THROW(publisher_interface->publish(), modulo_new_core::exceptions::NullPointerException);
-  publisher_interface->set_message_pair(msg_pair);
+  publisher_interface->set_message_pair(message_pair);
   EXPECT_NO_THROW(publisher_interface->publish());
 
-  publisher_interface = publisher_handler->create_publisher_interface(msg_pair);
+  publisher_interface = publisher_handler->create_publisher_interface(message_pair);
   EXPECT_NO_THROW(publisher_interface->publish());
 }
