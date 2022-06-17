@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thread>
+
 #include <rclcpp/node.hpp>
 
 #include "modulo_components/ComponentInterface.hpp"
@@ -9,6 +10,9 @@
 
 namespace modulo_components {
 
+/**
+ * @brief TODO
+ */
 class Component : public ComponentInterface<rclcpp::Node> {
 public:
   friend class ComponentPublicInterface;
@@ -147,5 +151,4 @@ inline void Component::add_output(
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add output '" << signal_name << "': " << ex.what());
   }
 }
-
 }// namespace modulo_components

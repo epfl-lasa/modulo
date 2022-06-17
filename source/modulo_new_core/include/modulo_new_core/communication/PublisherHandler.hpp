@@ -3,14 +3,14 @@
 #include <rclcpp/logging.hpp>
 
 #include "modulo_new_core/communication/PublisherInterface.hpp"
-#include "modulo_new_core/exceptions/NotLifecyclePublisherException.hpp"
+#include "modulo_new_core/exceptions/NullPointerException.hpp"
 
 namespace modulo_new_core::communication {
 
 /**
  * @class PublisherHandler
- * @brief The PublisherHandler handles different types of ROS publishers to activate, deactivate and publish
- * data with those publishers.
+ * @brief The PublisherHandler handles different types of ROS publishers to activate, deactivate and publish data with
+ * those publishers.
  * @tparam PubT The ROS publisher type
  * @tparam MsgT The ROS message type of the ROS publisher
  */
@@ -26,17 +26,20 @@ public:
 
   /**
    * @brief Activate the ROS publisher if applicable.
+   * @throws NullPointerException if the publisher pointer is null
    */
   void on_activate();
 
   /**
    * @brief Deactivate the ROS publisher if applicable.
+   * @throws NullPointerException if the publisher pointer is null
    */
   void on_deactivate();
 
   /**
    * @brief Publish the ROS message through the ROS publisher.
    * @param message The ROS message to publish
+   * @throws NullPointerException if the publisher pointer is null
    */
   void publish(const MsgT& message) const;
 
@@ -63,7 +66,7 @@ void PublisherHandler<PubT, MsgT>::on_activate() {
   if (this->get_type() == PublisherType::LIFECYCLE_PUBLISHER) {
     this->publisher_->on_activate();
   } else {
-    RCLCPP_WARN(rclcpp::get_logger("PublisherHandler"), "Only LifecyclePublishers can be deactivated");
+    RCLCPP_DEBUG(rclcpp::get_logger("PublisherHandler"), "Only LifecyclePublishers can be deactivated");
   }
 }
 
@@ -75,7 +78,7 @@ void PublisherHandler<PubT, MsgT>::on_deactivate() {
   if (this->get_type() == PublisherType::LIFECYCLE_PUBLISHER) {
     this->publisher_->on_deactivate();
   } else {
-    RCLCPP_WARN(rclcpp::get_logger("PublisherHandler"), "Only LifecyclePublishers can be deactivated");
+    RCLCPP_DEBUG(rclcpp::get_logger("PublisherHandler"), "Only LifecyclePublishers can be deactivated");
   }
 }
 
@@ -95,5 +98,4 @@ std::shared_ptr<PublisherInterface> PublisherHandler<PubT, MsgT>::create_publish
   publisher_interface->set_message_pair(message_pair);
   return publisher_interface;
 }
-
 }// namespace modulo_new_core::communication

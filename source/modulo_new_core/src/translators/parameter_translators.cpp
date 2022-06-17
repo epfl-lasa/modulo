@@ -1,13 +1,12 @@
 #include "modulo_new_core/translators/parameter_translators.hpp"
 
-#include <state_representation/space/cartesian/CartesianState.hpp>
+#include <clproto.h>
 #include <state_representation/space/cartesian/CartesianPose.hpp>
-#include <state_representation/space/joint/JointState.hpp>
+#include <state_representation/space/cartesian/CartesianState.hpp>
 #include <state_representation/space/joint/JointPositions.hpp>
+#include <state_representation/space/joint/JointState.hpp>
 
 #include "modulo_new_core/exceptions/IncompatibleParameterException.hpp"
-
-#include <clproto.h>
 
 using namespace state_representation;
 
@@ -224,14 +223,12 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
               "The ROS parameter " + ros_parameter.get_name()
                   + " with type double array cannot be interpreted by reference parameter " + parameter->get_name()
                   + " (type code " + std::to_string(static_cast<int>(parameter->get_parameter_type())) + ")");
-          break;
       }
       break;
     }
     default:
       throw state_representation::exceptions::InvalidParameterException(
           "Something went wrong while reading parameter " + parameter->get_name());
-      break;
   }
   return new_parameter;
 }
@@ -242,5 +239,4 @@ void read_parameter(
   auto new_parameter = read_parameter_const(ros_parameter, parameter);
   copy_parameter_value(new_parameter, parameter);
 }
-
-}
+}// namespace modulo_new_core::translators

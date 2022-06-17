@@ -1,11 +1,19 @@
-from rclpy import Parameter
-import state_representation as sr
+from typing import Optional
+
 import clproto
 import numpy as np
-from typing import Union
+import state_representation as sr
+from rclpy import Parameter
 
 
 def write_parameter(parameter: sr.Parameter) -> Parameter:
+    """
+    Write a ROS Parameter from a state_representation Parameter.
+
+    :param parameter: The state_representation parameter to read from
+    :raises Exception if the parameter could not be written
+    :return: The resulting ROS parameter
+    """
     if parameter.get_parameter_type() == sr.ParameterType.BOOL or \
             parameter.get_parameter_type() == sr.ParameterType.BOOL_ARRAY or \
             parameter.get_parameter_type() == sr.ParameterType.INT or \
@@ -38,6 +46,15 @@ def write_parameter(parameter: sr.Parameter) -> Parameter:
 
 
 def copy_parameter_value(source_parameter: sr.Parameter, parameter: sr.Parameter):
+    """
+    Copy the value of one state_representation Parameter into another. This helper function calls the getters and
+    setters of the appropriate parameter type to modify the value of the parameter instance while preserving the
+    reference to the original parameter.
+
+    :param source_parameter: The parameter with a value to copy
+    :param parameter: The destination parameter to be updated
+    :raises Exception if the copying failed
+    """
     if source_parameter.get_parameter_type() != parameter.get_parameter_type():
         raise RuntimeError(f"Source parameter {source_parameter.get_name()} to be copied does not have the same type "
                            f"as destination parameter {parameter.get_name()}")
@@ -70,8 +87,24 @@ def copy_parameter_value(source_parameter: sr.Parameter, parameter: sr.Parameter
                            f"into parameter {parameter.get_name()}")
 
 
-def read_parameter(ros_parameter: Parameter, parameter: Union[None, sr.Parameter] = None) -> sr.Parameter:
+def read_parameter(ros_parameter: Parameter, parameter: Optional[sr.Parameter] = None) -> sr.Parameter:
+    """
+    Update the parameter value of a state_representation Parameter from a ROS Parameter object.
+
+    :param ros_parameter: The ROS Parameter to read from
+    :param parameter: The state_representation Parameter to populate
+    :raises Exception if the ROS Parameter could not be read
+    :return: The resulting state_representation Parameter
+    """
+
     def read_new_parameter(ros_param: Parameter) -> sr.Parameter:
+        """
+        Read a ROS Parameter object and translate to a state_representation Parameter object.
+
+        :param ros_param: The ROS Parameter to read from
+        :raises Exception if the ROS Parameter could not be read
+        :return: The resulting state_representation Parameter
+        """
         if ros_param.type_ == Parameter.Type.BOOL:
             return sr.Parameter(ros_param.name, ros_param.get_parameter_value().bool_value, sr.ParameterType.BOOL)
         elif ros_param.type_ == Parameter.Type.BOOL_ARRAY:
@@ -127,9 +160,18 @@ def read_parameter(ros_parameter: Parameter, parameter: Union[None, sr.Parameter
 
 
 def read_parameter_const(ros_parameter: Parameter, parameter: sr.Parameter) -> sr.Parameter:
+    """
+    Update the parameter value of a state_representation Parameter from a ROS Parameter object only if the value of
+    the ROS Parameter can be interpreted as the value of the original state_representation Parameter.
+
+    :param ros_parameter: The ROS Parameter to read from
+    :param parameter: The state_representation Parameter to update
+    :raises Exception if the ROS Parameter could not be read
+    :return: The resulting state_representation Parameter
+    """
     if ros_parameter.name != parameter.get_name():
-        raise RuntimeError(
-            f"The ROS parameter {ros_parameter.name} to be read does not have the same name as the reference parameter {parameter.get_name()}")
+        raise RuntimeError(f"The ROS parameter {ros_parameter.name} to be read does not have "
+                           f"the same name as the reference parameter {parameter.get_name()}")
     new_parameter = read_parameter(ros_parameter)
     if new_parameter.get_parameter_type() == parameter.get_parameter_type():
         return new_parameter

@@ -51,5 +51,4 @@ void Component::run() {
 bool Component::execute() {
   return true;
 }
-
 }// namespace modulo_components

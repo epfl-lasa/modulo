@@ -1,5 +1,7 @@
 #include "modulo_new_core/communication/MessagePair.hpp"
 
+#include <utility>
+
 namespace modulo_new_core::communication {
 
 template<>
@@ -75,5 +77,4 @@ std::shared_ptr<MessagePairInterface> make_shared_message_pair(
 ) {
   return std::make_shared<MessagePair<EncodedState, state_representation::State>>(data, clock);
 }
-
 }// namespace modulo_new_core::communication

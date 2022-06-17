@@ -1,5 +1,7 @@
 #include "modulo_new_core/communication/SubscriptionInterface.hpp"
 
+#include "modulo_new_core/exceptions/NullPointerException.hpp"
+
 namespace modulo_new_core::communication {
 
 SubscriptionInterface::SubscriptionInterface(std::shared_ptr<MessagePairInterface> message_pair) :
@@ -15,5 +17,4 @@ void SubscriptionInterface::set_message_pair(const std::shared_ptr<MessagePairIn
   }
   this->message_pair_ = message_pair;
 }
-
 }// namespace modulo_new_core::communication

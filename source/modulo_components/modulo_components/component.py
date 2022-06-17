@@ -5,8 +5,8 @@ from modulo_components.component_interface import ComponentInterface
 
 class Component(ComponentInterface):
     """
-    Class to represent a Component in python, following the same logic pattern
-    as the c++ modulo_component::Component class.
+    Class to represent a Component in python, following the same logic pattern as the c++ modulo_component::Component
+    class.
     ...
     Attributes:
         started (bool): flag that indicates if execution has started or not
@@ -43,8 +43,8 @@ class Component(ComponentInterface):
 
     def __run(self):
         """
-        Run the execution function in a try catch block and set
-        the predicates according to the outcome of the execution.
+        Run the execution function in a try catch block and set the predicates according to the outcome of the
+        execution.
         """
         try:
             if not self.execute():

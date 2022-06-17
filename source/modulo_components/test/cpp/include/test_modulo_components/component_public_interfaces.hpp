@@ -75,6 +75,4 @@ public:
   using LifecycleComponent::outputs_;
   using LifecycleComponent::get_clock;
 };
-
-
-}
+}// namespace modulo_components
