@@ -12,91 +12,91 @@ MsgT = TypeVar('MsgT')
 StateT = TypeVar('StateT')
 
 
-def read_xyz(msg: Union[geometry.Point, geometry.Vector3]) -> List[float]:
+def read_xyz(message: Union[geometry.Point, geometry.Vector3]) -> List[float]:
     """
     Helper function to read a list from a Point or Vector3 message.
 
-    :param msg: The message to read from
+    :param message: The message to read from
     """
-    return [msg.x, msg.y, msg.z]
+    return [message.x, message.y, message.z]
 
 
-def read_quaternion(msg: geometry.Quaternion) -> List[float]:
+def read_quaternion(message: geometry.Quaternion) -> List[float]:
     """
     Helper function to read a list of quaternion coefficients (w,x,y,z) from a Quaternion message.
 
-    :param msg: The message to read from
+    :param message: The message to read from
     """
-    return [msg.w, msg.x, msg.y, msg.z]
+    return [message.w, message.x, message.y, message.z]
 
 
-def read_msg(state: StateT, msg: MsgT):
+def read_message(state: StateT, message: MsgT):
     """
     Convert a ROS message to a state_representation State.
 
     :param state: The state to populate
-    :param msg: The ROS message to read from
+    :param message: The ROS message to read from
     """
     if not isinstance(state, sr.State):
         raise RuntimeError("This state type is not supported.")
     if isinstance(state, sr.CartesianState):
-        if isinstance(msg, geometry.Accel):
-            state.set_linear_acceleration(read_xyz(msg.linear))
-            state.set_angular_acceleration(read_xyz(msg.angular))
-        elif isinstance(msg, geometry.Pose):
-            state.set_position(read_xyz(msg.position))
-            state.set_orientation(read_quaternion(msg.orientation))
-        elif isinstance(msg, geometry.Transform):
-            state.set_position(read_xyz(msg.translation))
-            state.set_orientation(read_quaternion(msg.rotation))
-        elif isinstance(msg, geometry.Twist):
-            state.set_linear_velocity(read_xyz(msg.linear))
-            state.set_angular_velocity(read_xyz(msg.angular))
-        elif isinstance(msg, geometry.Wrench):
-            state.set_force(read_xyz(msg.force))
-            state.set_torque(read_xyz(msg.torque))
+        if isinstance(message, geometry.Accel):
+            state.set_linear_acceleration(read_xyz(message.linear))
+            state.set_angular_acceleration(read_xyz(message.angular))
+        elif isinstance(message, geometry.Pose):
+            state.set_position(read_xyz(message.position))
+            state.set_orientation(read_quaternion(message.orientation))
+        elif isinstance(message, geometry.Transform):
+            state.set_position(read_xyz(message.translation))
+            state.set_orientation(read_quaternion(message.rotation))
+        elif isinstance(message, geometry.Twist):
+            state.set_linear_velocity(read_xyz(message.linear))
+            state.set_angular_velocity(read_xyz(message.angular))
+        elif isinstance(message, geometry.Wrench):
+            state.set_force(read_xyz(message.force))
+            state.set_torque(read_xyz(message.torque))
         else:
             raise RuntimeError("The provided combination of state type and message type is not supported")
-    elif isinstance(msg, sensor_msgs.msg.JointState) and isinstance(state, sr.JointState):
-        state.set_names(msg.name)
-        if len(msg.position):
-            state.set_positions(msg.position)
-        if len(msg.velocity):
-            state.set_velocities(msg.velocity)
-        if len(msg.effort):
-            state.set_torques(msg.effort)
+    elif isinstance(message, sensor_msgs.msg.JointState) and isinstance(state, sr.JointState):
+        state.set_names(message.name)
+        if len(message.position):
+            state.set_positions(message.position)
+        if len(message.velocity):
+            state.set_velocities(message.velocity)
+        if len(message.effort):
+            state.set_torques(message.effort)
     else:
         raise RuntimeError("The provided combination of state type and message type is not supported")
     return state
 
 
-def read_stamped_msg(state: StateT, msg: MsgT):
+def read_stamped_message(state: StateT, message: MsgT):
     """
     Convert a stamped ROS message to a state_representation State.
 
     :param state: The state to populate
-    :param msg: The ROS message to read from
+    :param message: The ROS message to read from
     """
-    if isinstance(msg, geometry.AccelStamped):
-        read_msg(state, msg.accel)
-    elif isinstance(msg, geometry.PoseStamped):
-        read_msg(state, msg.pose)
-    elif isinstance(msg, geometry.TransformStamped):
-        read_msg(state, msg.transform)
-        state.set_name(msg.child_frame_id)
-    elif isinstance(msg, geometry.TwistStamped):
-        read_msg(state, msg.twist)
-    elif isinstance(msg, geometry.WrenchStamped):
-        read_msg(state, msg.wrench)
+    if isinstance(message, geometry.AccelStamped):
+        read_message(state, message.accel)
+    elif isinstance(message, geometry.PoseStamped):
+        read_message(state, message.pose)
+    elif isinstance(message, geometry.TransformStamped):
+        read_message(state, message.transform)
+        state.set_name(message.child_frame_id)
+    elif isinstance(message, geometry.TwistStamped):
+        read_message(state, message.twist)
+    elif isinstance(message, geometry.WrenchStamped):
+        read_message(state, message.wrench)
     else:
         raise RuntimeError("The provided combination of state type and message type is not supported")
-    state.set_reference_frame(msg.header.frame_id)
+    state.set_reference_frame(message.header.frame_id)
 
 
-def read_clproto_msg(msg: EncodedState) -> StateT:
+def read_clproto_message(message: EncodedState) -> StateT:
     """
     Convert an EncodedState message to a state_representation State.
 
-    :param msg: The EncodedState msg to read from
+    :param message: The EncodedState message to read from
     """
-    return clproto.decode(msg.data.tobytes())
+    return clproto.decode(message.data.tobytes())
