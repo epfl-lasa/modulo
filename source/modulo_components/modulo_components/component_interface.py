@@ -64,14 +64,15 @@ class ComponentInterface(Node):
         self.add_parameter(sr.Parameter("period", 0.1, sr.ParameterType.DOUBLE),
                            "Period (in s) between step function calls.")
 
-        self.create_timer(self.get_parameter_value("period"), self.__step)
+        self.add_predicate("in_error_state", False)
 
-    def __step(self) -> None:
+        self.create_timer(self.get_parameter_value("period"), self._step)
+
+    def _step(self) -> None:
         """
         Step function that is called periodically.
         """
-        self._publish_predicates()
-        self._evaluate_periodic_callbacks()
+        pass
 
     def add_parameter(self, parameter: Union[str, sr.Parameter], description: str, read_only=False) -> None:
         """
@@ -382,3 +383,9 @@ class ComponentInterface(Node):
             except Exception as e:
                 self.get_logger().error(f"Failed to evaluate periodic function callback '{name}': {e}",
                                         throttle_duration_sec=1.0)
+
+    def raise_error(self):
+        """
+        Put the component in error state by setting the 'in_error_state' predicate to true.
+        """
+        self.set_predicate("in_error_state", True)
