@@ -25,143 +25,143 @@ namespace modulo_new_core::translators {
 /**
  * @brief Convert a ROS geometry_msgs::msg::Accel to a CartesianState
  * @param state The CartesianState to populate
- * @param msg The ROS msg to read from
+ * @param message The ROS message to read from
  */
-void read_msg(state_representation::CartesianState& state, const geometry_msgs::msg::Accel& msg);
+void read_message(state_representation::CartesianState& state, const geometry_msgs::msg::Accel& message);
 
 /**
  * @brief Convert a ROS geometry_msgs::msg::AccelStamped to a CartesianState
  * @param state The CartesianState to populate
- * @param msg The ROS msg to read from
+ * @param message The ROS message to read from
  */
-void read_msg(state_representation::CartesianState& state, const geometry_msgs::msg::AccelStamped& msg);
+void read_message(state_representation::CartesianState& state, const geometry_msgs::msg::AccelStamped& message);
 
 /**
  * @brief Convert a ROS geometry_msgs::msg::Pose to a CartesianState
  * @param state The CartesianState to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
-void read_msg(state_representation::CartesianState& state, const geometry_msgs::msg::Pose& msg);
+void read_message(state_representation::CartesianState& state, const geometry_msgs::msg::Pose& message);
 
 /**
  * @brief Convert a ROS geometry_msgs::msg::PoseStamped to a CartesianState
  * @param state The CartesianState to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
-void read_msg(state_representation::CartesianState& state, const geometry_msgs::msg::PoseStamped& msg);
+void read_message(state_representation::CartesianState& state, const geometry_msgs::msg::PoseStamped& message);
 
 /**
  * @brief Convert a ROS geometry_msgs::msg::Transform to a CartesianState
  * @param state The CartesianState to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
-void read_msg(state_representation::CartesianState& state, const geometry_msgs::msg::Transform& msg);
+void read_message(state_representation::CartesianState& state, const geometry_msgs::msg::Transform& message);
 
 /**
  * @brief Convert a ROS geometry_msgs::msg::TransformStamped to a CartesianState
  * @param state The CartesianState to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
-void read_msg(state_representation::CartesianState& state, const geometry_msgs::msg::TransformStamped& msg);
+void read_message(state_representation::CartesianState& state, const geometry_msgs::msg::TransformStamped& message);
 
 /**
  * @brief Convert a ROS geometry_msgs::msg::Twist to a CartesianState
  * @param state The CartesianState to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
-void read_msg(state_representation::CartesianState& state, const geometry_msgs::msg::Twist& msg);
+void read_message(state_representation::CartesianState& state, const geometry_msgs::msg::Twist& message);
 
 /**
  * @brief Convert a ROS geometry_msgs::msg::TwistStamped to a CartesianState
  * @param state The CartesianState to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
-void read_msg(state_representation::CartesianState& state, const geometry_msgs::msg::TwistStamped& msg);
+void read_message(state_representation::CartesianState& state, const geometry_msgs::msg::TwistStamped& message);
 
 /**
  * @brief Convert a ROS geometry_msgs::msg::Wrench to a CartesianState
  * @param state The CartesianState to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
-void read_msg(state_representation::CartesianState& state, const geometry_msgs::msg::Wrench& msg);
+void read_message(state_representation::CartesianState& state, const geometry_msgs::msg::Wrench& message);
 
 /**
  * @brief Convert a ROS geometry_msgs::msg::WrenchStamped to a CartesianState
  * @param state The CartesianState to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
-void read_msg(state_representation::CartesianState& state, const geometry_msgs::msg::WrenchStamped& msg);
+void read_message(state_representation::CartesianState& state, const geometry_msgs::msg::WrenchStamped& message);
 
 /**
  * @brief Convert a ROS sensor_msgs::msg::JointState to a JointState
  * @param state The JointState to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
-void read_msg(state_representation::JointState& state, const sensor_msgs::msg::JointState& msg);
+void read_message(state_representation::JointState& state, const sensor_msgs::msg::JointState& message);
 
 /**
  * @brief Template function to convert a ROS std_msgs::msg::T to a Parameter<T>
- * @tparam T all types of parameters supported in ROS std messages
- * @tparam U all types of parameters supported in ROS std messages
+ * @tparam T All types of parameters supported in ROS std messages
+ * @tparam U All types of parameters supported in ROS std messages
  * @param state The Parameter<T> to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
 template<typename T, typename U>
-void read_msg(state_representation::Parameter<T>& state, const U& msg) {
-  state.set_value(msg.data);
+void read_message(state_representation::Parameter<T>& state, const U& message) {
+  state.set_value(message.data);
 }
 
 /**
  * @brief Convert a ROS std_msgs::msg::Bool to a boolean
  * @param state The state to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
-void read_msg(bool& state, const std_msgs::msg::Bool& msg);
+void read_message(bool& state, const std_msgs::msg::Bool& message);
 
 /**
  * @brief Convert a ROS std_msgs::msg::Float64 to a double
  * @param state The state to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
-void read_msg(double& state, const std_msgs::msg::Float64& msg);
+void read_message(double& state, const std_msgs::msg::Float64& message);
 
 /**
  * @brief Convert a ROS std_msgs::msg::Float64MultiArray to a vector of double
  * @param state The state to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
-void read_msg(std::vector<double>& state, const std_msgs::msg::Float64MultiArray& msg);
+void read_message(std::vector<double>& state, const std_msgs::msg::Float64MultiArray& message);
 
 /**
  * @brief Convert a ROS std_msgs::msg::Int32 to an integer
  * @param state The state to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
-void read_msg(int& state, const std_msgs::msg::Int32& msg);
+void read_message(int& state, const std_msgs::msg::Int32& message);
 
 /**
  * @brief Convert a ROS std_msgs::msg::String to a string
  * @param state The state to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
-void read_msg(std::string& state, const std_msgs::msg::String& msg);
+void read_message(std::string& state, const std_msgs::msg::String& message);
 
 /**
  * @brief Convert a ROS std_msgs::msg::UInt8MultiArray message to a State using protobuf decoding
- * @tparam a state_representation::State type object
+ * @tparam T A state_representation::State type
  * @param state The state to populate
- * @param msg The ROS message to read from
+ * @param message The ROS message to read from
  */
 template<typename T>
-inline void read_msg(T& state, const EncodedState& msg) {
-  std::string tmp(msg.data.begin(), msg.data.end());
+inline void read_message(T& state, const EncodedState& message) {
+  std::string tmp(message.data.begin(), message.data.end());
   state = clproto::decode<T>(tmp);
 }
 
 template<>
-inline void read_msg(std::shared_ptr<state_representation::State>& state, const EncodedState& msg) {
+inline void read_message(std::shared_ptr<state_representation::State>& state, const EncodedState& message) {
   using namespace state_representation;
-  std::string tmp(msg.data.begin(), msg.data.end());
+  std::string tmp(message.data.begin(), message.data.end());
   auto new_state = clproto::decode<std::shared_ptr<State>>(tmp);
   switch (new_state->get_type()) {
     case StateType::STATE:

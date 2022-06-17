@@ -59,9 +59,9 @@ inline MsgT MessagePair<MsgT, DataT>::write_message() const {
   if (this->data_ == nullptr) {
     throw exceptions::NullPointerException("The message pair data is not set, nothing to write");
   }
-  auto msg = MsgT();
-  translators::write_msg(msg, *this->data_, clock_->now());
-  return msg;
+  auto message = MsgT();
+  translators::write_message(message, *this->data_, clock_->now());
+  return message;
 }
 
 template<>
@@ -69,9 +69,9 @@ inline EncodedState MessagePair<EncodedState, state_representation::State>::writ
   if (this->data_ == nullptr) {
     throw exceptions::NullPointerException("The message pair data is not set, nothing to write");
   }
-  auto msg = EncodedState();
-  translators::write_msg(msg, this->data_, clock_->now());
-  return msg;
+  auto message = EncodedState();
+  translators::write_message(message, this->data_, clock_->now());
+  return message;
 }
 
 template<typename MsgT, typename DataT>
@@ -79,7 +79,7 @@ inline void MessagePair<MsgT, DataT>::read_message(const MsgT& message) {
   if (this->data_ == nullptr) {
     throw exceptions::NullPointerException("The message pair data is not set, nothing to read");
   }
-  translators::read_msg(*this->data_, message);
+  translators::read_message(*this->data_, message);
 }
 
 template<>
@@ -87,7 +87,7 @@ inline void MessagePair<EncodedState, state_representation::State>::read_message
   if (this->data_ == nullptr) {
     throw exceptions::NullPointerException("The message pair data is not set, nothing to read");
   }
-  translators::read_msg(this->data_, message);
+  translators::read_message(this->data_, message);
 }
 
 template<typename MsgT, typename DataT>

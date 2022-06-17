@@ -11,10 +11,10 @@ template<typename MsgT, typename DataT>
 static void test_subscription_interface(const std::shared_ptr<rclcpp::Node>& node, const DataT& value) {
   // create message pair
   auto data = std::make_shared<DataT>(value);
-  auto msg_pair = std::make_shared<MessagePair<MsgT, DataT>>(data, node->get_clock());
+  auto message_pair = std::make_shared<MessagePair<MsgT, DataT>>(data, node->get_clock());
 
   // create subscription handler
-  auto subscription_handler = std::make_shared<SubscriptionHandler<MsgT>>(msg_pair);
+  auto subscription_handler = std::make_shared<SubscriptionHandler<MsgT>>(message_pair);
   auto subscription = node->template create_subscription<MsgT>(
       "topic", 10, subscription_handler->get_callback());
 
@@ -52,11 +52,11 @@ TEST_F(SubscriptionTest, EncodedState) {
   // create message pair
   auto data =
       std::make_shared<state_representation::CartesianState>(state_representation::CartesianState::Random("test"));
-  auto msg_pair = std::make_shared<MessagePair<modulo_new_core::EncodedState, state_representation::State>>(
+  auto message_pair = std::make_shared<MessagePair<modulo_new_core::EncodedState, state_representation::State>>(
       data, node->get_clock());
 
   // create subscription handler
-  auto subscription_handler = std::make_shared<SubscriptionHandler<modulo_new_core::EncodedState>>(msg_pair);
+  auto subscription_handler = std::make_shared<SubscriptionHandler<modulo_new_core::EncodedState>>(message_pair);
   auto subscription = node->create_subscription<modulo_new_core::EncodedState>(
       "topic", 10, subscription_handler->get_callback());
 
