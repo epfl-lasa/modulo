@@ -32,6 +32,7 @@ class ComponentInterface(Node):
         predicates (dict(Parameters(bool))): map of predicates added to the Component.
         predicate_publishers (dict(rclpy.Publisher(Bool))): map of publishers associated to each predicate.
         parameter_dict: dict of parameters
+        periodic_callbacks: dict of periodic callback functions
         tf_buffer (tf2_ros.Buffer): the buffer to lookup transforms published on tf2.
         tf_listener (tf2_ros.TransformListener): the listener to lookup transforms published on tf2.
         tf_broadcaster (tf2_ros.TransformBroadcaster): the broadcaster to publish transforms on tf2
@@ -49,6 +50,7 @@ class ComponentInterface(Node):
         self._parameter_dict: Dict[str, Union[str, sr.Parameter]] = {}
         self._predicates: Dict[str, Union[bool, Callable[[], bool]]] = {}
         self._predicate_publishers: Dict[str, Publisher] = {}
+        self._periodic_callbacks: Dict[str, Callable[[], None]] = {}
         self.__tf_buffer: Optional[Buffer] = None
         self.__tf_listener: Optional[TransformListener] = None
         self.__tf_broadcaster: Optional[TransformBroadcaster] = None
@@ -337,3 +339,30 @@ class ComponentInterface(Node):
             return result
         except tf2_py.TransformException as e:
             raise LookupTransformError(f"Failed to lookup transform: {e}")
+
+    def add_periodic_callback(self, name: str, callback: Callable[[], None]):
+        """
+        Add a periodic callback function. The provided function is evaluated periodically at the component step period.
+
+        :param name: The name of the callback
+        :param callback: The callback function that is evaluated periodically
+        """
+        if not name:
+            self.get_logger().error("Failed to add periodic function: Provide a non empty string as a name.")
+            return
+        if name in self._periodic_callbacks.keys():
+            self.get_logger().debug(f"Periodic function '{name}' already exists, overwriting.")
+        else:
+            self.get_logger().debug(f"Adding periodic function '{name}'.")
+        self._periodic_callbacks[name] = callback
+
+    def _evaluate_periodic_callbacks(self):
+        """
+        Helper function to evaluate all periodic function callbacks.
+        """
+        for name, callback in self._periodic_callbacks.items():
+            try:
+                callback()
+            except Exception as e:
+                self.get_logger().error(f"Failed to evaluate periodic function callback '{name}': {e}",
+                                        throttle_duration_sec=1.0)
