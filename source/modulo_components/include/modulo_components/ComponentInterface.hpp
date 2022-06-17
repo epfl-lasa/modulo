@@ -209,7 +209,7 @@ protected:
    * @param name The name of the callback
    * @param callback The callback function that is evaluated periodically
    */
-  void add_periodic_function(const std::string& name, const std::function<void(void)>& callback);
+  void add_periodic_callback(const std::string& name, const std::function<void(void)>& callback);
 
   /**
    * @brief Configure a transform broadcaster.
@@ -679,7 +679,7 @@ inline void ComponentInterface<NodeT>::add_input(
 
 template<class NodeT>
 inline void
-ComponentInterface<NodeT>::add_periodic_function(const std::string& name, const std::function<void()>& callback) {
+ComponentInterface<NodeT>::add_periodic_callback(const std::string& name, const std::function<void()>& callback) {
   if (name.empty()) {
     RCLCPP_ERROR(this->get_logger(), "Failed to add periodic function: Provide a non empty string as a name.");
     return;
