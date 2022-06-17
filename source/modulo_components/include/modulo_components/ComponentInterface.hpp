@@ -748,7 +748,7 @@ inline void ComponentInterface<NodeT>::send_transform(const state_representation
   }
   try {
     geometry_msgs::msg::TransformStamped transform_message;
-    modulo_new_core::translators::write_msg(transform_message, transform, this->get_clock()->now());
+    modulo_new_core::translators::write_message(transform_message, transform, this->get_clock()->now());
     tf2_msgs::msg::TFMessage tf_message;
     tf_message.transforms.emplace_back(transform_message);
     this->tf_broadcaster_->publish(tf_message);
@@ -769,7 +769,7 @@ inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_tra
   try {
     state_representation::CartesianPose result(frame_name, reference_frame_name);
     auto transform = this->tf_buffer_->lookupTransform(reference_frame_name, frame_name, time_point, duration);
-    modulo_new_core::translators::read_msg(result, transform);
+    modulo_new_core::translators::read_message(result, transform);
     return result;
   } catch (const tf2::TransformException& ex) {
     throw exceptions::LookupTransformException(std::string("Failed to lookup transform: ").append(ex.what()));
@@ -779,14 +779,14 @@ inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_tra
 template<class NodeT>
 inline void ComponentInterface<NodeT>::publish_predicates() {
   for (const auto& predicate: this->predicates_) {
-    std_msgs::msg::Bool msg;
-    msg.data = this->get_predicate(predicate.first);
+    std_msgs::msg::Bool message;
+    message.data = this->get_predicate(predicate.first);
     if (this->predicate_publishers_.find(predicate.first) == this->predicate_publishers_.end()) {
       RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                                    "No publisher for predicate " << predicate.first << " found.");
       return;
     }
-    predicate_publishers_.at(predicate.first)->publish(msg);
+    predicate_publishers_.at(predicate.first)->publish(message);
   }
 }
 
