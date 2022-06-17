@@ -4,9 +4,9 @@ import clproto
 import geometry_msgs.msg as geometry
 import numpy as np
 import rclpy.time
-import sensor_msgs.msg
 import state_representation as sr
 from modulo_new_core.encoded_state import EncodedState
+from sensor_msgs.msg import JointState
 
 MsgT = TypeVar('MsgT')
 StateT = TypeVar('StateT')
@@ -18,6 +18,7 @@ def write_xyz(message: Union[geometry.Point, geometry.Vector3], vector: np.array
 
     :param message: The message to populate
     :param vector: The vector to read from
+    :raises Exception if the message could not be written
     """
     if vector.size != 3:
         raise RuntimeError("Provide a vector of size 3 to transform to a Point or Vector3 message.")
@@ -32,6 +33,7 @@ def write_quaternion(message: geometry.Quaternion, quat: np.array):
 
     :param message: The message to populate
     :param quat: The vector to read from
+    :raises Exception if the message could not be written
     """
     if quat.size != 4:
         raise RuntimeError("Provide a vector of size 4 to transform to a Quaternion message.")
@@ -43,10 +45,11 @@ def write_quaternion(message: geometry.Quaternion, quat: np.array):
 
 def write_message(message: MsgT, state: StateT):
     """
-    Convert a state_representation State to a ROS message.
+    Convert a state_representation State type to a ROS message.
 
     :param message: The ROS message to populate
     :param state: The state to read from
+    :raises Exception if the message could not be written
     """
     if not isinstance(state, sr.State):
         raise RuntimeError("This state type is not supported.")
@@ -70,7 +73,7 @@ def write_message(message: MsgT, state: StateT):
             write_xyz(message.torque, state.get_torque())
         else:
             raise RuntimeError("The provided combination of state type and message type is not supported")
-    elif isinstance(message, sensor_msgs.msg.JointState) and isinstance(state, sr.JointState):
+    elif isinstance(message, JointState) and isinstance(state, sr.JointState):
         message.name = state.get_names()
         message.position = state.get_positions().tolist()
         message.velocity = state.get_velocities().tolist()
@@ -81,11 +84,12 @@ def write_message(message: MsgT, state: StateT):
 
 def write_stamped_message(message: MsgT, state: StateT, time: rclpy.time.Time):
     """
-    Convert a state_representation State to a stamped ROS message.
+    Convert a state_representation State type to a stamped ROS message.
 
     :param message: The ROS message to populate
     :param state: The state to read from
     :param time: The time of the message
+    :raises Exception if the message could not be written
     """
     if isinstance(message, geometry.AccelStamped):
         write_message(message.accel, state)
@@ -106,10 +110,12 @@ def write_stamped_message(message: MsgT, state: StateT, time: rclpy.time.Time):
 
 def write_clproto_message(state: StateT, clproto_message_type: clproto.MessageType) -> EncodedState():
     """
-    Convert a state_representation State to an EncodedState message.
+    Convert a state_representation State type to an EncodedState message.
 
     :param state: The state to read from
     :param clproto_message_type: The clproto message type to encode the state
+    :raises Exception if the message could not be written
+    :return: The populated message
     """
     if not isinstance(state, sr.State):
         raise RuntimeError("This state type is not supported.")

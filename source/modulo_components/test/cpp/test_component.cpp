@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <rclcpp/publisher.hpp>
+
 #include <rclcpp/node_options.hpp>
 
 #include "modulo_components/Component.hpp"
@@ -39,5 +39,4 @@ TEST_F(ComponentTest, AddOutput) {
   EXPECT_EQ(component_->outputs_.at("test_13")->get_message_pair()->get_type(),
             modulo_new_core::communication::MessageType::ENCODED_STATE);
 }
-
 } // namespace modulo_components

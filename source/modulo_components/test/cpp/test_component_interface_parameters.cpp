@@ -165,5 +165,4 @@ TYPED_TEST(ComponentInterfaceParameterTest, ReadOnlyParameter) {
   this->template expect_parameter_value<int>(1);
   EXPECT_EQ(this->param_->get_value(), 1);
 }
-
 } // namespace modulo_components

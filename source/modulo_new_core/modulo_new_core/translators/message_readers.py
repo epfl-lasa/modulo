@@ -1,12 +1,10 @@
-from typing import List
-from typing import TypeVar, Union
+from typing import List, TypeVar, Union
 
 import clproto
 import geometry_msgs.msg as geometry
-import sensor_msgs.msg
-import sensor_msgs.msg
 import state_representation as sr
 from modulo_new_core.encoded_state import EncodedState
+from sensor_msgs.msg import JointState
 
 MsgT = TypeVar('MsgT')
 StateT = TypeVar('StateT')
@@ -32,10 +30,11 @@ def read_quaternion(message: geometry.Quaternion) -> List[float]:
 
 def read_message(state: StateT, message: MsgT):
     """
-    Convert a ROS message to a state_representation State.
+    Convert a ROS message to a state_representation State type.
 
     :param state: The state to populate
     :param message: The ROS message to read from
+    :raises Exception if the message could not be read
     """
     if not isinstance(state, sr.State):
         raise RuntimeError("This state type is not supported.")
@@ -57,7 +56,7 @@ def read_message(state: StateT, message: MsgT):
             state.set_torque(read_xyz(message.torque))
         else:
             raise RuntimeError("The provided combination of state type and message type is not supported")
-    elif isinstance(message, sensor_msgs.msg.JointState) and isinstance(state, sr.JointState):
+    elif isinstance(message, JointState) and isinstance(state, sr.JointState):
         state.set_names(message.name)
         if len(message.position):
             state.set_positions(message.position)
@@ -72,10 +71,11 @@ def read_message(state: StateT, message: MsgT):
 
 def read_stamped_message(state: StateT, message: MsgT):
     """
-    Convert a stamped ROS message to a state_representation State.
+    Convert a stamped ROS message to a state_representation State type.
 
     :param state: The state to populate
     :param message: The ROS message to read from
+    :raises Exception if the message could not be read
     """
     if isinstance(message, geometry.AccelStamped):
         read_message(state, message.accel)
@@ -95,8 +95,9 @@ def read_stamped_message(state: StateT, message: MsgT):
 
 def read_clproto_message(message: EncodedState) -> StateT:
     """
-    Convert an EncodedState message to a state_representation State.
+    Convert an EncodedState message to a state_representation State type.
 
     :param message: The EncodedState message to read from
+    :raises Exception if the message could not be read
     """
     return clproto.decode(message.data.tobytes())

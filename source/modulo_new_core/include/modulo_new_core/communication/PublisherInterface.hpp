@@ -15,8 +15,8 @@ class PublisherHandler;
 
 /**
  * @class PublisherInterface
- * @brief Interface class to enable non-templated activating/deactivating/publishing of ROS publishers
- * from derived PublisherHandler instances through dynamic downcasting.
+ * @brief Interface class to enable non-templated activating/deactivating/publishing of ROS publishers from derived
+ * PublisherHandler instances through dynamic down-casting.
  */
 class PublisherInterface : public std::enable_shared_from_this<PublisherInterface> {
 public:
@@ -39,47 +39,53 @@ public:
 
   /**
    * @brief Get a pointer to a derived PublisherHandler instance from a PublisherInterface pointer.
-   * @details If a PublisherInterface pointer is used to address a derived PublisherHandler instance,
-   * this method will return a pointer to that derived instance through dynamic down-casting.
-   * The downcast will fail if the base PublisherInterface object has no reference count
-   * (if the object is not owned by any pointer), or if the derived object is not a correctly
-   * typed instance of a PublisherHandler. By default, an InvalidPointerCastException is thrown when
-   * the downcast fails. If this validation is disabled by setting the validate_pointer flag to false,
-   * it will not throw an exception and instead return a null pointer.
+   * @details If a PublisherInterface pointer is used to address a derived PublisherHandler instance, this method will
+   * return a pointer to that derived instance through dynamic down-casting. The downcast will fail if the base
+   * PublisherInterface object has no reference count (if the object is not owned by any pointer), or if the derived
+   * object is not a correctly typed instance of a PublisherHandler. By default, an InvalidPointerCastException is
+   * thrown when the downcast fails. If this validation is disabled by setting the validate_pointer flag to false, it
+   * will not throw an exception and instead return a null pointer.
    * @tparam PubT The ROS publisher type
    * @tparam MsgT The ROS message type
-   * @param validate_pointer If true, throw an exception when downcasting fails
+   * @throws InvalidPointerException if the base PublisherInterface object has no reference count and validate_pointer
+   * is set to true
+   * @throws InvalidPointerCastException if the derived object from the dynamic down-casting is not a correctly typed
+   * instance of a PublisherHandler
+   * @param validate_pointer If true, throw an exception when down-casting fails
    * @return A pointer to a derived PublisherHandler instance of the desired type, or a null pointer
-   * if downcasting failed and validate_pointer was set to false.
+   * if down-casting failed and validate_pointer was set to false.
    */
   template<typename PubT, typename MsgT>
   std::shared_ptr<PublisherHandler<PubT, MsgT>> get_handler(bool validate_pointer = true);
 
   /**
    * @brief Activate ROS publisher of a derived PublisherHandler instance through the PublisherInterface pointer.
-   * @details This throws an InvalidPointerCastException if the PublisherInterface does not point to
-   * a valid PublisherHandler instance or if the type of the message pair does not match the
-   * type of the PublisherHandler instance.
-   * @see PublisherInterface::get_handler()
+   * @details This throws an InvalidPointerCastException if the PublisherInterface does not point to a valid
+   * PublisherHandler instance or if the type of the message pair does not match the type of the PublisherHandler
+   * instance.
+   * @see PublisherInterface::get_handler
+   * @throws NullPointerException if the message pair pointer is null
    */
   void activate();
 
   /**
    * @brief Deactivate ROS publisher of a derived PublisherHandler instance through the PublisherInterface pointer.
-   * @details This throws an InvalidPointerCastException if the PublisherInterface does not point to
-   * a valid PublisherHandler instance or if the type of the message pair does not match the
-   * type of the PublisherHandler instance.
-   * @see PublisherInterface::get_handler()
+   * @details This throws an InvalidPointerCastException if the PublisherInterface does not point to a valid
+   * PublisherHandler instance or if the type of the message pair does not match the type of the PublisherHandler
+   * instance.
+   * @see PublisherInterface::get_handler
+   * @throws NullPointerException if the message pair pointer is null
    */
   void deactivate();
 
   /**
    * @brief Publish the data stored in the message pair through the ROS publisher of a derived PublisherHandler
    * instance through the PublisherInterface pointer.
-   * @details This throws an InvalidPointerCastException if the PublisherInterface does not point to
-   * a valid PublisherHandler instance or if the type of the message pair does not match the
-   * type of the PublisherHandler instance.
-   * @see PublisherInterface::get_handler()
+   * @details This throws an InvalidPointerCastException if the PublisherInterface does not point to a valid
+   * PublisherHandler instance or if the type of the message pair does not match the type of the PublisherHandler
+   * instance.
+   * @see PublisherInterface::get_handler
+   * @throws NullPointerException if the message pair pointer is null
    */
   void publish();
 
@@ -90,6 +96,7 @@ public:
 
   /**
    * @brief Set the pointer to the message pair of the PublisherInterface.
+   * @throws NullPointerException if the provided message pair pointer is null
    */
   void set_message_pair(const std::shared_ptr<MessagePairInterface>& message_pair);
 
@@ -101,11 +108,12 @@ public:
 
 private:
   /**
-   * @brief Publish the data stored in the message pair through the ROS publisher of a derived PublisherHandler
-   * instance through the PublisherInterface pointer.
-   * @details This throws an InvalidPointerCastException if the PublisherInterface does not point to a
-   * valid PublisherHandler instance or if the specified type does not match the type of the PublisherHandler instance.
-   * @see PublisherInterface::get_handler()
+   * @brief Publish the data stored in the message pair through the ROS publisher of a derived PublisherHandler instance
+   * through the PublisherInterface pointer.
+   * @details This throws an InvalidPointerCastException if the PublisherInterface does not point to a valid
+   * PublisherHandler instance or if the type of the message pair does not match the type of the PublisherHandler
+   * instance.
+   * @see PublisherInterface::get_handler
    * @tparam MsgT Message type of the PublisherHandler
    * @param message The ROS message to publish through the ROS publisher
    */
@@ -133,5 +141,4 @@ inline std::shared_ptr<PublisherHandler<PubT, MsgT>> PublisherInterface::get_han
   }
   return publisher_ptr;
 }
-
 }// namespace modulo_new_core::communication

@@ -66,5 +66,4 @@ static std::string parse_signal_name(const std::string& signal_name) {
 static std::string generate_predicate_topic(const std::string& component_name, const std::string& predicate_name) {
   return "/predicates/" + component_name + "/" + predicate_name;
 }
-
 }// namespace modulo_components::utilities

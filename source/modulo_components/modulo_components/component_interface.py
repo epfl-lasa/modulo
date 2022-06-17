@@ -1,5 +1,5 @@
 import sys
-from typing import Union, TypeVar, Callable, List
+from typing import Callable, Dict, List, Optional, TypeVar, Union
 
 import rclpy
 import state_representation as sr
@@ -13,6 +13,7 @@ from rcl_interfaces.msg import ParameterDescriptor
 from rcl_interfaces.msg import SetParametersResult
 from rclpy.duration import Duration
 from rclpy.node import Node
+from rclpy.publisher import Publisher
 from rclpy.time import Time
 from std_msgs.msg import Bool
 from tf2_ros import TransformBroadcaster
@@ -24,8 +25,8 @@ T = TypeVar('T')
 
 class ComponentInterface(Node):
     """
-    Abstract class to represent a Component in python, following the same logic pattern
-    as the c++ modulo_component::ComponentInterface class.
+    Abstract class to represent a Component in python, following the same logic pattern  as the C++
+    modulo_component::ComponentInterface class.
     ...
     Attributes:
         predicates (dict(Parameters(bool))): map of predicates added to the Component.
@@ -45,12 +46,12 @@ class ComponentInterface(Node):
                 node_name (str): name of the node to be passed to the base Node class
         """
         super().__init__(node_name, *kargs, **kwargs)
-        self._parameter_dict = {}
-        self._predicates = {}
-        self._predicate_publishers = {}
-        self.__tf_buffer: Buffer = None
-        self.__tf_listener: TransformListener = None
-        self.__tf_broadcaster: TransformBroadcaster = None
+        self._parameter_dict: Dict[str, Union[str, sr.Parameter]] = {}
+        self._predicates: Dict[str, Union[bool, Callable[[], bool]]] = {}
+        self._predicate_publishers: Dict[str, Publisher] = {}
+        self.__tf_buffer: Optional[Buffer] = None
+        self.__tf_listener: Optional[TransformListener] = None
+        self.__tf_broadcaster: Optional[TransformBroadcaster] = None
 
         self.add_on_set_parameters_callback(self.__on_set_parameters_callback)
         self.add_parameter(sr.Parameter("period", 0.1, sr.ParameterType.DOUBLE),
@@ -223,7 +224,7 @@ class ComponentInterface(Node):
                 result.reason += str(e)
         return result
 
-    def add_predicate(self, predicate_name: str, predicate_value: Union[bool, Callable]):
+    def add_predicate(self, predicate_name: str, predicate_value: Union[bool, Callable[[], bool]]):
         """
         Add a predicate to the map of predicates.
 
@@ -264,7 +265,7 @@ class ComponentInterface(Node):
             return bool_value
         return value
 
-    def set_predicate(self, predicate_name: str, predicate_value: Union[bool, Callable]):
+    def set_predicate(self, predicate_name: str, predicate_value: Union[bool, Callable[[], bool]]):
         """
         Set the value of the predicate given as parameter, if the predicate is not found does not do anything.
 
