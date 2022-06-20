@@ -4,6 +4,7 @@ import rclpy
 import state_representation as sr
 from modulo_components.component_interface import ComponentInterface
 from modulo_components.exceptions.component_exceptions import LookupTransformError
+from std_msgs.msg import Bool, String
 
 
 def raise_(ex):
@@ -49,6 +50,19 @@ def test_set_predicate(component_interface):
     component_interface.add_predicate('bar', True)
     component_interface.set_predicate('bar', lambda: False)
     assert not component_interface.get_predicate('bar')
+
+
+def test_add_input(component_interface):
+    component_interface.add_input("_tEsT_#1@3", "test", Bool)
+    assert "test_13" in component_interface._inputs.keys()
+    assert component_interface.get_parameter_value("test_13_topic") == "~/test_13"
+
+    component_interface.add_input("_tEsT_#1@5", "test", Bool, default_topic="/topic")
+    assert "test_15" in component_interface._inputs.keys()
+    assert component_interface.get_parameter_value("test_15_topic") == "/topic"
+
+    component_interface.add_input("test_13", "test", String)
+    assert component_interface._inputs["test_13"].msg_type == Bool
 
 
 def test_tf(component_interface):
