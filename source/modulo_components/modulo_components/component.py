@@ -1,6 +1,11 @@
 from threading import Thread
+from typing import TypeVar
 
+import clproto
 from modulo_components.component_interface import ComponentInterface
+
+DataT = TypeVar('DataT')
+MsgT = TypeVar('MsgT')
 
 
 class Component(ComponentInterface):
@@ -73,3 +78,32 @@ class Component(ComponentInterface):
         :return: True, if the execution was successful, false otherwise
         """
         return True
+
+    def _raise_error(self):
+        """
+        Put the component in error state by setting the 'in_error_state'
+        predicate to true.
+        """
+        self.set_predicate("in_error_state", True)
+
+    def add_output(self, signal_name: str, data: DataT, message_type: MsgT,
+                   clproto_message_type=clproto.MessageType.UNKNOWN_MESSAGE, fixed_topic=False, default_topic=""):
+        """
+        Add and configure an output signal of the component.
+
+        :param signal_name: Name of the output signal
+        :param data: Data to transmit on the output signal
+        :param message_type: The ROS message type of the output
+        :param clproto_message_type: The clproto message type, if applicable
+        :param fixed_topic: If true, the topic name of the output signal is fixed
+        :param default_topic: If set, the default value for the topic name to use
+        """
+        try:
+            parsed_signal_name = self._create_output(signal_name, data, message_type, clproto_message_type, fixed_topic,
+                                                     default_topic)
+            topic_name = self.get_parameter_value(parsed_signal_name + "_topic")
+            self.get_logger().debug(f"Adding output '{parsed_signal_name}' with topic name '{topic_name}'.")
+            publisher = self.create_publisher(message_type, topic_name, self._qos)
+            self._outputs[parsed_signal_name]["publisher"] = publisher
+        except Exception as e:
+            self.get_logger().error(f"Failed to add output '{signal_name}: {e}")

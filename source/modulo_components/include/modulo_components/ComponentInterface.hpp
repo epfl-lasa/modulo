@@ -224,7 +224,9 @@ protected:
    * @param signal_name Name of the output signal
    * @param data Data to transmit on the output signal
    * @param fixed_topic If true, the topic name of the output signal is fixed
+   * @param default_topic If set, the default value for the topic name to use
    * @throws AddSignalException if the output could not be created (empty name, already registered)
+   * @return The parsed signal name
    */
   template<typename DataT>
   std::string create_output(
