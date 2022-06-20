@@ -410,7 +410,7 @@ inline void ComponentInterface<NodeT>::add_parameter(
       descriptor.read_only = read_only;
       NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value(), descriptor);
     } else {
-      RCLCPP_DEBUG_STREAM(this->get_logger(),
+      RCLCPP_WARN_STREAM(this->get_logger(),
                           "Parameter '" << parameter->get_name() << "' already exists, overwriting.");
       NodeT::set_parameter(ros_param);
     }
@@ -500,7 +500,7 @@ inline void ComponentInterface<NodeT>::add_variant_predicate(
     return;
   }
   if (this->predicates_.find(name) != this->predicates_.end()) {
-    RCLCPP_DEBUG_STREAM(this->get_logger(), "Predicate '" << name << "' already exists, overwriting.");
+    RCLCPP_WARN_STREAM(this->get_logger(), "Predicate '" << name << "' already exists, overwriting.");
   } else {
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding predicate '" << name << "'.");
     auto publisher = this->template create_publisher<std_msgs::msg::Bool>(
@@ -685,7 +685,7 @@ ComponentInterface<NodeT>::add_periodic_callback(const std::string& name, const 
     return;
   }
   if (this->periodic_callbacks_.find(name) != this->periodic_callbacks_.end()) {
-    RCLCPP_DEBUG_STREAM(this->get_logger(), "Periodic function '" << name << "' already exists, overwriting.");
+    RCLCPP_WARN_STREAM(this->get_logger(), "Periodic function '" << name << "' already exists, overwriting.");
   } else {
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding periodic function '" << name << "'.");
   }

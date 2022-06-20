@@ -108,7 +108,7 @@ class ComponentInterface(Node):
                                        descriptor=ParameterDescriptor(description=description),
                                        ignore_override=read_only)
             else:
-                self.get_logger().debug(f"Parameter '{sr_parameter.get_name()}' already exists, overwriting.")
+                self.get_logger().warn(f"Parameter '{sr_parameter.get_name()}' already exists, overwriting.")
                 self.set_parameters([ros_param])
         except Exception as e:
             self.get_logger().error(f"Failed to add parameter: {e}")
@@ -227,7 +227,7 @@ class ComponentInterface(Node):
         if not name:
             self.get_logger().error("Failed to add predicate: Provide a non empty string as a name.")
         if name in self._predicates.keys():
-            self.get_logger().debug(f"Predicate {name} already exists, overwriting.")
+            self.get_logger().warn(f"Predicate {name} already exists, overwriting.")
         else:
             self.get_logger().debug(f"Adding predicate '{name}'.")
             self._predicate_publishers[name] = self.create_publisher(Bool,
@@ -356,7 +356,7 @@ class ComponentInterface(Node):
             self.get_logger().error("Failed to add periodic function: Provide a non empty string as a name.")
             return
         if name in self._periodic_callbacks.keys():
-            self.get_logger().debug(f"Periodic function '{name}' already exists, overwriting.")
+            self.get_logger().warn(f"Periodic function '{name}' already exists, overwriting.")
         else:
             self.get_logger().debug(f"Adding periodic function '{name}'.")
         self._periodic_callbacks[name] = callback
