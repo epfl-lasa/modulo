@@ -112,11 +112,9 @@ TEST_F(CommunicationTest, BasicTypes) {
 TEST_F(CommunicationTest, EncodedState) {
   using namespace state_representation;
   auto pub_state = std::make_shared<CartesianState>(CartesianState::Random("this", "world"));
-  std::shared_ptr<State> pub_data = pub_state;
-  auto pub_message = make_shared_message_pair(pub_data, this->clock_);
+  auto pub_message = make_shared_message_pair(pub_state, this->clock_);
   auto sub_state = std::make_shared<CartesianState>(CartesianState::Identity("that", "base"));
-  std::shared_ptr<State> sub_data = sub_state;
-  auto sub_message = make_shared_message_pair(sub_data, this->clock_);
+  auto sub_message = make_shared_message_pair(sub_state, this->clock_);
   this->add_nodes<modulo_new_core::EncodedState>("/test_topic", pub_message, sub_message);
   this->exec_->template spin_until_future_complete(
       std::dynamic_pointer_cast<MinimalSubscriber<modulo_new_core::EncodedState>>(this->sub_node_)->received_future,
@@ -125,6 +123,5 @@ TEST_F(CommunicationTest, EncodedState) {
 
   EXPECT_EQ(pub_state->get_name(), sub_state->get_name());
   EXPECT_EQ(pub_state->get_reference_frame(), sub_state->get_reference_frame());
-  EXPECT_TRUE(std::dynamic_pointer_cast<CartesianState>(pub_data)->data().isApprox(
-      std::dynamic_pointer_cast<CartesianState>(sub_data)->data()));
+  EXPECT_TRUE(pub_state->data().isApprox(sub_state->data()));
 }

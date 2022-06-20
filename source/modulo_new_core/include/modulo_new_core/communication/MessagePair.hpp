@@ -106,7 +106,41 @@ inline void MessagePair<MsgT, DataT>::set_data(const std::shared_ptr<DataT>& dat
 }
 
 template<typename DataT>
-std::shared_ptr<MessagePairInterface>
-make_shared_message_pair(const std::shared_ptr<DataT>& data, const std::shared_ptr<rclcpp::Clock>& clock);
+inline std::shared_ptr<MessagePairInterface>
+make_shared_message_pair(const std::shared_ptr<DataT>& data, const std::shared_ptr<rclcpp::Clock>& clock) {
+  return std::make_shared<MessagePair<EncodedState, state_representation::State>>(
+      std::dynamic_pointer_cast<state_representation::State>(data), clock
+  );
+}
 
+template<>
+inline std::shared_ptr<MessagePairInterface>
+make_shared_message_pair(const std::shared_ptr<bool>& data, const std::shared_ptr<rclcpp::Clock>& clock) {
+  return std::make_shared<MessagePair<std_msgs::msg::Bool, bool>>(data, clock);
+}
+
+template<>
+inline std::shared_ptr<MessagePairInterface>
+make_shared_message_pair(const std::shared_ptr<double>& data, const std::shared_ptr<rclcpp::Clock>& clock) {
+  return std::make_shared<MessagePair<std_msgs::msg::Float64, double>>(data, clock);
+}
+
+template<>
+inline std::shared_ptr<MessagePairInterface> make_shared_message_pair(
+    const std::shared_ptr<std::vector<double>>& data, const std::shared_ptr<rclcpp::Clock>& clock
+) {
+  return std::make_shared<MessagePair<std_msgs::msg::Float64MultiArray, std::vector<double>>>(data, clock);
+}
+
+template<>
+inline std::shared_ptr<MessagePairInterface>
+make_shared_message_pair(const std::shared_ptr<int>& data, const std::shared_ptr<rclcpp::Clock>& clock) {
+  return std::make_shared<MessagePair<std_msgs::msg::Int32, int>>(data, clock);
+}
+
+template<>
+inline std::shared_ptr<MessagePairInterface>
+make_shared_message_pair(const std::shared_ptr<std::string>& data, const std::shared_ptr<rclcpp::Clock>& clock) {
+  return std::make_shared<MessagePair<std_msgs::msg::String, std::string>>(data, clock);
+}
 }// namespace modulo_new_core::communication
