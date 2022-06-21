@@ -40,6 +40,7 @@ class Component(ComponentInterface):
         try:
             # TODO catch here or in helpers...? (or re raise with ComponentError)
             self._publish_predicates()
+            self._publish_outputs()
             self._evaluate_periodic_callbacks()
         except Exception as e:
             self.get_logger().error(f"Failed to execute step function: {e}", throttle_duration_sec=1.0)
