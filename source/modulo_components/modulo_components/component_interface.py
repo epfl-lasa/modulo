@@ -30,12 +30,13 @@ class ComponentInterface(Node):
     Abstract class to represent a Component in python, following the same logic pattern  as the C++
     modulo_component::ComponentInterface class.
     ...
+    # TODO class docstring and attributes
     Attributes:
         predicates (dict(Parameters(bool))): map of predicates added to the Component.
         predicate_publishers (dict(rclpy.Publisher(Bool))): map of publishers associated to each predicate.
-        parameter_dict: dict of parameters
-        periodic_callbacks: dict of periodic callback functions
-        qos: the Quality of Service for publishers and subscribers
+        parameter_dict (dict(Publisher)): dict of parameters
+        periodic_callbacks (dict(Callable): dict of periodic callback functions
+        qos (rclpy.qos.QoSProfile: the Quality of Service for publishers and subscribers
         tf_buffer (tf2_ros.Buffer): the buffer to lookup transforms published on tf2.
         tf_listener (tf2_ros.TransformListener): the listener to lookup transforms published on tf2.
         tf_broadcaster (tf2_ros.TransformBroadcaster): the broadcaster to publish transforms on tf2
