@@ -28,7 +28,6 @@ from tf2_ros import TransformBroadcaster
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
 
-DataT = TypeVar('DataT')
 MsgT = TypeVar('MsgT')
 T = TypeVar('T')
 
@@ -285,13 +284,13 @@ class ComponentInterface(Node):
             return
         self._predicates[name] = value
 
-    def _create_output(self, signal_name: str, data: DataT, message_type: MsgT,
+    def _create_output(self, signal_name: str, data: str, message_type: MsgT,
                        clproto_message_type: clproto.MessageType, fixed_topic: bool, default_topic: str) -> str:
         """
         Helper function to parse the signal name and add an output without Publisher to the dict of outputs.
 
         :param signal_name: Name of the output signal
-        :param data: Data to transmit on the output signal
+        :param data: Name of the attribute to transmit over the channel
         :param message_type: The ROS message type of the output
         :param clproto_message_type: The clproto message type, if applicable
         :param fixed_topic: If true, the topic name of the output signal is fixed
@@ -341,6 +340,8 @@ class ComponentInterface(Node):
 
     def add_input(self, signal_name: str, subscription: Union[str, Callable], message_type: MsgT, fixed_topic=False,
                   default_topic=""):
+        # TODO could be nice to add an optional callback here that would be executed from within the subscription
+        #  callback in order to manipulate the data pointer upon reception of a message
         """
         Add and configure an input signal of the component.
 

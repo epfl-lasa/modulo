@@ -4,7 +4,6 @@ from typing import TypeVar
 import clproto
 from modulo_components.component_interface import ComponentInterface
 
-DataT = TypeVar('DataT')
 MsgT = TypeVar('MsgT')
 
 
@@ -87,13 +86,13 @@ class Component(ComponentInterface):
         """
         self.set_predicate("in_error_state", True)
 
-    def add_output(self, signal_name: str, data: DataT, message_type: MsgT,
+    def add_output(self, signal_name: str, data: str, message_type: MsgT,
                    clproto_message_type=clproto.MessageType.UNKNOWN_MESSAGE, fixed_topic=False, default_topic=""):
         """
         Add and configure an output signal of the component.
 
         :param signal_name: Name of the output signal
-        :param data: Data to transmit on the output signal
+        :param data: Name of the attribute to transmit over the channel
         :param message_type: The ROS message type of the output
         :param clproto_message_type: The clproto message type, if applicable
         :param fixed_topic: If true, the topic name of the output signal is fixed

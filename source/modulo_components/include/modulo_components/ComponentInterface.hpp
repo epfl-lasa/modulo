@@ -180,6 +180,8 @@ protected:
    * @param fixed_topic If true, the topic name of the input signal is fixed
    * @param default_topic If set, the default value for the topic name to use
    */
+   // TODO could be nice to add an optional callback here that would be executed from within the subscription callback
+   // in order to manipulate the data pointer upon reception of a message
   template<typename DataT>
   void add_input(
       const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false,
