@@ -15,11 +15,17 @@ LifecycleComponent::LifecycleComponent(const rclcpp::NodeOptions& node_options) 
 }
 
 void LifecycleComponent::step() {
-  if (this->get_predicate("is_active")) {
+  try {
     this->publish_predicates();
-    this->publish_outputs();
-    this->evaluate_periodic_callbacks();
-    this->on_step();
+    if (this->get_predicate("is_active")) {
+      this->publish_outputs();
+      this->evaluate_periodic_callbacks();
+      this->on_step();
+    }
+  } catch (const std::exception& ex) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to execute step function:" << ex.what());
+    // TODO handle error in lifecycle component
+//    this->raise_error();
   }
 }
 

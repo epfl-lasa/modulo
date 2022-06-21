@@ -23,11 +23,21 @@ class Component(ComponentInterface):
         super().__init__(node_name, *kargs, **kwargs)
         self.__started = False
         self.__run_thread = None
-        self.add_predicate("in_error_state", False)
         self.add_predicate("is_finished", False)
 
         if start_thread:
             self.start_thread()
+
+    def _step(self):
+        """
+        Step function that is called periodically.
+        """
+        try:
+            # TODO catch here or in helpers...? (or re raise with ComponentError)
+            self._publish_predicates()
+            self._evaluate_periodic_callbacks()
+        except Exception as e:
+            self.get_logger().error(f"Failed to execute step function: {e}", throttle_duration_sec=1.0)
 
     def start_thread(self):
         """
@@ -48,11 +58,11 @@ class Component(ComponentInterface):
         """
         try:
             if not self.execute():
-                self._raise_error()
+                self.raise_error()
                 return
         except Exception as e:
             self.get_logger().error(f"Failed to run component {self.get_name()}: {e}", throttle_duration_sec=1.0)
-            self._raise_error()
+            self.raise_error()
             return
         self.set_predicate("is_finished", True)
 
@@ -63,10 +73,3 @@ class Component(ComponentInterface):
         :return: True, if the execution was successful, false otherwise
         """
         return True
-
-    def _raise_error(self):
-        """
-        Put the component in error state by setting the 'in_error_state'
-        predicate to true.
-        """
-        self.set_predicate("in_error_state", True)
