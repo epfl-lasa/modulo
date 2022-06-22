@@ -1,7 +1,6 @@
 import sys
 from typing import Callable, Dict, List, Optional, TypeVar, Union
 
-import numpy
 import rclpy
 import state_representation as sr
 import tf2_py
@@ -371,9 +370,15 @@ class ComponentInterface(Node):
         """
         for name in self._predicates.keys():
             message = Bool()
-            message.data = self.get_predicate(name)
+            value = self.get_predicate(name)
+            try:
+                message.data = value
+            except AssertionError:
+                self.get_logger().error(f"Predicate '{name}' has invalid type: expected 'bool', got '{type(value)}'.",
+                                        throttle_duration_sec=1.0)
+                return
             if name not in self._predicate_publishers.keys():
-                self.get_logger().error(f"No publisher for predicate {name} found.", throttle_duration_sec=1.0)
+                self.get_logger().error(f"No publisher for predicate '{name}' found.", throttle_duration_sec=1.0)
                 return
             self._predicate_publishers[name].publish(message)
 
