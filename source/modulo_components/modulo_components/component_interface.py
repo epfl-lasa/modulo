@@ -376,10 +376,10 @@ class ComponentInterface(Node):
             except AssertionError:
                 self.get_logger().error(f"Predicate '{name}' has invalid type: expected 'bool', got '{type(value)}'.",
                                         throttle_duration_sec=1.0)
-                return
+                continue
             if name not in self._predicate_publishers.keys():
                 self.get_logger().error(f"No publisher for predicate '{name}' found.", throttle_duration_sec=1.0)
-                return
+                continue
             self._predicate_publishers[name].publish(message)
 
     def _evaluate_periodic_callbacks(self):
