@@ -256,9 +256,7 @@ class ComponentInterface(Node):
             except Exception as e:
                 self.get_logger().error(f"Error while evaluating the callback function: {e}",
                                         throttle_duration_sec=1.0)
-            value = bool_value
-        if isinstance(value, numpy.bool) or isinstance(value, numpy.bool_):
-            value = bool(value)
+            return bool_value
         return value
 
     def set_predicate(self, name: str, value: Union[bool, Callable[[], bool]]):
