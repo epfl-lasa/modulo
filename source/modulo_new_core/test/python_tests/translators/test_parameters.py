@@ -15,6 +15,9 @@ def assert_np_array_equal(a: np.array, b: np.array, places=3):
 
 def test_parameter_write(parameters):
     for name, value_types in parameters.items():
+        param = sr.Parameter(name, value_types[1])
+        ros_param = write_parameter(param)
+        assert ros_param.type_ == value_types[3]
         param = sr.Parameter(name, value_types[0], value_types[1])
         ros_param = write_parameter(param)
         assert ros_param.to_parameter_msg() == Parameter(name, value=value_types[0]).to_parameter_msg()
@@ -64,6 +67,9 @@ def test_parameter_non_const_read(parameters):
 
 def test_state_parameter_write(state_parameters):
     for name, value_types in state_parameters.items():
+        param = sr.Parameter(name, sr.ParameterType.STATE, value_types[1])
+        ros_param = write_parameter(param)
+        assert ros_param.type_ == Parameter.Type.STRING
         param = sr.Parameter(name, value_types[0], sr.ParameterType.STATE, value_types[1])
         ros_param = write_parameter(param)
         assert ros_param.name == param.get_name()
@@ -94,6 +100,9 @@ def test_state_parameter_read_write(state_parameters):
 
 def test_vector_parameter_read_write():
     vec = np.random.rand(3)
+    param = sr.Parameter("vector", sr.ParameterType.VECTOR)
+    ros_param = write_parameter(param)
+    assert ros_param.type_ == Parameter.Type.DOUBLE_ARRAY
     param = sr.Parameter("vector", vec, sr.ParameterType.VECTOR)
     ros_param = write_parameter(param)
     assert ros_param.name == param.get_name()
@@ -114,6 +123,9 @@ def test_vector_parameter_read_write():
 
 def test_matrix_parameter_read_write():
     mat = np.random.rand(3, 4)
+    param = sr.Parameter("vector", sr.ParameterType.MATRIX)
+    ros_param = write_parameter(param)
+    assert ros_param.type_ == Parameter.Type.DOUBLE_ARRAY
     param = sr.Parameter("matrix", mat, sr.ParameterType.MATRIX)
     ros_param = write_parameter(param)
     assert ros_param.name == param.get_name()
