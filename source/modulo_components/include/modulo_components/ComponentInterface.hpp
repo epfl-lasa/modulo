@@ -3,12 +3,12 @@
 // TODO sort includes
 #include <rclcpp/parameter.hpp>
 #include <rclcpp/create_timer.hpp>
-#include <rclcpp/node_options.hpp>
-#include <rclcpp/node_interfaces/node_parameters_interface.hpp>
+#include <rclcpp/node.hpp>
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 
 #include <console_bridge/console.h>
 #include <tf2_msgs/msg/tf_message.hpp>
+#include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 
@@ -43,7 +43,7 @@ class ComponentInterfacePublicInterface;
  * @tparam NodeT
  */
 template<class NodeT>
-class ComponentInterface : private NodeT {
+class ComponentInterface : public NodeT {
 public:
   friend class ComponentInterfacePublicInterface<rclcpp::Node>;
   friend class ComponentInterfacePublicInterface<rclcpp_lifecycle::LifecycleNode>;
@@ -61,10 +61,7 @@ public:
    */
   virtual ~ComponentInterface() = default;
 
-  using NodeT::get_node_base_interface;
-  using NodeT::get_name;
-  using NodeT::get_clock;
-  using NodeT::get_logger;
+  // TODO hide ROS methods
 
 protected:
   /**
@@ -222,16 +219,6 @@ protected:
   void add_tf_listener();
 
   /**
-   * @brief Activate the transform broadcaster (for LifecycleComponents).
-   */
-  void activate_tf_broadcaster();
-
-  /**
-   * @brief Deactivate the transform broadcaster (for LifecycleComponents).
-   */
-  void deactivate_tf_broadcaster();
-
-  /**
    * @brief Helper function to parse the signal name and add an unconfigured PublisherInterface to the map of outputs.
    * @tparam DataT Type of the data pointer
    * @param signal_name Name of the output signal
@@ -297,8 +284,6 @@ protected:
    */
   virtual void raise_error();
 
-  using NodeT::create_publisher;
-
   std::map<std::string, std::shared_ptr<modulo_new_core::communication::SubscriptionInterface>>
       inputs_; ///< Map of inputs
   std::map<std::string, std::shared_ptr<modulo_new_core::communication::PublisherInterface>>
@@ -344,7 +329,7 @@ private:
   std::shared_ptr<rclcpp::TimerBase> step_timer_; ///< Timer for the step function
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_; ///< TF buffer
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_; ///< TF listener
-  std::shared_ptr<rclcpp::Publisher<tf2_msgs::msg::TFMessage>> tf_broadcaster_; ///< TF broadcaster
+  std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_; ///< TF broadcaster
   // TODO maybe add a static tf broadcaster
 };
 
@@ -459,6 +444,9 @@ ComponentInterface<NodeT>::on_set_parameters_callback(const std::vector<rclcpp::
   result.successful = true;
   for (const auto& ros_parameter: parameters) {
     try {
+      if (ros_parameter.get_name().substr(0, 27) == "qos_overrides./tf.publisher") {
+        continue;
+      }
       // get the associated parameter interface by name
       auto parameter = parameter_map_.get_parameter(ros_parameter.get_name());
 
@@ -503,11 +491,10 @@ inline void ComponentInterface<NodeT>::add_variant_predicate(
     RCLCPP_WARN_STREAM(this->get_logger(), "Predicate '" << name << "' already exists, overwriting.");
   } else {
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding predicate '" << name << "'.");
-    auto publisher = this->template create_publisher<std_msgs::msg::Bool>(
-        utilities::generate_predicate_topic(this->get_name(), name), this->qos_
+    auto publisher = rclcpp::create_publisher<std_msgs::msg::Bool>(
+        *this, utilities::generate_predicate_topic(this->get_name(), name), this->qos_
     );
-    this->predicate_publishers_.insert_or_assign(
-        name, std::static_pointer_cast<rclcpp::Publisher<std_msgs::msg::Bool>>(publisher));
+    this->predicate_publishers_.insert_or_assign(name, publisher);
   }
   this->predicates_.insert_or_assign(name, predicate);
 }
@@ -697,7 +684,7 @@ inline void ComponentInterface<NodeT>::add_tf_broadcaster() {
   if (this->tf_broadcaster_ == nullptr) {
     RCLCPP_DEBUG(this->get_logger(), "Adding TF broadcaster.");
     console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_NONE);
-    this->tf_broadcaster_ = this->template create_publisher<tf2_msgs::msg::TFMessage>("tf", this->qos_);
+    this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(*this);
   } else {
     RCLCPP_DEBUG(this->get_logger(), "TF broadcaster already exists.");
   }
@@ -716,38 +703,6 @@ inline void ComponentInterface<NodeT>::add_tf_listener() {
 }
 
 template<class NodeT>
-inline void ComponentInterface<NodeT>::activate_tf_broadcaster() {
-  if (this->publisher_type_ != modulo_new_core::communication::PublisherType::LIFECYCLE_PUBLISHER) {
-    return;
-  }
-  try {
-    RCLCPP_DEBUG(this->get_logger(), "Activating TF broadcaster.");
-    auto publisher = std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<tf2_msgs::msg::TFMessage>>(
-        this->tf_broadcaster_
-    );
-    publisher->on_activate();
-  } catch (const std::exception& ex) {
-    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to activate TF broadcaster: " << ex.what());
-  }
-}
-
-template<class NodeT>
-inline void ComponentInterface<NodeT>::deactivate_tf_broadcaster() {
-  if (this->publisher_type_ == modulo_new_core::communication::PublisherType::PUBLISHER) {
-    return;
-  }
-  try {
-    RCLCPP_DEBUG(this->get_logger(), "Deactivating TF broadcaster.");
-    auto publisher = std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<tf2_msgs::msg::TFMessage>>(
-        this->tf_broadcaster_
-    );
-    publisher->on_deactivate();
-  } catch (const std::exception& ex) {
-    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to deactivate TF broadcaster: " << ex.what());
-  }
-}
-
-template<class NodeT>
 inline void ComponentInterface<NodeT>::send_transform(const state_representation::CartesianPose& transform) {
   if (this->tf_broadcaster_ == nullptr) {
     RCLCPP_ERROR_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
@@ -757,9 +712,7 @@ inline void ComponentInterface<NodeT>::send_transform(const state_representation
   try {
     geometry_msgs::msg::TransformStamped transform_message;
     modulo_new_core::translators::write_message(transform_message, transform, this->get_clock()->now());
-    tf2_msgs::msg::TFMessage tf_message;
-    tf_message.transforms.emplace_back(transform_message);
-    this->tf_broadcaster_->publish(tf_message);
+    this->tf_broadcaster_->sendTransform(transform_message);
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                                  "Failed to send transform: " << ex.what());

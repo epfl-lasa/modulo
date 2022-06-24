@@ -8,10 +8,26 @@ namespace modulo_components {
 
 LifecycleComponent::LifecycleComponent(const rclcpp::NodeOptions& node_options) :
     ComponentInterface<rclcpp_lifecycle::LifecycleNode>(node_options, PublisherType::LIFECYCLE_PUBLISHER) {
-  this->add_predicate("is_unconfigured", true);
-  this->add_predicate("is_inactive", false);
-  this->add_predicate("is_active", false);
-  this->add_predicate("is_finalized", false);
+  this->add_predicate(
+      "is_unconfigured", [this] {
+        return this->get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED;
+      }
+  );
+  this->add_predicate(
+      "is_inactive", [this] {
+        return this->get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE;
+      }
+  );
+  this->add_predicate(
+      "is_active", [this] {
+        return this->get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE;
+      }
+  );
+  this->add_predicate(
+      "is_finalized", [this] {
+        return this->get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED;
+      }
+  );
 }
 
 void LifecycleComponent::step() {
@@ -47,8 +63,6 @@ LifecycleComponent::on_configure(const rclcpp_lifecycle::State& previous_state) 
       return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
     }
   }
-  this->set_predicate("is_unconfigured", false);
-  this->set_predicate("is_inactive", true);
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
@@ -72,8 +86,6 @@ LifecycleComponent::on_cleanup(const rclcpp_lifecycle::State& previous_state) {
     RCLCPP_ERROR(get_logger(), "Cleanup failed! Entering into the error processing transition state.");
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
-  this->set_predicate("is_inactive", false);
-  this->set_predicate("is_unconfigured", true);
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
@@ -104,8 +116,6 @@ LifecycleComponent::on_activate(const rclcpp_lifecycle::State& previous_state) {
       return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
     }
   }
-  this->set_predicate("is_inactive", false);
-  this->set_predicate("is_active", true);
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
@@ -129,8 +139,6 @@ LifecycleComponent::on_deactivate(const rclcpp_lifecycle::State& previous_state)
     RCLCPP_ERROR(get_logger(), "Deactivation failed! Entering into the error processing transition state.");
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
-  this->set_predicate("is_active", false);
-  this->set_predicate("is_inactive", true);
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
@@ -170,10 +178,6 @@ LifecycleComponent::on_shutdown(const rclcpp_lifecycle::State& previous_state) {
       //  this->daemons_.clear();
       //  this->parameters_.clear();
       //  this->shutdown_ = true;
-      this->set_predicate("is_unconfigured", false);
-      this->set_predicate("is_inactive", false);
-      this->set_predicate("is_active", false);
-      this->set_predicate("is_finalized", true);
       return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
     default:
       RCLCPP_WARN(get_logger(), "Invalid transition 'shutdown' from state %s.", previous_state.label().c_str());
@@ -194,10 +198,6 @@ bool LifecycleComponent::on_shutdown() {
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 LifecycleComponent::on_error(const rclcpp_lifecycle::State& previous_state) {
   RCLCPP_DEBUG(this->get_logger(), "on_error called from previous state %s", previous_state.label().c_str());
-  this->set_predicate("is_unconfigured", false);
-  this->set_predicate("is_inactive", false);
-  this->set_predicate("is_active", false);
-  this->set_predicate("is_finalized", false);
   this->set_predicate("in_error_state", true);
   bool error_handled;
   try {
@@ -209,11 +209,9 @@ LifecycleComponent::on_error(const rclcpp_lifecycle::State& previous_state) {
   if (!error_handled) {
     RCLCPP_ERROR(get_logger(), "Error processing failed! Entering into the finalized state.");
     // TODO: reset and finalize all needed properties
-    this->set_predicate("is_finalized", true);
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
   this->set_predicate("in_error_state", false);
-  this->set_predicate("is_unconfigured", true);
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
