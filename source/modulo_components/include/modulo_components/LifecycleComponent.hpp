@@ -240,7 +240,7 @@ private:
    */
   bool cleanup_signals();
 
-  using rclcpp_lifecycle::LifecycleNode::create_publisher;
+  // TODO hide ROS methods
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::create_output;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::inputs_;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::outputs_;
