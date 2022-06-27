@@ -359,7 +359,7 @@ class ComponentInterface(Node):
                 raise AddSignalError(f"Failed to add input '{parsed_signal_name}': Input already exists")
             topic_name = default_topic if default_topic else "~/" + parsed_signal_name
             self.add_parameter(sr.Parameter(parsed_signal_name + "_topic", topic_name, sr.ParameterType.STRING),
-                               f"Output topic name of signal '{parsed_signal_name}'", fixed_topic)
+                               f"Input topic name of signal '{parsed_signal_name}'", fixed_topic)
             topic_name = self.get_parameter_value(parsed_signal_name + "_topic")
             self.get_logger().debug(f"Adding input '{parsed_signal_name}' with topic name '{topic_name}'.")
             if isinstance(subscription, Callable):
