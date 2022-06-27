@@ -2,6 +2,7 @@ import clproto
 import pytest
 import rclpy.clock
 import state_representation as sr
+from rclpy import Parameter
 
 
 @pytest.fixture
@@ -21,14 +22,14 @@ def clock():
 
 @pytest.fixture
 def parameters():
-    return {"bool": [True, sr.ParameterType.BOOL, False],
-            "bool_array": [[True, False], sr.ParameterType.BOOL_ARRAY, [False]],
-            "int": [1, sr.ParameterType.INT, 2],
-            "int_array": [[1, 2], sr.ParameterType.INT_ARRAY, [2]],
-            "double": [1.0, sr.ParameterType.DOUBLE, 2.0],
-            "double_array": [[1.0, 2.0], sr.ParameterType.DOUBLE_ARRAY, [2.0]],
-            "string": ["1", sr.ParameterType.STRING, "2"],
-            "string_array": [["1", "2"], sr.ParameterType.STRING_ARRAY, ["2"]]
+    return {"bool": [True, sr.ParameterType.BOOL, False, Parameter.Type.BOOL],
+            "bool_array": [[True, False], sr.ParameterType.BOOL_ARRAY, [False], Parameter.Type.BOOL_ARRAY],
+            "int": [1, sr.ParameterType.INT, 2, Parameter.Type.INTEGER],
+            "int_array": [[1, 2], sr.ParameterType.INT_ARRAY, [2], Parameter.Type.INTEGER_ARRAY],
+            "double": [1.0, sr.ParameterType.DOUBLE, 2.0, Parameter.Type.DOUBLE],
+            "double_array": [[1.0, 2.0], sr.ParameterType.DOUBLE_ARRAY, [2.0], Parameter.Type.DOUBLE_ARRAY],
+            "string": ["1", sr.ParameterType.STRING, "2", Parameter.Type.STRING],
+            "string_array": [["1", "2"], sr.ParameterType.STRING_ARRAY, ["2"], Parameter.Type.STRING_ARRAY]
             }
 
 

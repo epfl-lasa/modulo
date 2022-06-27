@@ -15,14 +15,18 @@ def write_parameter(parameter: sr.Parameter) -> Parameter:
     :return: The resulting ROS parameter
     """
     if parameter.get_parameter_type() == sr.ParameterType.BOOL or \
-            parameter.get_parameter_type() == sr.ParameterType.BOOL_ARRAY or \
             parameter.get_parameter_type() == sr.ParameterType.INT or \
-            parameter.get_parameter_type() == sr.ParameterType.INT_ARRAY or \
             parameter.get_parameter_type() == sr.ParameterType.DOUBLE or \
-            parameter.get_parameter_type() == sr.ParameterType.DOUBLE_ARRAY or \
-            parameter.get_parameter_type() == sr.ParameterType.STRING or \
-            parameter.get_parameter_type() == sr.ParameterType.STRING_ARRAY:
+            parameter.get_parameter_type() == sr.ParameterType.STRING:
         return Parameter(parameter.get_name(), value=parameter.get_value())
+    elif parameter.get_parameter_type() == sr.ParameterType.BOOL_ARRAY:
+        return Parameter(parameter.get_name(), value=parameter.get_value(), type_=Parameter.Type.BOOL_ARRAY)
+    elif parameter.get_parameter_type() == sr.ParameterType.INT_ARRAY:
+        return Parameter(parameter.get_name(), value=parameter.get_value(), type_=Parameter.Type.INTEGER_ARRAY)
+    elif parameter.get_parameter_type() == sr.ParameterType.DOUBLE_ARRAY:
+        return Parameter(parameter.get_name(), value=parameter.get_value(), type_=Parameter.Type.DOUBLE_ARRAY)
+    elif parameter.get_parameter_type() == sr.ParameterType.STRING_ARRAY:
+        return Parameter(parameter.get_name(), value=parameter.get_value(), type_=Parameter.Type.STRING_ARRAY)
     elif parameter.get_parameter_type() == sr.ParameterType.STATE:
         if parameter.get_parameter_state_type() == sr.StateType.CARTESIAN_STATE:
             return Parameter(parameter.get_name(), Parameter.Type.STRING, clproto.to_json(
@@ -40,7 +44,8 @@ def write_parameter(parameter: sr.Parameter) -> Parameter:
             raise RuntimeError(f"Parameter {parameter.get_name()} could not be written!")
     elif parameter.get_parameter_type() == sr.ParameterType.VECTOR or \
             parameter.get_parameter_type() == sr.ParameterType.MATRIX:
-        return Parameter(parameter.get_name(), value=parameter.get_value().flatten().tolist())
+        return Parameter(parameter.get_name(), value=parameter.get_value().flatten().tolist(),
+                         type_=Parameter.Type.DOUBLE_ARRAY)
     else:
         raise RuntimeError(f"Parameter {parameter.get_name()} could not be written!")
 
