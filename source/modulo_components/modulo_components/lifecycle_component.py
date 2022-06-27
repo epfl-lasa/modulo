@@ -44,9 +44,9 @@ class LifecycleComponent(ComponentInterface):
         """
         self.get_logger().debug(f'Change state service called with request {request}')
         if request.transition.id == Transition.TRANSITION_CONFIGURE:
-            response = self.__configure(request, response)
+            response = self._configure(request, response)
         elif request.transition.id == Transition.TRANSITION_ACTIVATE:
-            response = self.__activate(request, response)
+            response = self._activate(request, response)
         elif request.transition.id == Transition.TRANSITION_DEACTIVATE:
             response = self.__deactivate(request, response)
         else:
@@ -54,7 +54,7 @@ class LifecycleComponent(ComponentInterface):
             response.success = False
         return response
 
-    def __configure(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
+    def _configure(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
         """
         Configure service callback. Simply call the on_configure function.
 
@@ -98,7 +98,7 @@ class LifecycleComponent(ComponentInterface):
                 self.get_logger().debug(f"Failed to configure output '{signal_name}': {e}")
         return success
 
-    def __activate(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
+    def _activate(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
         """
         Activate service callback. Set the node as active and call the on_activate function.
 
