@@ -6,6 +6,7 @@ import state_representation as sr
 from modulo_new_core.encoded_state import EncodedState
 from sensor_msgs.msg import JointState
 
+DataT = TypeVar('DataT')
 MsgT = TypeVar('MsgT')
 StateT = TypeVar('StateT')
 
@@ -15,6 +16,7 @@ def read_xyz(message: Union[geometry.Point, geometry.Vector3]) -> List[float]:
     Helper function to read a list from a Point or Vector3 message.
 
     :param message: The message to read from
+    :return: The vector coefficients as a list
     """
     return [message.x, message.y, message.z]
 
@@ -24,17 +26,19 @@ def read_quaternion(message: geometry.Quaternion) -> List[float]:
     Helper function to read a list of quaternion coefficients (w,x,y,z) from a Quaternion message.
 
     :param message: The message to read from
+    :return: The quaternion coefficients as a list
     """
     return [message.w, message.x, message.y, message.z]
 
 
-def read_message(state: StateT, message: MsgT):
+def read_message(state: StateT, message: MsgT) -> StateT:
     """
     Convert a ROS message to a state_representation State type.
 
     :param state: The state to populate
     :param message: The ROS message to read from
     :raises Exception if the message could not be read
+    :return: The populated state
     """
     if not isinstance(state, sr.State):
         raise RuntimeError("This state type is not supported.")
@@ -69,13 +73,14 @@ def read_message(state: StateT, message: MsgT):
     return state
 
 
-def read_stamped_message(state: StateT, message: MsgT):
+def read_stamped_message(state: StateT, message: MsgT) -> StateT:
     """
     Convert a stamped ROS message to a state_representation State type.
 
     :param state: The state to populate
     :param message: The ROS message to read from
     :raises Exception if the message could not be read
+    :return: The populated state
     """
     if isinstance(message, geometry.AccelStamped):
         read_message(state, message.accel)
@@ -91,6 +96,17 @@ def read_stamped_message(state: StateT, message: MsgT):
     else:
         raise RuntimeError("The provided combination of state type and message type is not supported")
     state.set_reference_frame(message.header.frame_id)
+    return state
+
+
+def read_std_message(message: MsgT) -> DataT:
+    """
+    Read the data field of a std_msg.msg message.
+
+    :param message: The message to read from
+    :return: The data field of the message
+    """
+    return message.data
 
 
 def read_clproto_message(message: EncodedState) -> StateT:
@@ -98,6 +114,7 @@ def read_clproto_message(message: EncodedState) -> StateT:
     Convert an EncodedState message to a state_representation State type.
 
     :param message: The EncodedState message to read from
-    :raises Exception if the message could not be read
+    :raises Exception if the message could not be read:
+    :return: The decoded clproto message
     """
     return clproto.decode(message.data.tobytes())
