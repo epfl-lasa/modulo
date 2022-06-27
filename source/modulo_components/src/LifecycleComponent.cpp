@@ -286,6 +286,7 @@ bool LifecycleComponent::configure_outputs() {
         }
       }
     } catch (const std::exception& ex) {
+      // TODO if modulo::communication had a base exception, could catch that
       success = false;
       RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to configure output '" << name << "': " << ex.what());
     }
@@ -306,10 +307,12 @@ bool LifecycleComponent::activate_outputs() {
     try {
       interface->activate();
     } catch (const std::exception& ex) {
+      // TODO if modulo::communication had a base exception, could catch that
       success = false;
       RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to activate output '" << name << "': " << ex.what());
     }
   }
+  RCLCPP_DEBUG(this->get_logger(), "All outputs activated.");
   return success;
 }
 
@@ -319,10 +322,12 @@ bool LifecycleComponent::deactivate_outputs() {
     try {
       interface->deactivate();
     } catch (const std::exception& ex) {
+      // TODO if modulo::communication had a base exception, could catch that
       success = false;
       RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to deactivate output '" << name << "': " << ex.what());
     }
   }
+  RCLCPP_DEBUG(this->get_logger(), "All outputs deactivated.");
   return success;
 }
 }// namespace modulo_components

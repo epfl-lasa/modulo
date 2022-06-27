@@ -1,12 +1,18 @@
 import sys
+from functools import partial
 from typing import Callable, Dict, List, Optional, TypeVar, Union
 
+import clproto
+import modulo_new_core.translators.message_readers as modulo_readers
+import modulo_new_core.translators.message_writers as modulo_writers
 import rclpy
 import state_representation as sr
 import tf2_py
 from geometry_msgs.msg import TransformStamped
-from modulo_components.exceptions.component_exceptions import ComponentParameterError, LookupTransformError
-from modulo_components.utilities.utilities import generate_predicate_topic
+from modulo_components.exceptions.component_exceptions import AddSignalError, ComponentParameterError, \
+    LookupTransformError
+from modulo_components.utilities.utilities import generate_predicate_topic, parse_signal_name
+from modulo_new_core.encoded_state import EncodedState
 from modulo_new_core.translators.message_readers import read_stamped_message
 from modulo_new_core.translators.message_writers import write_stamped_message
 from modulo_new_core.translators.parameter_translators import write_parameter, read_parameter_const
@@ -17,11 +23,12 @@ from rclpy.node import Node
 from rclpy.publisher import Publisher
 from rclpy.qos import QoSProfile
 from rclpy.time import Time
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Int32, Float64, Float64MultiArray, String
 from tf2_ros import TransformBroadcaster
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
 
+MsgT = TypeVar('MsgT')
 T = TypeVar('T')
 
 
@@ -37,6 +44,8 @@ class ComponentInterface(Node):
         parameter_dict (dict(Publisher)): dict of parameters
         periodic_callbacks (dict(Callable): dict of periodic callback functions
         qos (rclpy.qos.QoSProfile: the Quality of Service for publishers and subscribers
+        inputs: dict of inputs
+        outputs: dict of output
         tf_buffer (tf2_ros.Buffer): the buffer to lookup transforms published on tf2.
         tf_listener (tf2_ros.TransformListener): the listener to lookup transforms published on tf2.
         tf_broadcaster (tf2_ros.TransformBroadcaster): the broadcaster to publish transforms on tf2
@@ -55,6 +64,8 @@ class ComponentInterface(Node):
         self._predicates: Dict[str, Union[bool, Callable[[], bool]]] = {}
         self._predicate_publishers: Dict[str, Publisher] = {}
         self._periodic_callbacks: Dict[str, Callable[[], None]] = {}
+        self._inputs = {}
+        self._outputs = {}
         self.__tf_buffer: Optional[Buffer] = None
         self.__tf_listener: Optional[TransformListener] = None
         self.__tf_broadcaster: Optional[TransformBroadcaster] = None
@@ -273,6 +284,108 @@ class ComponentInterface(Node):
             return
         self._predicates[name] = value
 
+    def _create_output(self, signal_name: str, data: str, message_type: MsgT,
+                       clproto_message_type: clproto.MessageType, fixed_topic: bool, default_topic: str) -> str:
+        """
+        Helper function to parse the signal name and add an output without Publisher to the dict of outputs.
+
+        :param signal_name: Name of the output signal
+        :param data: Name of the attribute to transmit over the channel
+        :param message_type: The ROS message type of the output
+        :param clproto_message_type: The clproto message type, if applicable
+        :param fixed_topic: If true, the topic name of the output signal is fixed
+        :param default_topic: If set, the default value for the topic name to use
+        :raises AddSignalError if there is a problem adding the output
+        :return: The parsed signal name
+        """
+        try:
+            if message_type == EncodedState and clproto_message_type == clproto.MessageType.UNKNOWN_MESSAGE:
+                raise AddSignalError(f"Provide a valid clproto message type for outputs of type EncodedState.")
+            parsed_signal_name = parse_signal_name(signal_name)
+            if not parsed_signal_name:
+                raise AddSignalError("The parsed signal name is empty. Provide a string with valid "
+                                     "characters for the signal name ([a-zA-Z0-9_]).")
+            if parsed_signal_name in self._outputs.keys():
+                raise AddSignalError(f"Output with parsed name '{parsed_signal_name}' already exists.")
+            topic_name = default_topic if default_topic else "~/" + parsed_signal_name
+            self.add_parameter(sr.Parameter(parsed_signal_name + "_topic", topic_name, sr.ParameterType.STRING),
+                               f"Output topic name of signal '{parsed_signal_name}'", fixed_topic)
+            translator = None
+            if message_type == Bool or message_type == Float64 or \
+                    message_type == Float64MultiArray or message_type == Int32 or message_type == String:
+                translator = modulo_writers.write_std_message
+            elif message_type == EncodedState:
+                translator = partial(modulo_writers.write_clproto_message,
+                                     clproto_message_type=clproto_message_type)
+            else:
+                raise AddSignalError("The provided message type is not supported to create a component output")
+            self._outputs[parsed_signal_name] = {"attribute": data, "message_type": message_type,
+                                                 "translator": translator}
+            return parsed_signal_name
+        except Exception as e:
+            raise AddSignalError(f"{e}")
+
+    def __subscription_callback(self, message: MsgT, attribute_name: str, reader: Callable):
+        """
+        Subscription callback for the ROS subscriptions.
+
+        :param message: The message from the ROS network
+        :param attribute_name: The name of the attribute that is updated by the subscription
+        :param reader: A callable that can read the ROS message and translate to the desired type
+        """
+        try:
+            self.__setattr__(attribute_name, reader(message))
+        except Exception as e:
+            self.get_logger().error(f"Failed to read message for attribute {attribute_name}", throttle_duration_sec=1.0)
+
+    def add_input(self, signal_name: str, subscription: Union[str, Callable], message_type: MsgT, fixed_topic=False,
+                  default_topic=""):
+        # TODO could be nice to add an optional callback here that would be executed from within the subscription
+        #  callback in order to manipulate the data pointer upon reception of a message
+        """
+        Add and configure an input signal of the component.
+
+        :param signal_name: Name of the output signal
+        :param subscription: The callback to use for the subscription
+        :param message_type: ROS message type of the subscription
+        :param fixed_topic: If true, the topic name of the output signal is fixed
+        :param default_topic: If set, the default value for the topic name to use
+        """
+        try:
+            parsed_signal_name = parse_signal_name(signal_name)
+            if not parsed_signal_name:
+                raise AddSignalError(f"Failed to add input '{signal_name}': Parsed signal name is empty.")
+            if parsed_signal_name in self._inputs.keys():
+                raise AddSignalError(f"Failed to add input '{parsed_signal_name}': Input already exists")
+            topic_name = default_topic if default_topic else "~/" + parsed_signal_name
+            self.add_parameter(sr.Parameter(parsed_signal_name + "_topic", topic_name, sr.ParameterType.STRING),
+                               f"Input topic name of signal '{parsed_signal_name}'", fixed_topic)
+            topic_name = self.get_parameter_value(parsed_signal_name + "_topic")
+            self.get_logger().debug(f"Adding input '{parsed_signal_name}' with topic name '{topic_name}'.")
+            if isinstance(subscription, Callable):
+                self._inputs[parsed_signal_name] = self.create_subscription(message_type, topic_name, subscription,
+                                                                            self._qos)
+            elif isinstance(subscription, str):
+                if message_type == Bool or message_type == Float64 or \
+                        message_type == Float64MultiArray or message_type == Int32 or message_type == String:
+                    self._inputs[parsed_signal_name] = self.create_subscription(message_type, topic_name,
+                                                                                partial(self.__subscription_callback,
+                                                                                        attribute_name=subscription,
+                                                                                        reader=modulo_readers.read_std_message),
+                                                                                self._qos)
+                elif message_type == EncodedState:
+                    self._inputs[parsed_signal_name] = self.create_subscription(message_type, topic_name,
+                                                                                partial(self.__subscription_callback,
+                                                                                        attribute_name=subscription,
+                                                                                        reader=modulo_readers.read_clproto_message),
+                                                                                self._qos)
+                else:
+                    raise TypeError("The provided message type is not supported to create a component input")
+            else:
+                raise TypeError("Provide either a string containing the name of an attribute or a callable.")
+        except Exception as e:
+            self.get_logger().error(f"Failed to add input '{signal_name}': {e}")
+
     def add_tf_broadcaster(self):
         """
         Configure a transform broadcaster.
@@ -306,7 +419,7 @@ class ComponentInterface(Node):
             return
         try:
             transform_message = TransformStamped()
-            write_stamped_message(transform_message, transform, self.get_clock().now())
+            modulo_writers.write_stamped_message(transform_message, transform, self.get_clock().now())
             self.__tf_broadcaster.sendTransform(transform_message)
         except tf2_py.TransformException as e:
             self.get_logger().error(f"Failed to send transform: {e}", throttle_duration_sec=1.0)
@@ -327,7 +440,7 @@ class ComponentInterface(Node):
         try:
             result = sr.CartesianPose(frame_name, reference_frame_name)
             transform = self.__tf_buffer.lookup_transform(reference_frame_name, frame_name, time_point, duration)
-            read_stamped_message(result, transform)
+            modulo_readers.read_stamped_message(result, transform)
             return result
         except tf2_py.TransformException as e:
             raise LookupTransformError(f"Failed to lookup transform: {e}")
@@ -379,6 +492,18 @@ class ComponentInterface(Node):
                 self.get_logger().error(f"No publisher for predicate '{name}' found.", throttle_duration_sec=1.0)
                 continue
             self._predicate_publishers[name].publish(message)
+
+    def _publish_outputs(self):
+        """
+        Helper function to publish all outputs.
+        """
+        for signal, output_dict in self._outputs.items():
+            try:
+                message = output_dict["message_type"]()
+                output_dict["translator"](message, self.__getattribute__(output_dict["attribute"]))
+                output_dict["publisher"].publish(message)
+            except Exception as e:
+                self.get_logger().error(f"{e}")
 
     def _evaluate_periodic_callbacks(self):
         """

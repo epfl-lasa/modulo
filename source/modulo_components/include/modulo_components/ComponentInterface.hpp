@@ -180,6 +180,8 @@ protected:
    * @param fixed_topic If true, the topic name of the input signal is fixed
    * @param default_topic If set, the default value for the topic name to use
    */
+   // TODO could be nice to add an optional callback here that would be executed from within the subscription callback
+   // in order to manipulate the data pointer upon reception of a message
   template<typename DataT>
   void add_input(
       const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false,
@@ -224,12 +226,14 @@ protected:
    * @param signal_name Name of the output signal
    * @param data Data to transmit on the output signal
    * @param fixed_topic If true, the topic name of the output signal is fixed
+   * @param default_topic If set, the default value for the topic name to use
    * @throws AddSignalException if the output could not be created (empty name, already registered)
+   * @return The parsed signal name
    */
   template<typename DataT>
-  void create_output(
-      const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false,
-      const std::string& default_topic = ""
+  std::string create_output(
+      const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
+      const std::string& default_topic
   );
 
   /**
@@ -777,24 +781,38 @@ inline void ComponentInterface<NodeT>::evaluate_periodic_callbacks() {
 
 template<class NodeT>
 template<typename DataT>
-inline void ComponentInterface<NodeT>::create_output(
+inline std::string ComponentInterface<NodeT>::create_output(
     const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
     const std::string& default_topic
 ) {
   using namespace modulo_new_core::communication;
-  if (signal_name.empty()) {
-    throw exceptions::AddSignalException("Failed to add output: Provide a non empty string as a name.");
+  try {
+    auto parsed_signal_name = utilities::parse_signal_name(signal_name);
+    if (parsed_signal_name.empty()) {
+      throw exceptions::AddSignalException(
+          "The parsed signal name for signal '" + signal_name
+              + "'is empty. Provide a string with valid characters for the signal name ([a-zA-Z0-9_])."
+      );
+    }
+    RCLCPP_DEBUG_STREAM(this->get_logger(),
+                        "Creating output '" << parsed_signal_name << "' (provided signal name was '" << signal_name
+                                            << "'.");
+    if (this->outputs_.find(parsed_signal_name) != this->outputs_.end()) {
+      throw exceptions::AddSignalException("Output with name '" + signal_name + "' already exists.");
+    }
+    auto message_pair = make_shared_message_pair(data, this->get_clock());
+    this->outputs_.insert_or_assign(
+        parsed_signal_name, std::make_shared<PublisherInterface>(this->publisher_type_, message_pair));
+    std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
+    this->add_parameter(
+        parsed_signal_name + "_topic", topic_name, "Output topic name of signal '" + parsed_signal_name + "'",
+        fixed_topic
+    );
+    return parsed_signal_name;
+  } catch (const std::exception& ex) {
+    // TODO if modulo::communication had a base exception, could catch that
+    throw exceptions::AddSignalException(std::string(ex.what()));
   }
-  if (this->outputs_.find(signal_name) != this->outputs_.end()) {
-    throw exceptions::AddSignalException("Output with name '" + signal_name + "' already exists");
-  }
-  auto message_pair = make_shared_message_pair(data, this->get_clock());
-  this->outputs_.insert_or_assign(
-      signal_name, std::make_shared<PublisherInterface>(this->publisher_type_, message_pair));
-  std::string topic_name = default_topic.empty() ? "~/" + signal_name : default_topic;
-  this->add_parameter(
-      signal_name + "_topic", topic_name, "Output topic name of signal '" + signal_name + "'", fixed_topic
-  );
 }
 
 template<class NodeT>
