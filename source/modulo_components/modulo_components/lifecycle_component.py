@@ -3,6 +3,7 @@ from typing import TypeVar
 import clproto
 from lifecycle_msgs.msg import Transition
 from lifecycle_msgs.srv import ChangeState
+from lifecycle_msgs.msg import State
 from modulo_components.component_interface import ComponentInterface
 from modulo_components.exceptions.component_exceptions import AddSignalError
 
@@ -25,14 +26,15 @@ class LifecycleComponent(ComponentInterface):
                 node_name (str): name of the node to be passed to the base Node class
         """
         super().__init__(node_name, *kargs, **kwargs)
-        self.__inactive = False
-        self.__active = False
+        self.__state = State.PRIMARY_STATE_UNCONFIGURED
 
         # add the service to mimic the lifecycle paradigm
         self._change_state_srv = self.create_service(ChangeState, '~/change_state', self.__change_state)
 
-        self.add_predicate("is_inactive", self.__is_inactive)
-        self.add_predicate("is_active", self.__is_active)
+        self.add_predicate("is_unconfigured", lambda: self.__state == State.PRIMARY_STATE_UNCONFIGURED)
+        self.add_predicate("is_inactive", lambda: self.__state == State.PRIMARY_STATE_INACTIVE)
+        self.add_predicate("is_active", lambda: self.__state == State.PRIMARY_STATE_ACTIVE)
+        self.add_predicate("is_finalized", lambda: self.__state == State.PRIMARY_STATE_FINALIZED)
 
     def __change_state(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
         """
@@ -48,7 +50,8 @@ class LifecycleComponent(ComponentInterface):
         elif request.transition.id == Transition.TRANSITION_ACTIVATE:
             response = self._activate(request, response)
         elif request.transition.id == Transition.TRANSITION_DEACTIVATE:
-            response = self.__deactivate(request, response)
+            response = self._deactivate(request, response)
+
         else:
             self.get_logger().error(f'Unsupported state transition! {request}')
             response.success = False
@@ -62,13 +65,13 @@ class LifecycleComponent(ComponentInterface):
         :param response: the response object from the service call
         :return: true if the node configured properly
         """
-        if self.__inactive:
+        if not self.__state == State.PRIMARY_STATE_UNCONFIGURED:
             response.success = False
             return response
 
         response.success = self._configure_outputs() and self.on_configure()
         if response.success:
-            self.__inactive = True
+            self.__state = State.PRIMARY_STATE_INACTIVE
         return response
 
     def on_configure(self) -> bool:
@@ -78,12 +81,6 @@ class LifecycleComponent(ComponentInterface):
         :return: true if the node configured properly
         """
         return True
-
-    def __is_inactive(self) -> bool:
-        """
-        Predicate function to check the inactive property.
-        """
-        return self.__inactive
 
     def _configure_outputs(self) -> bool:
         success = True
@@ -98,6 +95,31 @@ class LifecycleComponent(ComponentInterface):
                 self.get_logger().debug(f"Failed to configure output '{signal_name}': {e}")
         return success
 
+    def _cleanup(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
+        """
+        Cleanup service callback. Simply call the on_cleanup function.
+
+        :param request: request to change the state to unconfigured
+        :param response: the response object from the service call
+        :return: true if the node was clean up properly
+        """
+        if self.__state != State.PRIMARY_STATE_INACTIVE:
+            response.success = False
+            return response
+
+        response.success = self.on_cleanup()
+        if response.success:
+            self.__state = State.PRIMARY_STATE_UNCONFIGURED
+        return response
+
+    def on_cleanup(self) -> bool:
+        """
+        Function called from the cleanup service callback. To be redefined in derived classes.
+
+        :return: true if the node was cleaned up properly
+        """
+        return True
+
     def _activate(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
         """
         Activate service callback. Set the node as active and call the on_activate function.
@@ -106,13 +128,13 @@ class LifecycleComponent(ComponentInterface):
         :param response: the response object from the service call
         :return: true if the node is activated properly
         """
-        if not self.__inactive or self.__active:
+        if self.__state != State.PRIMARY_STATE_INACTIVE:
             response.success = False
             return response
 
         response.success = self.on_activate()
         if response.success:
-            self.__active = True
+            self.__state = State.PRIMARY_STATE_ACTIVE
         return response
 
     def on_activate(self) -> bool:
@@ -123,13 +145,7 @@ class LifecycleComponent(ComponentInterface):
         """
         return True
 
-    def __is_active(self) -> bool:
-        """
-        Predicate function to check the active property.
-        """
-        return self.__active
-
-    def __deactivate(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
+    def _deactivate(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
         """
         Deactivate service callback. Set the node as not active and call the on_deactivate function.
 
@@ -137,13 +153,13 @@ class LifecycleComponent(ComponentInterface):
         :param response: the response object from the service call
         :return: true if the node is deactivated properly
         """
-        if not self.__inactive or not self.__active:
+        if self.__state != State.PRIMARY_STATE_ACTIVE:
             response.success = False
             return response
 
         response.success = self.on_deactivate()
         if response.success:
-            self.__active = False
+            self.__state = State.PRIMARY_STATE_INACTIVE
         return response
 
     def on_deactivate(self) -> bool:
@@ -154,10 +170,12 @@ class LifecycleComponent(ComponentInterface):
         """
         return True
 
+    # TODO on shutdown and on error
+
     def _step(self):
         try:
             self._publish_predicates()
-            if self.__active:
+            if self.__state == State.PRIMARY_STATE_ACTIVE:
                 self._publish_outputs()
                 self._evaluate_periodic_callbacks()
                 self.on_step()
