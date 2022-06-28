@@ -4,8 +4,8 @@ using namespace modulo_new_core::communication;
 
 namespace modulo_components {
 
-Component::Component(const rclcpp::NodeOptions& node_options, bool start_thread) :
-    ComponentInterface<rclcpp::Node>(node_options, PublisherType::PUBLISHER), started_(false) {
+Component::Component(const rclcpp::NodeOptions& node_options, bool start_thread, const std::string& fallback_name) :
+    ComponentInterface<rclcpp::Node>(node_options, PublisherType::PUBLISHER, fallback_name), started_(false) {
   this->add_predicate("is_finished", false);
 
   if (start_thread) {
