@@ -244,6 +244,22 @@ private:
   bool cleanup_signals();
 
   // TODO hide ROS methods
+  using rclcpp_lifecycle::LifecycleNode::configure;
+  using rclcpp_lifecycle::LifecycleNode::activate;
+  using rclcpp_lifecycle::LifecycleNode::deactivate;
+  using rclcpp_lifecycle::LifecycleNode::shutdown;
+  using rclcpp_lifecycle::LifecycleNode::cleanup;
+  using rclcpp_lifecycle::LifecycleNode::on_configure;
+  using rclcpp_lifecycle::LifecycleNode::on_activate;
+  using rclcpp_lifecycle::LifecycleNode::on_deactivate;
+  using rclcpp_lifecycle::LifecycleNode::on_error;
+  using rclcpp_lifecycle::LifecycleNode::on_cleanup;
+  using rclcpp_lifecycle::LifecycleNode::register_on_configure;
+  using rclcpp_lifecycle::LifecycleNode::register_on_activate;
+  using rclcpp_lifecycle::LifecycleNode::register_on_deactivate;
+  using rclcpp_lifecycle::LifecycleNode::register_on_error;
+  using rclcpp_lifecycle::LifecycleNode::register_on_cleanup;
+//  using rclcpp_lifecycle::LifecycleNode::trigger_transition; // TODO can we use that?
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::create_output;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::inputs_;
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::outputs_;
