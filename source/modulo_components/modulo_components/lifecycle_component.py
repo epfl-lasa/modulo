@@ -47,6 +47,8 @@ class LifecycleComponent(ComponentInterface):
         self.get_logger().debug(f'Change state service called with request {request}')
         if request.transition.id == Transition.TRANSITION_CONFIGURE:
             response = self.__on_configure(request, response)
+        elif request.transition.id == Transition.TRANSITION_CLEANUP:
+            response = self.__on_cleanup(request, response)
         elif request.transition.id == Transition.TRANSITION_ACTIVATE:
             response = self.__on_activate(request, response)
         elif request.transition.id == Transition.TRANSITION_DEACTIVATE:
@@ -80,28 +82,15 @@ class LifecycleComponent(ComponentInterface):
 
         :return: True if the transition was successful
         """
-        return self.__configure_outputs() and self.on_configure_callbacck()
+        return self.__configure_outputs() and self.on_configure_callback()
 
-    def on_configure_callbacck(self) -> bool:
+    def on_configure_callback(self) -> bool:
         """
         Function called from the configure transition service callback. To be redefined in derived classes.
 
         :return: True if the component configured successfully
         """
         return True
-
-    def __configure_outputs(self) -> bool:
-        success = True
-        for signal_name, output_dict in self._outputs.items():
-            try:
-                topic_name = self.get_parameter_value(signal_name + "_topic")
-                self.get_logger().debug(f"Configuring output '{signal_name}' with topic name '{topic_name}'.")
-                publisher = self.create_publisher(output_dict["message_type"], topic_name, self._qos)
-                self._outputs[signal_name]["publisher"] = publisher
-            except Exception as e:
-                success = False
-                self.get_logger().debug(f"Failed to configure output '{signal_name}': {e}")
-        return success
 
     def __on_cleanup(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
         """
@@ -205,6 +194,10 @@ class LifecycleComponent(ComponentInterface):
     # TODO on shutdown and on error
 
     def _step(self):
+        """
+        Step function that is called periodically and publishes predicates, outputs, evaluates daemon callbacks, and
+        calls the on_step function.
+        """
         try:
             self._publish_predicates()
             if self.__state == State.PRIMARY_STATE_ACTIVE:
@@ -213,6 +206,30 @@ class LifecycleComponent(ComponentInterface):
                 self.on_step_callback()
         except Exception as e:
             self.get_logger().error(f"Failed to execute step function: {e}", throttle_duration_sec=1.0)
+
+    def on_step_callback(self):
+        """
+        Steps to execute periodically. To be redefined by derived classes.
+        """
+        pass
+
+    def __configure_outputs(self) -> bool:
+        """
+        Configure all outputs.
+
+        :return: True if configuration was successful
+        """
+        success = True
+        for signal_name, output_dict in self._outputs.items():
+            try:
+                topic_name = self.get_parameter_value(signal_name + "_topic")
+                self.get_logger().debug(f"Configuring output '{signal_name}' with topic name '{topic_name}'.")
+                publisher = self.create_publisher(output_dict["message_type"], topic_name, self._qos)
+                self._outputs[signal_name]["publisher"] = publisher
+            except Exception as e:
+                success = False
+                self.get_logger().debug(f"Failed to configure output '{signal_name}': {e}")
+        return success
 
     def add_output(self, signal_name: str, data: str, message_type: MsgT,
                    clproto_message_type=clproto.MessageType.UNKNOWN_MESSAGE, fixed_topic=False, default_topic=""):
@@ -232,9 +249,3 @@ class LifecycleComponent(ComponentInterface):
             self.get_logger().debug(f"Adding output '{parsed_signal_name}.")
         except AddSignalError as e:
             self.get_logger().error(f"Failed to add output '{signal_name}': {e}")
-
-    def on_step_callback(self):
-        """
-        Steps to execute periodically. To be redefined by derived classes.
-        """
-        pass
