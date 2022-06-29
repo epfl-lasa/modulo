@@ -5,28 +5,23 @@ from typing import Callable, Dict, List, Optional, TypeVar, Union
 import clproto
 import modulo_core.translators.message_readers as modulo_readers
 import modulo_core.translators.message_writers as modulo_writers
-import rclpy
 import state_representation as sr
-import tf2_py
 from geometry_msgs.msg import TransformStamped
 from modulo_components.exceptions.component_exceptions import AddSignalError, ComponentParameterError, \
     LookupTransformError
 from modulo_components.utilities.utilities import generate_predicate_topic, parse_signal_name
 from modulo_core.encoded_state import EncodedState
-from modulo_core.translators.message_readers import read_stamped_message
-from modulo_core.translators.message_writers import write_stamped_message
 from modulo_core.translators.parameter_translators import write_parameter, read_parameter_const
-from rcl_interfaces.msg import ParameterDescriptor
-from rcl_interfaces.msg import SetParametersResult
+from rcl_interfaces.msg import ParameterDescriptor, SetParametersResult
 from rclpy.duration import Duration
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 from rclpy.publisher import Publisher
 from rclpy.qos import QoSProfile
 from rclpy.time import Time
 from std_msgs.msg import Bool, Int32, Float64, Float64MultiArray, String
-from tf2_ros import TransformBroadcaster
-from tf2_ros.buffer import Buffer
-from tf2_ros.transform_listener import TransformListener
+from tf2_py import TransformException
+from tf2_ros import Buffer, TransformBroadcaster, TransformListener
 
 MsgT = TypeVar('MsgT')
 T = TypeVar('T')
@@ -125,7 +120,7 @@ class ComponentInterface(Node):
         except Exception as e:
             self.get_logger().error(f"Failed to add parameter: {e}")
 
-    def get_parameter(self, name: str) -> Union[sr.Parameter, rclpy.parameter.Parameter]:
+    def get_parameter(self, name: str) -> Union[sr.Parameter, Parameter]:
         """
         Get a parameter by name. If this method is called from a file that contains 'rclpy' in its path, the
         rclpy.node.Node.get_parameter method will be invoked, otherwise return the parameter from the local parameter
@@ -139,7 +134,7 @@ class ComponentInterface(Node):
             co_filename = sys._getframe().f_back.f_code.co_filename
             self.get_logger().debug(f"get_parameter called from {co_filename}")
             if "rclpy" in co_filename:
-                return rclpy.node.Node.get_parameter(self, name)
+                return Node.get_parameter(self, name)
             else:
                 return self._get_component_parameter(name)
         except Exception as e:
@@ -204,7 +199,7 @@ class ComponentInterface(Node):
         """
         return True
 
-    def __on_set_parameters_callback(self, ros_parameters: List[rclpy.Parameter]) -> SetParametersResult:
+    def __on_set_parameters_callback(self, ros_parameters: List[Parameter]) -> SetParametersResult:
         """
         Callback function to validate and update parameters on change.
 
@@ -421,7 +416,7 @@ class ComponentInterface(Node):
             transform_message = TransformStamped()
             modulo_writers.write_stamped_message(transform_message, transform, self.get_clock().now())
             self.__tf_broadcaster.sendTransform(transform_message)
-        except tf2_py.TransformException as e:
+        except TransformException as e:
             self.get_logger().error(f"Failed to send transform: {e}", throttle_duration_sec=1.0)
 
     def lookup_transform(self, frame_name: str, reference_frame_name="world", time_point=Time(),
@@ -442,7 +437,7 @@ class ComponentInterface(Node):
             transform = self.__tf_buffer.lookup_transform(reference_frame_name, frame_name, time_point, duration)
             modulo_readers.read_stamped_message(result, transform)
             return result
-        except tf2_py.TransformException as e:
+        except TransformException as e:
             raise LookupTransformError(f"Failed to lookup transform: {e}")
 
     def get_qos(self) -> QoSProfile:
