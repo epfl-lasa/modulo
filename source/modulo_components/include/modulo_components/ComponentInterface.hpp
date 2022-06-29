@@ -95,8 +95,6 @@ protected:
    * @param description The description of the parameter
    * @param read_only If true, the value of the parameter cannot be changed after declaration
    */
-   // TODO could be nice to add an optional callback here that would be executed along with the
-   // on_set_parameter_callback
   template<typename T>
   void add_parameter(const std::string& name, const T& value, const std::string& description, bool read_only = false);
 
