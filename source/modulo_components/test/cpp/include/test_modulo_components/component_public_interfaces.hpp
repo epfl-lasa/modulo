@@ -12,7 +12,7 @@ template<class NodeT>
 class ComponentInterfacePublicInterface : public ComponentInterface<NodeT> {
 public:
   explicit ComponentInterfacePublicInterface(
-      const rclcpp::NodeOptions& node_options, modulo_new_core::communication::PublisherType publisher_type
+      const rclcpp::NodeOptions& node_options, modulo_core::communication::PublisherType publisher_type
   ) : ComponentInterface<NodeT>(node_options, publisher_type) {}
   using ComponentInterface<NodeT>::add_parameter;
   using ComponentInterface<NodeT>::get_parameter;

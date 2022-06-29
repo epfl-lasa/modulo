@@ -15,13 +15,13 @@
 #include <state_representation/parameters/ParameterMap.hpp>
 #include <state_representation/space/cartesian/CartesianPose.hpp>
 
-#include <modulo_new_core/communication/MessagePair.hpp>
-#include <modulo_new_core/communication/PublisherHandler.hpp>
-#include <modulo_new_core/communication/PublisherType.hpp>
-#include <modulo_new_core/communication/SubscriptionHandler.hpp>
-#include <modulo_new_core/translators/message_readers.hpp>
-#include <modulo_new_core/translators/message_writers.hpp>
-#include <modulo_new_core/translators/parameter_translators.hpp>
+#include <modulo_core/communication/MessagePair.hpp>
+#include <modulo_core/communication/PublisherHandler.hpp>
+#include <modulo_core/communication/PublisherType.hpp>
+#include <modulo_core/communication/SubscriptionHandler.hpp>
+#include <modulo_core/translators/message_readers.hpp>
+#include <modulo_core/translators/message_writers.hpp>
+#include <modulo_core/translators/parameter_translators.hpp>
 
 #include "modulo_components/exceptions/AddSignalException.hpp"
 #include "modulo_components/exceptions/ComponentParameterException.hpp"
@@ -55,7 +55,7 @@ public:
    * @param fallback_name The name of the component if it was not provided through the node options
    */
   explicit ComponentInterface(
-      const rclcpp::NodeOptions& node_options, modulo_new_core::communication::PublisherType publisher_type,
+      const rclcpp::NodeOptions& node_options, modulo_core::communication::PublisherType publisher_type,
       const std::string& fallback_name = "ComponentInterface"
   );
 
@@ -291,9 +291,9 @@ protected:
    */
   virtual void raise_error();
 
-  std::map<std::string, std::shared_ptr<modulo_new_core::communication::SubscriptionInterface>>
+  std::map<std::string, std::shared_ptr<modulo_core::communication::SubscriptionInterface>>
       inputs_; ///< Map of inputs
-  std::map<std::string, std::shared_ptr<modulo_new_core::communication::PublisherInterface>>
+  std::map<std::string, std::shared_ptr<modulo_core::communication::PublisherInterface>>
       outputs_; ///< Map of outputs
 
   rclcpp::QoS qos_ = rclcpp::QoS(10); ///< Quality of Service for ROS publishers and subscribers
@@ -320,7 +320,7 @@ private:
    */
   void set_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
-  modulo_new_core::communication::PublisherType
+  modulo_core::communication::PublisherType
       publisher_type_; ///< Type of the output publishers (one of PUBLISHER, LIFECYCLE_PUBLISHER)
 
   std::map<std::string, utilities::PredicateVariant> predicates_; ///< Map of predicates
@@ -342,7 +342,7 @@ private:
 
 template<class NodeT>
 ComponentInterface<NodeT>::ComponentInterface(
-    const rclcpp::NodeOptions& options, modulo_new_core::communication::PublisherType publisher_type,
+    const rclcpp::NodeOptions& options, modulo_core::communication::PublisherType publisher_type,
     const std::string& fallback_name
 ) :
     NodeT(utilities::parse_node_name(options, fallback_name), options), publisher_type_(publisher_type) {
@@ -394,7 +394,7 @@ inline void ComponentInterface<NodeT>::add_parameter(
     bool read_only
 ) {
   try {
-    auto ros_param = modulo_new_core::translators::write_parameter(parameter);
+    auto ros_param = modulo_core::translators::write_parameter(parameter);
     if (!NodeT::has_parameter(parameter->get_name())) {
       RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding parameter '" << parameter->get_name() << "'.");
       parameter_map_.set_parameter(parameter);
@@ -427,7 +427,7 @@ template<typename T>
 inline void ComponentInterface<NodeT>::set_parameter_value(const std::string& name, const T& value) {
   try {
     rcl_interfaces::msg::SetParametersResult result = NodeT::set_parameter(
-        modulo_new_core::translators::write_parameter(state_representation::make_shared_parameter(name, value)));
+        modulo_core::translators::write_parameter(state_representation::make_shared_parameter(name, value)));
     if (!result.successful) {
       RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                                    "Failed to set parameter value of parameter '" << name << "': " << result.reason);
@@ -459,13 +459,13 @@ ComponentInterface<NodeT>::on_set_parameters_callback(const std::vector<rclcpp::
       auto parameter = parameter_map_.get_parameter(ros_parameter.get_name());
 
       // convert the ROS parameter into a ParameterInterface without modifying the original
-      auto new_parameter = modulo_new_core::translators::read_parameter_const(ros_parameter, parameter);
+      auto new_parameter = modulo_core::translators::read_parameter_const(ros_parameter, parameter);
       if (!validate_parameter(new_parameter)) {
         result.successful = false;
         result.reason += "Parameter " + ros_parameter.get_name() + " could not be set! ";
       } else {
         // update the value of the parameter in the map
-        modulo_new_core::translators::copy_parameter_value(new_parameter, parameter);
+        modulo_core::translators::copy_parameter_value(new_parameter, parameter);
       }
     } catch (const std::exception& ex) {
       result.successful = false;
@@ -566,7 +566,7 @@ inline void ComponentInterface<NodeT>::add_input(
     const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
     const std::string& default_topic
 ) {
-  using namespace modulo_new_core::communication;
+  using namespace modulo_core::communication;
   try {
     std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
     if (parsed_signal_name.empty()) {
@@ -625,8 +625,8 @@ inline void ComponentInterface<NodeT>::add_input(
         break;
       }
       case MessageType::ENCODED_STATE: {
-        auto subscription_handler = std::make_shared<SubscriptionHandler<modulo_new_core::EncodedState>>(message_pair);
-        auto subscription = NodeT::template create_subscription<modulo_new_core::EncodedState>(
+        auto subscription_handler = std::make_shared<SubscriptionHandler<modulo_core::EncodedState>>(message_pair);
+        auto subscription = NodeT::template create_subscription<modulo_core::EncodedState>(
             topic_name, this->qos_, subscription_handler->get_callback());
         subscription_interface = subscription_handler->create_subscription_interface(subscription);
         break;
@@ -644,7 +644,7 @@ inline void ComponentInterface<NodeT>::add_input(
     const std::string& signal_name, const std::function<void(const std::shared_ptr<MsgT>)>& callback, bool fixed_topic,
     const std::string& default_topic
 ) {
-  using namespace modulo_new_core::communication;
+  using namespace modulo_core::communication;
   try {
     std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
     if (parsed_signal_name.empty()) {
@@ -719,7 +719,7 @@ inline void ComponentInterface<NodeT>::send_transform(const state_representation
   }
   try {
     geometry_msgs::msg::TransformStamped transform_message;
-    modulo_new_core::translators::write_message(transform_message, transform, this->get_clock()->now());
+    modulo_core::translators::write_message(transform_message, transform, this->get_clock()->now());
     this->tf_broadcaster_->sendTransform(transform_message);
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
@@ -738,7 +738,7 @@ inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_tra
   try {
     state_representation::CartesianPose result(frame_name, reference_frame_name);
     auto transform = this->tf_buffer_->lookupTransform(reference_frame_name, frame_name, time_point, duration);
-    modulo_new_core::translators::read_message(result, transform);
+    modulo_core::translators::read_message(result, transform);
     return result;
   } catch (const tf2::TransformException& ex) {
     throw exceptions::LookupTransformException(std::string("Failed to lookup transform: ").append(ex.what()));
@@ -789,7 +789,7 @@ inline std::string ComponentInterface<NodeT>::create_output(
     const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
     const std::string& default_topic
 ) {
-  using namespace modulo_new_core::communication;
+  using namespace modulo_core::communication;
   try {
     auto parsed_signal_name = utilities::parse_signal_name(signal_name);
     if (parsed_signal_name.empty()) {

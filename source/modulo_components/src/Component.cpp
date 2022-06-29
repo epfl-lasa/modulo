@@ -1,6 +1,6 @@
 #include "modulo_components/Component.hpp"
 
-using namespace modulo_new_core::communication;
+using namespace modulo_core::communication;
 
 namespace modulo_components {
 
