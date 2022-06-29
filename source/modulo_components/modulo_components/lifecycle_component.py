@@ -80,9 +80,9 @@ class LifecycleComponent(ComponentInterface):
 
         :return: True if the transition was successful
         """
-        return self.__configure_outputs() and self.configure()
+        return self.__configure_outputs() and self.on_configure_callbacck()
 
-    def configure(self) -> bool:
+    def on_configure_callbacck(self) -> bool:
         """
         Function called from the configure transition service callback. To be redefined in derived classes.
 
@@ -126,9 +126,9 @@ class LifecycleComponent(ComponentInterface):
 
         :return: True if the transition was successful
         """
-        return self.cleanup()
+        return self.on_cleanup_callback()
 
-    def cleanup(self) -> bool:
+    def on_cleanup_callback(self) -> bool:
         """
         Function called from the cleanup transition service callback. To be redefined in derived classes.
 
@@ -159,9 +159,9 @@ class LifecycleComponent(ComponentInterface):
 
         :return: True if the transition was successful
         """
-        return self.activate()
+        return self.on_activate_callback()
 
-    def activate(self) -> bool:
+    def on_activate_callback(self) -> bool:
         """
         Function called from the activate transition service callback. To be redefined in derived classes.
 
@@ -192,9 +192,9 @@ class LifecycleComponent(ComponentInterface):
 
         :return: True if the transition was successful
         """
-        return self.deactivate()
+        return self.on_deactivate_callback()
 
-    def deactivate(self) -> bool:
+    def on_deactivate_callback(self) -> bool:
         """
         Function called from the deactivate transition service callback. To be redefined in derived classes.
 
@@ -210,7 +210,7 @@ class LifecycleComponent(ComponentInterface):
             if self.__state == State.PRIMARY_STATE_ACTIVE:
                 self._publish_outputs()
                 self._evaluate_periodic_callbacks()
-                self.step()
+                self.on_step_callback()
         except Exception as e:
             self.get_logger().error(f"Failed to execute step function: {e}", throttle_duration_sec=1.0)
 
@@ -233,7 +233,7 @@ class LifecycleComponent(ComponentInterface):
         except AddSignalError as e:
             self.get_logger().error(f"Failed to add output '{signal_name}': {e}")
 
-    def step(self):
+    def on_step_callback(self):
         """
         Steps to execute periodically. To be redefined by derived classes.
         """
