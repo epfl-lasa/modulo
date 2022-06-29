@@ -38,7 +38,7 @@ void LifecycleComponent::step() {
     if (this->get_predicate("is_active")) {
       this->publish_outputs();
       this->evaluate_periodic_callbacks();
-      this->on_step();
+      this->on_step_callback();
     }
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to execute step function:" << ex.what());
@@ -54,10 +54,10 @@ LifecycleComponent::on_configure(const rclcpp_lifecycle::State& previous_state) 
     RCLCPP_WARN(get_logger(), "Invalid transition 'configure' from state %s.", previous_state.label().c_str());
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
-  if (!this->configure()) {
+  if (!this->handle_configure()) {
     RCLCPP_WARN(get_logger(), "Configuration failed! Reverting to the unconfigured state.");
     // perform cleanup actions to ensure the component is unconfigured
-    if (this->cleanup()) {
+    if (this->handle_cleanup()) {
       return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
     } else {
       RCLCPP_ERROR(get_logger(),
@@ -68,12 +68,12 @@ LifecycleComponent::on_configure(const rclcpp_lifecycle::State& previous_state) 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
-bool LifecycleComponent::configure() {
+bool LifecycleComponent::handle_configure() {
   bool result = this->configure_outputs();
-  return result && this->on_configure();
+  return result && this->on_configure_callback();
 }
 
-bool LifecycleComponent::on_configure() {
+bool LifecycleComponent::on_configure_callback() {
   return true;
 }
 
@@ -84,19 +84,19 @@ LifecycleComponent::on_cleanup(const rclcpp_lifecycle::State& previous_state) {
     RCLCPP_WARN(get_logger(), "Invalid transition 'cleanup' from state %s.", previous_state.label().c_str());
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
-  if (!this->cleanup()) {
+  if (!this->handle_cleanup()) {
     RCLCPP_ERROR(get_logger(), "Cleanup failed! Entering into the error processing transition state.");
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
-bool LifecycleComponent::cleanup() {
+bool LifecycleComponent::handle_cleanup() {
   bool result = this->cleanup_signals();
-  return result && this->on_cleanup();
+  return result && this->on_cleanup_callback();
 }
 
-bool LifecycleComponent::on_cleanup() {
+bool LifecycleComponent::on_cleanup_callback() {
   return true;
 }
 
@@ -107,10 +107,10 @@ LifecycleComponent::on_activate(const rclcpp_lifecycle::State& previous_state) {
     RCLCPP_WARN(get_logger(), "Invalid transition 'activate' from state %s.", previous_state.label().c_str());
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
-  if (!this->activate()) {
+  if (!this->handle_activate()) {
     RCLCPP_WARN(get_logger(), "Activation failed! Reverting to the inactive state.");
     // perform deactivation actions to ensure the component is inactive
-    if (this->deactivate()) {
+    if (this->handle_deactivate()) {
       return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
     } else {
       RCLCPP_ERROR(get_logger(),
@@ -121,12 +121,12 @@ LifecycleComponent::on_activate(const rclcpp_lifecycle::State& previous_state) {
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
-bool LifecycleComponent::activate() {
+bool LifecycleComponent::handle_activate() {
   bool result = this->activate_outputs();
-  return result && this->on_activate();
+  return result && this->on_activate_callback();
 }
 
-bool LifecycleComponent::on_activate() {
+bool LifecycleComponent::on_activate_callback() {
   return true;
 }
 
@@ -137,19 +137,19 @@ LifecycleComponent::on_deactivate(const rclcpp_lifecycle::State& previous_state)
     RCLCPP_WARN(get_logger(), "Invalid transition 'deactivate' from state %s.", previous_state.label().c_str());
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
   }
-  if (!this->deactivate()) {
+  if (!this->handle_deactivate()) {
     RCLCPP_ERROR(get_logger(), "Deactivation failed! Entering into the error processing transition state.");
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
-bool LifecycleComponent::deactivate() {
+bool LifecycleComponent::handle_deactivate() {
   bool result = this->deactivate_outputs();
-  return result && this->on_deactivate();
+  return result && this->on_deactivate_callback();
 }
 
-bool LifecycleComponent::on_deactivate() {
+bool LifecycleComponent::on_deactivate_callback() {
   return true;
 }
 
@@ -160,19 +160,19 @@ LifecycleComponent::on_shutdown(const rclcpp_lifecycle::State& previous_state) {
     case lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED:
       return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
     case lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE:
-      if (!this->deactivate()) {
+      if (!this->handle_deactivate()) {
         RCLCPP_DEBUG(get_logger(), "Shutdown failed during intermediate deactivation!");
         break;
       }
       [[fallthrough]];
     case lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE:
-      if (!this->cleanup()) {
+      if (!this->handle_cleanup()) {
         RCLCPP_DEBUG(get_logger(), "Shutdown failed during intermediate cleanup!");
         break;
       }
       [[fallthrough]];
     case lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED:
-      if (!this->shutdown()) {
+      if (!this->handle_shutdown()) {
         break;
       }
       //  TODO: reset and finalize all needed properties
@@ -189,11 +189,11 @@ LifecycleComponent::on_shutdown(const rclcpp_lifecycle::State& previous_state) {
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
 }
 
-bool LifecycleComponent::shutdown() {
-  return this->on_shutdown();
+bool LifecycleComponent::handle_shutdown() {
+  return this->on_shutdown_callback();
 }
 
-bool LifecycleComponent::on_shutdown() {
+bool LifecycleComponent::on_shutdown_callback() {
   return true;
 }
 
@@ -218,10 +218,10 @@ LifecycleComponent::on_error(const rclcpp_lifecycle::State& previous_state) {
 }
 
 bool LifecycleComponent::handle_error() {
-  return this->on_error();
+  return this->on_error_callback();
 }
 
-bool LifecycleComponent::on_error() {
+bool LifecycleComponent::on_error_callback() {
   return true;
 }
 
