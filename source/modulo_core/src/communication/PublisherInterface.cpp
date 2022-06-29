@@ -15,7 +15,7 @@
 
 namespace modulo_core::communication {
 
-PublisherInterface::PublisherInterface(PublisherType type, std::shared_ptr<MessagePairInterface>  message_pair) :
+PublisherInterface::PublisherInterface(PublisherType type, std::shared_ptr<MessagePairInterface> message_pair) :
     type_(type), message_pair_(std::move(message_pair)) {}
 
 void PublisherInterface::activate() {

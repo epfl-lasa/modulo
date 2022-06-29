@@ -2,9 +2,7 @@
 
 #include <rclcpp/node_options.hpp>
 
-#include "modulo_components/LifecycleComponent.hpp"
 #include "modulo_core/EncodedState.hpp"
-
 #include "test_modulo_components/component_public_interfaces.hpp"
 
 using namespace state_representation;

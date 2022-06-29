@@ -1,8 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "modulo_components/ComponentInterface.hpp"
 #include "modulo_core/EncodedState.hpp"
-
 #include "test_modulo_components/component_public_interfaces.hpp"
 
 namespace modulo_components {
@@ -122,7 +120,8 @@ TYPED_TEST(ComponentInterfaceTest, TF) {
   this->component_->add_tf_listener();
   auto send_tf = state_representation::CartesianPose::Random("test", "world");
   EXPECT_NO_THROW(this->component_->send_transform(send_tf));
-  EXPECT_THROW(auto throw_tf = this->component_->lookup_transform("dummy", "world"), exceptions::LookupTransformException);
+  EXPECT_THROW(auto throw_tf = this->component_->lookup_transform("dummy", "world"),
+               exceptions::LookupTransformException);
   auto lookup_tf = this->component_->lookup_transform("test", "world");
   auto identity = send_tf * lookup_tf.inverse();
   EXPECT_FLOAT_EQ(identity.data().norm(), 1.);

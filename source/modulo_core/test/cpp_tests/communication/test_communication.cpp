@@ -117,8 +117,7 @@ TEST_F(CommunicationTest, EncodedState) {
   auto sub_message = make_shared_message_pair(sub_state, this->clock_);
   this->add_nodes<modulo_core::EncodedState>("/test_topic", pub_message, sub_message);
   this->exec_->template spin_until_future_complete(
-      std::dynamic_pointer_cast<MinimalSubscriber<modulo_core::EncodedState>>(this->sub_node_)->received_future,
-      500ms
+      std::dynamic_pointer_cast<MinimalSubscriber<modulo_core::EncodedState>>(this->sub_node_)->received_future, 500ms
   );
 
   EXPECT_EQ(pub_state->get_name(), sub_state->get_name());

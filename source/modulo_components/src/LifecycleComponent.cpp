@@ -279,11 +279,10 @@ bool LifecycleComponent::configure_outputs() {
         }
         case MessageType::ENCODED_STATE: {
           auto publisher = this->create_publisher<modulo_core::EncodedState>(topic_name, this->qos_);
-          interface =
-              std::make_shared<PublisherHandler<rclcpp_lifecycle::LifecyclePublisher<modulo_core::EncodedState>,
-                                                modulo_core::EncodedState>>(
-                  PublisherType::LIFECYCLE_PUBLISHER, publisher
-              )->create_publisher_interface(message_pair);
+          interface = std::make_shared<PublisherHandler<rclcpp_lifecycle::LifecyclePublisher<modulo_core::EncodedState>,
+                                                        modulo_core::EncodedState>>(
+              PublisherType::LIFECYCLE_PUBLISHER, publisher
+          )->create_publisher_interface(message_pair);
           break;
         }
       }

@@ -66,7 +66,8 @@ public:
 
 class LifecycleComponentPublicInterface : public LifecycleComponent {
 public:
-  explicit LifecycleComponentPublicInterface(const rclcpp::NodeOptions& node_options) : LifecycleComponent(node_options) {}
+  explicit LifecycleComponentPublicInterface(const rclcpp::NodeOptions& node_options) :
+      LifecycleComponent(node_options) {}
   using LifecycleComponent::add_output;
   using LifecycleComponent::configure_outputs;
   using LifecycleComponent::activate_outputs;

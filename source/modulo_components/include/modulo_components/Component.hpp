@@ -141,8 +141,7 @@ inline void Component::add_output(
       case MessageType::ENCODED_STATE: {
         auto publisher = this->create_publisher<modulo_core::EncodedState>(topic_name, this->qos_);
         this->outputs_.at(parsed_signal_name) =
-            std::make_shared<PublisherHandler<rclcpp::Publisher<modulo_core::EncodedState>,
-                                              modulo_core::EncodedState>>(
+            std::make_shared<PublisherHandler<rclcpp::Publisher<modulo_core::EncodedState>, modulo_core::EncodedState>>(
                 PublisherType::PUBLISHER, publisher
             )->create_publisher_interface(message_pair);
         break;

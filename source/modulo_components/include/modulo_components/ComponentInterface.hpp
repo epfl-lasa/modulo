@@ -183,8 +183,8 @@ protected:
    * @param fixed_topic If true, the topic name of the input signal is fixed
    * @param default_topic If set, the default value for the topic name to use
    */
-   // TODO could be nice to add an optional callback here that would be executed from within the subscription callback
-   // in order to manipulate the data pointer upon reception of a message
+  // TODO could be nice to add an optional callback here that would be executed from within the subscription callback
+  // in order to manipulate the data pointer upon reception of a message
   template<typename DataT>
   void add_input(
       const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false,
@@ -291,10 +291,8 @@ protected:
    */
   virtual void raise_error();
 
-  std::map<std::string, std::shared_ptr<modulo_core::communication::SubscriptionInterface>>
-      inputs_; ///< Map of inputs
-  std::map<std::string, std::shared_ptr<modulo_core::communication::PublisherInterface>>
-      outputs_; ///< Map of outputs
+  std::map<std::string, std::shared_ptr<modulo_core::communication::SubscriptionInterface>> inputs_; ///< Map of inputs
+  std::map<std::string, std::shared_ptr<modulo_core::communication::PublisherInterface>> outputs_; ///< Map of outputs
 
   rclcpp::QoS qos_ = rclcpp::QoS(10); ///< Quality of Service for ROS publishers and subscribers
 
