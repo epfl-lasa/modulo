@@ -23,7 +23,7 @@ class LifecycleComponent(ComponentInterface):
         """
         Constructs all the necessary attributes and declare all the parameters.
             Parameters:
-                node_name (str): name of the node to be passed to the base Node class
+                node_name (str): name of the component to be passed to the base Node class
         """
         super().__init__(node_name, *kargs, **kwargs)
         self.__state = State.PRIMARY_STATE_UNCONFIGURED
@@ -46,43 +46,51 @@ class LifecycleComponent(ComponentInterface):
         """
         self.get_logger().debug(f'Change state service called with request {request}')
         if request.transition.id == Transition.TRANSITION_CONFIGURE:
-            response = self._configure(request, response)
+            response = self.__on_configure(request, response)
         elif request.transition.id == Transition.TRANSITION_ACTIVATE:
-            response = self._activate(request, response)
+            response = self.__on_activate(request, response)
         elif request.transition.id == Transition.TRANSITION_DEACTIVATE:
-            response = self._deactivate(request, response)
-
+            response = self.__on_deactivate(request, response)
+        # TODO the other transitions
         else:
             self.get_logger().error(f'Unsupported state transition! {request}')
             response.success = False
         return response
 
-    def _configure(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
+    def __on_configure(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
         """
-        Configure service callback. Simply call the on_configure function.
+        Configure service callback. Simply call the handle_configure function.
 
-        :param request: request to change the state to non active
-        :param response: the response object from the service call
-        :return: true if the node configured properly
+        :param request: Request to change the state to inactive
+        :param response: The response object from the service call
+        :return: True if the component configured successfully
         """
         if not self.__state == State.PRIMARY_STATE_UNCONFIGURED:
             response.success = False
             return response
 
-        response.success = self._configure_outputs() and self.on_configure()
+        response.success = self.__handle_configure()
         if response.success:
             self.__state = State.PRIMARY_STATE_INACTIVE
         return response
 
-    def on_configure(self) -> bool:
+    def __handle_configure(self) -> bool:
         """
-        Function called from the configure service callback. To be redefined in derived classes.
+        Handle the configure transition by related transition steps and invoking the user callback.
 
-        :return: true if the node configured properly
+        :return: True if the transition was successful
+        """
+        return self.__configure_outputs() and self.configure()
+
+    def configure(self) -> bool:
+        """
+        Function called from the configure transition service callback. To be redefined in derived classes.
+
+        :return: True if the component configured successfully
         """
         return True
 
-    def _configure_outputs(self) -> bool:
+    def __configure_outputs(self) -> bool:
         success = True
         for signal_name, output_dict in self._outputs.items():
             try:
@@ -95,78 +103,102 @@ class LifecycleComponent(ComponentInterface):
                 self.get_logger().debug(f"Failed to configure output '{signal_name}': {e}")
         return success
 
-    def _cleanup(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
+    def __on_cleanup(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
         """
-        Cleanup service callback. Simply call the on_cleanup function.
+        Cleanup service callback. Simply call the handle_cleanup function.
 
-        :param request: request to change the state to unconfigured
-        :param response: the response object from the service call
-        :return: true if the node was clean up properly
+        :param request: Request to change the state to unconfigured
+        :param response: The response object from the service call
+        :return: True if the component was cleaned up successfully
         """
         if self.__state != State.PRIMARY_STATE_INACTIVE:
             response.success = False
             return response
 
-        response.success = self.on_cleanup()
+        response.success = self.__handle_cleanup()
         if response.success:
             self.__state = State.PRIMARY_STATE_UNCONFIGURED
         return response
 
-    def on_cleanup(self) -> bool:
+    def __handle_cleanup(self) -> bool:
         """
-        Function called from the cleanup service callback. To be redefined in derived classes.
+        Handle the cleanup transition by related transition steps and invoking the user callback.
 
-        :return: true if the node was cleaned up properly
+        :return: True if the transition was successful
+        """
+        return self.cleanup()
+
+    def cleanup(self) -> bool:
+        """
+        Function called from the cleanup transition service callback. To be redefined in derived classes.
+
+        :return: True if the component was cleaned up successfully
         """
         return True
 
-    def _activate(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
+    def __on_activate(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
         """
-        Activate service callback. Set the node as active and call the on_activate function.
+        Activate service callback. Simply call the handle_activate function.
 
-        :param request: request to change the state to active state
-        :param response: the response object from the service call
-        :return: true if the node is activated properly
+        :param request: Request to change the state to active state
+        :param response: The response object from the service call
+        :return: True if the component is activated successfully
         """
         if self.__state != State.PRIMARY_STATE_INACTIVE:
             response.success = False
             return response
 
-        response.success = self.on_activate()
+        response.success = self.__handle_activate()
         if response.success:
             self.__state = State.PRIMARY_STATE_ACTIVE
         return response
 
-    def on_activate(self) -> bool:
+    def __handle_activate(self) -> bool:
         """
-        Function called from the activate service callback. To be redefined in derived classes.
+        Handle the activate transition by related transition steps and invoking the user callback.
 
-        :return: true if the node is activated properly
+        :return: True if the transition was successful
+        """
+        return self.activate()
+
+    def activate(self) -> bool:
+        """
+        Function called from the activate transition service callback. To be redefined in derived classes.
+
+        :return: True if the component was activated successfully
         """
         return True
 
-    def _deactivate(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
+    def __on_deactivate(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
         """
-        Deactivate service callback. Set the node as not active and call the on_deactivate function.
+        Dectivate service callback. Simply call the handle_deactivate function.
 
-        :param request: request to change the state to active state
-        :param response: the response object from the service call
-        :return: true if the node is deactivated properly
+        :param request: Request to change the state to inactive state
+        :param response: The response object from the service call
+        :return: True if the component is deactivated successfully
         """
         if self.__state != State.PRIMARY_STATE_ACTIVE:
             response.success = False
             return response
 
-        response.success = self.on_deactivate()
+        response.success = self.__handle_deactivate()
         if response.success:
             self.__state = State.PRIMARY_STATE_INACTIVE
         return response
 
-    def on_deactivate(self) -> bool:
+    def __handle_deactivate(self) -> bool:
         """
-        Function called from the deactivate service callback. To be redefined in derived classes.
+        Handle the deactivate transition by related transition steps and invoking the user callback.
 
-        :return: true if the node is deactivated properly
+        :return: True if the transition was successful
+        """
+        return self.deactivate()
+
+    def deactivate(self) -> bool:
+        """
+        Function called from the deactivate transition service callback. To be redefined in derived classes.
+
+        :return: True if the component was deactivated successfully
         """
         return True
 
@@ -178,7 +210,7 @@ class LifecycleComponent(ComponentInterface):
             if self.__state == State.PRIMARY_STATE_ACTIVE:
                 self._publish_outputs()
                 self._evaluate_periodic_callbacks()
-                self.on_step()
+                self.step()
         except Exception as e:
             self.get_logger().error(f"Failed to execute step function: {e}", throttle_duration_sec=1.0)
 
@@ -201,5 +233,8 @@ class LifecycleComponent(ComponentInterface):
         except AddSignalError as e:
             self.get_logger().error(f"Failed to add output '{signal_name}': {e}")
 
-    def on_step(self):
+    def step(self):
+        """
+        Steps to execute periodically. To be redefined by derived classes.
+        """
         pass
