@@ -17,8 +17,11 @@ public:
   /**
    * @brief Constructor from node options.
    * @param node_options Node options as used in ROS2 LifecycleNode
+   * @param fallback_name The name of the component if it was not provided through the node options
    */
-  explicit LifecycleComponent(const rclcpp::NodeOptions& node_options);
+  explicit LifecycleComponent(
+      const rclcpp::NodeOptions& node_options, const std::string& fallback_name = "LifecycleComponent"
+  );
 
   /**
    * @brief Virtual default destructor.
