@@ -51,9 +51,12 @@ public:
   /**
    * @brief Constructor from node options.
    * @param node_options Node options as used in ROS2 Node / LifecycleNode
+   * @param publisher_type The type of publisher that also indicates if the component is lifecycle or not
+   * @param fallback_name The name of the component if it was not provided through the node options
    */
   explicit ComponentInterface(
-      const rclcpp::NodeOptions& node_options, modulo_new_core::communication::PublisherType publisher_type
+      const rclcpp::NodeOptions& node_options, modulo_new_core::communication::PublisherType publisher_type,
+      const std::string& fallback_name = "ComponentInterface"
   );
 
   /**
@@ -339,9 +342,10 @@ private:
 
 template<class NodeT>
 ComponentInterface<NodeT>::ComponentInterface(
-    const rclcpp::NodeOptions& options, modulo_new_core::communication::PublisherType publisher_type
+    const rclcpp::NodeOptions& options, modulo_new_core::communication::PublisherType publisher_type,
+    const std::string& fallback_name
 ) :
-    NodeT(utilities::parse_node_name(options, "ComponentInterface"), options), publisher_type_(publisher_type) {
+    NodeT(utilities::parse_node_name(options, fallback_name), options), publisher_type_(publisher_type) {
   // register the parameter change callback handler
   parameter_cb_handle_ = NodeT::add_on_set_parameters_callback(
       [this](const std::vector<rclcpp::Parameter>& parameters) -> rcl_interfaces::msg::SetParametersResult {
@@ -400,7 +404,7 @@ inline void ComponentInterface<NodeT>::add_parameter(
       NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value(), descriptor);
     } else {
       RCLCPP_WARN_STREAM(this->get_logger(),
-                          "Parameter '" << parameter->get_name() << "' already exists, overwriting.");
+                         "Parameter '" << parameter->get_name() << "' already exists, overwriting.");
       NodeT::set_parameter(ros_param);
     }
   } catch (const std::exception& ex) {

@@ -6,8 +6,10 @@ using namespace modulo_new_core::communication;
 
 namespace modulo_components {
 
-LifecycleComponent::LifecycleComponent(const rclcpp::NodeOptions& node_options) :
-    ComponentInterface<rclcpp_lifecycle::LifecycleNode>(node_options, PublisherType::LIFECYCLE_PUBLISHER) {
+LifecycleComponent::LifecycleComponent(const rclcpp::NodeOptions& node_options, const std::string& fallback_name) :
+    ComponentInterface<rclcpp_lifecycle::LifecycleNode>(
+        node_options, PublisherType::LIFECYCLE_PUBLISHER, fallback_name
+    ) {
   this->add_predicate(
       "is_unconfigured", [this] {
         return this->get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED;
