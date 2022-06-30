@@ -35,7 +35,7 @@ protected:
    * Configuration generally involves reading parameters and adding inputs and outputs.
    * @return True if configuration is successful, false otherwise
    */
-  virtual bool on_configure();
+  virtual bool on_configure_callback();
 
   /**
    * @brief Steps to execute when cleaning up the component.
@@ -43,7 +43,7 @@ protected:
    * Cleanup generally involves resetting the properties and states to initial conditions.
    * @return True if cleanup is successful, false otherwise
    */
-  virtual bool on_cleanup();
+  virtual bool on_cleanup_callback();
 
   /**
    * @brief Steps to execute when activating the component.
@@ -51,7 +51,7 @@ protected:
    * Activation generally involves final setup steps before the on_step callback is periodically evaluated.
    * @return True if activation is successful, false otherwise
    */
-  virtual bool on_activate();
+  virtual bool on_activate_callback();
 
   /**
    * @brief Steps to execute when deactivating the component.
@@ -59,7 +59,7 @@ protected:
    * Deactivation generally involves any steps to reset the component to an inactive state.
    * @return True if deactivation is successful, false otherwise
    */
-  virtual bool on_deactivate();
+  virtual bool on_deactivate_callback();
 
   /**
    * @brief Steps to execute when shutting down the component.
@@ -67,7 +67,7 @@ protected:
    * Shutdown generally involves the destruction of any threads or properties not handled by the base class.
    * @return True if shutdown is successful, false otherwise
    */
-  virtual bool on_shutdown();
+  virtual bool on_shutdown_callback();
 
   /**
    * @brief Steps to execute when handling errors.
@@ -75,12 +75,12 @@ protected:
    * Error handling generally involves recovering and resetting the component to an unconfigured state.
    * @return True if error handling is successful, false otherwise
    */
-  virtual bool on_error();
+  virtual bool on_error_callback();
 
   /**
    * @brief Steps to execute periodically. To be redefined by derived Component classes.
    */
-  virtual void on_step();
+  virtual void on_step_callback();
 
   /**
    * @brief Add an output signal of the component.
@@ -115,7 +115,7 @@ private:
    * @details This method configures outputs and invokes the virtual on_configure callback.
    * @return True if configuration is successful, false otherwise
    */
-  bool configure();
+  bool handle_configure();
 
   /**
     * @brief Transition callback for state 'CleaningUp'.
@@ -134,7 +134,7 @@ private:
    * @details This method resets inputs and outputs and invokes the virtual on_cleanup callback.
    * @return True if cleanup is successful, false otherwise
    */
-  bool cleanup();
+  bool handle_cleanup();
 
   /**
   * @brief Transition callback for state 'Activating'.
@@ -154,7 +154,7 @@ private:
    * @details This method activates outputs and invokes the virtual on_activate callback.
    * @return True if activation is successful, false otherwise
    */
-  bool activate();
+  bool handle_activate();
 
   /**
     * @brief Transition callback for state 'Deactivating'.
@@ -173,7 +173,7 @@ private:
    * @details This method deactivates outputs and invokes the virtual on_deactivate callback.
    * @return True if deactivation is successful, false otherwise
    */
-  bool deactivate();
+  bool handle_deactivate();
 
   /**
     * @brief Transition callback for state 'ShuttingDown'.
@@ -192,7 +192,7 @@ private:
    * @details This method invokes the virtual on_shutdown callback.
    * @return True if shutdown is successful, false otherwise
    */
-  bool shutdown();
+  bool handle_shutdown();
 
   /**
     * @brief Transition callback for state 'ErrorProcessing'.
@@ -253,7 +253,7 @@ private:
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::evaluate_periodic_callbacks;
 };
 
-inline void LifecycleComponent::on_step() {}
+inline void LifecycleComponent::on_step_callback() {}
 
 template<typename DataT>
 inline void LifecycleComponent::add_output(
