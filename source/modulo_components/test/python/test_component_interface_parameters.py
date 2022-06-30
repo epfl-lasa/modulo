@@ -3,9 +3,8 @@ import rclpy.exceptions
 import rclpy.node
 import state_representation as sr
 from modulo_components.component_interface import ComponentInterface
-from rcl_interfaces.msg import SetParametersResult
-
 from modulo_components.exceptions.component_exceptions import ComponentParameterError
+from rcl_interfaces.msg import SetParametersResult
 
 
 class ComponentInterfaceTest(ComponentInterface):

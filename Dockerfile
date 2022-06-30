@@ -6,7 +6,6 @@ WORKDIR ${HOME}/ros2_ws
 FROM dependencies as modulo-core
 
 COPY --chown=${USER} ./source/modulo_core ./src/modulo_core
-COPY --chown=${USER} ./source/modulo_new_core ./src/modulo_new_core
 RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"
 
 

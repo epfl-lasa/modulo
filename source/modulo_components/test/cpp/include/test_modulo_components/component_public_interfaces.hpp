@@ -12,7 +12,7 @@ template<class NodeT>
 class ComponentInterfacePublicInterface : public ComponentInterface<NodeT> {
 public:
   explicit ComponentInterfacePublicInterface(
-      const rclcpp::NodeOptions& node_options, modulo_new_core::communication::PublisherType publisher_type
+      const rclcpp::NodeOptions& node_options, modulo_core::communication::PublisherType publisher_type
   ) : ComponentInterface<NodeT>(node_options, publisher_type) {}
   using ComponentInterface<NodeT>::add_parameter;
   using ComponentInterface<NodeT>::get_parameter;
@@ -66,7 +66,8 @@ public:
 
 class LifecycleComponentPublicInterface : public LifecycleComponent {
 public:
-  explicit LifecycleComponentPublicInterface(const rclcpp::NodeOptions& node_options) : LifecycleComponent(node_options) {}
+  explicit LifecycleComponentPublicInterface(const rclcpp::NodeOptions& node_options) :
+      LifecycleComponent(node_options) {}
   using LifecycleComponent::add_output;
   using LifecycleComponent::configure_outputs;
   using LifecycleComponent::activate_outputs;

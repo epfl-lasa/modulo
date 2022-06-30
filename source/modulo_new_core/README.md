@@ -1,1 +1,0 @@
-# aica_msgs

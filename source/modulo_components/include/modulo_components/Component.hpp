@@ -6,7 +6,7 @@
 
 #include "modulo_components/ComponentInterface.hpp"
 #include "modulo_components/utilities/utilities.hpp"
-#include "modulo_new_core/EncodedState.hpp"
+#include "modulo_core/EncodedState.hpp"
 
 namespace modulo_components {
 
@@ -89,7 +89,7 @@ inline void Component::add_output(
     const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
     const std::string& default_topic
 ) {
-  using namespace modulo_new_core::communication;
+  using namespace modulo_core::communication;
   try {
     auto parsed_signal_name = this->create_output(signal_name, data, fixed_topic, default_topic);
     auto topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
@@ -139,10 +139,9 @@ inline void Component::add_output(
         break;
       }
       case MessageType::ENCODED_STATE: {
-        auto publisher = this->create_publisher<modulo_new_core::EncodedState>(topic_name, this->qos_);
+        auto publisher = this->create_publisher<modulo_core::EncodedState>(topic_name, this->qos_);
         this->outputs_.at(parsed_signal_name) =
-            std::make_shared<PublisherHandler<rclcpp::Publisher<modulo_new_core::EncodedState>,
-                                              modulo_new_core::EncodedState>>(
+            std::make_shared<PublisherHandler<rclcpp::Publisher<modulo_core::EncodedState>, modulo_core::EncodedState>>(
                 PublisherType::PUBLISHER, publisher
             )->create_publisher_interface(message_pair);
         break;

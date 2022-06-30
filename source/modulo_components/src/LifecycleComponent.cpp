@@ -2,7 +2,7 @@
 
 #include <lifecycle_msgs/msg/state.hpp>
 
-using namespace modulo_new_core::communication;
+using namespace modulo_core::communication;
 
 namespace modulo_components {
 
@@ -278,12 +278,11 @@ bool LifecycleComponent::configure_outputs() {
           break;
         }
         case MessageType::ENCODED_STATE: {
-          auto publisher = this->create_publisher<modulo_new_core::EncodedState>(topic_name, this->qos_);
-          interface =
-              std::make_shared<PublisherHandler<rclcpp_lifecycle::LifecyclePublisher<modulo_new_core::EncodedState>,
-                                                modulo_new_core::EncodedState>>(
-                  PublisherType::LIFECYCLE_PUBLISHER, publisher
-              )->create_publisher_interface(message_pair);
+          auto publisher = this->create_publisher<modulo_core::EncodedState>(topic_name, this->qos_);
+          interface = std::make_shared<PublisherHandler<rclcpp_lifecycle::LifecyclePublisher<modulo_core::EncodedState>,
+                                                        modulo_core::EncodedState>>(
+              PublisherType::LIFECYCLE_PUBLISHER, publisher
+          )->create_publisher_interface(message_pair);
           break;
         }
       }

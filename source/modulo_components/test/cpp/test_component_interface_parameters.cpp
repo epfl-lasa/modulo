@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "modulo_components/exceptions/ComponentParameterException.hpp"
-#include "modulo_new_core/EncodedState.hpp"
-
+#include "modulo_core/EncodedState.hpp"
 #include "test_modulo_components/component_public_interfaces.hpp"
 
 namespace modulo_components {
@@ -21,11 +20,11 @@ protected:
   void SetUp() override {
     if (std::is_same<NodeT, rclcpp::Node>::value) {
       this->component_ = std::make_shared<ComponentInterfacePublicInterface<NodeT>>(
-          rclcpp::NodeOptions(), modulo_new_core::communication::PublisherType::PUBLISHER
+          rclcpp::NodeOptions(), modulo_core::communication::PublisherType::PUBLISHER
       );
     } else if (std::is_same<NodeT, rclcpp_lifecycle::LifecycleNode>::value) {
       this->component_ = std::make_shared<ComponentInterfacePublicInterface<NodeT>>(
-          rclcpp::NodeOptions(), modulo_new_core::communication::PublisherType::LIFECYCLE_PUBLISHER
+          rclcpp::NodeOptions(), modulo_core::communication::PublisherType::LIFECYCLE_PUBLISHER
       );
     }
     param_ = state_representation::make_shared_parameter("test", 1);
