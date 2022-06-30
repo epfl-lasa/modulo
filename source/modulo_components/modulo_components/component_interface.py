@@ -111,9 +111,14 @@ class ComponentInterface(Node):
                 self.get_logger().debug(f"Adding parameter '{sr_parameter.get_name()}'.")
                 self._parameter_dict[sr_parameter.get_name()] = parameter
                 # TODO ignore override
-                self.declare_parameter(ros_param.name, ros_param.value,
-                                       descriptor=ParameterDescriptor(description=description),
-                                       ignore_override=read_only)
+                if sr_parameter.is_empty():
+                    self.declare_parameter(ros_param.name, None,
+                                           descriptor=ParameterDescriptor(description=description,
+                                                                          type=Parameter.Type.NOT_SET.value,
+                                                                          dynamic_typing=True))
+                else:
+                    self.declare_parameter(ros_param.name, ros_param.value,
+                                           descriptor=ParameterDescriptor(description=description))
             else:
                 self.get_logger().warn(f"Parameter '{sr_parameter.get_name()}' already exists, overwriting.")
                 self.set_parameters([ros_param])
@@ -208,6 +213,8 @@ class ComponentInterface(Node):
         """
         result = SetParametersResult(successful=True)
         for ros_param in ros_parameters:
+            if ros_param.type_ == Parameter.Type.NOT_SET:
+                continue
             try:
                 parameter = self._get_component_parameter(ros_param.name)
                 new_parameter = read_parameter_const(ros_param, parameter)
