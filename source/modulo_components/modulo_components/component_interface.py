@@ -214,6 +214,8 @@ class ComponentInterface(Node):
         result = SetParametersResult(successful=True)
         for ros_param in ros_parameters:
             if ros_param.type_ == Parameter.Type.NOT_SET:
+                self.get_logger().debug(
+                    f"Parameter '{ros_param.name}' has type 'NOT_SET', skipping parameter validation and setting.")
                 continue
             try:
                 parameter = self._get_component_parameter(ros_param.name)
