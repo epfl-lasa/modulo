@@ -1,8 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "modulo_components/ComponentInterface.hpp"
-#include "modulo_new_core/EncodedState.hpp"
-
+#include "modulo_core/EncodedState.hpp"
 #include "test_modulo_components/component_public_interfaces.hpp"
 
 namespace modulo_components {
@@ -21,11 +19,11 @@ protected:
   void SetUp() override {
     if (std::is_same<NodeT, rclcpp::Node>::value) {
       this->component_ = std::make_shared<ComponentInterfacePublicInterface<NodeT>>(
-          rclcpp::NodeOptions(), modulo_new_core::communication::PublisherType::PUBLISHER
+          rclcpp::NodeOptions(), modulo_core::communication::PublisherType::PUBLISHER
       );
     } else if (std::is_same<NodeT, rclcpp_lifecycle::LifecycleNode>::value) {
       this->component_ = std::make_shared<ComponentInterfacePublicInterface<NodeT>>(
-          rclcpp::NodeOptions(), modulo_new_core::communication::PublisherType::LIFECYCLE_PUBLISHER
+          rclcpp::NodeOptions(), modulo_core::communication::PublisherType::LIFECYCLE_PUBLISHER
       );
     }
   }
@@ -98,7 +96,7 @@ TYPED_TEST(ComponentInterfaceTest, AddInput) {
       "test_13", [](const std::shared_ptr<std_msgs::msg::String>) {}
   );
   EXPECT_EQ(this->component_->inputs_.at("test_13")->get_message_pair()->get_type(),
-            modulo_new_core::communication::MessageType::BOOL);
+            modulo_core::communication::MessageType::BOOL);
 }
 
 TYPED_TEST(ComponentInterfaceTest, CreateOutput) {
@@ -109,12 +107,12 @@ TYPED_TEST(ComponentInterfaceTest, CreateOutput) {
 
   auto pub_interface = this->component_->outputs_.at("test");
   if (typeid(this->node_) == typeid(rclcpp::Node)) {
-    EXPECT_EQ(pub_interface->get_type(), modulo_new_core::communication::PublisherType::PUBLISHER);
+    EXPECT_EQ(pub_interface->get_type(), modulo_core::communication::PublisherType::PUBLISHER);
   } else if (typeid(this->node_) == typeid(rclcpp_lifecycle::LifecycleNode)) {
-    EXPECT_EQ(pub_interface->get_type(), modulo_new_core::communication::PublisherType::LIFECYCLE_PUBLISHER);
+    EXPECT_EQ(pub_interface->get_type(), modulo_core::communication::PublisherType::LIFECYCLE_PUBLISHER);
   }
-  EXPECT_EQ(pub_interface->get_message_pair()->get_type(), modulo_new_core::communication::MessageType::BOOL);
-  EXPECT_THROW(pub_interface->publish(), modulo_new_core::exceptions::InvalidPointerCastException);
+  EXPECT_EQ(pub_interface->get_message_pair()->get_type(), modulo_core::communication::MessageType::BOOL);
+  EXPECT_THROW(pub_interface->publish(), modulo_core::exceptions::InvalidPointerCastException);
 }
 
 TYPED_TEST(ComponentInterfaceTest, TF) {
@@ -122,7 +120,8 @@ TYPED_TEST(ComponentInterfaceTest, TF) {
   this->component_->add_tf_listener();
   auto send_tf = state_representation::CartesianPose::Random("test", "world");
   EXPECT_NO_THROW(this->component_->send_transform(send_tf));
-  EXPECT_THROW(auto throw_tf = this->component_->lookup_transform("dummy", "world"), exceptions::LookupTransformException);
+  EXPECT_THROW(auto throw_tf = this->component_->lookup_transform("dummy", "world"),
+               exceptions::LookupTransformException);
   auto lookup_tf = this->component_->lookup_transform("test", "world");
   auto identity = send_tf * lookup_tf.inverse();
   EXPECT_FLOAT_EQ(identity.data().norm(), 1.);

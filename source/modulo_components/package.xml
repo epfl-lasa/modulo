@@ -4,22 +4,17 @@
   <name>modulo_components</name>
   <version>0.0.1</version>
   <description>TODO</description>
-  <maintainer email="baptiste@aica.tech">TODO</maintainer>
-  <maintainer email="enrico@aica.tech">TODO</maintainer>
-  <maintainer email="dominic@aica.tech">TODO</maintainer>
+  <maintainer email="baptiste@aica.tech">Baptiste Busch</maintainer>
+  <maintainer email="enrico@aica.tech">Enrico Eberhard</maintainer>
+  <maintainer email="dominic@aica.tech">Dominic Reber</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 
-  <depend>rclcpp</depend>
-  <depend>rclpy</depend>
-  <depend>rclcpp_components</depend>
-  <depend>rcutils</depend>
   <depend>modulo_core</depend>
-  <depend>modulo_new_core</depend>
-
-  <exec_depend>launch_ros</exec_depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>tf2_ros</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

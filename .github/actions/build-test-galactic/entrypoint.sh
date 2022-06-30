@@ -26,7 +26,6 @@ build_and_test() {
 source /opt/ros/"${ROS_DISTRO}"/setup.bash
 cd /home/ros2/ros2_ws
 
-build_and_test modulo_new_core
 build_and_test modulo_core
 build_and_test modulo_components
 

@@ -2,9 +2,7 @@
 
 #include <rclcpp/node_options.hpp>
 
-#include "modulo_components/LifecycleComponent.hpp"
-#include "modulo_new_core/EncodedState.hpp"
-
+#include "modulo_core/EncodedState.hpp"
 #include "test_modulo_components/component_public_interfaces.hpp"
 
 using namespace state_representation;
@@ -40,6 +38,6 @@ TEST_F(LifecycleComponentTest, AddOutput) {
   auto new_data = std::make_shared<bool>(false);
   component_->add_output("test", new_data, true);
   EXPECT_EQ(component_->outputs_.at("test")->get_message_pair()->get_type(),
-            modulo_new_core::communication::MessageType::ENCODED_STATE);
+            modulo_core::communication::MessageType::ENCODED_STATE);
 }
 } // namespace modulo_components
