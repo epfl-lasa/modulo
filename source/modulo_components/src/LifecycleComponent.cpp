@@ -155,7 +155,7 @@ bool LifecycleComponent::on_deactivate() {
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 LifecycleComponent::on_shutdown(const rclcpp_lifecycle::State& previous_state) {
-  RCLCPP_DEBUG(this->get_logger(), "on_deactivate called from previous state %s", previous_state.label().c_str());
+  RCLCPP_DEBUG(this->get_logger(), "on_shutdown called from previous state %s", previous_state.label().c_str());
   switch (previous_state.id()) {
     case lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED:
       return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;

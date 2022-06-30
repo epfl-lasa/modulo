@@ -346,7 +346,7 @@ class ComponentInterface(Node):
         Add and configure an input signal of the component.
 
         :param signal_name: Name of the output signal
-        :param subscription: The callback to use for the subscription
+        :param subscription: Name of the attribute to receive messages for or the callback to use for the subscription
         :param message_type: ROS message type of the subscription
         :param fixed_topic: If true, the topic name of the output signal is fixed
         :param default_topic: If set, the default value for the topic name to use
