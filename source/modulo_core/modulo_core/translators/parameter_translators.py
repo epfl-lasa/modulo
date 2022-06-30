@@ -201,4 +201,6 @@ def read_parameter_const(ros_parameter: Parameter, parameter: sr.Parameter) -> s
                 f"The ROS parameter {ros_parameter.name} with type double array cannot be interpreted "
                 f"by reference parameter {parameter.get_name()} (type code {parameter.get_parameter_type()}")
     else:
-        raise ParameterTranslationError(f"Something went wrong while reading parameter {parameter.get_name()}")
+        raise ParameterTranslationError(
+            f"The ROS parameter has an incompatible type for component parameter '{parameter.get_name()}': "
+            f"expected {parameter.get_parameter_type().name}, got {ros_parameter.type_.name}")
