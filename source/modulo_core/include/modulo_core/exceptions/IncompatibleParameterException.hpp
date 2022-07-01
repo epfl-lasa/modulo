@@ -1,6 +1,6 @@
 #pragma once
 
-#include <state_representation/exceptions/InvalidParameterException.hpp>
+#include "modulo_core/exceptions/CoreException.hpp"
 
 namespace modulo_core::exceptions {
 
@@ -10,9 +10,10 @@ namespace modulo_core::exceptions {
  * @details This is an exception class to be thrown if there is a problem while translating from a ROS parameter to a
  * state_representation parameter and vice versa.
  */
-class IncompatibleParameterException : public state_representation::exceptions::InvalidParameterException {
+class IncompatibleParameterException : public CoreException {
 public:
-  explicit IncompatibleParameterException(const std::string& msg) :
-      state_representation::exceptions::InvalidParameterException(msg) {};
+  explicit IncompatibleParameterException(const std::string& msg) : CoreException(msg) {};
 };
 }// namespace modulo_core::exceptions
+
+

@@ -1,7 +1,6 @@
 #pragma once
 
-#include <stdexcept>
-#include <string>
+#include "modulo_core/exceptions/CoreException.hpp"
 
 namespace modulo_core::exceptions {
 
@@ -10,8 +9,9 @@ namespace modulo_core::exceptions {
  * @brief An exception class to notify that a certain pointer is null.
  * @details This is an exception class to be thrown if a pointer is null or is trying to be set to a null pointer.
  */
-class NullPointerException : public std::runtime_error {
+class NullPointerException : public CoreException {
 public:
-  explicit NullPointerException(const std::string& msg) : std::runtime_error(msg) {};
+  explicit NullPointerException(const std::string& msg) : CoreException(msg) {};
 };
 }// namespace modulo_core::exceptions
+
