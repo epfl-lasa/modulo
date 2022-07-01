@@ -30,6 +30,7 @@ public:
    * @brief Write the value of the data pointer to a ROS message.
    * @return The value of the data pointer as a ROS message
    * @throws NullPointerException if the data pointer is null
+   * @throws MessageTranslationException if the data could not be written to message
    */
   [[nodiscard]] MsgT write_message() const;
 
@@ -37,6 +38,7 @@ public:
    * @brief Read a ROS message and store the value in the data pointer.
    * @param message The ROS message to read
    * @throws NullPointerException if the data pointer is null
+   * @throws MessageTranslationException if the message could not be read
    */
   void read_message(const MsgT& message);
 

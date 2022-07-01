@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 import state_representation as sr
 from modulo_core.encoded_state import EncodedState
+from modulo_core.exceptions.core_exceptions import MessageTranslationError
 from rclpy.clock import Clock
 from sensor_msgs.msg import JointState
 
@@ -32,7 +33,7 @@ def test_accel(cart_state: sr.CartesianState, clock: Clock):
     assert_np_array_equal(read_xyz(message.angular), cart_state.get_angular_acceleration())
 
     new_state = sr.CartesianState("new")
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MessageTranslationError):
         modulo_writers.write_message(new_state, message)
     modulo_readers.read_message(new_state, message)
     assert_np_array_equal(cart_state.get_acceleration(), new_state.get_acceleration())
@@ -55,7 +56,7 @@ def test_pose(cart_state: sr.CartesianState, clock: Clock):
     assert_np_array_equal(read_quaternion(message.orientation), cart_state.get_orientation_coefficients())
 
     new_state = sr.CartesianState("new")
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MessageTranslationError):
         modulo_writers.write_message(new_state, message)
     modulo_readers.read_message(new_state, message)
     assert_np_array_equal(cart_state.get_pose(), new_state.get_pose())
@@ -78,7 +79,7 @@ def test_transform(cart_state: sr.CartesianState, clock: Clock):
     assert_np_array_equal(read_quaternion(message.rotation), cart_state.get_orientation_coefficients())
 
     new_state = sr.CartesianState("new")
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MessageTranslationError):
         modulo_writers.write_message(new_state, message)
     modulo_readers.read_message(new_state, message)
     assert_np_array_equal(cart_state.get_pose(), new_state.get_pose())
@@ -103,7 +104,7 @@ def test_twist(cart_state: sr.CartesianState, clock: Clock):
     assert_np_array_equal(read_xyz(message.angular), cart_state.get_angular_velocity())
 
     new_state = sr.CartesianState("new")
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MessageTranslationError):
         modulo_writers.write_message(new_state, message)
     modulo_readers.read_message(new_state, message)
     assert_np_array_equal(cart_state.get_twist(), new_state.get_twist())
@@ -126,7 +127,7 @@ def test_wrench(cart_state: sr.CartesianState, clock: Clock):
     assert_np_array_equal(read_xyz(message.torque), cart_state.get_torque())
 
     new_state = sr.CartesianState("new")
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MessageTranslationError):
         modulo_writers.write_message(new_state, message)
     modulo_readers.read_message(new_state, message)
     assert_np_array_equal(cart_state.get_wrench(), new_state.get_wrench())
@@ -152,7 +153,7 @@ def test_joint_state(joint_state: sr.JointState):
     assert_np_array_equal(message.effort, joint_state.get_torques())
 
     new_state = sr.JointState("test", ["1", "2", "3"])
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MessageTranslationError):
         modulo_writers.write_message(new_state, message)
     modulo_readers.read_message(new_state, message)
     for i in range(joint_state.get_size()):

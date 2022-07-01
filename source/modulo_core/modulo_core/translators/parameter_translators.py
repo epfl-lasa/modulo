@@ -3,6 +3,7 @@ from typing import Optional
 import clproto
 import numpy as np
 import state_representation as sr
+from modulo_core.exceptions.core_exceptions import ParameterTranslationError
 from rclpy import Parameter
 
 
@@ -11,7 +12,7 @@ def write_parameter(parameter: sr.Parameter) -> Parameter:
     Write a ROS Parameter from a state_representation Parameter.
 
     :param parameter: The state_representation parameter to read from
-    :raises Exception if the parameter could not be written
+    :raises ParameterTranslationError if the parameter could not be written
     :return: The resulting ROS parameter
     """
     if parameter.get_parameter_type() == sr.ParameterType.BOOL or \
@@ -41,13 +42,13 @@ def write_parameter(parameter: sr.Parameter) -> Parameter:
             return Parameter(parameter.get_name(), Parameter.Type.STRING, clproto.to_json(
                 clproto.encode(parameter.get_value(), clproto.MessageType.JOINT_POSITIONS_MESSAGE)))
         else:
-            raise RuntimeError(f"Parameter {parameter.get_name()} could not be written!")
+            raise ParameterTranslationError(f"Parameter {parameter.get_name()} could not be written!")
     elif parameter.get_parameter_type() == sr.ParameterType.VECTOR or \
             parameter.get_parameter_type() == sr.ParameterType.MATRIX:
         return Parameter(parameter.get_name(), value=parameter.get_value().flatten().tolist(),
                          type_=Parameter.Type.DOUBLE_ARRAY)
     else:
-        raise RuntimeError(f"Parameter {parameter.get_name()} could not be written!")
+        raise ParameterTranslationError(f"Parameter {parameter.get_name()} could not be written!")
 
 
 def copy_parameter_value(source_parameter: sr.Parameter, parameter: sr.Parameter):
@@ -58,11 +59,12 @@ def copy_parameter_value(source_parameter: sr.Parameter, parameter: sr.Parameter
 
     :param source_parameter: The parameter with a value to copy
     :param parameter: The destination parameter to be updated
-    :raises Exception if the copying failed
+    :raises ParameterTranslationError if the copying failed
     """
     if source_parameter.get_parameter_type() != parameter.get_parameter_type():
-        raise RuntimeError(f"Source parameter {source_parameter.get_name()} to be copied does not have the same type "
-                           f"as destination parameter {parameter.get_name()}")
+        raise ParameterTranslationError(
+            f"Source parameter {source_parameter.get_name()} to be copied does not have the same type "
+            f"as destination parameter {parameter.get_name()}")
     if source_parameter.get_parameter_type() == sr.ParameterType.BOOL or \
             source_parameter.get_parameter_type() == sr.ParameterType.BOOL_ARRAY or \
             source_parameter.get_parameter_type() == sr.ParameterType.INT or \
@@ -76,7 +78,7 @@ def copy_parameter_value(source_parameter: sr.Parameter, parameter: sr.Parameter
         parameter.set_value(source_parameter.get_value())
     elif source_parameter.get_parameter_type() == sr.ParameterType.STATE:
         if source_parameter.get_parameter_state_type() != parameter.get_parameter_state_type():
-            raise RuntimeError(
+            raise ParameterTranslationError(
                 f"Source parameter {source_parameter.get_name()} to be copied does not have the same state type "
                 f"as destination parameter {parameter.get_name()}")
         if source_parameter.get_parameter_state_type() == sr.StateType.CARTESIAN_STATE or \
@@ -85,11 +87,11 @@ def copy_parameter_value(source_parameter: sr.Parameter, parameter: sr.Parameter
                 source_parameter.get_parameter_state_type() == sr.StateType.JOINT_POSITIONS:
             parameter.set_value(source_parameter.get_value())
         else:
-            raise RuntimeError(f"Could not copy the value from source parameter {source_parameter.get_name()} "
-                               f"into parameter {parameter.get_name()}")
+            raise ParameterTranslationError(f"Could not copy the value from source parameter "
+                                            f"{source_parameter.get_name()} into parameter {parameter.get_name()}")
     else:
-        raise RuntimeError(f"Could not copy the value from source parameter {source_parameter.get_name()} "
-                           f"into parameter {parameter.get_name()}")
+        raise ParameterTranslationError(f"Could not copy the value from source parameter {source_parameter.get_name()} "
+                                        f"into parameter {parameter.get_name()}")
 
 
 def read_parameter(ros_parameter: Parameter, parameter: Optional[sr.Parameter] = None) -> sr.Parameter:
@@ -98,7 +100,7 @@ def read_parameter(ros_parameter: Parameter, parameter: Optional[sr.Parameter] =
 
     :param ros_parameter: The ROS Parameter to read from
     :param parameter: The state_representation Parameter to populate
-    :raises Exception if the ROS Parameter could not be read
+    :raises ParameterTranslationError if the ROS Parameter could not be read
     :return: The resulting state_representation Parameter
     """
 
@@ -107,7 +109,7 @@ def read_parameter(ros_parameter: Parameter, parameter: Optional[sr.Parameter] =
         Read a ROS Parameter object and translate to a state_representation Parameter object.
 
         :param ros_param: The ROS Parameter to read from
-        :raises Exception if the ROS Parameter could not be read
+        :raises ParameterTranslationError if the ROS Parameter could not be read
         :return: The resulting state_representation Parameter
         """
         if ros_param.type_ == Parameter.Type.BOOL:
@@ -150,11 +152,11 @@ def read_parameter(ros_parameter: Parameter, parameter: Optional[sr.Parameter] =
                 return sr.Parameter(ros_param.name, clproto.decode(encoding), sr.ParameterType.STATE,
                                     sr.StateType.JOINT_POSITIONS)
             else:
-                raise RuntimeError(f"Parameter {ros_param.name} has an unsupported encoded message type!")
+                raise ParameterTranslationError(f"Parameter {ros_param.name} has an unsupported encoded message type!")
         elif ros_param.type_ == Parameter.Type.BYTE_ARRAY:
-            raise RuntimeError("Parameter byte arrays are not currently supported.")
+            raise ParameterTranslationError("Parameter byte arrays are not currently supported.")
         else:
-            raise RuntimeError(f"Parameter {ros_param.name} could not be read!")
+            raise ParameterTranslationError(f"Parameter {ros_param.name} could not be read!")
 
     new_parameter = read_new_parameter(ros_parameter)
     if parameter is None:
@@ -171,12 +173,12 @@ def read_parameter_const(ros_parameter: Parameter, parameter: sr.Parameter) -> s
 
     :param ros_parameter: The ROS Parameter to read from
     :param parameter: The state_representation Parameter to update
-    :raises Exception if the ROS Parameter could not be read
+    :raises ParameterTranslationError if the ROS Parameter could not be read
     :return: The resulting state_representation Parameter
     """
     if ros_parameter.name != parameter.get_name():
-        raise RuntimeError(f"The ROS parameter {ros_parameter.name} to be read does not have "
-                           f"the same name as the reference parameter {parameter.get_name()}")
+        raise ParameterTranslationError(f"The ROS parameter {ros_parameter.name} to be read does not have "
+                                        f"the same name as the reference parameter {parameter.get_name()}")
     new_parameter = read_parameter(ros_parameter)
     if new_parameter.get_parameter_type() == parameter.get_parameter_type():
         return new_parameter
@@ -188,14 +190,15 @@ def read_parameter_const(ros_parameter: Parameter, parameter: sr.Parameter) -> s
         elif parameter.get_parameter_type() == sr.ParameterType.MATRIX:
             matrix = parameter.get_value()
             if matrix.size != len(value):
-                raise RuntimeError(f"The ROS parameter {ros_parameter.name} with type double array has size "
-                                   f"{len(value)} while the reference parameter matrix {parameter.get_name()} "
-                                   f"has size {len(matrix)}")
+                raise ParameterTranslationError(
+                    f"The ROS parameter {ros_parameter.name} with type double array has size "
+                    f"{len(value)} while the reference parameter matrix {parameter.get_name()} "
+                    f"has size {len(matrix)}")
             matrix = np.array(value).reshape(matrix.shape)
             return sr.Parameter(parameter.get_name(), matrix, sr.ParameterType.MATRIX)
         else:
-            raise RuntimeError(f"The ROS parameter {ros_parameter.name} with type double array cannot be interpreted "
-                               f"by reference parameter {parameter.get_name()} (type code "
-                               f"{parameter.get_parameter_type()}")
+            raise ParameterTranslationError(
+                f"The ROS parameter {ros_parameter.name} with type double array cannot be interpreted "
+                f"by reference parameter {parameter.get_name()} (type code {parameter.get_parameter_type()}")
     else:
-        raise RuntimeError(f"Something went wrong while reading parameter {parameter.get_name()}")
+        raise ParameterTranslationError(f"Something went wrong while reading parameter {parameter.get_name()}")
