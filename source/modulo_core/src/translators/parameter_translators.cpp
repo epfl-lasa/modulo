@@ -6,7 +6,7 @@
 #include <state_representation/space/joint/JointPositions.hpp>
 #include <state_representation/space/joint/JointState.hpp>
 
-#include "modulo_core/exceptions/IncompatibleParameterException.hpp"
+#include "modulo_core/exceptions/ParameterTranslationException.hpp"
 
 using namespace state_representation;
 
@@ -17,7 +17,7 @@ void copy_parameter_value(
     const std::shared_ptr<ParameterInterface>& parameter
 ) {
   if (source_parameter->get_parameter_type() != parameter->get_parameter_type()) {
-    throw exceptions::IncompatibleParameterException(
+    throw exceptions::ParameterTranslationException(
         "Source parameter " + source_parameter->get_name()
             + " to be copied does not have the same type as destination parameter " + parameter->get_name());
   }
@@ -54,7 +54,7 @@ void copy_parameter_value(
       return;
     case ParameterType::STATE:
       if (source_parameter->get_parameter_state_type() != parameter->get_parameter_state_type()) {
-        throw exceptions::IncompatibleParameterException(
+        throw exceptions::ParameterTranslationException(
             "Source parameter " + source_parameter->get_name()
                 + " to be copied does not have the same parameter state type as destination parameter "
                 + parameter->get_name());
@@ -79,7 +79,7 @@ void copy_parameter_value(
     default:
       break;
   }
-  throw InvalidParameterException(
+  throw exceptions::ParameterTranslationException(
       "Could not copy the value from source parameter " + source_parameter->get_name() + " into parameter "
           + parameter->get_name());
 }
@@ -130,7 +130,7 @@ rclcpp::Parameter write_parameter(const std::shared_ptr<state_representation::Pa
     default:
       break;
   }
-  throw InvalidParameterException("Parameter " + parameter->get_name() + " could not be written!");
+  throw exceptions::ParameterTranslationException("Parameter " + parameter->get_name() + " could not be written!");
 }
 
 std::shared_ptr<state_representation::ParameterInterface> read_parameter(const rclcpp::Parameter& parameter) {
@@ -171,17 +171,17 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter(const r
         case clproto::JOINT_POSITIONS_MESSAGE:
           return make_shared_parameter<JointPositions>(parameter.get_name(), clproto::decode<JointPositions>(encoding));
         default:
-          throw InvalidParameterException(
+          throw exceptions::ParameterTranslationException(
               "Parameter " + parameter.get_name() + " has an unsupported encoded message type");
       }
     }
     case rclcpp::PARAMETER_BYTE_ARRAY:
       // TODO: try clproto decode, re-use logic from above
-      throw InvalidParameterException("Parameter byte arrays are not currently supported.");
+      throw exceptions::ParameterTranslationException("Parameter byte arrays are not currently supported.");
     default:
       break;
   }
-  throw InvalidParameterException("Parameter " + parameter.get_name() + " could not be read!");
+  throw exceptions::ParameterTranslationException("Parameter " + parameter.get_name() + " could not be read!");
 }
 
 std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
@@ -189,7 +189,7 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
     const std::shared_ptr<const state_representation::ParameterInterface>& parameter
 ) {
   if (ros_parameter.get_name() != parameter->get_name()) {
-    throw exceptions::IncompatibleParameterException(
+    throw exceptions::ParameterTranslationException(
         "The ROS parameter " + ros_parameter.get_name()
             + " to be read does not have the same name as the reference parameter " + parameter->get_name());
   }
@@ -209,7 +209,7 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
         case ParameterType::MATRIX: {
           auto matrix = parameter->get_parameter_value<Eigen::MatrixXd>();
           if (static_cast<std::size_t>(matrix.size()) != value.size()) {
-            throw exceptions::IncompatibleParameterException(
+            throw exceptions::ParameterTranslationException(
                 "The ROS parameter " + ros_parameter.get_name() + " with type double array has size "
                     + std::to_string(value.size()) + " while the reference parameter matrix " + parameter->get_name()
                     + " has size " + std::to_string(matrix.size()));
@@ -219,7 +219,7 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
           break;
         }
         default:
-          throw exceptions::IncompatibleParameterException(
+          throw exceptions::ParameterTranslationException(
               "The ROS parameter " + ros_parameter.get_name()
                   + " with type double array cannot be interpreted by reference parameter " + parameter->get_name()
                   + " (type code " + std::to_string(static_cast<int>(parameter->get_parameter_type())) + ")");
@@ -227,7 +227,7 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
       break;
     }
     default:
-      throw state_representation::exceptions::InvalidParameterException(
+      throw exceptions::ParameterTranslationException(
           "Something went wrong while reading parameter " + parameter->get_name());
   }
   return new_parameter;

@@ -10,9 +10,9 @@ namespace modulo_core::exceptions {
  * @details This is an exception class to be thrown if there is a problem while translating from a ROS parameter to a
  * state_representation parameter and vice versa.
  */
-class IncompatibleParameterException : public CoreException {
+class ParameterTranslationException : public CoreException {
 public:
-  explicit IncompatibleParameterException(const std::string& msg) : CoreException(msg) {};
+  explicit ParameterTranslationException(const std::string& msg) : CoreException(msg) {};
 };
 }// namespace modulo_core::exceptions
 
