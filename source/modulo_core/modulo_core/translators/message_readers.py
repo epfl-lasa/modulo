@@ -4,6 +4,7 @@ import clproto
 import geometry_msgs.msg as geometry
 import state_representation as sr
 from modulo_core.encoded_state import EncodedState
+from modulo_core.exceptions.core_exceptions import MessageTranslationError
 from sensor_msgs.msg import JointState
 
 DataT = TypeVar('DataT')
@@ -37,11 +38,11 @@ def read_message(state: StateT, message: MsgT) -> StateT:
 
     :param state: The state to populate
     :param message: The ROS message to read from
-    :raises Exception if the message could not be read
+    :raises MessageTranslationError if the message could not be read
     :return: The populated state
     """
     if not isinstance(state, sr.State):
-        raise RuntimeError("This state type is not supported.")
+        raise MessageTranslationError("This state type is not supported.")
     if isinstance(state, sr.CartesianState):
         if isinstance(message, geometry.Accel):
             state.set_linear_acceleration(read_xyz(message.linear))
@@ -59,17 +60,20 @@ def read_message(state: StateT, message: MsgT) -> StateT:
             state.set_force(read_xyz(message.force))
             state.set_torque(read_xyz(message.torque))
         else:
-            raise RuntimeError("The provided combination of state type and message type is not supported")
+            raise MessageTranslationError("The provided combination of state type and message type is not supported")
     elif isinstance(message, JointState) and isinstance(state, sr.JointState):
-        state.set_names(message.name)
-        if len(message.position):
-            state.set_positions(message.position)
-        if len(message.velocity):
-            state.set_velocities(message.velocity)
-        if len(message.effort):
-            state.set_torques(message.effort)
+        try:
+            state.set_names(message.name)
+            if len(message.position):
+                state.set_positions(message.position)
+            if len(message.velocity):
+                state.set_velocities(message.velocity)
+            if len(message.effort):
+                state.set_torques(message.effort)
+        except Exception as e:
+            raise MessageTranslationError(f"{e}")
     else:
-        raise RuntimeError("The provided combination of state type and message type is not supported")
+        raise MessageTranslationError("The provided combination of state type and message type is not supported")
     return state
 
 
@@ -79,7 +83,7 @@ def read_stamped_message(state: StateT, message: MsgT) -> StateT:
 
     :param state: The state to populate
     :param message: The ROS message to read from
-    :raises Exception if the message could not be read
+    :raises MessageTranslationError if the message could not be read
     :return: The populated state
     """
     if isinstance(message, geometry.AccelStamped):
@@ -94,7 +98,7 @@ def read_stamped_message(state: StateT, message: MsgT) -> StateT:
     elif isinstance(message, geometry.WrenchStamped):
         read_message(state, message.wrench)
     else:
-        raise RuntimeError("The provided combination of state type and message type is not supported")
+        raise MessageTranslationError("The provided combination of state type and message type is not supported")
     state.set_reference_frame(message.header.frame_id)
     return state
 
@@ -114,7 +118,10 @@ def read_clproto_message(message: EncodedState) -> StateT:
     Convert an EncodedState message to a state_representation State type.
 
     :param message: The EncodedState message to read from
-    :raises Exception if the message could not be read:
+    :raises MessageTranslationError if the message could not be read:
     :return: The decoded clproto message
     """
-    return clproto.decode(message.data.tobytes())
+    try:
+        return clproto.decode(message.data.tobytes())
+    except Exception as e:
+        MessageTranslationError(f"{e}")

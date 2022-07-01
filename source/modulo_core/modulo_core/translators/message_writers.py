@@ -6,6 +6,7 @@ import numpy as np
 import rclpy.time
 import state_representation as sr
 from modulo_core.encoded_state import EncodedState
+from modulo_core.exceptions.core_exceptions import MessageTranslationError
 from sensor_msgs.msg import JointState
 
 DataT = TypeVar('DataT')
@@ -19,10 +20,10 @@ def write_xyz(message: Union[geometry.Point, geometry.Vector3], vector: np.array
 
     :param message: The message to populate
     :param vector: The vector to read from
-    :raises Exception if the message could not be written
+    :raises MessageTranslationError if the message could not be written
     """
     if vector.size != 3:
-        raise RuntimeError("Provide a vector of size 3 to transform to a Point or Vector3 message.")
+        raise MessageTranslationError("Provide a vector of size 3 to transform to a Point or Vector3 message.")
     message.x = vector[0]
     message.y = vector[1]
     message.z = vector[2]
@@ -34,10 +35,10 @@ def write_quaternion(message: geometry.Quaternion, quat: np.array):
 
     :param message: The message to populate
     :param quat: The vector to read from
-    :raises Exception if the message could not be written
+    :raises MessageTranslationError if the message could not be written
     """
     if quat.size != 4:
-        raise RuntimeError("Provide a vector of size 4 to transform to a Quaternion message.")
+        raise MessageTranslationError("Provide a vector of size 4 to transform to a Quaternion message.")
     message.w = quat[0]
     message.x = quat[1]
     message.y = quat[2]
@@ -50,12 +51,12 @@ def write_message(message: MsgT, state: StateT):
 
     :param message: The ROS message to populate
     :param state: The state to read from
-    :raises Exception if the message could not be written
+    :raises MessageTranslationError if the message could not be written
     """
     if not isinstance(state, sr.State):
-        raise RuntimeError("This state type is not supported.")
+        raise MessageTranslationError("This state type is not supported.")
     if state.is_empty():
-        raise RuntimeError(f"{state.get_name()} state is empty while attempting to write it to message.")
+        raise MessageTranslationError(f"{state.get_name()} state is empty while attempting to write it to message.")
     if isinstance(state, sr.CartesianState):
         if isinstance(message, geometry.Accel):
             write_xyz(message.linear, state.get_linear_acceleration())
@@ -73,14 +74,14 @@ def write_message(message: MsgT, state: StateT):
             write_xyz(message.force, state.get_force())
             write_xyz(message.torque, state.get_torque())
         else:
-            raise RuntimeError("The provided combination of state type and message type is not supported")
+            raise MessageTranslationError("The provided combination of state type and message type is not supported")
     elif isinstance(message, JointState) and isinstance(state, sr.JointState):
         message.name = state.get_names()
         message.position = state.get_positions().tolist()
         message.velocity = state.get_velocities().tolist()
         message.effort = state.get_torques().tolist()
     else:
-        raise RuntimeError("The provided combination of state type and message type is not supported")
+        raise MessageTranslationError("The provided combination of state type and message type is not supported")
 
 
 def write_stamped_message(message: MsgT, state: StateT, time: rclpy.time.Time):
@@ -90,7 +91,7 @@ def write_stamped_message(message: MsgT, state: StateT, time: rclpy.time.Time):
     :param message: The ROS message to populate
     :param state: The state to read from
     :param time: The time of the message
-    :raises Exception if the message could not be written
+    :raises MessageTranslationError if the message could not be written
     """
     if isinstance(message, geometry.AccelStamped):
         write_message(message.accel, state)
@@ -104,7 +105,7 @@ def write_stamped_message(message: MsgT, state: StateT, time: rclpy.time.Time):
     elif isinstance(message, geometry.WrenchStamped):
         write_message(message.wrench, state)
     else:
-        raise RuntimeError("The provided combination of state type and message type is not supported")
+        raise MessageTranslationError("The provided combination of state type and message type is not supported")
     message.header.stamp = time.to_msg()
     message.header.frame_id = state.get_reference_frame()
 
@@ -126,8 +127,11 @@ def write_clproto_message(message: EncodedState, state: StateT, clproto_message_
     :param message: The EncodedState message to populate
     :param state: The state to read from
     :param clproto_message_type: The clproto message type to encode the state
-    :raises Exception if the message could not be written
+    :raises MessageTranslationError if the message could not be written
     """
     if not isinstance(state, sr.State):
-        raise RuntimeError("This state type is not supported.")
-    message.data = clproto.encode(state, clproto_message_type)
+        raise MessageTranslationError("This state type is not supported.")
+    try:
+        message.data = clproto.encode(state, clproto_message_type)
+    except Exception as e:
+        raise MessageTranslationError(f"{e}")
