@@ -55,7 +55,7 @@ TEST_F(MessageTranslatorsTest, TestAccel) {
   expect_vector_equal(state_.get_angular_acceleration(), accel.angular);
 
   state_representation::CartesianState new_state("new");
-  EXPECT_THROW(write_message(accel, new_state, clock_.now()), state_representation::exceptions::EmptyStateException);
+  EXPECT_THROW(write_message(accel, new_state, clock_.now()), modulo_core::exceptions::MessageTranslationException);
   read_message(new_state, accel);
   EXPECT_TRUE(new_state.get_acceleration().isApprox(state_.get_acceleration()));
 
@@ -77,7 +77,7 @@ TEST_F(MessageTranslatorsTest, TestPose) {
   expect_quaternion_equal(state_.get_orientation(), pose.orientation);
 
   state_representation::CartesianState new_state("new");
-  EXPECT_THROW(write_message(pose, new_state, clock_.now()), state_representation::exceptions::EmptyStateException);
+  EXPECT_THROW(write_message(pose, new_state, clock_.now()), modulo_core::exceptions::MessageTranslationException);
   read_message(new_state, pose);
   EXPECT_TRUE(new_state.get_pose().isApprox(state_.get_pose()));
 
@@ -99,7 +99,7 @@ TEST_F(MessageTranslatorsTest, TestTransform) {
   expect_quaternion_equal(state_.get_orientation(), tf.rotation);
 
   state_representation::CartesianState new_state("new");
-  EXPECT_THROW(write_message(tf, new_state, clock_.now()), state_representation::exceptions::EmptyStateException);
+  EXPECT_THROW(write_message(tf, new_state, clock_.now()), modulo_core::exceptions::MessageTranslationException);
   read_message(new_state, tf);
   EXPECT_TRUE(new_state.get_pose().isApprox(state_.get_pose()));
 
@@ -123,7 +123,7 @@ TEST_F(MessageTranslatorsTest, TestTwist) {
   expect_vector_equal(state_.get_angular_velocity(), twist.angular);
 
   state_representation::CartesianState new_state("new");
-  EXPECT_THROW(write_message(twist, new_state, clock_.now()), state_representation::exceptions::EmptyStateException);
+  EXPECT_THROW(write_message(twist, new_state, clock_.now()), modulo_core::exceptions::MessageTranslationException);
   read_message(new_state, twist);
   EXPECT_TRUE(new_state.get_twist().isApprox(state_.get_twist()));
 
@@ -145,7 +145,7 @@ TEST_F(MessageTranslatorsTest, TestWrench) {
   expect_vector_equal(state_.get_torque(), wrench.torque);
 
   state_representation::CartesianState new_state("new");
-  EXPECT_THROW(write_message(wrench, new_state, clock_.now()), state_representation::exceptions::EmptyStateException);
+  EXPECT_THROW(write_message(wrench, new_state, clock_.now()), modulo_core::exceptions::MessageTranslationException);
   read_message(new_state, wrench);
   EXPECT_TRUE(new_state.get_wrench().isApprox(state_.get_wrench()));
 
@@ -171,7 +171,7 @@ TEST_F(MessageTranslatorsTest, TestJointState) {
   }
 
   auto new_state = state_representation::JointState("test", {"1", "2", "3"});
-  EXPECT_THROW(write_message(message, new_state, clock_.now()), state_representation::exceptions::EmptyStateException);
+  EXPECT_THROW(write_message(message, new_state, clock_.now()), modulo_core::exceptions::MessageTranslationException);
   read_message(new_state, message);
   EXPECT_TRUE(new_state.get_positions().isApprox(joint_state_.get_positions()));
   EXPECT_TRUE(new_state.get_velocities().isApprox(joint_state_.get_velocities()));

@@ -66,15 +66,19 @@ void read_message(state_representation::CartesianState& state, const geometry_ms
 }
 
 void read_message(state_representation::JointState& state, const sensor_msgs::msg::JointState& message) {
-  state.set_names(message.name);
-  if (!message.position.empty()) {
-    state.set_positions(Eigen::VectorXd::Map(message.position.data(), message.position.size()));
-  }
-  if (!message.velocity.empty()) {
-    state.set_velocities(Eigen::VectorXd::Map(message.velocity.data(), message.velocity.size()));
-  }
-  if (!message.effort.empty()) {
-    state.set_torques(Eigen::VectorXd::Map(message.effort.data(), message.effort.size()));
+  try {
+    state.set_names(message.name);
+    if (!message.position.empty()) {
+      state.set_positions(Eigen::VectorXd::Map(message.position.data(), message.position.size()));
+    }
+    if (!message.velocity.empty()) {
+      state.set_velocities(Eigen::VectorXd::Map(message.velocity.data(), message.velocity.size()));
+    }
+    if (!message.effort.empty()) {
+      state.set_torques(Eigen::VectorXd::Map(message.effort.data(), message.effort.size()));
+    }
+  } catch (const std::exception& ex) {
+    throw exceptions::MessageTranslationException(ex.what());
   }
 }
 

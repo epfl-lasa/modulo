@@ -19,6 +19,7 @@
 #include <state_representation/space/Jacobian.hpp>
 
 #include "modulo_core/EncodedState.hpp"
+#include "modulo_core/exceptions/MessageTranslationException.hpp"
 
 namespace modulo_core::translators {
 
@@ -151,11 +152,16 @@ void read_message(std::string& state, const std_msgs::msg::String& message);
  * @tparam T A state_representation::State type
  * @param state The state to populate
  * @param message The ROS message to read from
+ * @throws MessageTranslationException if the translation failed or is not supported.
  */
 template<typename T>
 inline void read_message(T& state, const EncodedState& message) {
-  std::string tmp(message.data.begin(), message.data.end());
-  state = clproto::decode<T>(tmp);
+  try {
+    std::string tmp(message.data.begin(), message.data.end());
+    state = clproto::decode<T>(tmp);
+  } catch (const std::exception& ex) {
+    throw exceptions::MessageTranslationException(ex.what());
+  }
 }
 
 template<>
@@ -304,14 +310,14 @@ inline void read_message(std::shared_ptr<state_representation::State>& state, co
           break;
         }
         default:
-          throw std::invalid_argument(
+          throw exceptions::MessageTranslationException(
               "The ParameterType contained by parameter " + param_ptr->get_name() + " is unsupported."
           );
       }
       break;
     }
     default:
-      throw std::invalid_argument("The StateType contained by state " + new_state->get_name() + " is unsupported.");
+      throw exceptions::MessageTranslationException("The StateType contained by state " + new_state->get_name() + " is unsupported.");
   }
 }
 }// namespace modulo_core::translators
