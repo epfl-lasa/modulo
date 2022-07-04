@@ -68,4 +68,32 @@ parse_node_name(const rclcpp::NodeOptions& options, const std::string& fallback 
 generate_predicate_topic(const std::string& component_name, const std::string& predicate_name) {
   return "/predicates/" + component_name + "/" + predicate_name;
 }
+
+[[maybe_unused]] static rclcpp::ParameterType
+get_ros_parameter_type(const state_representation::ParameterType& parameter_type) {
+  using namespace state_representation;
+  switch (parameter_type) {
+    case ParameterType::BOOL:
+      return rclcpp::ParameterType::PARAMETER_BOOL;
+    case ParameterType::BOOL_ARRAY:
+      return rclcpp::ParameterType::PARAMETER_BOOL_ARRAY;
+    case ParameterType::INT:
+      return rclcpp::ParameterType::PARAMETER_INTEGER;
+    case ParameterType::INT_ARRAY:
+      return rclcpp::ParameterType::PARAMETER_INTEGER_ARRAY;
+    case ParameterType::DOUBLE:
+      return rclcpp::ParameterType::PARAMETER_DOUBLE;
+    case ParameterType::DOUBLE_ARRAY:
+    case ParameterType::VECTOR:
+    case ParameterType::MATRIX:
+      return rclcpp::ParameterType::PARAMETER_DOUBLE_ARRAY;
+    case ParameterType::STRING:
+      return rclcpp::ParameterType::PARAMETER_STRING;
+    case ParameterType::STRING_ARRAY:
+    case ParameterType::STATE:
+      return rclcpp::ParameterType::PARAMETER_STRING_ARRAY;
+    default:
+      return rclcpp::ParameterType::PARAMETER_NOT_SET;
+  }
+}
 }// namespace modulo_components::utilities

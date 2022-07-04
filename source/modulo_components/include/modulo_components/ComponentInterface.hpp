@@ -399,11 +399,22 @@ inline void ComponentInterface<NodeT>::add_parameter(
       rcl_interfaces::msg::ParameterDescriptor descriptor;
       descriptor.description = description;
       descriptor.read_only = read_only;
-      NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value(), descriptor);
+      if (parameter->is_empty()) {
+        descriptor.dynamic_typing = true;
+        NodeT::declare_parameter(
+            parameter->get_name(), utilities::get_ros_parameter_type(parameter->get_parameter_type()));
+      } else {
+        NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value(), descriptor);
+      }
     } else {
-      RCLCPP_WARN_STREAM(this->get_logger(),
-                         "Parameter '" << parameter->get_name() << "' already exists, overwriting.");
-      NodeT::set_parameter(ros_param);
+      if (parameter->is_empty()) {
+        RCLCPP_ERROR_STREAM(this->get_logger(),
+                            "Cannot overwrite parameter '" << parameter->get_name() << "' with an empty parameter.");
+      } else {
+        RCLCPP_WARN_STREAM(this->get_logger(),
+                           "Parameter '" << parameter->get_name() << "' already exists, overwriting.");
+        NodeT::set_parameter(ros_param);
+      }
     }
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add parameter '" << parameter->get_name() << "': " << ex.what());
@@ -460,7 +471,7 @@ ComponentInterface<NodeT>::on_set_parameters_callback(const std::vector<rclcpp::
       auto new_parameter = modulo_core::translators::read_parameter_const(ros_parameter, parameter);
       if (!validate_parameter(new_parameter)) {
         result.successful = false;
-        result.reason += "Parameter " + ros_parameter.get_name() + " could not be set! ";
+        result.reason += "Validation of parameter '" + ros_parameter.get_name() + "' returned false!";
       } else {
         // update the value of the parameter in the map
         modulo_core::translators::copy_parameter_value(new_parameter, parameter);

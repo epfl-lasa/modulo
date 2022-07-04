@@ -110,7 +110,7 @@ class ComponentInterface(Node):
             if not self.has_parameter(sr_parameter.get_name()):
                 self.get_logger().debug(f"Adding parameter '{sr_parameter.get_name()}'.")
                 self._parameter_dict[sr_parameter.get_name()] = parameter
-                # TODO ignore override
+                # TODO read_only
                 if sr_parameter.is_empty():
                     self.declare_parameter(ros_param.name, None,
                                            descriptor=ParameterDescriptor(description=description,
@@ -120,8 +120,12 @@ class ComponentInterface(Node):
                     self.declare_parameter(ros_param.name, ros_param.value,
                                            descriptor=ParameterDescriptor(description=description))
             else:
-                self.get_logger().warn(f"Parameter '{sr_parameter.get_name()}' already exists, overwriting.")
-                self.set_parameters([ros_param])
+                if sr_parameter.is_empty():
+                    self.get_logger().error(
+                        f"Cannot overwrite parameter '{sr_parameter.get_name()}' with an empty parameter.")
+                else:
+                    self.get_logger().warn(f"Parameter '{sr_parameter.get_name()}' already exists, overwriting.")
+                    self.set_parameters([ros_param])
         except Exception as e:
             self.get_logger().error(f"Failed to add parameter: {e}")
 
@@ -213,16 +217,15 @@ class ComponentInterface(Node):
         """
         result = SetParametersResult(successful=True)
         for ros_param in ros_parameters:
-            if ros_param.type_ == Parameter.Type.NOT_SET:
-                self.get_logger().debug(
-                    f"Parameter '{ros_param.name}' has type 'NOT_SET', skipping parameter validation and setting.")
-                continue
             try:
                 parameter = self._get_component_parameter(ros_param.name)
                 new_parameter = read_parameter_const(ros_param, parameter)
-                if not self._validate_parameter(new_parameter):
+                if new_parameter.is_empty():
+                    self.get_logger().warn(
+                        f"Parameter '{new_parameter.get_name()}' is empty, validation will be skipped.")
+                elif not self._validate_parameter(new_parameter):
                     result.successful = False
-                    result.reason = f"Parameter {ros_param.name} could not be set!"
+                    result.reason = f"Validation of parameter '{ros_param.name}' returned false!"
                 else:
                     if isinstance(self._parameter_dict[ros_param.name], str):
                         self.__setattr__(self._parameter_dict[ros_param.name], new_parameter)
