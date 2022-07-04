@@ -3,6 +3,7 @@
 #include <string>
 
 #include <rclcpp/rclcpp.hpp>
+#include <state_representation/parameters/ParameterType.hpp>
 
 namespace modulo_components::utilities {
 
