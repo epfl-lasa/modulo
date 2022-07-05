@@ -400,9 +400,9 @@ inline void ComponentInterface<NodeT>::add_parameter(
       descriptor.description = description;
       descriptor.read_only = read_only;
       if (parameter->is_empty()) {
-        descriptor.dynamic_typing = true;
         NodeT::declare_parameter(
-            parameter->get_name(), utilities::get_ros_parameter_type(parameter->get_parameter_type()));
+            parameter->get_name(), utilities::get_ros_parameter_type(parameter->get_parameter_type()), descriptor
+        );
       } else {
         NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value(), descriptor);
       }

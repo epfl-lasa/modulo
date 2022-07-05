@@ -9,7 +9,7 @@ import state_representation as sr
 from geometry_msgs.msg import TransformStamped
 from modulo_components.exceptions.component_exceptions import AddSignalError, ComponentParameterError, \
     LookupTransformError
-from modulo_components.utilities.utilities import generate_predicate_topic, parse_signal_name
+from modulo_components.utilities.utilities import generate_predicate_topic, get_ros_parameter_type, parse_signal_name
 from modulo_core.encoded_state import EncodedState
 from modulo_core.translators.parameter_translators import write_parameter, read_parameter_const
 from rcl_interfaces.msg import ParameterDescriptor, SetParametersResult
@@ -111,14 +111,12 @@ class ComponentInterface(Node):
                 self.get_logger().debug(f"Adding parameter '{sr_parameter.get_name()}'.")
                 self._parameter_dict[sr_parameter.get_name()] = parameter
                 # TODO read_only
+                descriptor = ParameterDescriptor(description=description, read_only=read_only)
                 if sr_parameter.is_empty():
-                    self.declare_parameter(ros_param.name, None,
-                                           descriptor=ParameterDescriptor(description=description,
-                                                                          type=Parameter.Type.NOT_SET.value,
-                                                                          dynamic_typing=True))
+                    self.declare_parameter(ros_param.name, get_ros_parameter_type(sr_parameter.get_parameter_type()),
+                                           descriptor=descriptor)
                 else:
-                    self.declare_parameter(ros_param.name, ros_param.value,
-                                           descriptor=ParameterDescriptor(description=description))
+                    self.declare_parameter(ros_param.name, ros_param.value, descriptor=descriptor)
             else:
                 if sr_parameter.is_empty():
                     self.get_logger().error(

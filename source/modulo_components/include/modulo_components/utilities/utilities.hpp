@@ -70,6 +70,11 @@ generate_predicate_topic(const std::string& component_name, const std::string& p
   return "/predicates/" + component_name + "/" + predicate_name;
 }
 
+/**
+ * @brief Given a state representation parameter type, get the corresponding ROS parameter type.
+ * @param parameter_type The state representation parameter type
+ * @return The corresponding ROS parameter type
+ */
 [[maybe_unused]] static rclcpp::ParameterType
 get_ros_parameter_type(const state_representation::ParameterType& parameter_type) {
   using namespace state_representation;
