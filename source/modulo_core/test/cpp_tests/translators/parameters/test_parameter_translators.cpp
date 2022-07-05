@@ -10,60 +10,38 @@ using namespace modulo_core::translators;
 
 template<typename T> using ParamT = std::vector<std::tuple<T, state_representation::ParameterType>>;
 
-static std::tuple<ParamT<bool>,
-                  ParamT<std::vector<bool>>,
-                  ParamT<int>,
-                  ParamT<std::vector<int>>,
-                  ParamT<double>,
-                  ParamT<std::vector<double>>,
-                  ParamT<std::string>,
-                  ParamT<std::vector<std::string>>> parameter_test_cases{{
-                                                                             std::make_tuple(
-                                                                                 true,
-                                                                                 state_representation::ParameterType::BOOL
-                                                                             ), std::make_tuple(
-        false, state_representation::ParameterType::BOOL
-    ),
-                                                                         }, {
-                                                                             std::make_tuple(
-                                                                                 std::vector<bool>({true, false, true}),
-                                                                                 state_representation::ParameterType::BOOL_ARRAY
-                                                                             ),
-                                                                         }, {
-                                                                             std::make_tuple(
-                                                                                 0,
-                                                                                 state_representation::ParameterType::INT
-                                                                             ), std::make_tuple(
-        1, state_representation::ParameterType::INT
-    ),
-                                                                         }, {
-                                                                             std::make_tuple(
-                                                                                 std::vector<int>({1, 2, 3}),
-                                                                                 state_representation::ParameterType::INT_ARRAY
-                                                                             ),
-                                                                         }, {
-                                                                             std::make_tuple(
-                                                                                 1.0,
-                                                                                 state_representation::ParameterType::DOUBLE
-                                                                             ),
-                                                                         }, {
-                                                                             std::make_tuple(
-                                                                                 std::vector<double>({1.0, 2.0, 3.0}),
-                                                                                 state_representation::ParameterType::DOUBLE_ARRAY
-                                                                             ),
-                                                                         }, {
-                                                                             std::make_tuple(
-                                                                                 "test",
-                                                                                 state_representation::ParameterType::STRING
-                                                                             ),
-                                                                         }, {
-                                                                             std::make_tuple(
-                                                                                 std::vector<std::string>(
-                                                                                     {"1", "2", "3"}
-                                                                                 ),
-                                                                                 state_representation::ParameterType::STRING_ARRAY
-                                                                             ),
-                                                                         },
+static std::tuple<
+    ParamT<bool>,
+    ParamT<std::vector<bool>>,
+    ParamT<int>,
+    ParamT<std::vector<int>>,
+    ParamT<double>,
+    ParamT<std::vector<double>>,
+    ParamT<std::string>,
+    ParamT<std::vector<std::string>>
+> parameter_test_cases{{
+                       std::make_tuple(true, state_representation::ParameterType::BOOL),
+                       std::make_tuple(false, state_representation::ParameterType::BOOL),
+                   }, {
+                       std::make_tuple(
+                           std::vector<bool>({true, false, true}), state_representation::ParameterType::BOOL_ARRAY),
+                   }, {
+                       std::make_tuple(0, state_representation::ParameterType::INT),
+                       std::make_tuple(1, state_representation::ParameterType::INT),
+                   }, {
+                       std::make_tuple(std::vector<int>({1, 2, 3}), state_representation::ParameterType::INT_ARRAY),
+                   }, {
+                       std::make_tuple(1.0, state_representation::ParameterType::DOUBLE),
+                   }, {
+                       std::make_tuple(
+                           std::vector<double>({1.0, 2.0, 3.0}), state_representation::ParameterType::DOUBLE_ARRAY),
+                   }, {
+                       std::make_tuple("test", state_representation::ParameterType::STRING),
+                   }, {
+                       std::make_tuple(
+                           std::vector<std::string>({"1", "2", "3"}),
+                           state_representation::ParameterType::STRING_ARRAY),
+                   },
 };
 
 template<typename T>
@@ -143,12 +121,6 @@ TYPED_TEST_P(ParameterTranslationTest, NonConstRead) {
 
 REGISTER_TYPED_TEST_SUITE_P(ParameterTranslationTest, Write, ReadAndReWrite, ConstRead, NonConstRead);
 
-using ParameterTestTypes = testing::Types<bool,
-                                          std::vector<bool>,
-                                          int,
-                                          std::vector<int>,
-                                          double,
-                                          std::vector<double>,
-                                          std::string,
-                                          std::vector<std::string>>;
+using ParameterTestTypes = testing::Types<
+    bool, std::vector<bool>, int, std::vector<int>, double, std::vector<double>, std::string, std::vector<std::string>>;
 INSTANTIATE_TYPED_TEST_SUITE_P(TestPrefix, ParameterTranslationTest, ParameterTestTypes);
