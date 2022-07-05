@@ -202,3 +202,30 @@ def read_parameter_const(ros_parameter: Parameter, parameter: sr.Parameter) -> s
                 f"by reference parameter {parameter.get_name()} (type code {parameter.get_parameter_type()}")
     else:
         raise ParameterTranslationError(f"Something went wrong while reading parameter {parameter.get_name()}")
+
+
+def get_ros_parameter_type(parameter_type: sr.ParameterType) -> Parameter.Type:
+    """
+    Given a state representation parameter type, get the corresponding ROS parameter type.
+
+    :param parameter_type: The state representation parameter type
+    :return: The corresponding ROS parameter type
+    """
+    if parameter_type == sr.ParameterType.BOOL:
+        return Parameter.Type.BOOL
+    elif parameter_type == sr.ParameterType.BOOL_ARRAY:
+        return Parameter.Type.BOOL_ARRAY
+    elif parameter_type == sr.ParameterType.INT:
+        return Parameter.Type.INTEGER
+    elif parameter_type == sr.ParameterType.INT_ARRAY:
+        return Parameter.Type.INTEGER_ARRAY
+    elif parameter_type == sr.ParameterType.DOUBLE:
+        return Parameter.Type.DOUBLE
+    elif parameter_type in [sr.ParameterType.DOUBLE_ARRAY, sr.ParameterType.VECTOR, sr.ParameterType.MATRIX]:
+        return Parameter.Type.DOUBLE_ARRAY
+    elif parameter_type in [sr.ParameterType.STRING, sr.ParameterType.STATE]:
+        return Parameter.Type.STRING
+    elif parameter_type == sr.ParameterType.STRING_ARRAY:
+        return Parameter.Type.STRING_ARRAY
+    else:
+        return Parameter.Type.NOT_SET

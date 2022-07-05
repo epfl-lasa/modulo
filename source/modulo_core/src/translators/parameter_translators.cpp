@@ -172,7 +172,8 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter(const r
           return make_shared_parameter<JointPositions>(parameter.get_name(), clproto::decode<JointPositions>(encoding));
         default:
           throw exceptions::ParameterTranslationException(
-              "Parameter " + parameter.get_name() + " has an unsupported encoded message type");
+              "Parameter " + parameter.get_name() + " has an unsupported encoded message type"
+          );
       }
     }
     case rclcpp::PARAMETER_BYTE_ARRAY:
@@ -222,7 +223,8 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
           throw exceptions::ParameterTranslationException(
               "The ROS parameter " + ros_parameter.get_name()
                   + " with type double array cannot be interpreted by reference parameter " + parameter->get_name()
-                  + " (type code " + std::to_string(static_cast<int>(parameter->get_parameter_type())) + ")");
+                  + " (type code " + std::to_string(static_cast<int>(parameter->get_parameter_type())) + ")"
+          );
       }
       break;
     }
@@ -238,5 +240,31 @@ void read_parameter(
 ) {
   auto new_parameter = read_parameter_const(ros_parameter, parameter);
   copy_parameter_value(new_parameter, parameter);
+}
+
+rclcpp::ParameterType get_ros_parameter_type(const ParameterType& parameter_type) {
+  switch (parameter_type) {
+    case ParameterType::BOOL:
+      return rclcpp::ParameterType::PARAMETER_BOOL;
+    case ParameterType::BOOL_ARRAY:
+      return rclcpp::ParameterType::PARAMETER_BOOL_ARRAY;
+    case ParameterType::INT:
+      return rclcpp::ParameterType::PARAMETER_INTEGER;
+    case ParameterType::INT_ARRAY:
+      return rclcpp::ParameterType::PARAMETER_INTEGER_ARRAY;
+    case ParameterType::DOUBLE:
+      return rclcpp::ParameterType::PARAMETER_DOUBLE;
+    case ParameterType::DOUBLE_ARRAY:
+    case ParameterType::VECTOR:
+    case ParameterType::MATRIX:
+      return rclcpp::ParameterType::PARAMETER_DOUBLE_ARRAY;
+    case ParameterType::STRING:
+      return rclcpp::ParameterType::PARAMETER_STRING;
+    case ParameterType::STRING_ARRAY:
+    case ParameterType::STATE:
+      return rclcpp::ParameterType::PARAMETER_STRING_ARRAY;
+    default:
+      return rclcpp::ParameterType::PARAMETER_NOT_SET;
+  }
 }
 }// namespace modulo_core::translators
