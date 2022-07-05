@@ -1,3 +1,4 @@
+from copy import copy
 from typing import Optional
 
 import clproto
@@ -15,7 +16,10 @@ def write_parameter(parameter: sr.Parameter) -> Parameter:
     :raises ParameterTranslationError if the parameter could not be written
     :return: The resulting ROS parameter
     """
-    if parameter.get_parameter_type() == sr.ParameterType.BOOL or \
+    if parameter.is_empty():
+        return Parameter(parameter.get_name(), value=None, type_=Parameter.Type.NOT_SET)
+    elif parameter.get_parameter_type() == sr.ParameterType.BOOL or \
+            parameter.get_parameter_type() == sr.ParameterType.BOOL_ARRAY or \
             parameter.get_parameter_type() == sr.ParameterType.INT or \
             parameter.get_parameter_type() == sr.ParameterType.DOUBLE or \
             parameter.get_parameter_type() == sr.ParameterType.STRING:
@@ -179,6 +183,8 @@ def read_parameter_const(ros_parameter: Parameter, parameter: sr.Parameter) -> s
     if ros_parameter.name != parameter.get_name():
         raise ParameterTranslationError(f"The ROS parameter {ros_parameter.name} to be read does not have "
                                         f"the same name as the reference parameter {parameter.get_name()}")
+    if ros_parameter.type_ == Parameter.Type.NOT_SET:
+        return copy(parameter)
     new_parameter = read_parameter(ros_parameter)
     if new_parameter.get_parameter_type() == parameter.get_parameter_type():
         return new_parameter
@@ -201,7 +207,9 @@ def read_parameter_const(ros_parameter: Parameter, parameter: sr.Parameter) -> s
                 f"The ROS parameter {ros_parameter.name} with type double array cannot be interpreted "
                 f"by reference parameter {parameter.get_name()} (type code {parameter.get_parameter_type()}")
     else:
-        raise ParameterTranslationError(f"Something went wrong while reading parameter {parameter.get_name()}")
+        raise ParameterTranslationError(
+            f"The ROS parameter has an incompatible type for component parameter '{parameter.get_name()}': "
+            f"expected {parameter.get_parameter_type().name}, got {ros_parameter.type_.name}")
 
 
 def get_ros_parameter_type(parameter_type: sr.ParameterType) -> Parameter.Type:

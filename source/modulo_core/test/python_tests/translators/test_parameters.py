@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 import state_representation as sr
 from modulo_core.translators.parameter_translators import write_parameter, read_parameter, read_parameter_const
+from modulo_core.exceptions.core_exceptions import ParameterTranslationError
 from rclpy import Parameter
 
 
@@ -17,13 +18,18 @@ def test_parameter_write(parameters):
     for name, value_types in parameters.items():
         param = sr.Parameter(name, value_types[1])
         ros_param = write_parameter(param)
-        assert ros_param.type_ == value_types[3]
+        assert ros_param.type_ == Parameter.Type.NOT_SET
         param = sr.Parameter(name, value_types[0], value_types[1])
         ros_param = write_parameter(param)
+        assert ros_param.type_ == value_types[3]
         assert ros_param.to_parameter_msg() == Parameter(name, value=value_types[0]).to_parameter_msg()
 
 
 def test_parameter_read_write(parameters):
+    # A ROS parameter with type NOT_SET cannot be interpreted as sr.Parameter
+    ros_param = Parameter("name", type_=Parameter.Type.NOT_SET)
+    with pytest.raises(ParameterTranslationError):
+        read_parameter(ros_param)
     for name, value_types in parameters.items():
         ros_param = Parameter(name, value=value_types[0])
         param = read_parameter(ros_param)
@@ -69,9 +75,10 @@ def test_state_parameter_write(state_parameters):
     for name, value_types in state_parameters.items():
         param = sr.Parameter(name, sr.ParameterType.STATE, value_types[1])
         ros_param = write_parameter(param)
-        assert ros_param.type_ == Parameter.Type.STRING
+        assert ros_param.type_ == Parameter.Type.NOT_SET
         param = sr.Parameter(name, value_types[0], sr.ParameterType.STATE, value_types[1])
         ros_param = write_parameter(param)
+        assert ros_param.type_ == Parameter.Type.STRING
         assert ros_param.name == param.get_name()
         state = clproto.decode(clproto.from_json(ros_param.value))
         assert state.get_name() == value_types[0].get_name()
@@ -102,11 +109,11 @@ def test_vector_parameter_read_write():
     vec = np.random.rand(3)
     param = sr.Parameter("vector", sr.ParameterType.VECTOR)
     ros_param = write_parameter(param)
-    assert ros_param.type_ == Parameter.Type.DOUBLE_ARRAY
+    assert ros_param.type_ == Parameter.Type.NOT_SET
     param = sr.Parameter("vector", vec, sr.ParameterType.VECTOR)
     ros_param = write_parameter(param)
-    assert ros_param.name == param.get_name()
     assert ros_param.type_ == Parameter.Type.DOUBLE_ARRAY
+    assert ros_param.name == param.get_name()
     ros_vec = ros_param.get_parameter_value().double_array_value
     assert vec.tolist() == ros_vec.tolist()
 
@@ -125,11 +132,11 @@ def test_matrix_parameter_read_write():
     mat = np.random.rand(3, 4)
     param = sr.Parameter("vector", sr.ParameterType.MATRIX)
     ros_param = write_parameter(param)
-    assert ros_param.type_ == Parameter.Type.DOUBLE_ARRAY
+    assert ros_param.type_ == Parameter.Type.NOT_SET
     param = sr.Parameter("matrix", mat, sr.ParameterType.MATRIX)
     ros_param = write_parameter(param)
-    assert ros_param.name == param.get_name()
     assert ros_param.type_ == Parameter.Type.DOUBLE_ARRAY
+    assert ros_param.name == param.get_name()
     ros_mat = ros_param.get_parameter_value().double_array_value
     assert mat.flatten().tolist() == ros_mat.tolist()
 
