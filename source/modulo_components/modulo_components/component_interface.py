@@ -11,6 +11,7 @@ from modulo_components.exceptions.component_exceptions import AddSignalError, Co
     LookupTransformError
 from modulo_components.utilities.utilities import generate_predicate_topic, get_ros_parameter_type, parse_signal_name
 from modulo_core.encoded_state import EncodedState
+from modulo_core.exceptions.core_exceptions import ParameterTranslationError
 from modulo_core.translators.parameter_translators import write_parameter, read_parameter_const
 from rcl_interfaces.msg import ParameterDescriptor, SetParametersResult
 from rclpy.duration import Duration
@@ -92,6 +93,7 @@ class ComponentInterface(Node):
         :param parameter: Either the name of the parameter attribute or the parameter itself
         :param description: The parameter description
         :param read_only: If True, the value of the parameter cannot be changed after declaration
+        :raises ComponentParameterError if the parameter could not be added
         """
         try:
             if isinstance(parameter, sr.Parameter):
@@ -107,25 +109,25 @@ class ComponentInterface(Node):
                 raise TypeError("Provide either a state_representation.Parameter object or a string "
                                 "containing the name of the attribute that refers to the parameter to add.")
             ros_param = write_parameter(sr_parameter)
-            if not self.has_parameter(sr_parameter.get_name()):
-                self.get_logger().debug(f"Adding parameter '{sr_parameter.get_name()}'.")
-                self._parameter_dict[sr_parameter.get_name()] = parameter
+        except (TypeError, ParameterTranslationError) as e:
+            raise ComponentParameterError(f"Failed to add parameter: {e}")
+        if not self.has_parameter(sr_parameter.get_name()):
+            self.get_logger().debug(f"Adding parameter '{sr_parameter.get_name()}'.")
+            self._parameter_dict[sr_parameter.get_name()] = parameter
+            try:
                 # TODO read_only
                 descriptor = ParameterDescriptor(description=description, read_only=read_only)
                 if sr_parameter.is_empty():
-                    self.declare_parameter(ros_param.name, get_ros_parameter_type(sr_parameter.get_parameter_type()),
-                                           descriptor=descriptor)
+                    descriptor.dynamic_typing = True
+                    descriptor.type = get_ros_parameter_type(sr_parameter.get_parameter_type()).value
+                    self.declare_parameter(ros_param.name, None, descriptor=descriptor)
                 else:
                     self.declare_parameter(ros_param.name, ros_param.value, descriptor=descriptor)
-            else:
-                if sr_parameter.is_empty():
-                    self.get_logger().error(
-                        f"Cannot overwrite parameter '{sr_parameter.get_name()}' with an empty parameter.")
-                else:
-                    self.get_logger().warn(f"Parameter '{sr_parameter.get_name()}' already exists, overwriting.")
-                    self.set_parameters([ros_param])
-        except Exception as e:
-            self.get_logger().error(f"Failed to add parameter: {e}")
+            except Exception as e:
+                del self._parameter_dict[sr_parameter.get_name()]
+                raise ComponentParameterError(f"Failed to add parameter: {e}")
+        else:
+            self.get_logger().warn(f"Parameter '{sr_parameter.get_name()}' already exists.")
 
     def get_parameter(self, name: str) -> Union[sr.Parameter, Parameter]:
         """
@@ -218,10 +220,8 @@ class ComponentInterface(Node):
             try:
                 parameter = self._get_component_parameter(ros_param.name)
                 new_parameter = read_parameter_const(ros_param, parameter)
-                if new_parameter.is_empty():
-                    self.get_logger().warn(
-                        f"Parameter '{new_parameter.get_name()}' is empty, validation will be skipped.")
-                elif not self._validate_parameter(new_parameter):
+                self.get_logger().warn(f"{new_parameter}")
+                if not self._validate_parameter(new_parameter):
                     result.successful = False
                     result.reason = f"Validation of parameter '{ros_param.name}' returned false!"
                 else:
