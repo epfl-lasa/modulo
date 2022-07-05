@@ -5,6 +5,7 @@ from modulo_components.component_interface import ComponentInterface
 from rcl_interfaces.msg import SetParametersResult
 from rclpy.node import Node
 from rclpy.parameter import Parameter
+from rclpy.exceptions import ParameterUninitializedException
 
 
 class EmtpyParameterInterface(ComponentInterface):
@@ -35,12 +36,14 @@ def test_validate_empty_parameter(component_test):
     # component_test comes with empty parameter 'name'
     assert component_test.get_parameter("name").get_parameter_type() == sr.ParameterType.STRING
     assert component_test.get_parameter("name").is_empty()
-    assert Node.get_parameter(component_test, "name").type_ == Parameter.Type.NOT_SET
+    with pytest.raises(ParameterUninitializedException):
+        Node.get_parameter(component_test, "name")
 
     # Trying to overwrite with an empty parameter is not allowed
     component_test.add_parameter(sr.Parameter("name", sr.ParameterType.BOOL), "Test parameter")
     assert component_test.get_parameter("name").get_parameter_type() == sr.ParameterType.STRING
-    assert Node.get_parameter(component_test, "name").type_ == Parameter.Type.NOT_SET
+    with pytest.raises(ParameterUninitializedException):
+        Node.get_parameter(component_test, "name")
 
     # Set parameter with empty parameter isn't possible because there is no method for that
     # component_test.set_parameter(sr.Parameter("name", sr.ParameterType.STRING))
@@ -66,7 +69,8 @@ def test_validate_empty_parameter(component_test):
     assert Node.get_parameter(component_test, "name").type_ == Parameter.Type.STRING
     assert Node.get_parameter(component_test, "name").value == "again"
 
-    # Setting a parameter with type NOT_SET, undeclares that parameter, hence the last assertion fails!
+    # Setting a parameter with type NOT_SET is not possible, parameter remains unchanged
     Node.set_parameters(component_test, [Parameter("name", type_=Parameter.Type.NOT_SET, value=None)])
     assert component_test.get_parameter("name").get_parameter_type() == sr.ParameterType.STRING
-    assert Node.get_parameter(component_test, "name").type_ == Parameter.Type.NOT_SET
+    assert Node.get_parameter(component_test, "name").type_ == Parameter.Type.STRING
+    assert Node.get_parameter(component_test, "name").value == "again"

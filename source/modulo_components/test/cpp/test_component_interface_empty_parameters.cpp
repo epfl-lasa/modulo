@@ -62,16 +62,12 @@ TYPED_TEST(ComponentInterfaceEmptyParameterTest, ValidateEmptyParameter) {
   auto ros_param = rclcpp::Parameter();
   EXPECT_THROW(ros_param = this->component_->get_ros_parameter("name"),
                rclcpp::exceptions::ParameterUninitializedException);
-//  EXPECT_NO_THROW(this->component_->get_ros_parameter("name"););
-//  EXPECT_EQ(ros_param.get_type(), rclcpp::ParameterType::PARAMETER_NOT_SET);
 
   // Trying to overwrite with an empty parameter is not allowed
   this->component_->add_parameter(std::make_shared<Parameter<bool>>("name"), "Test parameter");
   EXPECT_EQ(this->component_->get_parameter("name")->get_parameter_type(), ParameterType::STRING);
   EXPECT_THROW(ros_param = this->component_->get_ros_parameter("name"),
                rclcpp::exceptions::ParameterUninitializedException);
-//  EXPECT_NO_THROW(ros_param = this->component_->get_ros_parameter("name"););
-//  EXPECT_EQ(ros_param.get_type(), rclcpp::ParameterType::PARAMETER_NOT_SET);
 
   // Set parameter with empty parameter isn't possible because there is no method for that
   // component->set_parameter(std::make_shared<Parameter<std::string>>("name"));
@@ -100,13 +96,12 @@ TYPED_TEST(ComponentInterfaceEmptyParameterTest, ValidateEmptyParameter) {
   EXPECT_EQ(ros_param.get_type(), rclcpp::ParameterType::PARAMETER_STRING);
   EXPECT_EQ(ros_param.template get_value<std::string>(), "again");
 
-  // Setting a parameter with type NOT_SET, undeclares that parameter, hence the last assertion fails!
+  // Setting a parameter with type NOT_SET is not possible, parameter remains unchanged
   auto result = this->component_->set_ros_parameter(rclcpp::Parameter("name"));
   RCLCPP_ERROR_STREAM(this->component_->get_logger(), result.reason);
   EXPECT_EQ(this->component_->get_parameter("name")->get_parameter_type(), ParameterType::STRING);
   EXPECT_NO_THROW(ros_param = this->component_->get_ros_parameter("name"););
-  EXPECT_EQ(ros_param.get_type(), rclcpp::ParameterType::PARAMETER_NOT_SET);
-//  EXPECT_EQ(ros_param.get_type(), rclcpp::ParameterType::PARAMETER_STRING);
-//  EXPECT_EQ(ros_param.get_value<std::string>(), "again");
+  EXPECT_EQ(ros_param.get_type(), rclcpp::ParameterType::PARAMETER_STRING);
+  EXPECT_EQ(ros_param.get_value<std::string>(), "again");
 }
 } // namespace modulo_components
