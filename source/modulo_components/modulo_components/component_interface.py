@@ -11,7 +11,8 @@ from modulo_components.exceptions.component_exceptions import AddSignalError, Co
     LookupTransformError
 from modulo_components.utilities.utilities import generate_predicate_topic, parse_signal_name
 from modulo_core.encoded_state import EncodedState
-from modulo_core.translators.parameter_translators import write_parameter, read_parameter_const
+from modulo_core.exceptions.core_exceptions import ParameterTranslationError
+from modulo_core.translators.parameter_translators import get_ros_parameter_type, read_parameter_const, write_parameter
 from rcl_interfaces.msg import ParameterDescriptor, SetParametersResult
 from rclpy.duration import Duration
 from rclpy.node import Node
@@ -92,6 +93,7 @@ class ComponentInterface(Node):
         :param parameter: Either the name of the parameter attribute or the parameter itself
         :param description: The parameter description
         :param read_only: If True, the value of the parameter cannot be changed after declaration
+        :raises ComponentParameterError if the parameter could not be added
         """
         try:
             if isinstance(parameter, sr.Parameter):
@@ -107,18 +109,24 @@ class ComponentInterface(Node):
                 raise TypeError("Provide either a state_representation.Parameter object or a string "
                                 "containing the name of the attribute that refers to the parameter to add.")
             ros_param = write_parameter(sr_parameter)
-            if not self.has_parameter(sr_parameter.get_name()):
-                self.get_logger().debug(f"Adding parameter '{sr_parameter.get_name()}'.")
-                self._parameter_dict[sr_parameter.get_name()] = parameter
-                # TODO ignore override
-                self.declare_parameter(ros_param.name, ros_param.value,
-                                       descriptor=ParameterDescriptor(description=description),
-                                       ignore_override=read_only)
-            else:
-                self.get_logger().warn(f"Parameter '{sr_parameter.get_name()}' already exists, overwriting.")
-                self.set_parameters([ros_param])
-        except Exception as e:
-            self.get_logger().error(f"Failed to add parameter: {e}")
+        except (TypeError, ParameterTranslationError) as e:
+            raise ComponentParameterError(f"Failed to add parameter: {e}")
+        if not self.has_parameter(sr_parameter.get_name()):
+            self.get_logger().debug(f"Adding parameter '{sr_parameter.get_name()}'.")
+            self._parameter_dict[sr_parameter.get_name()] = parameter
+            try:
+                descriptor = ParameterDescriptor(description=description, read_only=read_only)
+                if sr_parameter.is_empty():
+                    descriptor.dynamic_typing = True
+                    descriptor.type = get_ros_parameter_type(sr_parameter.get_parameter_type()).value
+                    self.declare_parameter(ros_param.name, None, descriptor=descriptor)
+                else:
+                    self.declare_parameter(ros_param.name, ros_param.value, descriptor=descriptor)
+            except Exception as e:
+                del self._parameter_dict[sr_parameter.get_name()]
+                raise ComponentParameterError(f"Failed to add parameter: {e}")
+        else:
+            self.get_logger().warn(f"Parameter '{sr_parameter.get_name()}' already exists.")
 
     def get_parameter(self, name: str) -> Union[sr.Parameter, Parameter]:
         """
