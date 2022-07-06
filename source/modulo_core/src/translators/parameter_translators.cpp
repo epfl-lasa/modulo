@@ -60,16 +60,16 @@ void copy_parameter_value(
                 + parameter->get_name());
       }
       switch (source_parameter->get_parameter_state_type()) {
-        case state_representation::StateType::CARTESIAN_STATE:
+        case StateType::CARTESIAN_STATE:
           parameter->set_parameter_value(source_parameter->get_parameter_value<CartesianState>());
           return;
-        case state_representation::StateType::CARTESIAN_POSE:
+        case StateType::CARTESIAN_POSE:
           parameter->set_parameter_value(source_parameter->get_parameter_value<CartesianPose>());
           return;
-        case state_representation::StateType::JOINT_STATE:
+        case StateType::JOINT_STATE:
           parameter->set_parameter_value(source_parameter->get_parameter_value<JointState>());
           return;
-        case state_representation::StateType::JOINT_POSITIONS:
+        case StateType::JOINT_POSITIONS:
           parameter->set_parameter_value(source_parameter->get_parameter_value<JointPositions>());
           return;
         default:
@@ -84,7 +84,10 @@ void copy_parameter_value(
           + parameter->get_name());
 }
 
-rclcpp::Parameter write_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter) {
+rclcpp::Parameter write_parameter(const std::shared_ptr<ParameterInterface>& parameter) {
+  if (parameter->is_empty()) {
+    return rclcpp::Parameter(parameter->get_name());
+  }
   switch (parameter->get_parameter_type()) {
     case ParameterType::BOOL:
       return {parameter->get_name(), parameter->get_parameter_value<bool>()};
@@ -133,7 +136,7 @@ rclcpp::Parameter write_parameter(const std::shared_ptr<state_representation::Pa
   throw exceptions::ParameterTranslationException("Parameter " + parameter->get_name() + " could not be written!");
 }
 
-std::shared_ptr<state_representation::ParameterInterface> read_parameter(const rclcpp::Parameter& parameter) {
+std::shared_ptr<ParameterInterface> read_parameter(const rclcpp::Parameter& parameter) {
   switch (parameter.get_type()) {
     case rclcpp::PARAMETER_BOOL:
       return make_shared_parameter(parameter.get_name(), parameter.as_bool());
@@ -172,7 +175,8 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter(const r
           return make_shared_parameter<JointPositions>(parameter.get_name(), clproto::decode<JointPositions>(encoding));
         default:
           throw exceptions::ParameterTranslationException(
-              "Parameter " + parameter.get_name() + " has an unsupported encoded message type");
+              "Parameter " + parameter.get_name() + " has an unsupported encoded message type"
+          );
       }
     }
     case rclcpp::PARAMETER_BYTE_ARRAY:
@@ -184,14 +188,17 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter(const r
   throw exceptions::ParameterTranslationException("Parameter " + parameter.get_name() + " could not be read!");
 }
 
-std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
-    const rclcpp::Parameter& ros_parameter,
-    const std::shared_ptr<const state_representation::ParameterInterface>& parameter
+std::shared_ptr<ParameterInterface> read_parameter_const(
+    const rclcpp::Parameter& ros_parameter, const std::shared_ptr<const ParameterInterface>& parameter
 ) {
   if (ros_parameter.get_name() != parameter->get_name()) {
     throw exceptions::ParameterTranslationException(
         "The ROS parameter " + ros_parameter.get_name()
             + " to be read does not have the same name as the reference parameter " + parameter->get_name());
+  }
+  if (ros_parameter.get_type() == rclcpp::PARAMETER_NOT_SET) {
+    return make_shared_parameter_interface(
+        parameter->get_name(), parameter->get_parameter_type(), parameter->get_parameter_state_type());
   }
   auto new_parameter = read_parameter(ros_parameter);
   if (new_parameter->get_parameter_type() == parameter->get_parameter_type()) {
@@ -222,7 +229,8 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
           throw exceptions::ParameterTranslationException(
               "The ROS parameter " + ros_parameter.get_name()
                   + " with type double array cannot be interpreted by reference parameter " + parameter->get_name()
-                  + " (type code " + std::to_string(static_cast<int>(parameter->get_parameter_type())) + ")");
+                  + " (type code " + std::to_string(static_cast<int>(parameter->get_parameter_type())) + ")"
+          );
       }
       break;
     }
@@ -238,5 +246,31 @@ void read_parameter(
 ) {
   auto new_parameter = read_parameter_const(ros_parameter, parameter);
   copy_parameter_value(new_parameter, parameter);
+}
+
+rclcpp::ParameterType get_ros_parameter_type(const ParameterType& parameter_type) {
+  switch (parameter_type) {
+    case ParameterType::BOOL:
+      return rclcpp::ParameterType::PARAMETER_BOOL;
+    case ParameterType::BOOL_ARRAY:
+      return rclcpp::ParameterType::PARAMETER_BOOL_ARRAY;
+    case ParameterType::INT:
+      return rclcpp::ParameterType::PARAMETER_INTEGER;
+    case ParameterType::INT_ARRAY:
+      return rclcpp::ParameterType::PARAMETER_INTEGER_ARRAY;
+    case ParameterType::DOUBLE:
+      return rclcpp::ParameterType::PARAMETER_DOUBLE;
+    case ParameterType::DOUBLE_ARRAY:
+    case ParameterType::VECTOR:
+    case ParameterType::MATRIX:
+      return rclcpp::ParameterType::PARAMETER_DOUBLE_ARRAY;
+    case ParameterType::STRING:
+      return rclcpp::ParameterType::PARAMETER_STRING;
+    case ParameterType::STRING_ARRAY:
+    case ParameterType::STATE:
+      return rclcpp::ParameterType::PARAMETER_STRING_ARRAY;
+    default:
+      return rclcpp::ParameterType::PARAMETER_NOT_SET;
+  }
 }
 }// namespace modulo_core::translators

@@ -60,4 +60,13 @@ std::shared_ptr<state_representation::ParameterInterface> read_parameter_const(
 void read_parameter(
     const rclcpp::Parameter& ros_parameter, const std::shared_ptr<state_representation::ParameterInterface>& parameter
 );
+
+
+/**
+ * @brief Given a state representation parameter type, get the corresponding ROS parameter type.
+ * @param parameter_type The state representation parameter type
+ * @return The corresponding ROS parameter type
+ */
+rclcpp::ParameterType get_ros_parameter_type(const state_representation::ParameterType& parameter_type);
+
 }// namespace modulo_core::exceptions

@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "modulo_core/exceptions/ParameterTranslationException.hpp"
 #include "modulo_core/translators/parameter_translators.hpp"
 
 using namespace modulo_core::translators;
@@ -54,16 +55,21 @@ TYPED_TEST_SUITE_P(ParameterTranslationTest);
 
 TYPED_TEST_P(ParameterTranslationTest, Write) {
   for (auto const& test_case : this->test_cases_) {
-    auto param = state_representation::make_shared_parameter("test", std::get<0>(test_case));
+    auto param = std::make_shared<state_representation::Parameter<TypeParam>>("test");
     rclcpp::Parameter ros_param;
+    EXPECT_NO_THROW(ros_param = write_parameter(param));
+    EXPECT_EQ(ros_param.get_type(), rclcpp::ParameterType::PARAMETER_NOT_SET);
+    param = state_representation::make_shared_parameter("test", std::get<0>(test_case));
     EXPECT_NO_THROW(ros_param = write_parameter(param));
     EXPECT_EQ(ros_param, rclcpp::Parameter("test", std::get<0>(test_case)));
   }
 }
 
 TYPED_TEST_P(ParameterTranslationTest, ReadAndReWrite) {
+  auto ros_param = rclcpp::Parameter("test");
+  EXPECT_THROW(read_parameter(ros_param), modulo_core::exceptions::ParameterTranslationException);
   for (auto const& [value, type]: this->test_cases_) {
-    auto ros_param = rclcpp::Parameter("test", value);
+    ros_param = rclcpp::Parameter("test", value);
     std::shared_ptr<state_representation::ParameterInterface> param;
     ASSERT_NO_THROW(param = read_parameter(ros_param));
     EXPECT_EQ(param->get_name(), ros_param.get_name());
