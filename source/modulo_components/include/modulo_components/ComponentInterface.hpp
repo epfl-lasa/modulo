@@ -339,6 +339,8 @@ private:
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_; ///< TF listener
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_; ///< TF broadcaster
   // TODO maybe add a static tf broadcaster
+
+  bool set_parameter_callback_called_ = false; ///< Flag to indicate if on_set_parameter_callback was called
 };
 
 template<class NodeT>
@@ -394,6 +396,7 @@ inline void ComponentInterface<NodeT>::add_parameter(
     const std::shared_ptr<state_representation::ParameterInterface>& parameter, const std::string& description,
     bool read_only
 ) {
+  this->set_parameter_callback_called_ = false;
   rclcpp::Parameter ros_param;
   try {
     ros_param = modulo_core::translators::write_parameter(parameter);
@@ -411,14 +414,15 @@ inline void ComponentInterface<NodeT>::add_parameter(
         descriptor.dynamic_typing = true;
         descriptor.type = modulo_core::translators::get_ros_parameter_type(parameter->get_parameter_type());
         NodeT::declare_parameter(parameter->get_name(), rclcpp::ParameterValue{}, descriptor);
-        if (!this->validate_parameter(parameter)) {
-          NodeT::undeclare_parameter(parameter->get_name());
-          throw exceptions::ComponentParameterException(
-              "Validation of parameter '" + parameter->get_name() + "' returned false!"
-          );
-        }
       } else {
         NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value(), descriptor);
+      }
+      if (!this->set_parameter_callback_called_) {
+        auto result = this->on_set_parameters_callback({NodeT::get_parameters({parameter->get_name()})});
+        if (!result.successful) {
+          NodeT::undeclare_parameter(parameter->get_name());
+          throw exceptions::ComponentParameterException(result.reason);
+        }
       }
     } catch (const std::exception& ex) {
       this->parameter_map_.remove_parameter(parameter->get_name());
@@ -480,7 +484,7 @@ ComponentInterface<NodeT>::on_set_parameters_callback(const std::vector<rclcpp::
       if (!this->validate_parameter(new_parameter)) {
         result.successful = false;
         result.reason += "Validation of parameter '" + ros_parameter.get_name() + "' returned false!";
-      } else {
+      } else if (!new_parameter->is_empty()) {
         // update the value of the parameter in the map
         modulo_core::translators::copy_parameter_value(new_parameter, parameter);
       }
@@ -489,6 +493,7 @@ ComponentInterface<NodeT>::on_set_parameters_callback(const std::vector<rclcpp::
       result.reason += ex.what();
     }
   }
+  this->set_parameter_callback_called_ = true;
   return result;
 }
 

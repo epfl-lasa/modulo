@@ -10,11 +10,14 @@ from rclpy.parameter import Parameter
 
 
 class EmtpyParameterInterface(ComponentInterface):
-    def __init__(self, node_name, allow_empty=True, add_parameter=True, *kargs, **kwargs):
+    def __init__(self, node_name, allow_empty=True, add_parameter=True, empty_parameter=True, *kargs, **kwargs):
         super().__init__(node_name, *kargs, **kwargs)
         self._allow_empty = allow_empty
         if add_parameter:
-            self.add_parameter(sr.Parameter("name", sr.ParameterType.STRING), "Test parameter")
+            if empty_parameter:
+                self.add_parameter(sr.Parameter("name", sr.ParameterType.STRING), "Test parameter")
+            else:
+                self.add_parameter(sr.Parameter("name", "test", sr.ParameterType.STRING), "Test parameter")
 
     def get_ros_parameter(self, name: str) -> rclpy.Parameter:
         return rclpy.node.Node.get_parameter(self, name)
@@ -138,5 +141,12 @@ def test_change_parameter_type(component_test):
 
 
 def test_parameter_overrides(ros_context):
-    # Construction with allowing empty parameters but providing the parameter override should succeed
+    # Construction with not allowing empty parameters but providing the parameter override should succeed
     EmtpyParameterInterface("component", False, parameter_overrides=[Parameter("name", value="test")])
+
+
+def test_parameter_overrides_empty(ros_context):
+    # Construction with not allowing empty parameters and providing an uninitialized parameter override should not succeed
+    with pytest.raises(ComponentParameterError):
+        EmtpyParameterInterface("component", allow_empty=False, empty_parameter=False,
+                                parameter_overrides=[Parameter("name")])

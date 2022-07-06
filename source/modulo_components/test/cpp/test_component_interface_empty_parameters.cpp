@@ -11,10 +11,15 @@ class EmptyParameterInterface : public ComponentInterfacePublicInterface<NodeT> 
 public:
   explicit EmptyParameterInterface(
       const rclcpp::NodeOptions& node_options, modulo_core::communication::PublisherType publisher_type,
-      const std::string& fallback_name = "EmptyParameterInterface", bool allow_empty = true, bool add_parameter = true
+      const std::string& fallback_name = "EmptyParameterInterface", bool allow_empty = true, bool add_parameter = true,
+      bool empty_parameter = true
   ) : ComponentInterfacePublicInterface<NodeT>(node_options, publisher_type, fallback_name), allow_empty_(allow_empty) {
     if (add_parameter) {
-      this->add_parameter(std::make_shared<Parameter<std::string>>("name"), "Test parameter");
+      if (empty_parameter) {
+        this->add_parameter(std::make_shared<Parameter<std::string>>("name"), "Test parameter");
+      } else {
+        this->add_parameter(std::make_shared<Parameter<std::string>>("name", "test"), "Test parameter");
+      }
     }
   };
 
@@ -197,7 +202,7 @@ TYPED_TEST(ComponentInterfaceEmptyParameterTest, ChangeParameterType) {
 }
 
 TYPED_TEST(ComponentInterfaceEmptyParameterTest, ParameterOverrides) {
-  // Construction with allowing empty parameters but providing the parameter override should succeed
+  // Construction with not allowing empty parameters but providing the parameter override should succeed
   if (std::is_same<TypeParam, rclcpp::Node>::value) {
     EXPECT_NO_THROW(std::make_shared<EmptyParameterInterface<TypeParam>>(
         rclcpp::NodeOptions().parameter_overrides({rclcpp::Parameter("name", "test")}),
@@ -208,6 +213,22 @@ TYPED_TEST(ComponentInterfaceEmptyParameterTest, ParameterOverrides) {
         rclcpp::NodeOptions().parameter_overrides({rclcpp::Parameter("name", "test")}),
         modulo_core::communication::PublisherType::LIFECYCLE_PUBLISHER, "EmptyParameterComponent", false
     ));
+  }
+}
+
+TYPED_TEST(ComponentInterfaceEmptyParameterTest, ParameterOverridesEmpty) {
+  // Construction with not allowing empty parameters and providing an uninitialized parameter override should not succeed
+  std::shared_ptr<EmptyParameterInterface<TypeParam>> component;
+  if (std::is_same<TypeParam, rclcpp::Node>::value) {
+    EXPECT_THROW(component = std::make_shared<EmptyParameterInterface<TypeParam>>(
+        rclcpp::NodeOptions().parameter_overrides({rclcpp::Parameter("name")}),
+        modulo_core::communication::PublisherType::PUBLISHER, "EmptyParameterComponent", false, true, false
+    ), modulo_components::exceptions::ComponentParameterException);
+  } else if (std::is_same<TypeParam, rclcpp_lifecycle::LifecycleNode>::value) {
+    EXPECT_THROW(std::make_shared<EmptyParameterInterface<TypeParam>>(
+        rclcpp::NodeOptions().parameter_overrides({rclcpp::Parameter("name")}),
+        modulo_core::communication::PublisherType::LIFECYCLE_PUBLISHER, "EmptyParameterComponent", false, true, false
+    ), modulo_components::exceptions::ComponentParameterException);
   }
 }
 } // namespace modulo_components
