@@ -32,29 +32,9 @@ class ComponentInterface(Node):
     """
     Abstract class to represent a Component in python, following the same logic pattern  as the C++
     modulo_component::ComponentInterface class.
-    ...
-    # TODO class docstring and attributes
-    Attributes:
-        predicates (dict(Parameters(bool))): map of predicates added to the Component.
-        predicate_publishers (dict(rclpy.Publisher(Bool))): map of publishers associated to each predicate.
-        parameter_dict (dict(Publisher)): dict of parameters
-        periodic_callbacks (dict(Callable): dict of periodic callback functions
-        qos (rclpy.qos.QoSProfile: the Quality of Service for publishers and subscribers
-        inputs: dict of inputs
-        outputs: dict of output
-        tf_buffer (tf2_ros.Buffer): the buffer to lookup transforms published on tf2.
-        tf_listener (tf2_ros.TransformListener): the listener to lookup transforms published on tf2.
-        tf_broadcaster (tf2_ros.TransformBroadcaster): the broadcaster to publish transforms on tf2
-    Parameters:
-        period (double): period (in s) between step function calls.
     """
 
     def __init__(self, node_name: str, *kargs, **kwargs):
-        """
-        Constructs all the necessary attributes and declare all the parameters.
-            Parameters:
-                node_name (str): name of the node to be passed to the base Node class
-        """
         super().__init__(node_name, *kargs, **kwargs)
         self._parameter_dict: Dict[str, Union[str, sr.Parameter]] = {}
         self._predicates: Dict[str, Union[bool, Callable[[], bool]]] = {}
@@ -221,7 +201,7 @@ class ComponentInterface(Node):
                 new_parameter = read_parameter_const(ros_param, parameter)
                 if not self._validate_parameter(new_parameter):
                     result.successful = False
-                    result.reason = f"Parameter {ros_param.name} could not be set!"
+                    result.reason = f"Validation of parameter '{ros_param.name}' returned false!"
                 else:
                     if isinstance(self._parameter_dict[ros_param.name], str):
                         self.__setattr__(self._parameter_dict[ros_param.name], new_parameter)

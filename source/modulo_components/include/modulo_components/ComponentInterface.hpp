@@ -476,9 +476,9 @@ ComponentInterface<NodeT>::on_set_parameters_callback(const std::vector<rclcpp::
 
       // convert the ROS parameter into a ParameterInterface without modifying the original
       auto new_parameter = modulo_core::translators::read_parameter_const(ros_parameter, parameter);
-      if (!validate_parameter(new_parameter)) {
+      if (!this->validate_parameter(new_parameter)) {
         result.successful = false;
-        result.reason += "Parameter " + ros_parameter.get_name() + " could not be set! ";
+        result.reason += "Validation of parameter '" + ros_parameter.get_name() + "' returned false!";
       } else {
         // update the value of the parameter in the map
         modulo_core::translators::copy_parameter_value(new_parameter, parameter);
