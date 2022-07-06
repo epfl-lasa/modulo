@@ -19,7 +19,6 @@ def write_parameter(parameter: sr.Parameter) -> Parameter:
     if parameter.is_empty():
         return Parameter(parameter.get_name(), value=None, type_=Parameter.Type.NOT_SET)
     elif parameter.get_parameter_type() == sr.ParameterType.BOOL or \
-            parameter.get_parameter_type() == sr.ParameterType.BOOL_ARRAY or \
             parameter.get_parameter_type() == sr.ParameterType.INT or \
             parameter.get_parameter_type() == sr.ParameterType.DOUBLE or \
             parameter.get_parameter_type() == sr.ParameterType.STRING:
