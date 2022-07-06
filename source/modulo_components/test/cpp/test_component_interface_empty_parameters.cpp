@@ -20,9 +20,6 @@ public:
 
 private:
   bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter) override {
-    if (parameter->get_name() == "period") {
-      return false;
-    }
     if (parameter->get_name() == "name") {
       if (parameter->is_empty()) {
         return this->allow_empty_;
@@ -197,5 +194,20 @@ TYPED_TEST(ComponentInterfaceEmptyParameterTest, ChangeParameterType) {
   EXPECT_NO_THROW(ros_param = this->component_->get_ros_parameter("int"););
   EXPECT_EQ(ros_param.get_type(), rclcpp::ParameterType::PARAMETER_INTEGER);
   EXPECT_EQ(ros_param.template get_value<int>(), 1);
+}
+
+TYPED_TEST(ComponentInterfaceEmptyParameterTest, ParameterOverrides) {
+  // Construction with allowing empty parameters but providing the parameter override should succeed
+  if (std::is_same<TypeParam, rclcpp::Node>::value) {
+    EXPECT_NO_THROW(std::make_shared<EmptyParameterInterface<TypeParam>>(
+        rclcpp::NodeOptions().parameter_overrides({rclcpp::Parameter("name", "test")}),
+        modulo_core::communication::PublisherType::PUBLISHER, "EmptyParameterComponent", false
+    ));
+  } else if (std::is_same<TypeParam, rclcpp_lifecycle::LifecycleNode>::value) {
+    EXPECT_NO_THROW(std::make_shared<EmptyParameterInterface<TypeParam>>(
+        rclcpp::NodeOptions().parameter_overrides({rclcpp::Parameter("name", "test")}),
+        modulo_core::communication::PublisherType::LIFECYCLE_PUBLISHER, "EmptyParameterComponent", false
+    ));
+  }
 }
 } // namespace modulo_components

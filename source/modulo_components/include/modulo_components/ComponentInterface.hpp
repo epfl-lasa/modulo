@@ -408,14 +408,15 @@ inline void ComponentInterface<NodeT>::add_parameter(
       descriptor.description = description;
       descriptor.read_only = read_only;
       if (parameter->is_empty()) {
+        descriptor.dynamic_typing = true;
+        descriptor.type = modulo_core::translators::get_ros_parameter_type(parameter->get_parameter_type());
+        NodeT::declare_parameter(parameter->get_name(), rclcpp::ParameterValue{}, descriptor);
         if (!this->validate_parameter(parameter)) {
+          NodeT::undeclare_parameter(parameter->get_name());
           throw exceptions::ComponentParameterException(
               "Validation of parameter '" + parameter->get_name() + "' returned false!"
           );
         }
-        descriptor.dynamic_typing = true;
-        descriptor.type = modulo_core::translators::get_ros_parameter_type(parameter->get_parameter_type());
-        NodeT::declare_parameter(parameter->get_name(), rclcpp::ParameterValue{}, descriptor);
       } else {
         NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value(), descriptor);
       }

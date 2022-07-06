@@ -135,3 +135,8 @@ def test_change_parameter_type(component_test):
     ros_param = component_test.get_ros_parameter("int")
     assert ros_param.type_ == Parameter.Type.INTEGER
     assert ros_param.value == 1
+
+
+def test_parameter_overrides(ros_context):
+    # Construction with allowing empty parameters but providing the parameter override should succeed
+    EmtpyParameterInterface("component", False, parameter_overrides=[Parameter("name", value="test")])
