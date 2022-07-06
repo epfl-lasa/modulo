@@ -59,9 +59,8 @@ def test_add_parameter_again(component_interface):
     component_interface.add_parameter("param", "Test parameter")
     component_interface.validate_was_called = False
     component_interface.add_parameter(sr.Parameter("test", 2, sr.ParameterType.INT), "foo")
-    assert component_interface.validate_was_called
-    assert_param_value_equal(component_interface, "test", 2)
-    assert component_interface.param.get_value() == 2
+    assert not component_interface.validate_was_called
+    assert_param_value_equal(component_interface, "test", 1)
 
 
 def test_add_parameter_again_not_attribute(component_interface):
@@ -73,9 +72,8 @@ def test_add_parameter_again_not_attribute(component_interface):
     component_interface.add_parameter(component_interface.param, "Test parameter")
     component_interface.validate_was_called = False
     component_interface.add_parameter(sr.Parameter("test", 2, sr.ParameterType.INT), "foo")
-    assert component_interface.validate_was_called
-    assert_param_value_equal(component_interface, "test", 2)
-    assert component_interface.param.get_value() == 1
+    assert not component_interface.validate_was_called
+    assert_param_value_equal(component_interface, "test", 1)
 
 
 def test_set_parameter(component_interface):
@@ -140,16 +138,14 @@ def test_read_only_parameter(component_interface):
     component_interface.get_ros_parameter("test")
     assert_param_value_equal(component_interface, "test", 1)
 
-    # TODO read only
     component_interface.validate_was_called = False
-    # with pytest.raises(RuntimeError):
-    #     component_interface.set_parameter_value("test", 2, sr.ParameterType.INT)
-    # assert not component_interface.validate_was_called
+    component_interface.set_parameter_value("test", 2, sr.ParameterType.INT)
+    assert not component_interface.validate_was_called
     assert_param_value_equal(component_interface, "test", 1)
     assert component_interface.param.get_value() == 1
 
     component_interface.validate_was_called = False
-    # result = component_interface.set_ros_parameter(rclpy.Parameter("test", value=2))
-    # assert not component_interface.validate_was_called
-    # assert not result.successful
+    result = component_interface.set_ros_parameter(rclpy.Parameter("test", value=2))
+    assert not component_interface.validate_was_called
+    assert not result.successful
     assert_param_value_equal(component_interface, "test", 1)

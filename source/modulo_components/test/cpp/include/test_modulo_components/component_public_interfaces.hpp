@@ -12,8 +12,9 @@ template<class NodeT>
 class ComponentInterfacePublicInterface : public ComponentInterface<NodeT> {
 public:
   explicit ComponentInterfacePublicInterface(
-      const rclcpp::NodeOptions& node_options, modulo_core::communication::PublisherType publisher_type
-  ) : ComponentInterface<NodeT>(node_options, publisher_type) {}
+      const rclcpp::NodeOptions& node_options, modulo_core::communication::PublisherType publisher_type,
+      const std::string& fallback_name = "ComponentInterfacePublicInterface"
+  ) : ComponentInterface<NodeT>(node_options, publisher_type, fallback_name) {}
   using ComponentInterface<NodeT>::add_parameter;
   using ComponentInterface<NodeT>::get_parameter;
   using ComponentInterface<NodeT>::get_parameter_value;
