@@ -197,7 +197,8 @@ std::shared_ptr<ParameterInterface> read_parameter_const(
             + " to be read does not have the same name as the reference parameter " + parameter->get_name());
   }
   if (ros_parameter.get_type() == rclcpp::PARAMETER_NOT_SET) {
-    return std::make_shared<ParameterInterface>(*parameter);
+    return make_shared_parameter_interface(
+        parameter->get_name(), parameter->get_parameter_type(), parameter->get_parameter_state_type());
   }
   auto new_parameter = read_parameter(ros_parameter);
   if (new_parameter->get_parameter_type() == parameter->get_parameter_type()) {
