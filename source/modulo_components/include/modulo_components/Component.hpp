@@ -20,12 +20,9 @@ public:
   /**
    * @brief Constructor from node options.
    * @param node_options Node options as used in ROS2 Node
-   * @param start_thread If true, start the execution thread on construction
    * @param fallback_name The name of the component if it was not provided through the node options
    */
-  explicit Component(
-      const rclcpp::NodeOptions& node_options, const std::string& fallback_name = "Component", bool start_thread = false
-  );
+  explicit Component(const rclcpp::NodeOptions& node_options, const std::string& fallback_name = "Component");
 
   /**
    * @brief Virtual default destructor.

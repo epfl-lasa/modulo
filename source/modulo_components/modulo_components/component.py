@@ -17,7 +17,7 @@ class Component(ComponentInterface):
         run_thread (Thread): the execution thread
     """
 
-    def __init__(self, node_name: str, start_thread=False, *kargs, **kwargs):
+    def __init__(self, node_name: str, *kargs, **kwargs):
         """
         Constructs all the necessary attributes and declare all the parameters.
             Parameters:
@@ -28,9 +28,6 @@ class Component(ComponentInterface):
         self.__started = False
         self.__run_thread = None
         self.add_predicate("is_finished", False)
-
-        if start_thread:
-            self.start_thread()
 
     def _step(self):
         """
