@@ -243,6 +243,9 @@ class LifecycleComponent(ComponentInterface):
         :param fixed_topic: If true, the topic name of the output signal is fixed
         :param default_topic: If set, the default value for the topic name to use
         """
+        if self.__state not in [State.PRIMARY_STATE_UNCONFIGURED, State.PRIMARY_STATE_INACTIVE]:
+            self.get_logger().warn(f"Adding output in state {self.__state} is not allowed.", throttle_duration_sec=1.0)
+            return
         try:
             parsed_signal_name = self._create_output(signal_name, data, message_type, clproto_message_type, fixed_topic,
                                                      default_topic)
