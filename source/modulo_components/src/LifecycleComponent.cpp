@@ -120,8 +120,8 @@ LifecycleComponent::on_activate(const rclcpp_lifecycle::State& previous_state) {
 }
 
 bool LifecycleComponent::handle_activate() {
-  bool result = this->on_activate_callback();
-  return result && this->activate_outputs();
+  bool result = this->activate_outputs();
+  return result && this->on_activate_callback();
 }
 
 bool LifecycleComponent::on_activate_callback() {
