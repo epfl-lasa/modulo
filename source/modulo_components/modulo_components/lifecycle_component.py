@@ -82,7 +82,7 @@ class LifecycleComponent(ComponentInterface):
 
         :return: True if the transition was successful
         """
-        return self.__configure_outputs() and self.on_configure_callback()
+        return self.on_configure_callback() and self.__configure_outputs()
 
     def on_configure_callback(self) -> bool:
         """
