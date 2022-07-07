@@ -112,7 +112,7 @@ TYPED_TEST(ComponentInterfaceTest, CreateOutput) {
     EXPECT_EQ(pub_interface->get_type(), modulo_core::communication::PublisherType::LIFECYCLE_PUBLISHER);
   }
   EXPECT_EQ(pub_interface->get_message_pair()->get_type(), modulo_core::communication::MessageType::BOOL);
-  EXPECT_THROW(pub_interface->publish(), modulo_core::exceptions::InvalidPointerCastException);
+  EXPECT_THROW(pub_interface->publish(), modulo_core::exceptions::CoreException);
 }
 
 TYPED_TEST(ComponentInterfaceTest, TF) {
