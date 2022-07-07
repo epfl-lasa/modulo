@@ -24,7 +24,7 @@ public:
    * @param fallback_name The name of the component if it was not provided through the node options
    */
   explicit Component(
-      const rclcpp::NodeOptions& node_options, bool start_thread = false, const std::string& fallback_name = "Component"
+      const rclcpp::NodeOptions& node_options, const std::string& fallback_name = "Component", bool start_thread = false
   );
 
   /**
