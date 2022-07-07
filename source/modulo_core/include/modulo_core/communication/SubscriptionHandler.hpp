@@ -48,6 +48,7 @@ public:
 
 private:
   std::shared_ptr<rclcpp::Subscription<MsgT>> subscription_; ///< The pointer referring to the ROS subscription
+  std::shared_ptr<rclcpp::Clock> clock_; ///< ROS clock for throttling log
 };
 
 template<typename MsgT>
