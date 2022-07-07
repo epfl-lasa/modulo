@@ -10,7 +10,7 @@ from geometry_msgs.msg import TransformStamped
 from modulo_components.exceptions import AddSignalError, ComponentParameterError, LookupTransformError
 from modulo_components.utilities import generate_predicate_topic, parse_signal_name
 from modulo_core import EncodedState
-from modulo_core.exceptions import ParameterTranslationError
+from modulo_core.exceptions import MessageTranslationError, ParameterTranslationError
 from modulo_core.translators.parameter_translators import get_ros_parameter_type, read_parameter_const, write_parameter
 from rcl_interfaces.msg import ParameterDescriptor, SetParametersResult
 from rclpy.duration import Duration
@@ -321,8 +321,9 @@ class ComponentInterface(Node):
         """
         try:
             self.__setattr__(attribute_name, reader(message))
-        except Exception as e:
-            self.get_logger().error(f"Failed to read message for attribute {attribute_name}", throttle_duration_sec=1.0)
+        except (AttributeError, MessageTranslationError) as e:
+            self.get_logger().warn(f"Failed to read message for attribute {attribute_name}: {e}",
+                                    throttle_duration_sec=1.0)
 
     def add_input(self, signal_name: str, subscription: Union[str, Callable], message_type: MsgT, default_topic="",
                   fixed_topic=False):
@@ -411,7 +412,7 @@ class ComponentInterface(Node):
             transform_message = TransformStamped()
             modulo_writers.write_stamped_message(transform_message, transform, self.get_clock().now())
             self.__tf_broadcaster.sendTransform(transform_message)
-        except TransformException as e:
+        except (MessageTranslationError, TransformException) as e:
             self.get_logger().error(f"Failed to send transform: {e}", throttle_duration_sec=1.0)
 
     def lookup_transform(self, frame_name: str, reference_frame_name="world", time_point=Time(),
