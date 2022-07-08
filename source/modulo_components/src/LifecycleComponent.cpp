@@ -1,7 +1,5 @@
 #include "modulo_components/LifecycleComponent.hpp"
 
-#include <lifecycle_msgs/msg/state.hpp>
-
 using namespace modulo_core::communication;
 
 namespace modulo_components {
@@ -69,8 +67,8 @@ LifecycleComponent::on_configure(const rclcpp_lifecycle::State& previous_state) 
 }
 
 bool LifecycleComponent::handle_configure() {
-  bool result = this->configure_outputs();
-  return result && this->on_configure_callback();
+  bool result = this->on_configure_callback();
+  return result && this->configure_outputs();
 }
 
 bool LifecycleComponent::on_configure_callback() {
@@ -92,8 +90,8 @@ LifecycleComponent::on_cleanup(const rclcpp_lifecycle::State& previous_state) {
 }
 
 bool LifecycleComponent::handle_cleanup() {
-  bool result = this->cleanup_signals();
-  return result && this->on_cleanup_callback();
+  bool result = this->on_cleanup_callback();
+  return result && this->cleanup_signals();
 }
 
 bool LifecycleComponent::on_cleanup_callback() {
@@ -145,8 +143,8 @@ LifecycleComponent::on_deactivate(const rclcpp_lifecycle::State& previous_state)
 }
 
 bool LifecycleComponent::handle_deactivate() {
-  bool result = this->deactivate_outputs();
-  return result && this->on_deactivate_callback();
+  bool result = this->on_deactivate_callback();
+  return result && this->deactivate_outputs();
 }
 
 bool LifecycleComponent::on_deactivate_callback() {

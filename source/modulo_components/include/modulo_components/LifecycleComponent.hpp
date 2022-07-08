@@ -1,5 +1,6 @@
 #pragma once
 
+#include <lifecycle_msgs/msg/state.hpp>
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 
 #include "modulo_components/ComponentInterface.hpp"
@@ -260,6 +261,12 @@ inline void LifecycleComponent::add_output(
     const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
     const std::string& default_topic
 ) {
+  if (this->get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED
+      && this->get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE) {
+    RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                "Adding output in state " << this->get_current_state().label() << " is not allowed.");
+    return;
+  }
   try {
     this->create_output(signal_name, data, fixed_topic, default_topic);
   } catch (const std::exception& ex) {
