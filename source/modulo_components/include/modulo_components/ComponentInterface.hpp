@@ -19,6 +19,7 @@
 #include <modulo_core/communication/PublisherHandler.hpp>
 #include <modulo_core/communication/PublisherType.hpp>
 #include <modulo_core/communication/SubscriptionHandler.hpp>
+#include <modulo_core/exceptions/ParameterTranslationException.hpp>
 #include <modulo_core/translators/message_readers.hpp>
 #include <modulo_core/translators/message_writers.hpp>
 #include <modulo_core/translators/parameter_translators.hpp>
@@ -79,6 +80,7 @@ protected:
    * @param parameter A ParameterInterface pointer to a Parameter instance
    * @param description The description of the parameter
    * @param read_only If true, the value of the parameter cannot be changed after declaration
+   * @raise ComponentParameterError if the parameter could not be added
    */
   void add_parameter(
       const std::shared_ptr<state_representation::ParameterInterface>& parameter, const std::string& description,
@@ -94,6 +96,7 @@ protected:
    * @param value The value of the parameter
    * @param description The description of the parameter
    * @param read_only If true, the value of the parameter cannot be changed after declaration
+   * @raise ComponentParameterError if the parameter could not be added
    */
   template<typename T>
   void add_parameter(const std::string& name, const T& value, const std::string& description, bool read_only = false);
@@ -336,6 +339,8 @@ private:
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_; ///< TF listener
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_; ///< TF broadcaster
   // TODO maybe add a static tf broadcaster
+
+  bool set_parameter_callback_called_ = false; ///< Flag to indicate if on_set_parameter_callback was called
 };
 
 template<class NodeT>
@@ -391,22 +396,40 @@ inline void ComponentInterface<NodeT>::add_parameter(
     const std::shared_ptr<state_representation::ParameterInterface>& parameter, const std::string& description,
     bool read_only
 ) {
+  this->set_parameter_callback_called_ = false;
+  rclcpp::Parameter ros_param;
   try {
-    auto ros_param = modulo_core::translators::write_parameter(parameter);
-    if (!NodeT::has_parameter(parameter->get_name())) {
-      RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding parameter '" << parameter->get_name() << "'.");
-      parameter_map_.set_parameter(parameter);
+    ros_param = modulo_core::translators::write_parameter(parameter);
+  } catch (const modulo_core::exceptions::ParameterTranslationException& ex) {
+    throw exceptions::ComponentParameterException("Failed to add parameter: " + std::string(ex.what()));
+  }
+  if (!NodeT::has_parameter(parameter->get_name())) {
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding parameter '" << parameter->get_name() << "'.");
+    this->parameter_map_.set_parameter(parameter);
+    try {
       rcl_interfaces::msg::ParameterDescriptor descriptor;
       descriptor.description = description;
       descriptor.read_only = read_only;
-      NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value(), descriptor);
-    } else {
-      RCLCPP_WARN_STREAM(this->get_logger(),
-                         "Parameter '" << parameter->get_name() << "' already exists, overwriting.");
-      NodeT::set_parameter(ros_param);
+      if (parameter->is_empty()) {
+        descriptor.dynamic_typing = true;
+        descriptor.type = modulo_core::translators::get_ros_parameter_type(parameter->get_parameter_type());
+        NodeT::declare_parameter(parameter->get_name(), rclcpp::ParameterValue{}, descriptor);
+      } else {
+        NodeT::declare_parameter(parameter->get_name(), ros_param.get_parameter_value(), descriptor);
+      }
+      if (!this->set_parameter_callback_called_) {
+        auto result = this->on_set_parameters_callback({NodeT::get_parameters({parameter->get_name()})});
+        if (!result.successful) {
+          NodeT::undeclare_parameter(parameter->get_name());
+          throw exceptions::ComponentParameterException(result.reason);
+        }
+      }
+    } catch (const std::exception& ex) {
+      this->parameter_map_.remove_parameter(parameter->get_name());
+      throw exceptions::ComponentParameterException("Failed to add parameter: " + std::string(ex.what()));
     }
-  } catch (const std::exception& ex) {
-    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add parameter '" << parameter->get_name() << "': " << ex.what());
+  } else {
+    RCLCPP_WARN_STREAM(this->get_logger(), "Parameter '" << parameter->get_name() << "' already exists.");
   }
 }
 
@@ -458,10 +481,10 @@ ComponentInterface<NodeT>::on_set_parameters_callback(const std::vector<rclcpp::
 
       // convert the ROS parameter into a ParameterInterface without modifying the original
       auto new_parameter = modulo_core::translators::read_parameter_const(ros_parameter, parameter);
-      if (!validate_parameter(new_parameter)) {
+      if (!this->validate_parameter(new_parameter)) {
         result.successful = false;
-        result.reason += "Parameter " + ros_parameter.get_name() + " could not be set! ";
-      } else {
+        result.reason += "Validation of parameter '" + ros_parameter.get_name() + "' returned false!";
+      } else if (!new_parameter->is_empty()) {
         // update the value of the parameter in the map
         modulo_core::translators::copy_parameter_value(new_parameter, parameter);
       }
@@ -470,6 +493,7 @@ ComponentInterface<NodeT>::on_set_parameters_callback(const std::vector<rclcpp::
       result.reason += ex.what();
     }
   }
+  this->set_parameter_callback_called_ = true;
   return result;
 }
 

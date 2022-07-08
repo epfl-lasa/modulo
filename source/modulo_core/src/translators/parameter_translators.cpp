@@ -236,7 +236,8 @@ std::shared_ptr<ParameterInterface> read_parameter_const(
     }
     default:
       throw exceptions::ParameterTranslationException(
-          "Something went wrong while reading parameter " + parameter->get_name());
+          "Incompatible parameter type encountered while reading parameter '" + parameter->get_name() + "'."
+      );
   }
   return new_parameter;
 }

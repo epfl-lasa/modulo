@@ -75,9 +75,8 @@ TYPED_TEST(ComponentInterfaceParameterTest, AddParameterAgain) {
   // Adding an existing parameter again should just set the value
   this->component_->validate_parameter_was_called = false;
   EXPECT_NO_THROW(this->component_->add_parameter("test", 2, "foo"));
-  EXPECT_TRUE(this->component_->validate_parameter_was_called);
-  this->template expect_parameter_value<int>(2);
-  EXPECT_EQ(this->param_->get_value(), 2);
+  EXPECT_FALSE(this->component_->validate_parameter_was_called);
+  this->template expect_parameter_value<int>(1);
 }
 
 TYPED_TEST(ComponentInterfaceParameterTest, SetParameter) {
