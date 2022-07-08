@@ -20,12 +20,9 @@ public:
   /**
    * @brief Constructor from node options.
    * @param node_options Node options as used in ROS2 Node
-   * @param start_thread If true, start the execution thread on construction
    * @param fallback_name The name of the component if it was not provided through the node options
    */
-  explicit Component(
-      const rclcpp::NodeOptions& node_options, bool start_thread = true, const std::string& fallback_name = "Component"
-  );
+  explicit Component(const rclcpp::NodeOptions& node_options, const std::string& fallback_name = "Component");
 
   /**
    * @brief Virtual default destructor.
@@ -36,13 +33,13 @@ protected:
   /**
    * @brief Start the execution thread.
    */
-  void start_thread();
+  void execute();
 
   /**
    * @brief Execute the component logic. To be redefined in derived classes.
    * @return True, if the execution was successful, false otherwise
    */
-  virtual bool execute();
+  virtual bool on_execute_callback();
 
   /**
    * @brief Add and configure an output signal of the component.
@@ -60,16 +57,15 @@ protected:
 
 private:
   /**
-   * @brief Step function that is called periodically and publishes predicates,
-   * outputs, and evaluates daemon callbacks.
+   * @brief Step function that is called periodically and publishes predicates, outputs, and evaluates daemon callbacks.
    */
   void step() override;
 
   /**
-   * @brief Run the execution function in a try catch block and
-   * set the predicates according to the outcome of the execution.
+   * @brief Run the execution function in a try catch block and set the predicates according to the outcome of the
+   * execution.
    */
-  void run();
+  void on_execute();
 
   // TODO hide ROS methods
   using ComponentInterface<rclcpp::Node>::create_output;
@@ -80,7 +76,7 @@ private:
   using ComponentInterface<rclcpp::Node>::publish_outputs;
   using ComponentInterface<rclcpp::Node>::evaluate_periodic_callbacks;
 
-  std::thread run_thread_; ///< The execution thread of the component
+  std::thread execute_thread_; ///< The execution thread of the component
   bool started_; ///< Flag that indicates if execution has started or not
 };
 

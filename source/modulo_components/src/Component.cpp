@@ -4,13 +4,9 @@ using namespace modulo_core::communication;
 
 namespace modulo_components {
 
-Component::Component(const rclcpp::NodeOptions& node_options, bool start_thread, const std::string& fallback_name) :
+Component::Component(const rclcpp::NodeOptions& node_options, const std::string& fallback_name) :
     ComponentInterface<rclcpp::Node>(node_options, PublisherType::PUBLISHER, fallback_name), started_(false) {
   this->add_predicate("is_finished", false);
-
-  if (start_thread) {
-    this->start_thread();
-  }
 }
 
 void Component::step() {
@@ -24,18 +20,18 @@ void Component::step() {
   }
 }
 
-void Component::start_thread() {
+void Component::execute() {
   if (this->started_) {
-    RCLCPP_ERROR(this->get_logger(), "Failed to start run thread: Thread has already been started.");
+    RCLCPP_ERROR(this->get_logger(), "Failed to start execution thread: Thread has already been started.");
     return;
   }
   this->started_ = true;
-  this->run_thread_ = std::thread([this]() { this->run(); });
+  this->execute_thread_ = std::thread([this]() { this->on_execute(); });
 }
 
-void Component::run() {
+void Component::on_execute() {
   try {
-    if (!this->execute()) {
+    if (!this->on_execute_callback()) {
       this->raise_error();
       return;
     }
@@ -44,11 +40,11 @@ void Component::run() {
     this->raise_error();
     return;
   }
-  RCLCPP_DEBUG(this->get_logger(), "Execution finished, setting is_finished predicate to true");
+  RCLCPP_DEBUG(this->get_logger(), "Execution finished, setting 'is_finished' predicate to true.");
   this->set_predicate("is_finished", true);
 }
 
-bool Component::execute() {
+bool Component::on_execute_callback() {
   return true;
 }
 }// namespace modulo_components

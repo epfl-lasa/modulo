@@ -20,7 +20,7 @@ protected:
   }
 
   void SetUp() override {
-    component_ = std::make_shared<ComponentPublicInterface>(rclcpp::NodeOptions(), false);
+    component_ = std::make_shared<ComponentPublicInterface>(rclcpp::NodeOptions());
   }
 
   std::shared_ptr<ComponentPublicInterface> component_;

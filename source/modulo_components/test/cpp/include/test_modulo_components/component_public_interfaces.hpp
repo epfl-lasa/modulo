@@ -58,8 +58,9 @@ public:
 
 class ComponentPublicInterface : public Component {
 public:
-  explicit ComponentPublicInterface(const rclcpp::NodeOptions& node_options, bool start_thread = true) :
-      Component(node_options, start_thread) {}
+  explicit ComponentPublicInterface(
+      const rclcpp::NodeOptions& node_options, const std::string& fallback_name = "ComponentPublicInterface"
+  ) : Component(node_options, fallback_name) {}
   using Component::add_output;
   using Component::outputs_;
 };
