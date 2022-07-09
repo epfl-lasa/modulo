@@ -291,8 +291,12 @@ class ComponentInterface(Node):
             if parsed_signal_name in self._outputs.keys():
                 raise AddSignalError(f"Output with parsed name '{parsed_signal_name}' already exists.")
             topic_name = default_topic if default_topic else "~/" + parsed_signal_name
-            self.add_parameter(sr.Parameter(parsed_signal_name + "_topic", topic_name, sr.ParameterType.STRING),
-                               f"Output topic name of signal '{parsed_signal_name}'", fixed_topic)
+            parameter_name = parsed_signal_name + "_topic"
+            if self.has_parameter(parameter_name) and self.get_parameter(parameter_name).is_empty():
+                self.set_parameter_value(parameter_name, topic_name)
+            else:
+                self.add_parameter(sr.Parameter(parameter_name, topic_name, sr.ParameterType.STRING),
+                                   f"Output topic name of signal '{parsed_signal_name}'", fixed_topic)
             translator = None
             if message_type == Bool or message_type == Float64 or \
                     message_type == Float64MultiArray or message_type == Int32 or message_type == String:
@@ -341,8 +345,12 @@ class ComponentInterface(Node):
             if parsed_signal_name in self._inputs.keys():
                 raise AddSignalError(f"Failed to add input '{parsed_signal_name}': Input already exists")
             topic_name = default_topic if default_topic else "~/" + parsed_signal_name
-            self.add_parameter(sr.Parameter(parsed_signal_name + "_topic", topic_name, sr.ParameterType.STRING),
-                               f"Input topic name of signal '{parsed_signal_name}'", fixed_topic)
+            parameter_name = parsed_signal_name + "_topic"
+            if self.has_parameter(parameter_name) and self.get_parameter(parameter_name).is_empty():
+                self.set_parameter_value(parameter_name, topic_name)
+            else:
+                self.add_parameter(sr.Parameter(parameter_name, topic_name, sr.ParameterType.STRING),
+                                   f"Input topic name of signal '{parsed_signal_name}'", fixed_topic)
             topic_name = self.get_parameter_value(parsed_signal_name + "_topic")
             self.get_logger().debug(f"Adding input '{parsed_signal_name}' with topic name '{topic_name}'.")
             if isinstance(subscription, Callable):
