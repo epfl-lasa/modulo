@@ -36,6 +36,8 @@ ament_auto_add_library(modulo_core SHARED
     ${PROJECT_SOURCE_DIR}/src/translators/message_readers.cpp
     ${PROJECT_SOURCE_DIR}/src/translators/message_writers.cpp)
 
+target_link_libraries(${PROJECT_NAME} clproto state_representation)
+
 # install Python modules
 ament_python_install_package(${PROJECT_NAME} SCRIPTS_DESTINATION lib/${PROJECT_NAME})
 

@@ -21,17 +21,12 @@ find_package(ament_cmake_python REQUIRED)
 
 ament_auto_find_build_dependencies()
 
-find_package(control_libraries 6.0.6 REQUIRED COMPONENTS state_representation)
-find_package(clproto 6.0.0 REQUIRED)
-
 include_directories(include)
 
 ament_auto_add_library(${PROJECT_NAME} SHARED
     ${PROJECT_SOURCE_DIR}/src/ComponentInterface.cpp
     ${PROJECT_SOURCE_DIR}/src/Component.cpp
     ${PROJECT_SOURCE_DIR}/src/LifecycleComponent.cpp)
-
-target_link_libraries(${PROJECT_NAME} clproto)
 
 # Install Python modules
 ament_python_install_package(${PROJECT_NAME} SCRIPTS_DESTINATION lib/${PROJECT_NAME})
