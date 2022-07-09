@@ -4,7 +4,7 @@ from typing import Optional
 import clproto
 import numpy as np
 import state_representation as sr
-from modulo_core.exceptions.core_exceptions import ParameterTranslationError
+from modulo_core.exceptions import ParameterTranslationError
 from rclpy import Parameter
 
 

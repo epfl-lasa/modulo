@@ -5,7 +5,7 @@ from lifecycle_msgs.msg import Transition
 from lifecycle_msgs.srv import ChangeState
 from lifecycle_msgs.msg import State
 from modulo_components.component_interface import ComponentInterface
-from modulo_components.exceptions.component_exceptions import AddSignalError
+from modulo_components.exceptions import AddSignalError
 
 MsgT = TypeVar('MsgT')
 

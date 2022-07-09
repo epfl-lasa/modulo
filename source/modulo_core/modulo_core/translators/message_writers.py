@@ -5,8 +5,8 @@ import geometry_msgs.msg as geometry
 import numpy as np
 import rclpy.time
 import state_representation as sr
-from modulo_core.encoded_state import EncodedState
-from modulo_core.exceptions.core_exceptions import MessageTranslationError
+from modulo_core import EncodedState
+from modulo_core.exceptions import MessageTranslationError
 from sensor_msgs.msg import JointState
 
 DataT = TypeVar('DataT')
