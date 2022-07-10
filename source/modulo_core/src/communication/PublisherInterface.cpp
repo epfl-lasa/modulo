@@ -106,7 +106,7 @@ void PublisherInterface::publish() {
         break;
     }
   } catch (const exceptions::CoreException& ex) {
-    throw exceptions::CoreException(ex);
+    throw;
   }
 }
 
