@@ -68,7 +68,7 @@ class Component(ComponentInterface):
         self.get_logger().debug("Execution finished, setting 'is_finished' predicate to true.")
         self.set_predicate("is_finished", True)
 
-    def on_execute_callback(self):
+    def on_execute_callback(self) -> bool:
         """
         Execute the component logic. To be redefined in the derived classes.
 
