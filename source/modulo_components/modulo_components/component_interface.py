@@ -38,6 +38,7 @@ class ComponentInterface(Node):
         self._parameter_dict: Dict[str, Union[str, sr.Parameter]] = {}
         self._predicates: Dict[str, Union[bool, Callable[[], bool]]] = {}
         self._predicate_publishers: Dict[str, Publisher] = {}
+        self._triggers: Dict[str, bool] = {}
         self._periodic_callbacks: Dict[str, Callable[[], None]] = {}
         self._inputs = {}
         self._outputs = {}
@@ -265,6 +266,45 @@ class ComponentInterface(Node):
                 throttle_duration_sec=1.0)
             return
         self._predicates[name] = value
+
+    def add_trigger(self, trigger_name: str):
+        """
+        Add a trigger to the component. Triggers are predicates that are always false except when it's triggered in
+        which case it is set back to false immediately after it is read.
+
+        :param trigger_name: The name of the trigger
+        """
+        if not trigger_name:
+            self.get_logger().error("Failed to add trigger: Provide a non empty string as a name.")
+            return
+        if trigger_name in self._triggers.keys() or trigger_name in self._predicates.keys():
+            self.get_logger().error(
+                f"Failed to add trigger: there is already a trigger or predicate with name '{trigger_name}'.")
+            return
+        self._triggers[trigger_name] = False
+        self.add_predicate(trigger_name, partial(self.__get_trigger_value, trigger_name=trigger_name))
+
+    def __get_trigger_value(self, trigger_name: str) -> bool:
+        """
+        Get the trigger value and set it to false independent of the previous value.
+
+        :param trigger_name: The name of the trigger
+        :return: The value of the trigger
+        """
+        value = self._triggers[trigger_name]
+        self._triggers[trigger_name] = False
+        return value
+
+    def trigger(self, trigger_name: str):
+        """
+        Latch the trigger with the provided name.
+
+        :param trigger_name: The name of the trigger
+        """
+        if not trigger_name in self._triggers.keys():
+            self.get_logger().error(f"Failed to trigger: could not find trigger with name '{trigger_name}'.")
+            return
+        self._triggers[trigger_name] = True
 
     def _create_output(self, signal_name: str, data: str, message_type: MsgT, clproto_message_type: clproto.MessageType,
                        default_topic: str, fixed_topic: bool) -> str:

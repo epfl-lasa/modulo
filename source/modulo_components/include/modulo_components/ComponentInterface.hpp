@@ -179,6 +179,19 @@ protected:
   void set_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function);
 
   /**
+   * @brief Add a trigger to the component. Triggers are predicates that are always false except when it's triggered in
+   * which case it is set back to false immediately after it is read.
+   * @param trigger_name The name of the trigger
+   */
+  void add_trigger(const std::string& trigger_name);
+
+  /**
+   * @brief Latch the trigger with the provided name.
+   * @param trigger_name The name of the trigger
+   */
+  void trigger(const std::string& trigger_name);
+
+  /**
    * @brief Add and configure an input signal of the component.
    * @tparam DataT Type of the data pointer
    * @param signal_name Name of the input signal
@@ -327,6 +340,7 @@ private:
   std::map<std::string, utilities::PredicateVariant> predicates_; ///< Map of predicates
   std::map<std::string, std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>>>
       predicate_publishers_; ///< Map of predicate publishers
+  std::map<std::string, bool> triggers_; ///< Map of triggers
 
   std::map<std::string, std::function<void(void)>> periodic_callbacks_; ///< Map of periodic function callbacks
 
@@ -555,6 +569,38 @@ inline bool ComponentInterface<NodeT>::get_predicate(const std::string& predicat
                                                                              << ex.what());
   }
   return value;
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::add_trigger(const std::string& trigger_name) {
+  if (trigger_name.empty()) {
+    RCLCPP_ERROR(this->get_logger(), "Failed to add trigger: Provide a non empty string as a name.");
+    return;
+  }
+  if (this->triggers_.find(trigger_name) != this->triggers_.end()
+      || this->predicates_.find(trigger_name) != this->predicates_.end()) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add trigger: there is already a trigger or "
+                                            "predicate with name '" << trigger_name << "'.");
+    return;
+  }
+  this->triggers_.insert_or_assign(trigger_name, false);
+  this->add_predicate(
+      trigger_name, [this, &trigger_name] {
+        auto value = this->triggers_.at(trigger_name);
+        this->triggers_.at(trigger_name) = false;
+        return value;
+      }
+  );
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::trigger(const std::string& trigger_name) {
+  if (this->triggers_.find(trigger_name) == this->triggers_.end()) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to trigger: could not find trigger"
+                                            " with name  '" << trigger_name << "'.");
+    return;
+  }
+  this->triggers_.at(trigger_name) = true;
 }
 
 template<class NodeT>

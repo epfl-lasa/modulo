@@ -78,3 +78,17 @@ def test_tf(component_interface):
     identity = send_tf * lookup_tf.inverse()
     assert np.linalg.norm(identity.data()) - 1 < 1e-3
     assert abs(identity.get_orientation().w) - 1 < 1e-3
+
+
+def test_add_trigger(component_interface):
+    component_interface.add_trigger("trigger")
+    assert "trigger" in component_interface._triggers.keys()
+    assert not component_interface._triggers["trigger"]
+    assert not component_interface.get_predicate("trigger")
+    component_interface.trigger("trigger")
+    # After triggering, the trigger will be true only once
+    assert component_interface._triggers["trigger"]
+    assert component_interface.get_predicate("trigger")
+    # After the predicate function was evaluated once, the trigger is back to false
+    assert not component_interface._triggers["trigger"]
+    assert not component_interface.get_predicate("trigger")
