@@ -16,7 +16,7 @@ def write_parameter(parameter: sr.Parameter) -> Parameter:
     :raises ParameterTranslationError if the parameter could not be written
     :return: The resulting ROS parameter
     """
-    if parameter.is_empty():
+    if not parameter:
         return Parameter(parameter.get_name(), value=None, type_=Parameter.Type.NOT_SET)
     elif parameter.get_parameter_type() == sr.ParameterType.BOOL or \
             parameter.get_parameter_type() == sr.ParameterType.INT or \

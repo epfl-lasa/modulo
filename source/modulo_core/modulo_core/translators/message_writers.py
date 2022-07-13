@@ -55,7 +55,7 @@ def write_message(message: MsgT, state: StateT):
     """
     if not isinstance(state, sr.State):
         raise MessageTranslationError("This state type is not supported.")
-    if state.is_empty():
+    if not state:
         raise MessageTranslationError(f"{state.get_name()} state is empty while attempting to write it to message.")
     if isinstance(state, sr.CartesianState):
         if isinstance(message, geometry.Accel):
