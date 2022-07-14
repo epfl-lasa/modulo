@@ -4,7 +4,7 @@
 
 #include "modulo_core/communication/PublisherHandler.hpp"
 #include "modulo_core/communication/MessagePair.hpp"
-#include "modulo_core/exceptions/NullPointerException.hpp"
+#include "modulo_core/exceptions/CoreException.hpp"
 
 using namespace modulo_core::communication;
 
@@ -21,7 +21,7 @@ static void test_publisher_interface(const std::shared_ptr<rclcpp::Node>& node, 
 
   // use in publisher interface
   std::shared_ptr<PublisherInterface> publisher_interface(publisher_handler);
-  EXPECT_THROW(publisher_interface->publish(), modulo_core::exceptions::NullPointerException);
+  EXPECT_THROW(publisher_interface->publish(), modulo_core::exceptions::CoreException);
   publisher_interface->set_message_pair(message_pair);
   EXPECT_NO_THROW(publisher_interface->publish());
 
@@ -71,7 +71,7 @@ TEST_F(PublisherTest, EncodedState) {
 
   // use in publisher interface
   std::shared_ptr<PublisherInterface> publisher_interface(publisher_handler);
-  EXPECT_THROW(publisher_interface->publish(), modulo_core::exceptions::NullPointerException);
+  EXPECT_THROW(publisher_interface->publish(), modulo_core::exceptions::CoreException);
   publisher_interface->set_message_pair(message_pair);
   EXPECT_NO_THROW(publisher_interface->publish());
 

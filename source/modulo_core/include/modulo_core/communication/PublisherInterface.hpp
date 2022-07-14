@@ -85,7 +85,7 @@ public:
    * PublisherHandler instance or if the type of the message pair does not match the type of the PublisherHandler
    * instance.
    * @see PublisherInterface::get_handler
-   * @throws NullPointerException if the message pair pointer is null
+   * @throws CoreException if the publishing failed for some reason (translation, null pointer, pointer cast, ...)
    */
   void publish();
 

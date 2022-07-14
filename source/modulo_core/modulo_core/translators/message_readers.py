@@ -41,39 +41,42 @@ def read_message(state: StateT, message: MsgT) -> StateT:
     :raises MessageTranslationError if the message could not be read
     :return: The populated state
     """
-    if not isinstance(state, sr.State):
-        raise MessageTranslationError("This state type is not supported.")
-    if isinstance(state, sr.CartesianState):
-        if isinstance(message, geometry.Accel):
-            state.set_linear_acceleration(read_xyz(message.linear))
-            state.set_angular_acceleration(read_xyz(message.angular))
-        elif isinstance(message, geometry.Pose):
-            state.set_position(read_xyz(message.position))
-            state.set_orientation(read_quaternion(message.orientation))
-        elif isinstance(message, geometry.Transform):
-            state.set_position(read_xyz(message.translation))
-            state.set_orientation(read_quaternion(message.rotation))
-        elif isinstance(message, geometry.Twist):
-            state.set_linear_velocity(read_xyz(message.linear))
-            state.set_angular_velocity(read_xyz(message.angular))
-        elif isinstance(message, geometry.Wrench):
-            state.set_force(read_xyz(message.force))
-            state.set_torque(read_xyz(message.torque))
+    try:
+        if not isinstance(state, sr.State):
+            raise MessageTranslationError("This state type is not supported.")
+        if isinstance(state, sr.CartesianState):
+            if isinstance(message, geometry.Accel):
+                state.set_linear_acceleration(read_xyz(message.linear))
+                state.set_angular_acceleration(read_xyz(message.angular))
+            elif isinstance(message, geometry.Pose):
+                state.set_position(read_xyz(message.position))
+                state.set_orientation(read_quaternion(message.orientation))
+            elif isinstance(message, geometry.Transform):
+                state.set_position(read_xyz(message.translation))
+                state.set_orientation(read_quaternion(message.rotation))
+            elif isinstance(message, geometry.Twist):
+                state.set_linear_velocity(read_xyz(message.linear))
+                state.set_angular_velocity(read_xyz(message.angular))
+            elif isinstance(message, geometry.Wrench):
+                state.set_force(read_xyz(message.force))
+                state.set_torque(read_xyz(message.torque))
+            else:
+                raise MessageTranslationError("The provided combination of state type and message type is not supported")
+        elif isinstance(message, JointState) and isinstance(state, sr.JointState):
+            try:
+                state.set_names(message.name)
+                if len(message.position):
+                    state.set_positions(message.position)
+                if len(message.velocity):
+                    state.set_velocities(message.velocity)
+                if len(message.effort):
+                    state.set_torques(message.effort)
+            except Exception as e:
+                raise MessageTranslationError(f"{e}")
         else:
             raise MessageTranslationError("The provided combination of state type and message type is not supported")
-    elif isinstance(message, JointState) and isinstance(state, sr.JointState):
-        try:
-            state.set_names(message.name)
-            if len(message.position):
-                state.set_positions(message.position)
-            if len(message.velocity):
-                state.set_velocities(message.velocity)
-            if len(message.effort):
-                state.set_torques(message.effort)
-        except Exception as e:
-            raise MessageTranslationError(f"{e}")
-    else:
-        raise MessageTranslationError("The provided combination of state type and message type is not supported")
+    except Exception as e:
+        raise MessageTranslationError(f"{e}")
     return state
 
 
@@ -86,19 +89,22 @@ def read_stamped_message(state: StateT, message: MsgT) -> StateT:
     :raises MessageTranslationError if the message could not be read
     :return: The populated state
     """
-    if isinstance(message, geometry.AccelStamped):
-        read_message(state, message.accel)
-    elif isinstance(message, geometry.PoseStamped):
-        read_message(state, message.pose)
-    elif isinstance(message, geometry.TransformStamped):
-        read_message(state, message.transform)
-        state.set_name(message.child_frame_id)
-    elif isinstance(message, geometry.TwistStamped):
-        read_message(state, message.twist)
-    elif isinstance(message, geometry.WrenchStamped):
-        read_message(state, message.wrench)
-    else:
-        raise MessageTranslationError("The provided combination of state type and message type is not supported")
+    try:
+        if isinstance(message, geometry.AccelStamped):
+            read_message(state, message.accel)
+        elif isinstance(message, geometry.PoseStamped):
+            read_message(state, message.pose)
+        elif isinstance(message, geometry.TransformStamped):
+            read_message(state, message.transform)
+            state.set_name(message.child_frame_id)
+        elif isinstance(message, geometry.TwistStamped):
+            read_message(state, message.twist)
+        elif isinstance(message, geometry.WrenchStamped):
+            read_message(state, message.wrench)
+        else:
+            raise MessageTranslationError("The provided combination of state type and message type is not supported")
+    except MessageTranslationError as e:
+        raise MessageTranslationError(f"{e}")
     state.set_reference_frame(message.header.frame_id)
     return state
 

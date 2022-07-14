@@ -790,7 +790,7 @@ inline void ComponentInterface<NodeT>::publish_outputs() {
   for (const auto& [signal, publisher]: this->outputs_) {
     try {
       publisher->publish();
-    } catch (const std::exception& ex) {
+    } catch (const modulo_core::exceptions::CoreException& ex) {
       RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                                    "Failed to publish output '" << signal << "': " << ex.what());
     }
