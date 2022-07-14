@@ -308,6 +308,7 @@ class ComponentInterface(Node):
             self.get_logger().error(f"Failed to trigger: could not find trigger with name '{trigger_name}'.")
             return
         self._triggers[trigger_name] = True
+        self._publish_predicate(trigger_name)
 
     def _create_output(self, signal_name: str, data: str, message_type: MsgT, clproto_message_type: clproto.MessageType,
                        default_topic: str, fixed_topic: bool) -> str:

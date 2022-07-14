@@ -611,6 +611,7 @@ inline void ComponentInterface<NodeT>::trigger(const std::string& trigger_name) 
     return;
   }
   this->triggers_.at(trigger_name) = true;
+  publish_predicate(trigger_name);
 }
 
 template<class NodeT>
