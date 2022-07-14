@@ -183,15 +183,15 @@ protected:
    * @tparam DataT Type of the data pointer
    * @param signal_name Name of the input signal
    * @param data Data to receive on the input signal
-   * @param fixed_topic If true, the topic name of the input signal is fixed
    * @param default_topic If set, the default value for the topic name to use
+   * @param fixed_topic If true, the topic name of the input signal is fixed
    */
   // TODO could be nice to add an optional callback here that would be executed from within the subscription callback
   // in order to manipulate the data pointer upon reception of a message
   template<typename DataT>
   void add_input(
-      const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false,
-      const std::string& default_topic = ""
+      const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::string& default_topic = "",
+      bool fixed_topic = false
   );
 
   /**
@@ -199,13 +199,13 @@ protected:
    * @tparam MsgT The ROS message type of the subscription
    * @param signal_name Name of the input signal
    * @param callback The callback to use for the subscription
-   * @param fixed_topic If true, the topic name of the input signal is fixed
    * @param default_topic If set, the default value for the topic name to use
+   * @param fixed_topic If true, the topic name of the input signal is fixed
    */
   template<typename MsgT>
   void add_input(
       const std::string& signal_name, const std::function<void(const std::shared_ptr<MsgT>)>& callback,
-      bool fixed_topic = false, const std::string& default_topic = ""
+      const std::string& default_topic = "", bool fixed_topic = false
   );
 
   /**
@@ -231,15 +231,15 @@ protected:
    * @tparam DataT Type of the data pointer
    * @param signal_name Name of the output signal
    * @param data Data to transmit on the output signal
-   * @param fixed_topic If true, the topic name of the output signal is fixed
    * @param default_topic If set, the default value for the topic name to use
+   * @param fixed_topic If true, the topic name of the output signal is fixed
    * @throws AddSignalException if the output could not be created (empty name, already registered)
    * @return The parsed signal name
    */
   template<typename DataT>
   std::string create_output(
-      const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
-      const std::string& default_topic
+      const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::string& default_topic,
+      bool fixed_topic
   );
 
   /**
@@ -585,8 +585,8 @@ inline void ComponentInterface<NodeT>::set_predicate(
 template<class NodeT>
 template<typename DataT>
 inline void ComponentInterface<NodeT>::add_input(
-    const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
-    const std::string& default_topic
+    const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::string& default_topic,
+    bool fixed_topic
 ) {
   using namespace modulo_core::communication;
   try {
@@ -600,10 +600,14 @@ inline void ComponentInterface<NodeT>::add_input(
       throw exceptions::AddSignalException("Failed to add input '" + signal_name + "': Input already exists");
     }
     std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
-    this->add_parameter(
-        parsed_signal_name + "_topic", topic_name, "Output topic name of signal '" + parsed_signal_name + "'",
-        fixed_topic
-    );
+    auto parameter_name = parsed_signal_name + "_topic";
+    if (NodeT::has_parameter(parameter_name) && this->get_parameter(parameter_name)->is_empty()) {
+      this->set_parameter_value<std::string>(parameter_name, topic_name);
+    } else {
+      this->add_parameter(
+          parameter_name, topic_name, "Input topic name of signal '" + parsed_signal_name + "'", fixed_topic
+      );
+    }
     topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
     RCLCPP_DEBUG_STREAM(this->get_logger(),
                         "Adding input '" << signal_name << "' with topic name '" << topic_name << "'.");
@@ -663,8 +667,8 @@ inline void ComponentInterface<NodeT>::add_input(
 template<class NodeT>
 template<typename MsgT>
 inline void ComponentInterface<NodeT>::add_input(
-    const std::string& signal_name, const std::function<void(const std::shared_ptr<MsgT>)>& callback, bool fixed_topic,
-    const std::string& default_topic
+    const std::string& signal_name, const std::function<void(const std::shared_ptr<MsgT>)>& callback,
+    const std::string& default_topic, bool fixed_topic
 ) {
   using namespace modulo_core::communication;
   try {
@@ -808,8 +812,8 @@ inline void ComponentInterface<NodeT>::evaluate_periodic_callbacks() {
 template<class NodeT>
 template<typename DataT>
 inline std::string ComponentInterface<NodeT>::create_output(
-    const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
-    const std::string& default_topic
+    const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::string& default_topic,
+    bool fixed_topic
 ) {
   using namespace modulo_core::communication;
   try {
@@ -830,10 +834,14 @@ inline std::string ComponentInterface<NodeT>::create_output(
     this->outputs_.insert_or_assign(
         parsed_signal_name, std::make_shared<PublisherInterface>(this->publisher_type_, message_pair));
     std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
-    this->add_parameter(
-        parsed_signal_name + "_topic", topic_name, "Output topic name of signal '" + parsed_signal_name + "'",
-        fixed_topic
-    );
+    auto parameter_name = parsed_signal_name + "_topic";
+    if (NodeT::has_parameter(parameter_name) && this->get_parameter(parameter_name)->is_empty()) {
+      this->set_parameter_value<std::string>(parameter_name, topic_name);
+    } else {
+      this->add_parameter(
+          parameter_name, topic_name, "Output topic name of signal '" + parsed_signal_name + "'", fixed_topic
+      );
+    }
     return parsed_signal_name;
   } catch (const std::exception& ex) {
     // TODO if modulo::communication had a base exception, could catch that

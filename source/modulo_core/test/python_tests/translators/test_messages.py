@@ -5,8 +5,8 @@ import modulo_core.translators.message_writers as modulo_writers
 import numpy as np
 import pytest
 import state_representation as sr
-from modulo_core.encoded_state import EncodedState
-from modulo_core.exceptions.core_exceptions import MessageTranslationError
+from modulo_core import EncodedState
+from modulo_core.exceptions import MessageTranslationError
 from rclpy.clock import Clock
 from sensor_msgs.msg import JointState
 

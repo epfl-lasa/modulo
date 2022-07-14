@@ -26,7 +26,7 @@ static void write_quaternion(geometry_msgs::msg::Quaternion& message, const Eige
 }
 
 void write_message(geometry_msgs::msg::Accel& message, const CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) {
+  if (!state) {
     throw exceptions::MessageTranslationException(
         state.get_name() + " state is empty while attempting to write it to message"
     );
@@ -42,7 +42,7 @@ void write_message(geometry_msgs::msg::AccelStamped& message, const CartesianSta
 }
 
 void write_message(geometry_msgs::msg::Pose& message, const CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) {
+  if (!state) {
     throw exceptions::MessageTranslationException(
         state.get_name() + " state is empty while attempting to write it to message"
     );
@@ -58,7 +58,7 @@ void write_message(geometry_msgs::msg::PoseStamped& message, const CartesianStat
 }
 
 void write_message(geometry_msgs::msg::Transform& message, const CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) {
+  if (!state) {
     throw exceptions::MessageTranslationException(
         state.get_name() + " state is empty while attempting to write it to message"
     );
@@ -76,7 +76,7 @@ write_message(geometry_msgs::msg::TransformStamped& message, const CartesianStat
 }
 
 void write_message(geometry_msgs::msg::Twist& message, const CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) {
+  if (!state) {
     throw exceptions::MessageTranslationException(
         state.get_name() + " state is empty while attempting to write it to message"
     );
@@ -92,7 +92,7 @@ void write_message(geometry_msgs::msg::TwistStamped& message, const CartesianSta
 }
 
 void write_message(geometry_msgs::msg::Wrench& message, const CartesianState& state, const rclcpp::Time&) {
-  if (state.is_empty()) {
+  if (!state) {
     throw exceptions::MessageTranslationException(
         state.get_name() + " state is empty while attempting to write it to message"
     );
@@ -108,7 +108,7 @@ void write_message(geometry_msgs::msg::WrenchStamped& message, const CartesianSt
 }
 
 void write_message(sensor_msgs::msg::JointState& message, const JointState& state, const rclcpp::Time& time) {
-  if (state.is_empty()) {
+  if (!state) {
     throw exceptions::MessageTranslationException(
         state.get_name() + " state is empty while attempting to write it to message"
     );
@@ -124,7 +124,7 @@ void write_message(sensor_msgs::msg::JointState& message, const JointState& stat
 }
 
 void write_message(tf2_msgs::msg::TFMessage& message, const CartesianState& state, const rclcpp::Time& time) {
-  if (state.is_empty()) {
+  if (!state) {
     throw exceptions::MessageTranslationException(
         state.get_name() + " state is empty while attempting to write it to message"
     );
@@ -136,7 +136,7 @@ void write_message(tf2_msgs::msg::TFMessage& message, const CartesianState& stat
 
 template<typename U, typename T>
 void write_message(U& message, const Parameter<T>& state, const rclcpp::Time&) {
-  if (state.is_empty()) {
+  if (!state) {
     throw exceptions::MessageTranslationException(
         state.get_name() + " state is empty while attempting to write it to message"
     );

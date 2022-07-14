@@ -5,7 +5,7 @@ from lifecycle_msgs.msg import Transition
 from lifecycle_msgs.srv import ChangeState
 from lifecycle_msgs.msg import State
 from modulo_components.component_interface import ComponentInterface
-from modulo_components.exceptions.component_exceptions import AddSignalError
+from modulo_components.exceptions import AddSignalError
 
 MsgT = TypeVar('MsgT')
 
@@ -232,7 +232,7 @@ class LifecycleComponent(ComponentInterface):
         return success
 
     def add_output(self, signal_name: str, data: str, message_type: MsgT,
-                   clproto_message_type=clproto.MessageType.UNKNOWN_MESSAGE, fixed_topic=False, default_topic=""):
+                   clproto_message_type=clproto.MessageType.UNKNOWN_MESSAGE, default_topic="", fixed_topic=False):
         """
         Add an output signal of the component.
 
@@ -240,15 +240,15 @@ class LifecycleComponent(ComponentInterface):
         :param data: Name of the attribute to transmit over the channel
         :param message_type: The ROS message type of the output
         :param clproto_message_type: The clproto message type, if applicable
-        :param fixed_topic: If true, the topic name of the output signal is fixed
         :param default_topic: If set, the default value for the topic name to use
+        :param fixed_topic: If true, the topic name of the output signal is fixed
         """
         if self.__state not in [State.PRIMARY_STATE_UNCONFIGURED, State.PRIMARY_STATE_INACTIVE]:
             self.get_logger().warn(f"Adding output in state {self.__state} is not allowed.", throttle_duration_sec=1.0)
             return
         try:
-            parsed_signal_name = self._create_output(signal_name, data, message_type, clproto_message_type, fixed_topic,
-                                                     default_topic)
+            parsed_signal_name = self._create_output(signal_name, data, message_type, clproto_message_type,
+                                                     default_topic, fixed_topic)
             self.get_logger().debug(f"Adding output '{parsed_signal_name}.")
         except AddSignalError as e:
             self.get_logger().error(f"Failed to add output '{signal_name}': {e}")

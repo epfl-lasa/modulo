@@ -5,8 +5,8 @@ import geometry_msgs.msg as geometry
 import numpy as np
 import rclpy.time
 import state_representation as sr
-from modulo_core.encoded_state import EncodedState
-from modulo_core.exceptions.core_exceptions import MessageTranslationError
+from modulo_core import EncodedState
+from modulo_core.exceptions import MessageTranslationError
 from sensor_msgs.msg import JointState
 
 DataT = TypeVar('DataT')
@@ -55,7 +55,7 @@ def write_message(message: MsgT, state: StateT):
     """
     if not isinstance(state, sr.State):
         raise MessageTranslationError("This state type is not supported.")
-    if state.is_empty():
+    if not state:
         raise MessageTranslationError(f"{state.get_name()} state is empty while attempting to write it to message.")
     if isinstance(state, sr.CartesianState):
         if isinstance(message, geometry.Accel):

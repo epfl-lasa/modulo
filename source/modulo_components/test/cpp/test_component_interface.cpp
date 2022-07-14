@@ -82,12 +82,12 @@ TYPED_TEST(ComponentInterfaceTest, SetPredicateValue) {
 
 TYPED_TEST(ComponentInterfaceTest, AddInput) {
   auto data = std::make_shared<bool>(true);
-  EXPECT_NO_THROW(this->component_->add_input("_tEsT_#1@3", data, true));
+  EXPECT_NO_THROW(this->component_->add_input("_tEsT_#1@3", data));
   EXPECT_FALSE(this->component_->inputs_.find("test_13") == this->component_->inputs_.end());
   EXPECT_EQ(this->component_->template get_parameter_value<std::string>("test_13_topic"), "~/test_13");
 
   EXPECT_NO_THROW(this->component_->template add_input<std_msgs::msg::Bool>(
-      "_tEsT_#1@5", [](const std::shared_ptr<std_msgs::msg::Bool>) {}, true, "/topic"
+      "_tEsT_#1@5", [](const std::shared_ptr<std_msgs::msg::Bool>) {}, "/topic", true
   ));
   EXPECT_FALSE(this->component_->inputs_.find("test_15") == this->component_->inputs_.end());
   EXPECT_EQ(this->component_->template get_parameter_value<std::string>("test_15_topic"), "/topic");
@@ -101,7 +101,7 @@ TYPED_TEST(ComponentInterfaceTest, AddInput) {
 
 TYPED_TEST(ComponentInterfaceTest, CreateOutput) {
   auto data = std::make_shared<bool>(true);
-  EXPECT_NO_THROW(this->component_->create_output("test", data, true, "/topic"));
+  EXPECT_NO_THROW(this->component_->create_output("test", data, "/topic", true));
   EXPECT_FALSE(this->component_->outputs_.find("test") == this->component_->outputs_.end());
   EXPECT_EQ(this->component_->template get_parameter_value<std::string>("test_topic"), "/topic");
 

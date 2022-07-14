@@ -3,7 +3,7 @@ import pytest
 import rclpy
 import state_representation as sr
 from modulo_components.component_interface import ComponentInterface
-from modulo_components.exceptions.component_exceptions import LookupTransformError
+from modulo_components.exceptions import LookupTransformError
 from std_msgs.msg import Bool, String
 
 

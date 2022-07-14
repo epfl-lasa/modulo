@@ -7,11 +7,10 @@ import modulo_core.translators.message_readers as modulo_readers
 import modulo_core.translators.message_writers as modulo_writers
 import state_representation as sr
 from geometry_msgs.msg import TransformStamped
-from modulo_components.exceptions.component_exceptions import AddSignalError, ComponentParameterError, \
-    LookupTransformError
-from modulo_components.utilities.utilities import generate_predicate_topic, parse_signal_name
-from modulo_core.encoded_state import EncodedState
-from modulo_core.exceptions.core_exceptions import ParameterTranslationError
+from modulo_components.exceptions import AddSignalError, ComponentParameterError, LookupTransformError
+from modulo_components.utilities import generate_predicate_topic, parse_signal_name
+from modulo_core import EncodedState
+from modulo_core.exceptions import ParameterTranslationError
 from modulo_core.translators.parameter_translators import get_ros_parameter_type, read_parameter_const, write_parameter
 from rcl_interfaces.msg import ParameterDescriptor, SetParametersResult
 from rclpy.duration import Duration
@@ -267,8 +266,8 @@ class ComponentInterface(Node):
             return
         self._predicates[name] = value
 
-    def _create_output(self, signal_name: str, data: str, message_type: MsgT,
-                       clproto_message_type: clproto.MessageType, fixed_topic: bool, default_topic: str) -> str:
+    def _create_output(self, signal_name: str, data: str, message_type: MsgT, clproto_message_type: clproto.MessageType,
+                       default_topic: str, fixed_topic: bool) -> str:
         """
         Helper function to parse the signal name and add an output without Publisher to the dict of outputs.
 
@@ -276,8 +275,8 @@ class ComponentInterface(Node):
         :param data: Name of the attribute to transmit over the channel
         :param message_type: The ROS message type of the output
         :param clproto_message_type: The clproto message type, if applicable
-        :param fixed_topic: If true, the topic name of the output signal is fixed
         :param default_topic: If set, the default value for the topic name to use
+        :param fixed_topic: If true, the topic name of the output signal is fixed
         :raises AddSignalError if there is a problem adding the output
         :return: The parsed signal name
         """
@@ -291,8 +290,12 @@ class ComponentInterface(Node):
             if parsed_signal_name in self._outputs.keys():
                 raise AddSignalError(f"Output with parsed name '{parsed_signal_name}' already exists.")
             topic_name = default_topic if default_topic else "~/" + parsed_signal_name
-            self.add_parameter(sr.Parameter(parsed_signal_name + "_topic", topic_name, sr.ParameterType.STRING),
-                               f"Output topic name of signal '{parsed_signal_name}'", fixed_topic)
+            parameter_name = parsed_signal_name + "_topic"
+            if self.has_parameter(parameter_name) and self.get_parameter(parameter_name).is_empty():
+                self.set_parameter_value(parameter_name, topic_name)
+            else:
+                self.add_parameter(sr.Parameter(parameter_name, topic_name, sr.ParameterType.STRING),
+                                   f"Output topic name of signal '{parsed_signal_name}'", fixed_topic)
             translator = None
             if message_type == Bool or message_type == Float64 or \
                     message_type == Float64MultiArray or message_type == Int32 or message_type == String:
@@ -321,8 +324,8 @@ class ComponentInterface(Node):
         except Exception as e:
             self.get_logger().error(f"Failed to read message for attribute {attribute_name}", throttle_duration_sec=1.0)
 
-    def add_input(self, signal_name: str, subscription: Union[str, Callable], message_type: MsgT, fixed_topic=False,
-                  default_topic=""):
+    def add_input(self, signal_name: str, subscription: Union[str, Callable], message_type: MsgT, default_topic="",
+                  fixed_topic=False):
         # TODO could be nice to add an optional callback here that would be executed from within the subscription
         #  callback in order to manipulate the data pointer upon reception of a message
         """
@@ -331,8 +334,8 @@ class ComponentInterface(Node):
         :param signal_name: Name of the output signal
         :param subscription: Name of the attribute to receive messages for or the callback to use for the subscription
         :param message_type: ROS message type of the subscription
-        :param fixed_topic: If true, the topic name of the output signal is fixed
         :param default_topic: If set, the default value for the topic name to use
+        :param fixed_topic: If true, the topic name of the output signal is fixed
         """
         try:
             parsed_signal_name = parse_signal_name(signal_name)
@@ -341,8 +344,12 @@ class ComponentInterface(Node):
             if parsed_signal_name in self._inputs.keys():
                 raise AddSignalError(f"Failed to add input '{parsed_signal_name}': Input already exists")
             topic_name = default_topic if default_topic else "~/" + parsed_signal_name
-            self.add_parameter(sr.Parameter(parsed_signal_name + "_topic", topic_name, sr.ParameterType.STRING),
-                               f"Input topic name of signal '{parsed_signal_name}'", fixed_topic)
+            parameter_name = parsed_signal_name + "_topic"
+            if self.has_parameter(parameter_name) and self.get_parameter(parameter_name).is_empty():
+                self.set_parameter_value(parameter_name, topic_name)
+            else:
+                self.add_parameter(sr.Parameter(parameter_name, topic_name, sr.ParameterType.STRING),
+                                   f"Input topic name of signal '{parsed_signal_name}'", fixed_topic)
             topic_name = self.get_parameter_value(parsed_signal_name + "_topic")
             self.get_logger().debug(f"Adding input '{parsed_signal_name}' with topic name '{topic_name}'.")
             if isinstance(subscription, Callable):

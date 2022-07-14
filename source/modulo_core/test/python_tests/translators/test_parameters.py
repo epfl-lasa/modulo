@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 import state_representation as sr
 from modulo_core.translators.parameter_translators import write_parameter, read_parameter, read_parameter_const
-from modulo_core.exceptions.core_exceptions import ParameterTranslationError
+from modulo_core.exceptions import ParameterTranslationError
 from rclpy import Parameter
 
 

@@ -21,7 +21,7 @@ find_package(ament_cmake_python REQUIRED)
 
 ament_auto_find_build_dependencies()
 
-find_package(control_libraries 6.0.5 REQUIRED COMPONENTS state_representation)
+find_package(control_libraries 6.0.7 REQUIRED COMPONENTS state_representation)
 find_package(clproto 6.0.0 REQUIRED)
 
 include_directories(include)
@@ -35,6 +35,8 @@ ament_auto_add_library(modulo_core SHARED
     ${PROJECT_SOURCE_DIR}/src/translators/parameter_translators.cpp
     ${PROJECT_SOURCE_DIR}/src/translators/message_readers.cpp
     ${PROJECT_SOURCE_DIR}/src/translators/message_writers.cpp)
+
+target_link_libraries(${PROJECT_NAME} clproto state_representation)
 
 # install Python modules
 ament_python_install_package(${PROJECT_NAME} SCRIPTS_DESTINATION lib/${PROJECT_NAME})

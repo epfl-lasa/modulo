@@ -28,7 +28,7 @@ protected:
 
 TEST_F(LifecycleComponentTest, AddOutput) {
   std::shared_ptr<State> data = make_shared_state(CartesianState::Random("test"));
-  component_->add_output("test", data, true);
+  component_->add_output("test", data);
   auto outputs_iterator = component_->outputs_.find("test");
   EXPECT_TRUE(outputs_iterator != component_->outputs_.end());
   EXPECT_NO_THROW(component_->configure_outputs());
@@ -36,7 +36,7 @@ TEST_F(LifecycleComponentTest, AddOutput) {
   EXPECT_NO_THROW(component_->outputs_.at("test")->publish());
 
   auto new_data = std::make_shared<bool>(false);
-  component_->add_output("test", new_data, true);
+  component_->add_output("test", new_data);
   EXPECT_EQ(component_->outputs_.at("test")->get_message_pair()->get_type(),
             modulo_core::communication::MessageType::ENCODED_STATE);
 }

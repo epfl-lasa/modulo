@@ -88,13 +88,13 @@ protected:
    * @tparam DataT Type of the data pointer
    * @param signal_name Name of the output signal
    * @param data Data to transmit on the output signal
-   * @param fixed_topic If true, the topic name of the output signal is fixed
    * @param default_topic If set, the default value for the topic name to use
+   * @param fixed_topic If true, the topic name of the output signal is fixed
    */
   template<typename DataT>
   void add_output(
-      const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic = false,
-      const std::string& default_topic = ""
+      const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::string& default_topic = "",
+      bool fixed_topic = false
   );
 
 private:
@@ -258,8 +258,8 @@ inline void LifecycleComponent::on_step_callback() {}
 
 template<typename DataT>
 inline void LifecycleComponent::add_output(
-    const std::string& signal_name, const std::shared_ptr<DataT>& data, bool fixed_topic,
-    const std::string& default_topic
+    const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::string& default_topic,
+    bool fixed_topic
 ) {
   if (this->get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED
       && this->get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE) {
@@ -268,7 +268,7 @@ inline void LifecycleComponent::add_output(
     return;
   }
   try {
-    this->create_output(signal_name, data, fixed_topic, default_topic);
+    this->create_output(signal_name, data, default_topic, fixed_topic);
   } catch (const std::exception& ex) {
     // TODO if modulo::communication had a base exception, could catch that
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add output '" << signal_name << "': " << ex.what());

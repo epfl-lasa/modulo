@@ -2,7 +2,7 @@ import pytest
 import rclpy
 import state_representation as sr
 from modulo_components.component_interface import ComponentInterface
-from modulo_components.exceptions.component_exceptions import ComponentParameterError
+from modulo_components.exceptions import ComponentParameterError
 from rcl_interfaces.msg import SetParametersResult
 from rclpy.exceptions import ParameterNotDeclaredException
 from rclpy.node import Node
