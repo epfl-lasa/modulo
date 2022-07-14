@@ -255,7 +255,9 @@ class ComponentInterface(Node):
 
     def set_predicate(self, name: str, value: Union[bool, Callable[[], bool]]):
         """
-        Set the value of the predicate given as parameter, if the predicate is not found does not do anything.
+        Set the value of the predicate given as parameter, if the predicate is not found does not do anything. Even
+        though the predicates are published periodically, the new value of this predicate will be published once
+        immediately after setting it.
 
         :param name: The name of the predicate to retrieve from the map of predicates
         :param value: The new value of the predicate as a bool or a callable function
@@ -266,6 +268,7 @@ class ComponentInterface(Node):
                 throttle_duration_sec=1.0)
             return
         self._predicates[name] = value
+        self._publish_predicate(name)
 
     def add_trigger(self, trigger_name: str):
         """
@@ -506,23 +509,31 @@ class ComponentInterface(Node):
             self.get_logger().debug(f"Adding periodic function '{name}'.")
         self._periodic_callbacks[name] = callback
 
+    def _publish_predicate(self, name):
+        """
+        Helper function to publish a predicate.
+
+        :param name: The name of the predicate to publish
+        """
+        message = Bool()
+        value = self.get_predicate(name)
+        try:
+            message.data = value
+        except AssertionError:
+            self.get_logger().error(f"Predicate '{name}' has invalid type: expected 'bool', got '{type(value)}'.",
+                                    throttle_duration_sec=1.0)
+            return
+        if name not in self._predicate_publishers.keys():
+            self.get_logger().error(f"No publisher for predicate '{name}' found.", throttle_duration_sec=1.0)
+            return
+        self._predicate_publishers[name].publish(message)
+
     def _publish_predicates(self):
         """
         Helper function to publish all predicates.
         """
         for name in self._predicates.keys():
-            message = Bool()
-            value = self.get_predicate(name)
-            try:
-                message.data = value
-            except AssertionError:
-                self.get_logger().error(f"Predicate '{name}' has invalid type: expected 'bool', got '{type(value)}'.",
-                                        throttle_duration_sec=1.0)
-                continue
-            if name not in self._predicate_publishers.keys():
-                self.get_logger().error(f"No publisher for predicate '{name}' found.", throttle_duration_sec=1.0)
-                continue
-            self._predicate_publishers[name].publish(message)
+            self._publish_predicate(name)
 
     def _publish_outputs(self):
         """

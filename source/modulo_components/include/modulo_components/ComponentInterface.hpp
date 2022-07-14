@@ -166,6 +166,8 @@ protected:
 
   /**
    * @brief Set the value of the predicate given as parameter, if the predicate is not found does not do anything.
+   * @details Even though the predicates are published periodically, the new value of this predicate will be published
+   * once immediately after setting it.
    * @param predicate_name the name of the predicate to retrieve from the map of predicates
    * @param predicate_value the new value of the predicate
    */
@@ -173,6 +175,8 @@ protected:
 
   /**
    * @brief Set the value of the predicate given as parameter, if the predicate is not found does not do anything.
+   * @details Even though the predicates are published periodically, the new value of this predicate will be published
+   * once immediately after setting it.
    * @param predicate_name the name of the predicate to retrieve from the map of predicates
    * @param predicate_function the function to call that returns the value of the predicate
    */
@@ -286,6 +290,12 @@ protected:
       const std::string& frame_name, const std::string& reference_frame_name = "world",
       const tf2::TimePoint& time_point = tf2::TimePoint(std::chrono::microseconds(0)),
       const tf2::Duration& duration = tf2::Duration(std::chrono::microseconds(10)));
+
+  /**
+   * @brief Helper function to publish a predicate.
+   * @param name The name of the predicate to publish
+   */
+  void publish_predicate(const std::string& name);
 
   /**
    * @brief Helper function to publish all predicates.
@@ -614,6 +624,7 @@ inline void ComponentInterface<NodeT>::set_variant_predicate(
     return;
   }
   predicate_iterator->second = predicate;
+  this->publish_predicate(name);
 }
 
 template<class NodeT>
@@ -818,16 +829,21 @@ inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_tra
 }
 
 template<class NodeT>
+inline void ComponentInterface<NodeT>::publish_predicate(const std::string& name) {
+  std_msgs::msg::Bool message;
+  message.data = this->get_predicate(name);
+  if (this->predicate_publishers_.find(name) == this->predicate_publishers_.end()) {
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                 "No publisher for predicate '" << name << "' found.");
+    return;
+  }
+  predicate_publishers_.at(name)->publish(message);
+}
+
+template<class NodeT>
 inline void ComponentInterface<NodeT>::publish_predicates() {
   for (const auto& predicate: this->predicates_) {
-    std_msgs::msg::Bool message;
-    message.data = this->get_predicate(predicate.first);
-    if (this->predicate_publishers_.find(predicate.first) == this->predicate_publishers_.end()) {
-      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                   "No publisher for predicate " << predicate.first << " found.");
-      return;
-    }
-    predicate_publishers_.at(predicate.first)->publish(message);
+    this->publish_predicate(predicate.first);
   }
 }
 
