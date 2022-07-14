@@ -86,7 +86,8 @@ def test_add_trigger(component_interface):
     assert not component_interface._triggers["trigger"]
     assert not component_interface.get_predicate("trigger")
     component_interface.trigger("trigger")
-    # After triggering, the trigger will be true only once
+    # When reading, the trigger will be true only once
+    component_interface._triggers["trigger"] = True
     assert component_interface._triggers["trigger"]
     assert component_interface.get_predicate("trigger")
     # After the predicate function was evaluated once, the trigger is back to false

@@ -146,7 +146,8 @@ TYPED_TEST(ComponentInterfaceTest, AddTrigger) {
   EXPECT_FALSE(this->component_->triggers_.at("trigger"));
   EXPECT_FALSE(this->component_->get_predicate("trigger"));
   EXPECT_NO_THROW(this->component_->trigger("trigger"));
-  // After triggering, the trigger will be true only once
+  // When reading, the trigger will be true only once
+  this->component_->triggers_.at("trigger") = true;
   EXPECT_TRUE(this->component_->triggers_.at("trigger"));
   EXPECT_TRUE(this->component_->get_predicate("trigger"));
   // After the predicate function was evaluated once, the trigger is back to false
