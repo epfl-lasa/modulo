@@ -166,6 +166,8 @@ protected:
 
   /**
    * @brief Set the value of the predicate given as parameter, if the predicate is not found does not do anything.
+   * @details Even though the predicates are published periodically, the new value of this predicate will be published
+   * once immediately after setting it.
    * @param predicate_name the name of the predicate to retrieve from the map of predicates
    * @param predicate_value the new value of the predicate
    */
@@ -173,10 +175,25 @@ protected:
 
   /**
    * @brief Set the value of the predicate given as parameter, if the predicate is not found does not do anything.
+   * @details Even though the predicates are published periodically, the new value of this predicate will be published
+   * once immediately after setting it.
    * @param predicate_name the name of the predicate to retrieve from the map of predicates
    * @param predicate_function the function to call that returns the value of the predicate
    */
   void set_predicate(const std::string& predicate_name, const std::function<bool(void)>& predicate_function);
+
+  /**
+   * @brief Add a trigger to the component. Triggers are predicates that are always false except when it's triggered in
+   * which case it is set back to false immediately after it is read.
+   * @param trigger_name The name of the trigger
+   */
+  void add_trigger(const std::string& trigger_name);
+
+  /**
+   * @brief Latch the trigger with the provided name.
+   * @param trigger_name The name of the trigger
+   */
+  void trigger(const std::string& trigger_name);
 
   /**
    * @brief Add and configure an input signal of the component.
@@ -275,6 +292,12 @@ protected:
       const tf2::Duration& duration = tf2::Duration(std::chrono::microseconds(10)));
 
   /**
+   * @brief Helper function to publish a predicate.
+   * @param name The name of the predicate to publish
+   */
+  void publish_predicate(const std::string& name);
+
+  /**
    * @brief Helper function to publish all predicates.
    */
   void publish_predicates();
@@ -327,6 +350,7 @@ private:
   std::map<std::string, utilities::PredicateVariant> predicates_; ///< Map of predicates
   std::map<std::string, std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>>>
       predicate_publishers_; ///< Map of predicate publishers
+  std::map<std::string, bool> triggers_; ///< Map of triggers
 
   std::map<std::string, std::function<void(void)>> periodic_callbacks_; ///< Map of periodic function callbacks
 
@@ -558,6 +582,39 @@ inline bool ComponentInterface<NodeT>::get_predicate(const std::string& predicat
 }
 
 template<class NodeT>
+inline void ComponentInterface<NodeT>::add_trigger(const std::string& trigger_name) {
+  if (trigger_name.empty()) {
+    RCLCPP_ERROR(this->get_logger(), "Failed to add trigger: Provide a non empty string as a name.");
+    return;
+  }
+  if (this->triggers_.find(trigger_name) != this->triggers_.end()
+      || this->predicates_.find(trigger_name) != this->predicates_.end()) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add trigger: there is already a trigger or "
+                                            "predicate with name '" << trigger_name << "'.");
+    return;
+  }
+  this->triggers_.insert_or_assign(trigger_name, false);
+  this->add_predicate(
+      trigger_name, [this, &trigger_name] {
+        auto value = this->triggers_.at(trigger_name);
+        this->triggers_.at(trigger_name) = false;
+        return value;
+      }
+  );
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::trigger(const std::string& trigger_name) {
+  if (this->triggers_.find(trigger_name) == this->triggers_.end()) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to trigger: could not find trigger"
+                                            " with name  '" << trigger_name << "'.");
+    return;
+  }
+  this->triggers_.at(trigger_name) = true;
+  publish_predicate(trigger_name);
+}
+
+template<class NodeT>
 inline void ComponentInterface<NodeT>::set_variant_predicate(
     const std::string& name, const utilities::PredicateVariant& predicate
 ) {
@@ -568,6 +625,7 @@ inline void ComponentInterface<NodeT>::set_variant_predicate(
     return;
   }
   predicate_iterator->second = predicate;
+  this->publish_predicate(name);
 }
 
 template<class NodeT>
@@ -772,16 +830,21 @@ inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_tra
 }
 
 template<class NodeT>
+inline void ComponentInterface<NodeT>::publish_predicate(const std::string& name) {
+  std_msgs::msg::Bool message;
+  message.data = this->get_predicate(name);
+  if (this->predicate_publishers_.find(name) == this->predicate_publishers_.end()) {
+    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                                 "No publisher for predicate '" << name << "' found.");
+    return;
+  }
+  predicate_publishers_.at(name)->publish(message);
+}
+
+template<class NodeT>
 inline void ComponentInterface<NodeT>::publish_predicates() {
   for (const auto& predicate: this->predicates_) {
-    std_msgs::msg::Bool message;
-    message.data = this->get_predicate(predicate.first);
-    if (this->predicate_publishers_.find(predicate.first) == this->predicate_publishers_.end()) {
-      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                   "No publisher for predicate " << predicate.first << " found.");
-      return;
-    }
-    predicate_publishers_.at(predicate.first)->publish(message);
+    this->publish_predicate(predicate.first);
   }
 }
 

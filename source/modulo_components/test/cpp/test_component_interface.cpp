@@ -139,4 +139,19 @@ TYPED_TEST(ComponentInterfaceTest, RaiseError) {
   this->component_->raise_error();
   EXPECT_TRUE(this->component_->get_predicate("in_error_state"));
 }
+
+TYPED_TEST(ComponentInterfaceTest, AddTrigger) {
+  EXPECT_NO_THROW(this->component_->add_trigger("trigger"));
+  ASSERT_FALSE(this->component_->triggers_.find("trigger") == this->component_->triggers_.end());
+  EXPECT_FALSE(this->component_->triggers_.at("trigger"));
+  EXPECT_FALSE(this->component_->get_predicate("trigger"));
+  EXPECT_NO_THROW(this->component_->trigger("trigger"));
+  // When reading, the trigger will be true only once
+  this->component_->triggers_.at("trigger") = true;
+  EXPECT_TRUE(this->component_->triggers_.at("trigger"));
+  EXPECT_TRUE(this->component_->get_predicate("trigger"));
+  // After the predicate function was evaluated once, the trigger is back to false
+  EXPECT_FALSE(this->component_->triggers_.at("trigger"));
+  EXPECT_FALSE(this->component_->get_predicate("trigger"));
+}
 }// namespace modulo_components
