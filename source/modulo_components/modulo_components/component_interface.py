@@ -1,4 +1,5 @@
 import sys
+import inspect
 from functools import partial
 from typing import Callable, Dict, List, Optional, TypeVar, Union
 
@@ -7,6 +8,7 @@ import modulo_core.translators.message_readers as modulo_readers
 import modulo_core.translators.message_writers as modulo_writers
 import state_representation as sr
 from geometry_msgs.msg import TransformStamped
+from modulo_component_interfaces.srv import EmptyTrigger, StringTrigger
 from modulo_components.exceptions import AddSignalError, ComponentParameterError, LookupTransformError
 from modulo_components.utilities import generate_predicate_topic, parse_signal_name
 from modulo_core import EncodedState
@@ -420,6 +422,34 @@ class ComponentInterface(Node):
                 raise TypeError("Provide either a string containing the name of an attribute or a callable.")
         except Exception as e:
             self.get_logger().error(f"Failed to add input '{signal_name}': {e}")
+
+    def add_service(self, service_name: str, callback: Union[Callable[[], dict], Callable[[string], dict]]):
+        """
+        Add a service to trigger a callback function.
+        The callback should take either no arguments (empty service) or a single string argument (string service).
+        The string payload can have an arbitrary format to parameterize and control the callback behaviour as desired.
+        It is the responsibility of the service callback to parse the string according to some payload format.
+        When adding a service with a string payload, be sure to document the payload format appropriately.
+
+        :param service_name: The name of the service
+        :param callback: The callback function to execute
+        :return: A dict with the outcome of the service call, containing "success" and "message" fields in the format
+            {"success": [True | False], "message": "..."}
+        """
+        def response_wrapper(ret, response):
+            if "success" in ret.keys():
+                response.success = ret["success"]
+            if "message" in ret.keys():
+                response.message = ret["message"]
+            return response
+
+        signature = inspect.signature(callback)
+        if len(signature.parameters) == 0:
+            self.create_service(EmptyTrigger, service_name,
+                                lambda request, response: response_wrapper(callback(), response))
+        else:
+            self.create_service(EmptyTrigger, service_name,
+                                lambda request, response: response_wrapper(callback(request.payload), response))
 
     def add_tf_broadcaster(self):
         """
