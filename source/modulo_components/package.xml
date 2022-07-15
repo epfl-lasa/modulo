@@ -13,6 +13,7 @@
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 
   <depend>modulo_core</depend>
+  <depend>modulo_component_interfaces</depend>
   <depend>rclcpp_lifecycle</depend>
   <depend>tf2_ros</depend>
 

@@ -3,10 +3,16 @@ FROM ghcr.io/aica-technology/ros2-control-libraries:${BASE_TAG} as dependencies
 WORKDIR ${HOME}/ros2_ws
 
 
-FROM dependencies as modulo-core
+FROM dependencies as modulo-component-interfaces
+
+COPY --chown=${USER} ./source/modulo_component_interfaces ./src/modulo_component_interfaces
+RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"
+
+
+FROM modulo-component-interfaces as modulo-core
 
 COPY --chown=${USER} ./source/modulo_core ./src/modulo_core
-RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"
+RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build --packages-select modulo_core"
 
 
 FROM modulo-core as modulo-components
