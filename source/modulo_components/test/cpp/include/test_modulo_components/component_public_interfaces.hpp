@@ -28,6 +28,7 @@ public:
   using ComponentInterface<NodeT>::trigger;
   using ComponentInterface<NodeT>::triggers_;
   using ComponentInterface<NodeT>::add_input;
+  using ComponentInterface<NodeT>::add_service;
   using ComponentInterface<NodeT>::inputs_;
   using ComponentInterface<NodeT>::create_output;
   using ComponentInterface<NodeT>::outputs_;
