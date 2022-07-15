@@ -800,9 +800,14 @@ inline void ComponentInterface<NodeT>::add_service(
             const std::shared_ptr<modulo_component_interfaces::srv::EmptyTrigger::Request>,
             std::shared_ptr<modulo_component_interfaces::srv::EmptyTrigger::Response> response
         ) {
-          auto callback_response = callback();
-          response->success = callback_response.success;
-          response->message = callback_response.message;
+          try {
+            auto callback_response = callback();
+            response->success = callback_response.success;
+            response->message = callback_response.message;
+          } catch (const std::exception& ex) {
+            response->success = false;
+            response->message = ex.what();
+          }
         });
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add service '" << service_name << "': " << ex.what());
@@ -821,9 +826,14 @@ inline void ComponentInterface<NodeT>::add_service(
             const std::shared_ptr<modulo_component_interfaces::srv::StringTrigger::Request> request,
             std::shared_ptr<modulo_component_interfaces::srv::StringTrigger::Response> response
         ) {
-          auto callback_response = callback(request->payload);
-          response->success = callback_response.success;
-          response->message = callback_response.message;
+          try {
+            auto callback_response = callback(request->payload);
+            response->success = callback_response.success;
+            response->message = callback_response.message;
+          } catch (const std::exception& ex) {
+            response->success = false;
+            response->message = ex.what();
+          }
         });
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add service '" << service_name << "': " << ex.what());

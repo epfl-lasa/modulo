@@ -436,24 +436,44 @@ class ComponentInterface(Node):
         :return: A dict with the outcome of the service call, containing "success" and "message" fields in the format
             {"success": [True | False], "message": "..."}
         """
-        def response_wrapper(ret, response):
-            if "success" in ret.keys():
-                response.success = ret["success"]
-            if "message" in ret.keys():
-                response.message = ret["message"]
-            return response
+        def callback_wrapper(request, response, cb):
+            try:
+                if hasattr(request, "payload"):
+                    ret = cb(request.payload)
+                else:
+                    ret = cb()
+                response.success = True
 
+                # handle different return types
+                if isinstance(ret, dict):
+                    if "success" in ret.keys():
+                        response.success = ret["success"]
+                    else:
+                        # if the dict does not contain a success field, but the callback
+                        # completes without error, assume it was successful
+
+                        response.success = True
+                    if "message" in ret.keys():
+                        response.message = ret["message"]
+                elif isinstance(ret, bool):
+                    response.success = ret
+                else:
+                    response.success = True
+            except Exception as e:
+                response.success = False
+                response.message = f"{e}"
+            return response
         try:
             parsed_service_name = parse_signal_name(service_name)
             signature = inspect.signature(callback)
             if len(signature.parameters) == 0:
                 self.get_logger().debug(f"Adding empty service {parsed_service_name}")
-                self.create_service(EmptyTrigger, parsed_service_name,
-                                    lambda request, response: response_wrapper(callback(), response))
+                service_type = EmptyTrigger
             else:
                 self.get_logger().debug(f"Adding string service {parsed_service_name}")
-                self.create_service(EmptyTrigger, parsed_service_name,
-                                    lambda request, response: response_wrapper(callback(request.payload), response))
+                service_type = StringTrigger
+            self.create_service(service_type, parsed_service_name,
+                                lambda request, response: callback_wrapper(request, response, callback))
         except Exception as e:
             self.get_logger().error(f"Failed to add service '{service_name}': {e}")
 
