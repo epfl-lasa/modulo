@@ -792,30 +792,42 @@ template<class NodeT>
 inline void ComponentInterface<NodeT>::add_service(
     const std::string& service_name, const std::function<ComponentServiceResponse(void)>& callback
 ) {
-  NodeT::template create_service<modulo_component_interfaces::srv::EmptyTrigger>(
-      service_name, [callback](
-          const std::shared_ptr<modulo_component_interfaces::srv::EmptyTrigger::Request>,
-          std::shared_ptr<modulo_component_interfaces::srv::EmptyTrigger::Response> response
-      ) {
-        auto callback_response = callback();
-        response->success = callback_response.success;
-        response->message = callback_response.message;
-      });
+  try {
+    std::string parsed_service_name = utilities::parse_signal_name(service_name);
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding empty service '" << parsed_service_name << ".");
+    NodeT::template create_service<modulo_component_interfaces::srv::EmptyTrigger>(
+        parsed_service_name, [callback](
+            const std::shared_ptr<modulo_component_interfaces::srv::EmptyTrigger::Request>,
+            std::shared_ptr<modulo_component_interfaces::srv::EmptyTrigger::Response> response
+        ) {
+          auto callback_response = callback();
+          response->success = callback_response.success;
+          response->message = callback_response.message;
+        });
+  } catch (const std::exception& ex) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add service '" << service_name << "': " << ex.what());
+  }
 }
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::add_service(
     const std::string& service_name, const std::function<ComponentServiceResponse(const std::string& string)>& callback
 ) {
-  NodeT::template create_service<modulo_component_interfaces::srv::StringTrigger>(
-      service_name, [callback](
-          const std::shared_ptr<modulo_component_interfaces::srv::StringTrigger::Request> request,
-          std::shared_ptr<modulo_component_interfaces::srv::StringTrigger::Response> response
-      ) {
-        auto callback_response = callback(request->payload);
-        response->success = callback_response.success;
-        response->message = callback_response.message;
-      });
+  try {
+    std::string parsed_service_name = utilities::parse_signal_name(service_name);
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding string service '" << parsed_service_name << ".");
+    NodeT::template create_service<modulo_component_interfaces::srv::StringTrigger>(
+        parsed_service_name, [callback](
+            const std::shared_ptr<modulo_component_interfaces::srv::StringTrigger::Request> request,
+            std::shared_ptr<modulo_component_interfaces::srv::StringTrigger::Response> response
+        ) {
+          auto callback_response = callback(request->payload);
+          response->success = callback_response.success;
+          response->message = callback_response.message;
+        });
+  } catch (const std::exception& ex) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add service '" << service_name << "': " << ex.what());
+  }
 }
 
 template<class NodeT>

@@ -443,13 +443,19 @@ class ComponentInterface(Node):
                 response.message = ret["message"]
             return response
 
-        signature = inspect.signature(callback)
-        if len(signature.parameters) == 0:
-            self.create_service(EmptyTrigger, service_name,
-                                lambda request, response: response_wrapper(callback(), response))
-        else:
-            self.create_service(EmptyTrigger, service_name,
-                                lambda request, response: response_wrapper(callback(request.payload), response))
+        try:
+            parsed_service_name = parse_signal_name(service_name)
+            signature = inspect.signature(callback)
+            if len(signature.parameters) == 0:
+                self.get_logger().debug(f"Adding empty service {parsed_service_name}")
+                self.create_service(EmptyTrigger, parsed_service_name,
+                                    lambda request, response: response_wrapper(callback(), response))
+            else:
+                self.get_logger().debug(f"Adding string service {parsed_service_name}")
+                self.create_service(EmptyTrigger, parsed_service_name,
+                                    lambda request, response: response_wrapper(callback(request.payload), response))
+        except Exception as e:
+            self.get_logger().error(f"Failed to add service '{service_name}': {e}")
 
     def add_tf_broadcaster(self):
         """
