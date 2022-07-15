@@ -24,6 +24,9 @@
 #include <modulo_core/translators/message_writers.hpp>
 #include <modulo_core/translators/parameter_translators.hpp>
 
+#include <modulo_component_interfaces/srv/empty_trigger.hpp>
+#include <modulo_component_interfaces/srv/string_trigger.hpp>
+
 #include "modulo_components/exceptions/AddSignalException.hpp"
 #include "modulo_components/exceptions/ComponentParameterException.hpp"
 #include "modulo_components/exceptions/LookupTransformException.hpp"
@@ -31,6 +34,15 @@
 #include "modulo_components/utilities/predicate_variant.hpp"
 
 namespace modulo_components {
+
+/**
+ * @struct ComponentServiceResponse
+ * @brief TODO
+ */
+struct ComponentServiceResponse {
+  bool success;
+  std::string message;
+};
 
 /**
  * @brief TODO
@@ -223,6 +235,26 @@ protected:
   void add_input(
       const std::string& signal_name, const std::function<void(const std::shared_ptr<MsgT>)>& callback,
       const std::string& default_topic = "", bool fixed_topic = false
+  );
+
+  /**
+   * @brief Add a service to trigger a callback function with no input arguments.
+   * @param service_name The name of the service
+   * @param callback A service callback function with no arguments that returns a ComponentServiceResponse
+   */
+  void add_service(const std::string& service_name, const std::function<ComponentServiceResponse(void)>& callback);
+
+  /**
+   * @brief Add a service to trigger a callback function with a string payload.
+   * @details The string payload can have an arbitrary format to parameterize and control the callback behaviour
+   * as desired. It is the responsibility of the service callback to parse the string according to some payload format.
+   * When adding a service with a string payload, be sure to document the payload format appropriately.
+   * @param service_name The name of the service
+   * @param callback A service callback function with a string argument that returns a ComponentServiceResponse
+   */
+  void add_service(
+      const std::string& service_name,
+      const std::function<ComponentServiceResponse(const std::string& string)>& callback
   );
 
   /**
@@ -753,6 +785,58 @@ inline void ComponentInterface<NodeT>::add_input(
     this->inputs_.insert_or_assign(parsed_signal_name, subscription_interface);
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add input '" << signal_name << "': " << ex.what());
+  }
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::add_service(
+    const std::string& service_name, const std::function<ComponentServiceResponse(void)>& callback
+) {
+  try {
+    std::string parsed_service_name = utilities::parse_signal_name(service_name);
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding empty service '" << parsed_service_name << ".");
+    NodeT::template create_service<modulo_component_interfaces::srv::EmptyTrigger>(
+        parsed_service_name, [callback](
+            const std::shared_ptr<modulo_component_interfaces::srv::EmptyTrigger::Request>,
+            std::shared_ptr<modulo_component_interfaces::srv::EmptyTrigger::Response> response
+        ) {
+          try {
+            auto callback_response = callback();
+            response->success = callback_response.success;
+            response->message = callback_response.message;
+          } catch (const std::exception& ex) {
+            response->success = false;
+            response->message = ex.what();
+          }
+        });
+  } catch (const std::exception& ex) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add service '" << service_name << "': " << ex.what());
+  }
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::add_service(
+    const std::string& service_name, const std::function<ComponentServiceResponse(const std::string& string)>& callback
+) {
+  try {
+    std::string parsed_service_name = utilities::parse_signal_name(service_name);
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding string service '" << parsed_service_name << ".");
+    NodeT::template create_service<modulo_component_interfaces::srv::StringTrigger>(
+        parsed_service_name, [callback](
+            const std::shared_ptr<modulo_component_interfaces::srv::StringTrigger::Request> request,
+            std::shared_ptr<modulo_component_interfaces::srv::StringTrigger::Response> response
+        ) {
+          try {
+            auto callback_response = callback(request->payload);
+            response->success = callback_response.success;
+            response->message = callback_response.message;
+          } catch (const std::exception& ex) {
+            response->success = false;
+            response->message = ex.what();
+          }
+        });
+  } catch (const std::exception& ex) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add service '" << service_name << "': " << ex.what());
   }
 }
 

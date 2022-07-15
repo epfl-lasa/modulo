@@ -65,6 +65,18 @@ def test_add_input(component_interface):
     assert component_interface._inputs["test_13"].msg_type == Bool
 
 
+def test_add_service(component_interface):
+    def empty_callback():
+        return {"success": True, "message": "test"}
+    component_interface.add_service("empty", empty_callback)
+
+    def string_callback():
+        return {"success": True, "message": "test"}
+    component_interface.add_service("empty", string_callback)
+
+    # TODO: use a service client to trigger the service and test the behaviour
+
+
 def test_tf(component_interface):
     component_interface.add_tf_broadcaster()
     component_interface.add_tf_listener()

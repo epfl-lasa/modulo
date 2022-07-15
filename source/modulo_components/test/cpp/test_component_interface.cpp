@@ -99,6 +99,20 @@ TYPED_TEST(ComponentInterfaceTest, AddInput) {
             modulo_core::communication::MessageType::BOOL);
 }
 
+TYPED_TEST(ComponentInterfaceTest, AddService) {
+  auto empty_callback = []() -> ComponentServiceResponse {
+    return ComponentServiceResponse();
+  };
+  EXPECT_NO_THROW(this->component_->add_service("empty", empty_callback));
+
+  auto string_callback = [](const std::string&) -> ComponentServiceResponse {
+    return ComponentServiceResponse();
+  };
+  EXPECT_NO_THROW(this->component_->add_service("string", string_callback));
+
+  // TODO: use a service client to trigger the service and test the behaviour
+}
+
 TYPED_TEST(ComponentInterfaceTest, CreateOutput) {
   auto data = std::make_shared<bool>(true);
   EXPECT_NO_THROW(this->component_->create_output("test", data, "/topic", true));

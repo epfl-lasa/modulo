@@ -1,4 +1,5 @@
 import sys
+import inspect
 from functools import partial
 from typing import Callable, Dict, List, Optional, TypeVar, Union
 
@@ -7,6 +8,7 @@ import modulo_core.translators.message_readers as modulo_readers
 import modulo_core.translators.message_writers as modulo_writers
 import state_representation as sr
 from geometry_msgs.msg import TransformStamped
+from modulo_component_interfaces.srv import EmptyTrigger, StringTrigger
 from modulo_components.exceptions import AddSignalError, ComponentParameterError, LookupTransformError
 from modulo_components.utilities import generate_predicate_topic, parse_signal_name
 from modulo_core import EncodedState
@@ -420,6 +422,55 @@ class ComponentInterface(Node):
                 raise TypeError("Provide either a string containing the name of an attribute or a callable.")
         except Exception as e:
             self.get_logger().error(f"Failed to add input '{signal_name}': {e}")
+
+    def add_service(self, service_name: str, callback: Union[Callable[[], dict], Callable[[str], dict]]):
+        """
+        Add a service to trigger a callback function.
+        The callback should take either no arguments (empty service) or a single string argument (string service).
+        The string payload can have an arbitrary format to parameterize and control the callback behaviour as desired.
+        It is the responsibility of the service callback to parse the string according to some payload format.
+        When adding a service with a string payload, be sure to document the payload format appropriately.
+
+        :param service_name: The name of the service
+        :param callback: The callback function to execute
+        :return: A dict with the outcome of the service call, containing "success" and "message" fields in the format
+            {"success": [True | False], "message": "..."}
+        """
+        def callback_wrapper(request, response, cb):
+            try:
+                if hasattr(request, "payload"):
+                    ret = cb(request.payload)
+                else:
+                    ret = cb()
+
+                # if the return does not contain a success field or bool result,
+                # but the callback completes without error, assume it was successful
+                response.success = True
+                if isinstance(ret, dict):
+                    if "success" in ret.keys():
+                        response.success = ret["success"]
+                    if "message" in ret.keys():
+                        response.message = ret["message"]
+                elif isinstance(ret, bool):
+                    response.success = ret
+            except Exception as e:
+                response.success = False
+                response.message = f"{e}"
+            return response
+
+        try:
+            parsed_service_name = parse_signal_name(service_name)
+            signature = inspect.signature(callback)
+            if len(signature.parameters) == 0:
+                self.get_logger().debug(f"Adding empty service {parsed_service_name}")
+                service_type = EmptyTrigger
+            else:
+                self.get_logger().debug(f"Adding string service {parsed_service_name}")
+                service_type = StringTrigger
+            self.create_service(service_type, parsed_service_name,
+                                lambda request, response: callback_wrapper(request, response, callback))
+        except Exception as e:
+            self.get_logger().error(f"Failed to add service '{service_name}': {e}")
 
     def add_tf_broadcaster(self):
         """
