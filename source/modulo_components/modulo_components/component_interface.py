@@ -442,23 +442,17 @@ class ComponentInterface(Node):
                     ret = cb(request.payload)
                 else:
                     ret = cb()
-                response.success = True
 
-                # handle different return types
+                # if the return does not contain a success field or bool result,
+                # but the callback completes without error, assume it was successful
+                response.success = True
                 if isinstance(ret, dict):
                     if "success" in ret.keys():
                         response.success = ret["success"]
-                    else:
-                        # if the dict does not contain a success field, but the callback
-                        # completes without error, assume it was successful
-
-                        response.success = True
                     if "message" in ret.keys():
                         response.message = ret["message"]
                 elif isinstance(ret, bool):
                     response.success = ret
-                else:
-                    response.success = True
             except Exception as e:
                 response.success = False
                 response.message = f"{e}"
