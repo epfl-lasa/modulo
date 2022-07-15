@@ -423,7 +423,7 @@ class ComponentInterface(Node):
         except Exception as e:
             self.get_logger().error(f"Failed to add input '{signal_name}': {e}")
 
-    def add_service(self, service_name: str, callback: Union[Callable[[], dict], Callable[[string], dict]]):
+    def add_service(self, service_name: str, callback: Union[Callable[[], dict], Callable[[str], dict]]):
         """
         Add a service to trigger a callback function.
         The callback should take either no arguments (empty service) or a single string argument (string service).
@@ -463,6 +463,7 @@ class ComponentInterface(Node):
                 response.success = False
                 response.message = f"{e}"
             return response
+
         try:
             parsed_service_name = parse_signal_name(service_name)
             signature = inspect.signature(callback)
