@@ -794,9 +794,9 @@ inline void ComponentInterface<NodeT>::add_service(
 ) {
   try {
     std::string parsed_service_name = utilities::parse_signal_name(service_name);
-    RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding empty service '" << parsed_service_name << ".");
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding empty service '" << parsed_service_name << "'.");
     NodeT::template create_service<modulo_component_interfaces::srv::EmptyTrigger>(
-        parsed_service_name, [callback](
+        "~/" + parsed_service_name, [callback](
             const std::shared_ptr<modulo_component_interfaces::srv::EmptyTrigger::Request>,
             std::shared_ptr<modulo_component_interfaces::srv::EmptyTrigger::Response> response
         ) {
@@ -820,9 +820,9 @@ inline void ComponentInterface<NodeT>::add_service(
 ) {
   try {
     std::string parsed_service_name = utilities::parse_signal_name(service_name);
-    RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding string service '" << parsed_service_name << ".");
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding string service '" << parsed_service_name << "'.");
     NodeT::template create_service<modulo_component_interfaces::srv::StringTrigger>(
-        parsed_service_name, [callback](
+        "~/" + parsed_service_name, [callback](
             const std::shared_ptr<modulo_component_interfaces::srv::StringTrigger::Request> request,
             std::shared_ptr<modulo_component_interfaces::srv::StringTrigger::Response> response
         ) {

@@ -462,12 +462,12 @@ class ComponentInterface(Node):
             parsed_service_name = parse_signal_name(service_name)
             signature = inspect.signature(callback)
             if len(signature.parameters) == 0:
-                self.get_logger().debug(f"Adding empty service {parsed_service_name}")
+                self.get_logger().debug(f"Adding empty service '{parsed_service_name}'")
                 service_type = EmptyTrigger
             else:
-                self.get_logger().debug(f"Adding string service {parsed_service_name}")
+                self.get_logger().debug(f"Adding string service '{parsed_service_name}'")
                 service_type = StringTrigger
-            self.create_service(service_type, parsed_service_name,
+            self.create_service(service_type,  "~/" + parsed_service_name,
                                 lambda request, response: callback_wrapper(request, response, callback))
         except Exception as e:
             self.get_logger().error(f"Failed to add service '{service_name}': {e}")
