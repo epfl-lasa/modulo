@@ -7,6 +7,16 @@ class ComponentError(Exception):
         super().__init__(message)
 
 
+class AddServiceError(ComponentError):
+    """
+    An exception class to notify errors when adding a service. This is an exception class to be thrown if there is a
+    problem while adding a service to the component.
+    """
+
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
 class AddSignalError(ComponentError):
     """
     An exception class to notify errors when adding a signal. This is an exception class to be thrown if there is a
