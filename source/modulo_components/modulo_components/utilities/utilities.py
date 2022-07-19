@@ -12,14 +12,14 @@ def generate_predicate_topic(node_name: str, predicate_name: str) -> str:
     return f'/predicates/{node_name}/{predicate_name}'
 
 
-def parse_signal_name(signal_name: str) -> str:
+def parse_topic_name(topic_name: str) -> str:
     """
-    Parse a string signal name from a user-provided input.
+    Parse a string topic name from a user-provided input.
     This functions removes all characters different from a-z, A-Z, 0-9, and _ from a string.
 
-    :param signal_name: The input string
+    :param topic_name: The input string
     :return: The sanitized string
     """
-    sanitized_string = re.sub("\W", "", signal_name, flags=re.ASCII).lower()
+    sanitized_string = re.sub("\W", "", topic_name, flags=re.ASCII).lower()
     sanitized_string = sanitized_string.lstrip("_")
     return sanitized_string
