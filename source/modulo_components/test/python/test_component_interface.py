@@ -69,10 +69,28 @@ def test_add_service(component_interface):
     def empty_callback():
         return {"success": True, "message": "test"}
     component_interface.add_service("empty", empty_callback)
+    assert len(component_interface._services) == 1
+    assert "empty" in component_interface._services.keys()
 
     def string_callback():
         return {"success": True, "message": "test"}
+    component_interface.add_service("string", string_callback)
+    assert len(component_interface._services) == 2
+    assert "string" in component_interface._services.keys()
+
+    # adding a service under an existing name should fail for either callback type, but is exception safe
+    component_interface.add_service("empty", empty_callback)
     component_interface.add_service("empty", string_callback)
+    assert len(component_interface._services) == 2
+
+    component_interface.add_service("string", empty_callback)
+    component_interface.add_service("string", string_callback)
+    assert len(component_interface._services) == 2
+
+    # adding a mangled service name should succeed under a sanitized name
+    component_interface.add_service("_tEsT_#1@3", empty_callback)
+    assert len(component_interface._services) == 3
+    assert "test_13" in component_interface._services.keys()
 
     # TODO: use a service client to trigger the service and test the behaviour
 
