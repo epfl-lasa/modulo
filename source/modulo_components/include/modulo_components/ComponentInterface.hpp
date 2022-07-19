@@ -38,7 +38,9 @@ namespace modulo_components {
 
 /**
  * @struct ComponentServiceResponse
- * @brief TODO
+ * @brief Response structure to be returned by component services.
+ * @details The structure contains a bool success field and a string message field.
+ * This information is used to provide feedback on the service outcome to the service client.
  */
 struct ComponentServiceResponse {
   bool success;
