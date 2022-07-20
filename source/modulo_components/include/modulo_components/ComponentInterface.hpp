@@ -27,6 +27,7 @@
 #include <modulo_component_interfaces/srv/empty_trigger.hpp>
 #include <modulo_component_interfaces/srv/string_trigger.hpp>
 
+#include "modulo_components/exceptions/AddServiceException.hpp"
 #include "modulo_components/exceptions/AddSignalException.hpp"
 #include "modulo_components/exceptions/ComponentParameterException.hpp"
 #include "modulo_components/exceptions/LookupTransformException.hpp"
@@ -37,7 +38,9 @@ namespace modulo_components {
 
 /**
  * @struct ComponentServiceResponse
- * @brief TODO
+ * @brief Response structure to be returned by component services.
+ * @details The structure contains a bool success field and a string message field.
+ * This information is used to provide feedback on the service outcome to the service client.
  */
 struct ComponentServiceResponse {
   bool success;
@@ -376,6 +379,22 @@ private:
    */
   void set_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
+  /**
+   * @brief Validate an add_input request by parsing the signal name and checking the map of registered inputs.
+   * @param signal_name The name of the input signal
+   * @throws AddSignalException if the input could not be created (empty name or already registered)
+   * @return The parsed signal name
+   */
+  std::string validate_input_signal_name(const std::string& signal_name);
+
+  /**
+   * @brief Validate an add_service request by parsing the service name and checking the maps of registered services.
+   * @param service_name The name of the service
+   * @throws AddServiceException if the service could not be created (empty name or already registered)
+   * @return The parsed service name
+   */
+  std::string validate_service_name(const std::string& service_name);
+
   modulo_core::communication::PublisherType
       publisher_type_; ///< Type of the output publishers (one of PUBLISHER, LIFECYCLE_PUBLISHER)
 
@@ -383,6 +402,11 @@ private:
   std::map<std::string, std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>>>
       predicate_publishers_; ///< Map of predicate publishers
   std::map<std::string, bool> triggers_; ///< Map of triggers
+
+  std::map<std::string, std::shared_ptr<rclcpp::Service<modulo_component_interfaces::srv::EmptyTrigger>>>
+      empty_services_; ///< Map of EmptyTrigger services
+  std::map<std::string, std::shared_ptr<rclcpp::Service<modulo_component_interfaces::srv::StringTrigger>>>
+      string_services_; ///< Map of StringTrigger services
 
   std::map<std::string, std::function<void(void)>> periodic_callbacks_; ///< Map of periodic function callbacks
 
@@ -673,6 +697,20 @@ inline void ComponentInterface<NodeT>::set_predicate(
 }
 
 template<class NodeT>
+inline std::string ComponentInterface<NodeT>::validate_input_signal_name(const std::string& signal_name) {
+  std::string parsed_signal_name = utilities::parse_topic_name(signal_name);
+  if (parsed_signal_name.empty()) {
+    throw exceptions::AddSignalException(
+        "Failed to add input '" + signal_name + "': Parsed signal name is empty."
+    );
+  }
+  if (this->inputs_.find(parsed_signal_name) != this->inputs_.cend()) {
+    throw exceptions::AddSignalException("Failed to add input '" + signal_name + "': Input already exists");
+  }
+  return parsed_signal_name;
+}
+
+template<class NodeT>
 template<typename DataT>
 inline void ComponentInterface<NodeT>::add_input(
     const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::string& default_topic,
@@ -680,15 +718,7 @@ inline void ComponentInterface<NodeT>::add_input(
 ) {
   using namespace modulo_core::communication;
   try {
-    std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
-    if (parsed_signal_name.empty()) {
-      throw exceptions::AddSignalException(
-          "Failed to add input '" + signal_name + "': Parsed signal name is empty."
-      );
-    }
-    if (this->inputs_.find(parsed_signal_name) != this->inputs_.end()) {
-      throw exceptions::AddSignalException("Failed to add input '" + signal_name + "': Input already exists");
-    }
+    std::string parsed_signal_name = this->validate_input_signal_name(signal_name);
     std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
     auto parameter_name = parsed_signal_name + "_topic";
     if (NodeT::has_parameter(parameter_name) && this->get_parameter(parameter_name)->is_empty()) {
@@ -762,15 +792,7 @@ inline void ComponentInterface<NodeT>::add_input(
 ) {
   using namespace modulo_core::communication;
   try {
-    std::string parsed_signal_name = utilities::parse_signal_name(signal_name);
-    if (parsed_signal_name.empty()) {
-      throw exceptions::AddSignalException(
-          "Failed to add input '" + signal_name + "': Parsed signal name is empty."
-      );
-    }
-    if (this->inputs_.find(parsed_signal_name) != this->inputs_.end()) {
-      throw exceptions::AddSignalException("Failed to add input '" + signal_name + "': Input already exists");
-    }
+    std::string parsed_signal_name = this->validate_input_signal_name(signal_name);
     std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
     this->add_parameter(
         parsed_signal_name + "_topic", topic_name, "Output topic name of signal '" + parsed_signal_name + "'",
@@ -789,13 +811,28 @@ inline void ComponentInterface<NodeT>::add_input(
 }
 
 template<class NodeT>
+inline std::string ComponentInterface<NodeT>::validate_service_name(const std::string& service_name) {
+  std::string parsed_service_name = utilities::parse_topic_name(service_name);
+  if (parsed_service_name.empty()) {
+    throw exceptions::AddServiceException(
+        "Failed to add service '" + service_name + "': Parsed service name is empty."
+    );
+  }
+  if (this->empty_services_.find(parsed_service_name) != this->empty_services_.cend()
+      || this->string_services_.find(parsed_service_name) != this->string_services_.cend()) {
+    throw exceptions::AddServiceException("Failed to add service '" + service_name + "': Service already exists");
+  }
+  return parsed_service_name;
+}
+
+template<class NodeT>
 inline void ComponentInterface<NodeT>::add_service(
     const std::string& service_name, const std::function<ComponentServiceResponse(void)>& callback
 ) {
   try {
-    std::string parsed_service_name = utilities::parse_signal_name(service_name);
+    std::string parsed_service_name = validate_service_name(service_name);
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding empty service '" << parsed_service_name << "'.");
-    NodeT::template create_service<modulo_component_interfaces::srv::EmptyTrigger>(
+    auto service = NodeT::template create_service<modulo_component_interfaces::srv::EmptyTrigger>(
         "~/" + parsed_service_name, [callback](
             const std::shared_ptr<modulo_component_interfaces::srv::EmptyTrigger::Request>,
             std::shared_ptr<modulo_component_interfaces::srv::EmptyTrigger::Response> response
@@ -809,6 +846,7 @@ inline void ComponentInterface<NodeT>::add_service(
             response->message = ex.what();
           }
         });
+    this->empty_services_.insert_or_assign(parsed_service_name, service);
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add service '" << service_name << "': " << ex.what());
   }
@@ -819,9 +857,9 @@ inline void ComponentInterface<NodeT>::add_service(
     const std::string& service_name, const std::function<ComponentServiceResponse(const std::string& string)>& callback
 ) {
   try {
-    std::string parsed_service_name = utilities::parse_signal_name(service_name);
+    std::string parsed_service_name = validate_service_name(service_name);
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding string service '" << parsed_service_name << "'.");
-    NodeT::template create_service<modulo_component_interfaces::srv::StringTrigger>(
+    auto service = NodeT::template create_service<modulo_component_interfaces::srv::StringTrigger>(
         "~/" + parsed_service_name, [callback](
             const std::shared_ptr<modulo_component_interfaces::srv::StringTrigger::Request> request,
             std::shared_ptr<modulo_component_interfaces::srv::StringTrigger::Response> response
@@ -835,6 +873,7 @@ inline void ComponentInterface<NodeT>::add_service(
             response->message = ex.what();
           }
         });
+    this->string_services_.insert_or_assign(parsed_service_name, service);
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add service '" << service_name << "': " << ex.what());
   }
@@ -964,7 +1003,7 @@ inline std::string ComponentInterface<NodeT>::create_output(
 ) {
   using namespace modulo_core::communication;
   try {
-    auto parsed_signal_name = utilities::parse_signal_name(signal_name);
+    auto parsed_signal_name = utilities::parse_topic_name(signal_name);
     if (parsed_signal_name.empty()) {
       throw exceptions::AddSignalException(
           "The parsed signal name for signal '" + signal_name

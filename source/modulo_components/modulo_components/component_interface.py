@@ -9,8 +9,8 @@ import modulo_core.translators.message_writers as modulo_writers
 import state_representation as sr
 from geometry_msgs.msg import TransformStamped
 from modulo_component_interfaces.srv import EmptyTrigger, StringTrigger
-from modulo_components.exceptions import AddSignalError, ComponentParameterError, LookupTransformError
-from modulo_components.utilities import generate_predicate_topic, parse_signal_name
+from modulo_components.exceptions import AddServiceError, AddSignalError, ComponentParameterError, LookupTransformError
+from modulo_components.utilities import generate_predicate_topic, parse_topic_name
 from modulo_core import EncodedState
 from modulo_core.exceptions import MessageTranslationError, ParameterTranslationError
 from modulo_core.translators.parameter_translators import get_ros_parameter_type, read_parameter_const, write_parameter
@@ -44,6 +44,7 @@ class ComponentInterface(Node):
         self._periodic_callbacks: Dict[str, Callable[[], None]] = {}
         self._inputs = {}
         self._outputs = {}
+        self._services = {}
         self.__tf_buffer: Optional[Buffer] = None
         self.__tf_listener: Optional[TransformListener] = None
         self.__tf_broadcaster: Optional[TransformBroadcaster] = None
@@ -329,7 +330,7 @@ class ComponentInterface(Node):
         try:
             if message_type == EncodedState and clproto_message_type == clproto.MessageType.UNKNOWN_MESSAGE:
                 raise AddSignalError(f"Provide a valid clproto message type for outputs of type EncodedState.")
-            parsed_signal_name = parse_signal_name(signal_name)
+            parsed_signal_name = parse_topic_name(signal_name)
             if not parsed_signal_name:
                 raise AddSignalError("The parsed signal name is empty. Provide a string with valid "
                                      "characters for the signal name ([a-zA-Z0-9_]).")
@@ -385,7 +386,7 @@ class ComponentInterface(Node):
         :param fixed_topic: If true, the topic name of the output signal is fixed
         """
         try:
-            parsed_signal_name = parse_signal_name(signal_name)
+            parsed_signal_name = parse_topic_name(signal_name)
             if not parsed_signal_name:
                 raise AddSignalError(f"Failed to add input '{signal_name}': Parsed signal name is empty.")
             if parsed_signal_name in self._inputs.keys():
@@ -459,7 +460,11 @@ class ComponentInterface(Node):
             return response
 
         try:
-            parsed_service_name = parse_signal_name(service_name)
+            parsed_service_name = parse_topic_name(service_name)
+            if not parsed_service_name:
+                raise AddServiceError(f"Failed to add service '{service_name}': Parsed service name is empty.")
+            if parsed_service_name in self._services.keys():
+                raise AddServiceError(f"Failed to add service '{service_name}': Service already exists")
             signature = inspect.signature(callback)
             if len(signature.parameters) == 0:
                 self.get_logger().debug(f"Adding empty service '{parsed_service_name}'")
@@ -467,8 +472,9 @@ class ComponentInterface(Node):
             else:
                 self.get_logger().debug(f"Adding string service '{parsed_service_name}'")
                 service_type = StringTrigger
-            self.create_service(service_type,  "~/" + parsed_service_name,
-                                lambda request, response: callback_wrapper(request, response, callback))
+            self._services[parsed_service_name] = \
+                self.create_service(service_type, "~/" + parsed_service_name,
+                                    lambda request, response: callback_wrapper(request, response, callback))
         except Exception as e:
             self.get_logger().error(f"Failed to add service '{service_name}': {e}")
 

@@ -32,6 +32,8 @@ public:
   using ComponentInterface<NodeT>::inputs_;
   using ComponentInterface<NodeT>::create_output;
   using ComponentInterface<NodeT>::outputs_;
+  using ComponentInterface<NodeT>::empty_services_;
+  using ComponentInterface<NodeT>::string_services_;
   using ComponentInterface<NodeT>::add_tf_broadcaster;
   using ComponentInterface<NodeT>::add_tf_listener;
   using ComponentInterface<NodeT>::send_transform;

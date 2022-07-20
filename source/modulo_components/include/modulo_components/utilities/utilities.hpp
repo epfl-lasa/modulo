@@ -40,15 +40,15 @@ parse_node_name(const rclcpp::NodeOptions& options, const std::string& fallback 
 }
 
 /**
- * @brief Parse a string signal name from a user-provided input.
+ * @brief Parse a string topic name from a user-provided input.
  * @details This functions removes all characters different from
  * a-z, A-Z, 0-9, and _ from a string.
- * @param signal_name The input string
+ * @param topic_name The input string
  * @return The sanitized string
  */
-[[maybe_unused]] static std::string parse_signal_name(const std::string& signal_name) {
+[[maybe_unused]] static std::string parse_topic_name(const std::string& topic_name) {
   std::string output;
-  for (char c: signal_name) {
+  for (char c: topic_name) {
     if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
       if (!(c == '_' && output.empty())) {
         output.insert(output.end(), std::tolower(c));

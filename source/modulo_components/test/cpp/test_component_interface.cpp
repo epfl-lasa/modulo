@@ -100,15 +100,45 @@ TYPED_TEST(ComponentInterfaceTest, AddInput) {
 }
 
 TYPED_TEST(ComponentInterfaceTest, AddService) {
+  EXPECT_EQ(static_cast<int>(this->component_->empty_services_.size()), 0);
+  EXPECT_EQ(static_cast<int>(this->component_->string_services_.size()), 0);
+
   auto empty_callback = []() -> ComponentServiceResponse {
     return ComponentServiceResponse();
   };
   EXPECT_NO_THROW(this->component_->add_service("empty", empty_callback));
+  EXPECT_EQ(static_cast<int>(this->component_->empty_services_.size()), 1);
+  EXPECT_NE(this->component_->empty_services_.find("empty"), this->component_->empty_services_.cend());
 
   auto string_callback = [](const std::string&) -> ComponentServiceResponse {
     return ComponentServiceResponse();
   };
   EXPECT_NO_THROW(this->component_->add_service("string", string_callback));
+  EXPECT_EQ(static_cast<int>(this->component_->string_services_.size()), 1);
+  EXPECT_NE(this->component_->string_services_.find("string"), this->component_->string_services_.cend());
+
+  // adding a service under an existing name should fail for either callback type but is exception safe
+  EXPECT_NO_THROW(this->component_->add_service("empty", empty_callback));
+  EXPECT_NO_THROW(this->component_->add_service("empty", string_callback));
+  EXPECT_EQ(static_cast<int>(this->component_->empty_services_.size()), 1);
+  EXPECT_EQ(static_cast<int>(this->component_->string_services_.size()), 1);
+
+  EXPECT_NO_THROW(this->component_->add_service("string", empty_callback));
+  EXPECT_NO_THROW(this->component_->add_service("string", string_callback));
+  EXPECT_EQ(static_cast<int>(this->component_->empty_services_.size()), 1);
+  EXPECT_EQ(static_cast<int>(this->component_->string_services_.size()), 1);
+
+  // adding an empty service name should fail
+  EXPECT_NO_THROW(this->component_->add_service("", empty_callback));
+  EXPECT_NO_THROW(this->component_->add_service("", string_callback));
+  EXPECT_EQ(static_cast<int>(this->component_->empty_services_.size()), 1);
+  EXPECT_EQ(static_cast<int>(this->component_->string_services_.size()), 1);
+
+
+  // adding a mangled service name should succeed under a sanitized name
+  EXPECT_NO_THROW(this->component_->add_service("_tEsT_#1@3", empty_callback));
+  EXPECT_EQ(static_cast<int>(this->component_->empty_services_.size()), 2);
+  EXPECT_NE(this->component_->empty_services_.find("test_13"), this->component_->empty_services_.cend());
 
   // TODO: use a service client to trigger the service and test the behaviour
 }
