@@ -164,6 +164,26 @@ inline void read_message(T& state, const EncodedState& message) {
   }
 }
 
+/**
+ * @brief
+ * @tparam T
+ * @param state
+ * @param new_state
+ * @throw MessageTranslationException
+ * @return
+ */
+template<typename T>
+inline std::shared_ptr<T> dynamic_cast_with_check(
+    std::shared_ptr<state_representation::State>& state, std::shared_ptr<state_representation::State>& new_state
+) {
+  auto derived_state = std::dynamic_pointer_cast<T>(state->shared_from_this());
+  if (derived_state == nullptr) {
+    throw modulo_core::exceptions::MessageTranslationException("Dynamic casting of state failed.");
+  }
+  *derived_state = *std::dynamic_pointer_cast<T>(new_state);
+  return derived_state;
+}
+
 template<>
 inline void read_message(std::shared_ptr<state_representation::State>& state, const EncodedState& message) {
   using namespace state_representation;
@@ -173,142 +193,91 @@ inline void read_message(std::shared_ptr<state_representation::State>& state, co
     case StateType::STATE:
       *state = *new_state;
       break;
-    case StateType::SPATIAL_STATE: {
-      auto derived_state = std::dynamic_pointer_cast<SpatialState>(state->shared_from_this());
-      *derived_state = *std::dynamic_pointer_cast<SpatialState>(new_state);
-      state = derived_state;
+    case StateType::SPATIAL_STATE:
+      state = dynamic_cast_with_check<SpatialState>(state, new_state);
       break;
-    }
-    case StateType::CARTESIAN_STATE: {
-      auto derived_state = std::dynamic_pointer_cast<CartesianState>(state->shared_from_this());
-      *derived_state = *std::dynamic_pointer_cast<CartesianState>(new_state);
-      state = derived_state;
+    case StateType::CARTESIAN_STATE:
+      state = dynamic_cast_with_check<CartesianState>(state, new_state);
       break;
-    }
-    case StateType::CARTESIAN_POSE: {
-      auto derived_state = std::dynamic_pointer_cast<CartesianPose>(state->shared_from_this());
-      *derived_state = *std::dynamic_pointer_cast<CartesianPose>(new_state);
-      state = derived_state;
+    case StateType::CARTESIAN_POSE:
+      state =
+          state->get_type() == StateType::CARTESIAN_STATE ? dynamic_cast_with_check<CartesianState>(state, new_state)
+                                                          : dynamic_cast_with_check<CartesianPose>(state, new_state);
       break;
-    }
-    case StateType::CARTESIAN_TWIST: {
-      auto derived_state = std::dynamic_pointer_cast<CartesianTwist>(state->shared_from_this());
-      *derived_state = *std::dynamic_pointer_cast<CartesianTwist>(new_state);
-      state = derived_state;
+    case StateType::CARTESIAN_TWIST:
+      state =
+          state->get_type() == StateType::CARTESIAN_STATE ? dynamic_cast_with_check<CartesianState>(state, new_state)
+                                                          : dynamic_cast_with_check<CartesianTwist>(state, new_state);
       break;
-    }
-    case StateType::CARTESIAN_ACCELERATION: {
-      auto derived_state = std::dynamic_pointer_cast<CartesianAcceleration>(state->shared_from_this());
-      *derived_state = *std::dynamic_pointer_cast<CartesianAcceleration>(new_state);
-      state = derived_state;
+    case StateType::CARTESIAN_ACCELERATION:
+      state =
+          state->get_type() == StateType::CARTESIAN_STATE ? dynamic_cast_with_check<CartesianState>(state, new_state)
+                                                          : dynamic_cast_with_check<CartesianAcceleration>(
+              state, new_state
+          );
       break;
-    }
-    case StateType::CARTESIAN_WRENCH: {
-      auto derived_state = std::dynamic_pointer_cast<CartesianWrench>(state->shared_from_this());
-      *derived_state = *std::dynamic_pointer_cast<CartesianWrench>(new_state);
-      state = derived_state;
+    case StateType::CARTESIAN_WRENCH:
+      state =
+          state->get_type() == StateType::CARTESIAN_STATE ? dynamic_cast_with_check<CartesianState>(state, new_state)
+                                                          : dynamic_cast_with_check<CartesianWrench>(state, new_state);
       break;
-    }
-    case StateType::JACOBIAN: {
-      auto derived_state = std::dynamic_pointer_cast<Jacobian>(state->shared_from_this());
-      *derived_state = *std::dynamic_pointer_cast<Jacobian>(new_state);
-      state = derived_state;
+    case StateType::JACOBIAN:
+      state = dynamic_cast_with_check<Jacobian>(state, new_state);
       break;
-    }
-    case StateType::JOINT_STATE: {
-      auto derived_state = std::dynamic_pointer_cast<JointState>(state->shared_from_this());
-      *derived_state = *std::dynamic_pointer_cast<JointState>(new_state);
-      state = derived_state;
+    case StateType::JOINT_STATE:
+      state = dynamic_cast_with_check<JointState>(state, new_state);
       break;
-    }
-    case StateType::JOINT_POSITIONS: {
-      auto derived_state = std::dynamic_pointer_cast<JointPositions>(state->shared_from_this());
-      *derived_state = *std::dynamic_pointer_cast<JointPositions>(new_state);
-      state = derived_state;
+    case StateType::JOINT_POSITIONS:
+      state = state->get_type() == StateType::JOINT_STATE ? dynamic_cast_with_check<JointState>(state, new_state)
+                                                          : dynamic_cast_with_check<JointPositions>(state, new_state);
       break;
-    }
-    case StateType::JOINT_VELOCITIES: {
-      auto derived_state = std::dynamic_pointer_cast<JointVelocities>(state->shared_from_this());
-      *derived_state = *std::dynamic_pointer_cast<JointVelocities>(new_state);
-      state = derived_state;
+    case StateType::JOINT_VELOCITIES:
+      state = state->get_type() == StateType::JOINT_STATE ? dynamic_cast_with_check<JointState>(state, new_state)
+                                                          : dynamic_cast_with_check<JointVelocities>(state, new_state);
       break;
-    }
-    case StateType::JOINT_ACCELERATIONS: {
-      auto derived_state = std::dynamic_pointer_cast<JointAccelerations>(state->shared_from_this());
-      *derived_state = *std::dynamic_pointer_cast<JointAccelerations>(new_state);
-      state = derived_state;
+    case StateType::JOINT_ACCELERATIONS:
+      state = state->get_type() == StateType::JOINT_STATE ? dynamic_cast_with_check<JointState>(state, new_state)
+                                                          : dynamic_cast_with_check<JointAccelerations>(
+              state, new_state
+          );
       break;
-    }
-    case StateType::JOINT_TORQUES: {
-      auto derived_state = std::dynamic_pointer_cast<JointTorques>(state->shared_from_this());
-      *derived_state = *std::dynamic_pointer_cast<JointTorques>(new_state);
-      state = derived_state;
+    case StateType::JOINT_TORQUES:
+      state = state->get_type() == StateType::JOINT_STATE ? dynamic_cast_with_check<JointState>(state, new_state)
+                                                          : dynamic_cast_with_check<JointTorques>(state, new_state);
       break;
-    }
     case StateType::PARAMETER: {
       auto param_ptr = std::dynamic_pointer_cast<ParameterInterface>(new_state);
       switch (param_ptr->get_parameter_type()) {
-        case ParameterType::BOOL: {
-          auto derived_state = std::dynamic_pointer_cast<Parameter<bool>>(state->shared_from_this());
-          *derived_state = *std::dynamic_pointer_cast<Parameter<bool>>(new_state);
-          state = derived_state;
+        case ParameterType::BOOL:
+          state = dynamic_cast_with_check<Parameter<bool>>(state, new_state);
           break;
-        }
-        case ParameterType::BOOL_ARRAY: {
-          auto derived_state = std::dynamic_pointer_cast<Parameter<std::vector<bool>>>(state->shared_from_this());
-          *derived_state = *std::dynamic_pointer_cast<Parameter<std::vector<bool>>>(new_state);
-          state = derived_state;
+        case ParameterType::BOOL_ARRAY:
+          state = dynamic_cast_with_check<Parameter<std::vector<bool>>>(state, new_state);
           break;
-        }
-        case ParameterType::INT: {
-          auto derived_state = std::dynamic_pointer_cast<Parameter<int>>(state->shared_from_this());
-          *derived_state = *std::dynamic_pointer_cast<Parameter<int>>(new_state);
-          state = derived_state;
+        case ParameterType::INT:
+          state = dynamic_cast_with_check<Parameter<int>>(state, new_state);
           break;
-        }
-        case ParameterType::INT_ARRAY: {
-          auto derived_state = std::dynamic_pointer_cast<Parameter<std::vector<int>>>(state->shared_from_this());
-          *derived_state = *std::dynamic_pointer_cast<Parameter<std::vector<int>>>(new_state);
-          state = derived_state;
+        case ParameterType::INT_ARRAY:
+          state = dynamic_cast_with_check<Parameter<std::vector<int>>>(state, new_state);
           break;
-        }
-        case ParameterType::DOUBLE: {
-          auto derived_state = std::dynamic_pointer_cast<Parameter<double>>(state->shared_from_this());
-          *derived_state = *std::dynamic_pointer_cast<Parameter<double>>(new_state);
-          state = derived_state;
+        case ParameterType::DOUBLE:
+          state = dynamic_cast_with_check<Parameter<double>>(state, new_state);
           break;
-        }
-        case ParameterType::DOUBLE_ARRAY: {
-          auto derived_state = std::dynamic_pointer_cast<Parameter<std::vector<double>>>(state->shared_from_this());
-          *derived_state = *std::dynamic_pointer_cast<Parameter<std::vector<double>>>(new_state);
-          state = derived_state;
+        case ParameterType::DOUBLE_ARRAY:
+          state = dynamic_cast_with_check<Parameter<std::vector<double>>>(state, new_state);
           break;
-        }
-        case ParameterType::STRING: {
-          auto derived_state = std::dynamic_pointer_cast<Parameter<std::string>>(state->shared_from_this());
-          *derived_state = *std::dynamic_pointer_cast<Parameter<std::string>>(new_state);
-          state = derived_state;
+        case ParameterType::STRING:
+          state = dynamic_cast_with_check<Parameter<std::string>>(state, new_state);
           break;
-        }
-        case ParameterType::STRING_ARRAY: {
-          auto
-              derived_state = std::dynamic_pointer_cast<Parameter<std::vector<std::string>>>(state->shared_from_this());
-          *derived_state = *std::dynamic_pointer_cast<Parameter<std::vector<std::string>>>(new_state);
-          state = derived_state;
+        case ParameterType::STRING_ARRAY:
+          state = dynamic_cast_with_check<Parameter<std::vector<std::string>>>(state, new_state);
           break;
-        }
-        case ParameterType::VECTOR: {
-          auto derived_state = std::dynamic_pointer_cast<Parameter<Eigen::VectorXd>>(state->shared_from_this());
-          *derived_state = *std::dynamic_pointer_cast<Parameter<Eigen::VectorXd>>(new_state);
-          state = derived_state;
+        case ParameterType::VECTOR:
+          state = dynamic_cast_with_check<Parameter<Eigen::VectorXd>>(state, new_state);
           break;
-        }
-        case ParameterType::MATRIX: {
-          auto derived_state = std::dynamic_pointer_cast<Parameter<Eigen::MatrixXd>>(state->shared_from_this());
-          *derived_state = *std::dynamic_pointer_cast<Parameter<Eigen::MatrixXd>>(new_state);
-          state = derived_state;
+        case ParameterType::MATRIX:
+          state = dynamic_cast_with_check<Parameter<Eigen::MatrixXd>>(state, new_state);
           break;
-        }
         default:
           throw exceptions::MessageTranslationException(
               "The ParameterType contained by parameter " + param_ptr->get_name() + " is unsupported."
@@ -317,7 +286,9 @@ inline void read_message(std::shared_ptr<state_representation::State>& state, co
       break;
     }
     default:
-      throw exceptions::MessageTranslationException("The StateType contained by state " + new_state->get_name() + " is unsupported.");
+      throw exceptions::MessageTranslationException(
+          "The StateType contained by state " + new_state->get_name() + " is unsupported."
+      );
   }
 }
 }// namespace modulo_core::translators
