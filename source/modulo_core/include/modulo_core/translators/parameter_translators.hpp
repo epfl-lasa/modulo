@@ -3,6 +3,10 @@
 #include <rclcpp/parameter.hpp>
 #include <state_representation/parameters/Parameter.hpp>
 
+/**
+ * @namespace modulo_core::translators
+ * @brief Modulo Core translation module for converting between ROS2 and state_representation data types.
+ */
 namespace modulo_core::translators {
 
 /**

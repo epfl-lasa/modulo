@@ -3,6 +3,10 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * @namespace modulo_core::exceptions
+ * @brief Modulo Core exceptions module for defining exception classes.
+ */
 namespace modulo_core::exceptions {
 
 /**

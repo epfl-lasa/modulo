@@ -2,6 +2,10 @@
 
 #include <std_msgs/msg/u_int8_multi_array.hpp>
 
+/**
+ * @namespace modulo_core
+ * @brief Modulo Core
+ */
 namespace modulo_core {
 
 /**
