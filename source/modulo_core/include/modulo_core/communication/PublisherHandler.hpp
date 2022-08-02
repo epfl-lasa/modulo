@@ -64,7 +64,11 @@ void PublisherHandler<PubT, MsgT>::on_activate() {
     throw exceptions::NullPointerException("Publisher not set");
   }
   if (this->get_type() == PublisherType::LIFECYCLE_PUBLISHER) {
-    this->publisher_->on_activate();
+    try {
+      this->publisher_->on_activate();
+    } catch (const std::exception& ex) {
+      throw exceptions::CoreException(ex.what());
+    }
   } else {
     RCLCPP_DEBUG(rclcpp::get_logger("PublisherHandler"), "Only LifecyclePublishers can be deactivated");
   }
@@ -76,7 +80,11 @@ void PublisherHandler<PubT, MsgT>::on_deactivate() {
     throw exceptions::NullPointerException("Publisher not set");
   }
   if (this->get_type() == PublisherType::LIFECYCLE_PUBLISHER) {
-    this->publisher_->on_deactivate();
+    try {
+      this->publisher_->on_deactivate();
+    } catch (const std::exception& ex) {
+      throw exceptions::CoreException(ex.what());
+    }
   } else {
     RCLCPP_DEBUG(rclcpp::get_logger("PublisherHandler"), "Only LifecyclePublishers can be deactivated");
   }
@@ -87,15 +95,23 @@ void PublisherHandler<PubT, MsgT>::publish(const MsgT& message) const {
   if (this->publisher_ == nullptr) {
     throw exceptions::NullPointerException("Publisher not set");
   }
-  this->publisher_->publish(message);
+  try {
+    this->publisher_->publish(message);
+  } catch (const std::exception& ex) {
+    throw exceptions::CoreException(ex.what());
+  }
 }
 
 template<typename PubT, typename MsgT>
 std::shared_ptr<PublisherInterface> PublisherHandler<PubT, MsgT>::create_publisher_interface(
     const std::shared_ptr<MessagePairInterface>& message_pair
 ) {
-  std::shared_ptr<PublisherInterface> publisher_interface(this->shared_from_this());
-  publisher_interface->set_message_pair(message_pair);
-  return publisher_interface;
+  try {
+    std::shared_ptr<PublisherInterface> publisher_interface(this->shared_from_this());
+    publisher_interface->set_message_pair(message_pair);
+    return publisher_interface;
+  } catch (const std::exception& ex) {
+    throw exceptions::CoreException(ex.what());
+  }
 }
 }// namespace modulo_core::communication
