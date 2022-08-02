@@ -176,7 +176,7 @@ template<typename T>
 inline std::shared_ptr<T> dynamic_cast_with_check(
     std::shared_ptr<state_representation::State>& state, std::shared_ptr<state_representation::State>& new_state
 ) {
-  auto derived_state = std::dynamic_pointer_cast<T>(state->shared_from_this());
+  auto derived_state = std::dynamic_pointer_cast<T>(state);
   if (derived_state == nullptr) {
     throw modulo_core::exceptions::MessageTranslationException("Dynamic casting of state failed.");
   }

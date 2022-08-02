@@ -208,7 +208,7 @@ TEST_F(MessageTranslatorsTest, TestEncodedState) {
   EXPECT_EQ(state_.get_reference_frame(), new_state.get_reference_frame());
 }
 
-TEST_F(MessageTranslatorsTest, TestEncodedStatePointer) {
+TEST_F(MessageTranslatorsTest, TestEncodedStatePointerSameType) {
   auto state_ptr = state_representation::make_shared_state(state_);
   auto message = modulo_core::EncodedState();
   write_message(message, state_ptr, clock_.now());
@@ -218,4 +218,24 @@ TEST_F(MessageTranslatorsTest, TestEncodedStatePointer) {
   EXPECT_TRUE(state_.data().isApprox(new_state.data()));
   EXPECT_EQ(state_.get_name(), new_state.get_name());
   EXPECT_EQ(state_.get_reference_frame(), new_state.get_reference_frame());
+}
+
+TEST_F(MessageTranslatorsTest, TestEncodedStatePointerCompatibleType) {
+  auto state_ptr = state_representation::make_shared_state(state_);
+  auto message = modulo_core::EncodedState();
+  write_message(message, state_ptr, clock_.now());
+  auto new_state_ptr = state_representation::make_shared_state(state_representation::CartesianPose());
+  read_message(new_state_ptr, message);
+  auto new_state = *std::dynamic_pointer_cast<state_representation::CartesianPose>(new_state_ptr);
+  EXPECT_TRUE(state_.get_pose().isApprox(new_state.get_pose()));
+  EXPECT_EQ(state_.get_name(), new_state.get_name());
+  EXPECT_EQ(state_.get_reference_frame(), new_state.get_reference_frame());
+}
+
+TEST_F(MessageTranslatorsTest, TestEncodedStatePointerIncompatibleType) {
+  auto state_ptr = state_representation::make_shared_state(joint_state_);
+  auto message = modulo_core::EncodedState();
+  write_message(message, state_ptr, clock_.now());
+  auto new_state_ptr = state_representation::make_shared_state(state_representation::CartesianPose());
+  EXPECT_THROW(read_message(new_state_ptr, message), modulo_core::exceptions::MessageTranslationException);
 }
