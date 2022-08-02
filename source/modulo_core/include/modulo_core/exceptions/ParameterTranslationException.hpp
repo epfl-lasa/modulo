@@ -5,7 +5,7 @@
 namespace modulo_core::exceptions {
 
 /**
- * @class IncompatibleParameterException
+ * @class ParameterTranslationException
  * @brief An exception class to notify incompatibility when translating parameters from different sources.
  * @details This is an exception class to be thrown if there is a problem while translating from a ROS parameter to a
  * state_representation parameter and vice versa.
