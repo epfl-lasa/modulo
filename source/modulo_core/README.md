@@ -1,5 +1,9 @@
 # Modulo Core
 
+Modulo Core is an interface package to support the interoperability of the [Robot Operating System (ROS)](https://www.ros.org)
+with [EPFL LASA control libraries](https://github.com/epfl-lasa/control-libraries) by providing communication and
+translation utilities.
+
 ## Communication
 
 In ROS, applications communicate through publishers and subscribers. Communication is handled in a particular format
