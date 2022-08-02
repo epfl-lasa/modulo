@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['aica_5fmsgs_0',['aica_msgs',['../md__github_workspace_source_modulo_core__r_e_a_d_m_e.html',1,'']]]
+  ['contributing_0',['Contributing',['../md__github_workspace_source_modulo_components__c_o_n_t_r_i_b_u_t_i_n_g_.html',1,'']]]
 ];

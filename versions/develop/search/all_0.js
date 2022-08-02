@@ -11,6 +11,5 @@ var searchData=
   ['add_5ftf_5flistener_8',['add_tf_listener',['../classmodulo__components_1_1_component_interface.html#abcc9679e8c32c9b702d00bf30d1c46cf',1,'modulo_components::ComponentInterface']]],
   ['add_5ftrigger_9',['add_trigger',['../classmodulo__components_1_1_component_interface.html#a5698b2a6b162e283890ee4e119712156',1,'modulo_components::ComponentInterface']]],
   ['addserviceexception_10',['AddServiceException',['../classmodulo__components_1_1exceptions_1_1_add_service_exception.html',1,'modulo_components::exceptions']]],
-  ['addsignalexception_11',['AddSignalException',['../classmodulo__components_1_1exceptions_1_1_add_signal_exception.html',1,'modulo_components::exceptions']]],
-  ['aica_5fmsgs_12',['aica_msgs',['../md__github_workspace_source_modulo_core__r_e_a_d_m_e.html',1,'']]]
+  ['addsignalexception_11',['AddSignalException',['../classmodulo__components_1_1exceptions_1_1_add_signal_exception.html',1,'modulo_components::exceptions']]]
 ];

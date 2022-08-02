@@ -8,6 +8,7 @@ var searchData=
   ['get_5fparameter_5fvalue_5',['get_parameter_value',['../classmodulo__components_1_1_component_interface.html#a1c4fce25923a6daba6fa4d956000e151',1,'modulo_components::ComponentInterface']]],
   ['get_5fpredicate_6',['get_predicate',['../classmodulo__components_1_1_component_interface.html#a61da9d2635dbfa646ce74f72e332cc91',1,'modulo_components::ComponentInterface']]],
   ['get_5fqos_7',['get_qos',['../classmodulo__components_1_1_component_interface.html#a857308be739a6f5222c875792973ddd0',1,'modulo_components::ComponentInterface']]],
-  ['get_5fsubscription_8',['get_subscription',['../classmodulo__core_1_1communication_1_1_subscription_handler.html#aa9c9421c48dbbbc87dfd0d370f452b44',1,'modulo_core::communication::SubscriptionHandler']]],
-  ['get_5ftype_9',['get_type',['../classmodulo__core_1_1communication_1_1_message_pair_interface.html#a578dda86f8b23d5aeb8c3d3854239e77',1,'modulo_core::communication::MessagePairInterface::get_type()'],['../classmodulo__core_1_1communication_1_1_publisher_interface.html#a2f878eb3cd08e69b685b39c6c79c5ed0',1,'modulo_core::communication::PublisherInterface::get_type()']]]
+  ['get_5fros_5fparameter_5ftype_8',['get_ros_parameter_type',['../namespacemodulo__core_1_1translators.html#aea1df4ab0bfb038f7b297865993149e2',1,'modulo_core::translators']]],
+  ['get_5fsubscription_9',['get_subscription',['../classmodulo__core_1_1communication_1_1_subscription_handler.html#aa9c9421c48dbbbc87dfd0d370f452b44',1,'modulo_core::communication::SubscriptionHandler']]],
+  ['get_5ftype_10',['get_type',['../classmodulo__core_1_1communication_1_1_message_pair_interface.html#a578dda86f8b23d5aeb8c3d3854239e77',1,'modulo_core::communication::MessagePairInterface::get_type()'],['../classmodulo__core_1_1communication_1_1_publisher_interface.html#a2f878eb3cd08e69b685b39c6c79c5ed0',1,'modulo_core::communication::PublisherInterface::get_type()']]]
 ];

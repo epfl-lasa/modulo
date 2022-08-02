@@ -9,8 +9,9 @@ var searchData=
   ['componentparameterexception_6',['ComponentParameterException',['../classmodulo__components_1_1exceptions_1_1_component_parameter_exception.html',1,'modulo_components::exceptions']]],
   ['componentserviceresponse_7',['ComponentServiceResponse',['../structmodulo__components_1_1_component_service_response.html',1,'modulo_components']]],
   ['contributing_8',['Contributing',['../md__github_workspace_source_modulo_components__c_o_n_t_r_i_b_u_t_i_n_g_.html',1,'']]],
-  ['coreexception_9',['CoreException',['../classmodulo__core_1_1exceptions_1_1_core_exception.html',1,'modulo_core::exceptions']]],
-  ['create_5foutput_10',['create_output',['../classmodulo__components_1_1_component_interface.html#a8c41afaf38f405fd56be2292e6171e49',1,'modulo_components::ComponentInterface']]],
-  ['create_5fpublisher_5finterface_11',['create_publisher_interface',['../classmodulo__core_1_1communication_1_1_publisher_handler.html#a95f0a5157539b3ffb1a936e4bbd60e23',1,'modulo_core::communication::PublisherHandler']]],
-  ['create_5fsubscription_5finterface_12',['create_subscription_interface',['../classmodulo__core_1_1communication_1_1_subscription_handler.html#a9adbe98500d927e5e76fb18c9f62e04b',1,'modulo_core::communication::SubscriptionHandler']]]
+  ['copy_5fparameter_5fvalue_9',['copy_parameter_value',['../namespacemodulo__core_1_1translators.html#af16d1185354f2f64f06698b0d1b3fc3f',1,'modulo_core::translators']]],
+  ['coreexception_10',['CoreException',['../classmodulo__core_1_1exceptions_1_1_core_exception.html',1,'modulo_core::exceptions']]],
+  ['create_5foutput_11',['create_output',['../classmodulo__components_1_1_component_interface.html#a8c41afaf38f405fd56be2292e6171e49',1,'modulo_components::ComponentInterface']]],
+  ['create_5fpublisher_5finterface_12',['create_publisher_interface',['../classmodulo__core_1_1communication_1_1_publisher_handler.html#a95f0a5157539b3ffb1a936e4bbd60e23',1,'modulo_core::communication::PublisherHandler']]],
+  ['create_5fsubscription_5finterface_13',['create_subscription_interface',['../classmodulo__core_1_1communication_1_1_subscription_handler.html#a9adbe98500d927e5e76fb18c9f62e04b',1,'modulo_core::communication::SubscriptionHandler']]]
 ];

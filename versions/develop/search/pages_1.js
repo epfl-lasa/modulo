@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['contributing_0',['Contributing',['../md__github_workspace_source_modulo_components__c_o_n_t_r_i_b_u_t_i_n_g_.html',1,'']]]
+  ['modulo_0',['Modulo',['../index.html',1,'']]],
+  ['modulo_20core_1',['Modulo Core',['../md__github_workspace_source_modulo_core__r_e_a_d_m_e.html',1,'']]],
+  ['modulo_5fcomponents_2',['modulo_components',['../md__github_workspace_source_modulo_components__r_e_a_d_m_e.html',1,'']]]
 ];
