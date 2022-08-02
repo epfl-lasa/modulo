@@ -1,5 +1,9 @@
 #pragma once
 
+/**
+ * @namespace modulo_core::communication
+ * @brief Modulo Core communication module for handling messages on publication and subscription interfaces.
+ */
 namespace modulo_core::communication {
 
 /**
