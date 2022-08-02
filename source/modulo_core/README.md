@@ -4,11 +4,13 @@ Modulo Core is an interface package to support the interoperability of the [Robo
 with [EPFL LASA control libraries](https://github.com/epfl-lasa/control-libraries) by providing communication and
 translation utilities.
 
+This package is specifically designed for ROS2 and was developed on Galactic Geochelone.
+
 ## Communication
 
 In ROS, applications communicate through publishers and subscribers. Communication is handled in a particular format
 (a ROS message), which includes a serialized representation of the data as well as a message header.
-For example, data of type of `bool` maps to the standard message `std_msgs::msg::Bool`.
+For example, data of type `bool` maps to the standard message `std_msgs::msg::Bool`.
 
 If application A wishes to send data to application B, a publisher of A and a subscriber of B must be configured
 to the same ROS message type. The data is written into the message format and published by A. B receives the message
@@ -116,7 +118,7 @@ publisher_interface->publish();
 
 The `SubscriptionHandler` is a templated wrapper for a ROS subscription that additionally holds a `MessagePair`
 reference. When the subscription receives a message, the `SubscriptionHandler` callback automatically translates
-the ROS message and update the value of the data referenced by the `MessagePair`.
+the ROS message and updates the value of the data referenced by the `MessagePair`.
 
 ```c++
 using namespace modulo_core::communication;
@@ -151,7 +153,7 @@ The translation module provides functions to convert between ROS2 and state_repr
 
 ### Message Translators
 
-As described in the (Communication)[#communication] section, the ROS framework uses specific message formats to
+As described in the [Communication](#communication) section, the ROS framework uses specific message formats to
 send data between applications. Wrapping and unwrapping the data values to and from the ROS message is handled by
 the message translators.
 
@@ -165,12 +167,12 @@ Conceptually, parameters are a way to label and transfer data with a name-value 
 A parameter has a name and a data value of a particular data type. On an interface level, this allows parameter
 values to be retrieved or written by name in order to determine or configure the behaviour of particular elements.
 
-The ROS Parameter is a specific implementation of the parameter concept which, together with the ParameterMessage,
-can be used to read and write named parameters on application nodes through the ROS interface. The ROS Parameter
+The ROS `Parameter` is a specific implementation of the parameter concept which, together with the `ParameterMessage`,
+can be used to read and write named parameters on application nodes through the ROS interface. The ROS `Parameter`
 supports only simple types (atomic types, strings and arrays).
 
 The control libraries [`state_representation::Parameter`](https://epfl-lasa.github.io/control-libraries/versions/main/classstate__representation_1_1_parameter_interface.html)
-is another implementation that supports more data types, including State-derived objects and matrices.
+is another implementation that supports more data types, including `State`-derived objects and matrices.
 
-The parameter translator utilities in `modulo_core::translators` convert between ROS and state_representation parameter
-formats, so that parameters can be sent on the ROS interface but consumed as state_representation objects locally.
+The parameter translator utilities in `modulo_core::translators` convert between ROS and `state_representation`
+parameter formats, so that parameters can be sent on the ROS interface but consumed as `state_representation` objects locally.
