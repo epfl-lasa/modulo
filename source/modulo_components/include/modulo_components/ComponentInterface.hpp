@@ -845,7 +845,8 @@ inline void ComponentInterface<NodeT>::add_service(
             response->success = false;
             response->message = ex.what();
           }
-        });
+        }
+    );
     this->empty_services_.insert_or_assign(parsed_service_name, service);
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add service '" << service_name << "': " << ex.what());
@@ -872,7 +873,8 @@ inline void ComponentInterface<NodeT>::add_service(
             response->success = false;
             response->message = ex.what();
           }
-        });
+        }
+    );
     this->string_services_.insert_or_assign(parsed_service_name, service);
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add service '" << service_name << "': " << ex.what());
@@ -1029,9 +1031,10 @@ inline std::string ComponentInterface<NodeT>::create_output(
       );
     }
     return parsed_signal_name;
-  } catch (const std::exception& ex) {
-    // TODO if modulo::communication had a base exception, could catch that
-    throw exceptions::AddSignalException(std::string(ex.what()));
+  } catch (const modulo_core::exceptions::CoreException& ex) {
+    throw exceptions::AddSignalException(ex.what());
+  } catch (const exceptions::ComponentException& ex) {
+    throw exceptions::AddSignalException(ex.what());
   }
 }
 

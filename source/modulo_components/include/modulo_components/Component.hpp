@@ -7,6 +7,7 @@
 #include "modulo_components/ComponentInterface.hpp"
 #include "modulo_components/utilities/utilities.hpp"
 #include "modulo_core/EncodedState.hpp"
+#include "modulo_core/exceptions/CoreException.hpp"
 
 namespace modulo_components {
 
@@ -143,8 +144,9 @@ inline void Component::add_output(
         break;
       }
     }
-  } catch (const std::exception& ex) {
-    // TODO if modulo::communication had a base exception, could catch that
+  } catch (const modulo_core::exceptions::CoreException& ex) {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add output '" << signal_name << "': " << ex.what());
+  } catch (const exceptions::ComponentException& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add output '" << signal_name << "': " << ex.what());
   }
 }

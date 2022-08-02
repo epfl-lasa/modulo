@@ -1,5 +1,7 @@
 #include "modulo_components/LifecycleComponent.hpp"
 
+#include "modulo_core/exceptions/CoreException.hpp"
+
 using namespace modulo_core::communication;
 
 namespace modulo_components {
@@ -284,8 +286,7 @@ bool LifecycleComponent::configure_outputs() {
           break;
         }
       }
-    } catch (const std::exception& ex) {
-      // TODO if modulo::communication had a base exception, could catch that
+    } catch (const modulo_core::exceptions::CoreException& ex) {
       success = false;
       RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to configure output '" << name << "': " << ex.what());
     }
@@ -305,8 +306,7 @@ bool LifecycleComponent::activate_outputs() {
   for (auto const& [name, interface]: this->outputs_) {
     try {
       interface->activate();
-    } catch (const std::exception& ex) {
-      // TODO if modulo::communication had a base exception, could catch that
+    } catch (const modulo_core::exceptions::CoreException& ex) {
       success = false;
       RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to activate output '" << name << "': " << ex.what());
     }
@@ -320,8 +320,7 @@ bool LifecycleComponent::deactivate_outputs() {
   for (auto const& [name, interface]: this->outputs_) {
     try {
       interface->deactivate();
-    } catch (const std::exception& ex) {
-      // TODO if modulo::communication had a base exception, could catch that
+    } catch (const modulo_core::exceptions::CoreException& ex) {
       success = false;
       RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to deactivate output '" << name << "': " << ex.what());
     }
