@@ -109,7 +109,7 @@ TEST_F(CommunicationTest, BasicTypes) {
   this->communicate<std_msgs::msg::String, std::string>("this", "that");
 }
 
-TEST_F(CommunicationTest, EncodedState) {
+TEST_F(CommunicationTest, EncodedStateSameType) {
   using namespace state_representation;
   auto pub_state = std::make_shared<CartesianState>(CartesianState::Random("this", "world"));
   auto pub_message = make_shared_message_pair(pub_state, this->clock_);
@@ -123,4 +123,35 @@ TEST_F(CommunicationTest, EncodedState) {
   EXPECT_EQ(pub_state->get_name(), sub_state->get_name());
   EXPECT_EQ(pub_state->get_reference_frame(), sub_state->get_reference_frame());
   EXPECT_TRUE(pub_state->data().isApprox(sub_state->data()));
+}
+
+TEST_F(CommunicationTest, EncodedStateIncompatibleType) {
+  using namespace state_representation;
+  auto pub_state = std::make_shared<CartesianPose>(CartesianPose::Random("this", "world"));
+  auto pub_message = make_shared_message_pair(pub_state, this->clock_);
+  auto sub_state = std::make_shared<JointState>(JointState::Zero("that", 3));
+  auto sub_message = make_shared_message_pair(sub_state, this->clock_);
+  this->add_nodes<modulo_core::EncodedState>("/test_topic", pub_message, sub_message);
+  this->exec_->template spin_until_future_complete(
+      std::dynamic_pointer_cast<MinimalSubscriber<modulo_core::EncodedState>>(this->sub_node_)->received_future, 500ms
+  );
+
+  // An exception is thrown and caught, so the sub state didn't change
+  EXPECT_EQ(sub_state->get_type(), StateType::JOINT_STATE);
+  EXPECT_TRUE(sub_state->data().isApprox(JointState::Zero("that", 3).data()));
+}
+
+TEST_F(CommunicationTest, EncodedStateCompatibleType) {
+  using namespace state_representation;
+  auto pub_state = std::make_shared<JointState>(JointState::Random("this", 3));
+  auto pub_message = make_shared_message_pair(pub_state, this->clock_);
+  auto sub_state = std::make_shared<JointPositions>(JointPositions::Zero("that", 3));
+  auto sub_message = make_shared_message_pair(sub_state, this->clock_);
+  this->add_nodes<modulo_core::EncodedState>("/test_topic", pub_message, sub_message);
+  this->exec_->template spin_until_future_complete(
+      std::dynamic_pointer_cast<MinimalSubscriber<modulo_core::EncodedState>>(this->sub_node_)->received_future, 500ms
+  );
+
+  EXPECT_EQ(sub_state->get_name(), pub_state->get_name());
+  EXPECT_TRUE(sub_state->get_positions().isApprox(pub_state->get_positions()));
 }
