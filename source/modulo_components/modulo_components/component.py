@@ -34,7 +34,6 @@ class Component(ComponentInterface):
         Step function that is called periodically.
         """
         try:
-            # TODO catch here or in helpers...? (or re raise with ComponentError)
             self._publish_predicates()
             self._publish_outputs()
             self._evaluate_periodic_callbacks()
