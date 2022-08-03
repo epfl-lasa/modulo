@@ -362,7 +362,7 @@ inline void read_message(std::shared_ptr<state_representation::State>& state, co
       break;
     }
     case StateType::PARAMETER: {
-      auto param_ptr = std::dynamic_pointer_cast<ParameterInterface>(new_state);
+      auto param_ptr = std::dynamic_pointer_cast<ParameterInterface>(state);
       switch (param_ptr->get_parameter_type()) {
         case ParameterType::BOOL:
           safe_dynamic_cast<Parameter<bool>>(state, new_state);
