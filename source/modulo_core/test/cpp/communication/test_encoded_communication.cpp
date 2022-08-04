@@ -27,7 +27,7 @@ void test_joint_dist(
     EXPECT_EQ(pub_state->get_size(), recv_state->get_size());
     EXPECT_LT(pub_state->dist(*recv_state, distance_variable), tol);
   } else {
-    EXPECT_EQ(recv_state->get_size(), 0);
+    EXPECT_EQ(recv_state->get_size(), 0u);
   }
 }
 
@@ -298,28 +298,28 @@ TEST_F(EncodedCommunicationTest, IncompatibleTypeJoint) {
   this->communicate<State, JointState>(
       State(StateType::STATE, "this"), JointState::Zero("that", 3), false,
       [](const std::shared_ptr<State>&, const std::shared_ptr<JointState>& recv_state) {
-        EXPECT_EQ(recv_state->get_size(), 3);
+        EXPECT_EQ(recv_state->get_size(), 3u);
         EXPECT_NEAR(recv_state->data().norm(), 0, tol);
       }
   );
   this->communicate<SpatialState, JointState>(
       SpatialState(StateType::SPATIAL_STATE, "this"), JointState::Zero("that", 3), false,
       [](const std::shared_ptr<SpatialState>&, const std::shared_ptr<JointState>& recv_state) {
-        EXPECT_EQ(recv_state->get_size(), 3);
+        EXPECT_EQ(recv_state->get_size(), 3u);
         EXPECT_NEAR(recv_state->data().norm(), 0, tol);
       }
   );
   this->communicate<CartesianState, JointState>(
       CartesianState::Random("this", "world"), JointState::Zero("that", 3), false,
       [](const std::shared_ptr<CartesianState>&, const std::shared_ptr<JointState>& recv_state) {
-        EXPECT_EQ(recv_state->get_size(), 3);
+        EXPECT_EQ(recv_state->get_size(), 3u);
         EXPECT_NEAR(recv_state->data().norm(), 0, tol);
       }
   );
   this->communicate<Jacobian, JointState>(
       Jacobian("this", 3, "base"), JointState::Zero("that", 3), false,
       [](const std::shared_ptr<Jacobian>&, const std::shared_ptr<JointState>& recv_state) {
-        EXPECT_EQ(recv_state->get_size(), 3);
+        EXPECT_EQ(recv_state->get_size(), 3u);
         EXPECT_NEAR(recv_state->data().norm(), 0, tol);
       }
   );
