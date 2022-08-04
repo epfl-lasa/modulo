@@ -87,4 +87,4 @@ using ParameterStateTestTypes = testing::Types<state_representation::CartesianSt
                                                state_representation::CartesianPose,
                                                state_representation::JointState,
                                                state_representation::JointPositions>;
-INSTANTIATE_TYPED_TEST_SUITE_P(TestPrefix, ParameterStateTranslationTest, ParameterStateTestTypes);
+INSTANTIATE_TYPED_TEST_SUITE_P(, ParameterStateTranslationTest, ParameterStateTestTypes);

@@ -123,4 +123,4 @@ REGISTER_TYPED_TEST_SUITE_P(ParameterTranslationTest, Write, ReadAndReWrite, Con
 
 using ParameterTestTypes = testing::Types<
     bool, std::vector<bool>, int, std::vector<int>, double, std::vector<double>, std::string, std::vector<std::string>>;
-INSTANTIATE_TYPED_TEST_SUITE_P(TestPrefix, ParameterTranslationTest, ParameterTestTypes);
+INSTANTIATE_TYPED_TEST_SUITE_P(, ParameterTranslationTest, ParameterTestTypes);
