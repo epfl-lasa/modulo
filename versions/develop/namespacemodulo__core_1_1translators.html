@@ -133,6 +133,22 @@ Functions</h2></td></tr>
 <tr class="memitem:ae3028daafe4e35d4cb3ed83172d8bcb0"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemodulo__core_1_1translators.html#ae3028daafe4e35d4cb3ed83172d8bcb0">read_message</a> (T &amp;state, const <a class="el" href="namespacemodulo__core.html#aa89356b8fb7ab13ff2514931d3b05fdc">EncodedState</a> &amp;message)</td></tr>
 <tr class="memdesc:ae3028daafe4e35d4cb3ed83172d8bcb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a ROS std_msgs::msg::UInt8MultiArray message to a State using protobuf decoding.  <a href="namespacemodulo__core_1_1translators.html#ae3028daafe4e35d4cb3ed83172d8bcb0">More...</a><br /></td></tr>
 <tr class="separator:ae3028daafe4e35d4cb3ed83172d8bcb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ef1c765b829bf82c25a6e4f409c618e"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a6ef1c765b829bf82c25a6e4f409c618e"><td class="memTemplItemLeft" align="right" valign="top">std::shared_ptr&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemodulo__core_1_1translators.html#a6ef1c765b829bf82c25a6e4f409c618e">safe_dynamic_pointer_cast</a> (std::shared_ptr&lt; state_representation::State &gt; &amp;state)</td></tr>
+<tr class="memdesc:a6ef1c765b829bf82c25a6e4f409c618e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Safely downcast a base state pointer to a derived state pointer.  <a href="namespacemodulo__core_1_1translators.html#a6ef1c765b829bf82c25a6e4f409c618e">More...</a><br /></td></tr>
+<tr class="separator:a6ef1c765b829bf82c25a6e4f409c618e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b01bebfd4d9e35131e0d04620446c08"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a9b01bebfd4d9e35131e0d04620446c08"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemodulo__core_1_1translators.html#a9b01bebfd4d9e35131e0d04620446c08">safe_dynamic_cast</a> (std::shared_ptr&lt; state_representation::State &gt; &amp;state, std::shared_ptr&lt; state_representation::State &gt; &amp;new_state)</td></tr>
+<tr class="memdesc:a9b01bebfd4d9e35131e0d04620446c08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the value referenced by a state pointer from a new_state pointer.  <a href="namespacemodulo__core_1_1translators.html#a9b01bebfd4d9e35131e0d04620446c08">More...</a><br /></td></tr>
+<tr class="separator:a9b01bebfd4d9e35131e0d04620446c08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04a6f2e996dbc7b5ce4dcda8d9d21548"><td class="memTemplParams" colspan="2">template&lt;typename StateT , typename NewStateT &gt; </td></tr>
+<tr class="memitem:a04a6f2e996dbc7b5ce4dcda8d9d21548"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemodulo__core_1_1translators.html#a04a6f2e996dbc7b5ce4dcda8d9d21548">safe_spatial_state_conversion</a> (std::shared_ptr&lt; state_representation::State &gt; &amp;state, std::shared_ptr&lt; state_representation::State &gt; &amp;new_state, std::function&lt; void(StateT &amp;, const NewStateT &amp;)&gt; conversion_callback={})</td></tr>
+<tr class="memdesc:a04a6f2e996dbc7b5ce4dcda8d9d21548"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the value referenced by a state pointer by dynamically casting and converting the value referenced by a new_state pointer.  <a href="namespacemodulo__core_1_1translators.html#a04a6f2e996dbc7b5ce4dcda8d9d21548">More...</a><br /></td></tr>
+<tr class="separator:a04a6f2e996dbc7b5ce4dcda8d9d21548"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0f036bf1583f4542468ca69fd66ead0"><td class="memTemplParams" colspan="2">template&lt;typename StateT , typename NewStateT &gt; </td></tr>
+<tr class="memitem:ad0f036bf1583f4542468ca69fd66ead0"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemodulo__core_1_1translators.html#ad0f036bf1583f4542468ca69fd66ead0">safe_joint_state_conversion</a> (std::shared_ptr&lt; state_representation::State &gt; &amp;state, std::shared_ptr&lt; state_representation::State &gt; &amp;new_state, std::function&lt; void(StateT &amp;, const NewStateT &amp;)&gt; conversion_callback={})</td></tr>
+<tr class="memdesc:ad0f036bf1583f4542468ca69fd66ead0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the value referenced by a state pointer by dynamically casting and converting the value referenced by a new_state pointer.  <a href="namespacemodulo__core_1_1translators.html#ad0f036bf1583f4542468ca69fd66ead0">More...</a><br /></td></tr>
+<tr class="separator:ad0f036bf1583f4542468ca69fd66ead0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fb8cdead7c278bc0328da3b123c9038"><td class="memItemLeft" align="right" valign="top">template&lt;&gt; </td></tr>
 <tr class="memitem:a4fb8cdead7c278bc0328da3b123c9038"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemodulo__core_1_1translators.html#a4fb8cdead7c278bc0328da3b123c9038">read_message</a> (std::shared_ptr&lt; state_representation::State &gt; &amp;state, const <a class="el" href="namespacemodulo__core.html#aa89356b8fb7ab13ff2514931d3b05fdc">EncodedState</a> &amp;message)</td></tr>
 <tr class="separator:a4fb8cdead7c278bc0328da3b123c9038"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -985,7 +1001,7 @@ template&lt;typename T , typename U &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="message__readers_8hpp_source.html#l00111">111</a> of file <a class="el" href="message__readers_8hpp_source.html">message_readers.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="message__readers_8hpp_source.html#l00113">113</a> of file <a class="el" href="message__readers_8hpp_source.html">message_readers.hpp</a>.</p>
 
 </div>
 </div>
@@ -1025,7 +1041,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="message__readers_8hpp_source.html#l00168">168</a> of file <a class="el" href="message__readers_8hpp_source.html">message_readers.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="message__readers_8hpp_source.html#l00277">277</a> of file <a class="el" href="message__readers_8hpp_source.html">message_readers.hpp</a>.</p>
 
 </div>
 </div>
@@ -1164,7 +1180,7 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="message__readers_8hpp_source.html#l00158">158</a> of file <a class="el" href="message__readers_8hpp_source.html">message_readers.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="message__readers_8hpp_source.html#l00160">160</a> of file <a class="el" href="message__readers_8hpp_source.html">message_readers.hpp</a>.</p>
 
 </div>
 </div>
@@ -1347,6 +1363,244 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A new ParameterInterface pointer with the updated value </dd></dl>
+
+</div>
+</div>
+<a id="a9b01bebfd4d9e35131e0d04620446c08" name="a9b01bebfd4d9e35131e0d04620446c08"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b01bebfd4d9e35131e0d04620446c08">&#9670;&nbsp;</a></span>safe_dynamic_cast()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void modulo_core::translators::safe_dynamic_cast </td>
+          <td>(</td>
+          <td class="paramtype">std::shared_ptr&lt; state_representation::State &gt; &amp;&#160;</td>
+          <td class="paramname"><em>state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::shared_ptr&lt; state_representation::State &gt; &amp;&#160;</td>
+          <td class="paramname"><em>new_state</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Update the value referenced by a state pointer from a new_state pointer. </p>
+<p >The base state and new_state pointers must reference state-derived instances of type T. This function dynamically downcasts each pointer to a pointer of the derived type and assigns the de-referenced value from the new_state parameter to the address of the state pointer. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>The derived state type </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state</td><td>A base state pointer referencing a state-derived instance to be modified </td></tr>
+    <tr><td class="paramname">new_state</td><td>A base state pointer referencing a state-derived instance to be copied into the state parameter </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">MessageTranslationException</td><td>if either parameter cannot be cast to state type T </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="message__readers_8hpp_source.html#l00200">200</a> of file <a class="el" href="message__readers_8hpp_source.html">message_readers.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a6ef1c765b829bf82c25a6e4f409c618e" name="a6ef1c765b829bf82c25a6e4f409c618e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ef1c765b829bf82c25a6e4f409c618e">&#9670;&nbsp;</a></span>safe_dynamic_pointer_cast()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::shared_ptr&lt; T &gt; modulo_core::translators::safe_dynamic_pointer_cast </td>
+          <td>(</td>
+          <td class="paramtype">std::shared_ptr&lt; state_representation::State &gt; &amp;&#160;</td>
+          <td class="paramname"><em>state</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Safely downcast a base state pointer to a derived state pointer. </p>
+<p >This utility function asserts that result of the dynamic pointer cast is not null, and throws an exception otherwise. This helps to prevent uncaught segmentation faults from a null pointer dynamic cast result being passed to subsequent execution steps. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>The derived state type </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state</td><td>A base state pointer referencing a state-derived instance </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">MessageTranslationException</td><td>if the dynamic cast results in a null pointer </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The derived pointer of type T </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="message__readers_8hpp_source.html#l00180">180</a> of file <a class="el" href="message__readers_8hpp_source.html">message_readers.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ad0f036bf1583f4542468ca69fd66ead0" name="ad0f036bf1583f4542468ca69fd66ead0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0f036bf1583f4542468ca69fd66ead0">&#9670;&nbsp;</a></span>safe_joint_state_conversion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename StateT , typename NewStateT &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void modulo_core::translators::safe_joint_state_conversion </td>
+          <td>(</td>
+          <td class="paramtype">std::shared_ptr&lt; state_representation::State &gt; &amp;&#160;</td>
+          <td class="paramname"><em>state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::shared_ptr&lt; state_representation::State &gt; &amp;&#160;</td>
+          <td class="paramname"><em>new_state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::function&lt; void(StateT &amp;, const NewStateT &amp;)&gt;&#160;</td>
+          <td class="paramname"><em>conversion_callback</em> = <code>{}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Update the value referenced by a state pointer by dynamically casting and converting the value referenced by a new_state pointer. </p>
+<p >This utility function is intended to help the conversion between joint-state-derived instances encapsulated in base state pointers. It sets the name and joint names of the referenced state instance from the new_state, and then passes the referenced values to a user-defined conversion callback function. For example, if state is referencing a JointPositions instance A and new_state is referencing a JointState instance B, the conversion callback function should invoke A.set_positions(B.get_positions()). </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">StateT</td><td>The derived joint state type of the destination state </td></tr>
+    <tr><td class="paramname">NewStateT</td><td>The derived joint state type of the new state </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state</td><td>A base state pointer referencing a joint-state-derived instance to be modified </td></tr>
+    <tr><td class="paramname">new_state</td><td>A base state pointer referencing a joint-state-derived instance to be converted into the state parameter </td></tr>
+    <tr><td class="paramname">conversion_callback</td><td>A callback function taking parameters of type StateT and NewStateT, where the referenced StateT instance can be modified as needed from the NewStateT value </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="message__readers_8hpp_source.html#l00260">260</a> of file <a class="el" href="message__readers_8hpp_source.html">message_readers.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a04a6f2e996dbc7b5ce4dcda8d9d21548" name="a04a6f2e996dbc7b5ce4dcda8d9d21548"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04a6f2e996dbc7b5ce4dcda8d9d21548">&#9670;&nbsp;</a></span>safe_spatial_state_conversion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename StateT , typename NewStateT &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void modulo_core::translators::safe_spatial_state_conversion </td>
+          <td>(</td>
+          <td class="paramtype">std::shared_ptr&lt; state_representation::State &gt; &amp;&#160;</td>
+          <td class="paramname"><em>state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::shared_ptr&lt; state_representation::State &gt; &amp;&#160;</td>
+          <td class="paramname"><em>new_state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::function&lt; void(StateT &amp;, const NewStateT &amp;)&gt;&#160;</td>
+          <td class="paramname"><em>conversion_callback</em> = <code>{}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Update the value referenced by a state pointer by dynamically casting and converting the value referenced by a new_state pointer. </p>
+<p >This utility function is intended to help the conversion between spatial-state-derived instances encapsulated in base state pointers. It sets the name and reference frame of the referenced state instance from the new_state, and then passes the referenced values to a user-defined conversion callback function. For example, if state is referencing a CartesianPose instance A and new_state is referencing a CartesianState instance B, the conversion callback function should invoke A.set_pose(B.get_pose()). </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">StateT</td><td>The derived spatial state type of the destination state </td></tr>
+    <tr><td class="paramname">NewStateT</td><td>The derived spatial state type of the new state </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state</td><td>A base state pointer referencing a spatial-state-derived instance to be modified </td></tr>
+    <tr><td class="paramname">new_state</td><td>A base state pointer referencing a spatial-state-derived instance to be converted into the state parameter </td></tr>
+    <tr><td class="paramname">conversion_callback</td><td>A callback function taking parameters of type StateT and NewStateT, where the referenced StateT instance can be modified as needed from the NewStateT value </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="message__readers_8hpp_source.html#l00225">225</a> of file <a class="el" href="message__readers_8hpp_source.html">message_readers.hpp</a>.</p>
 
 </div>
 </div>
