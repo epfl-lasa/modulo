@@ -48,15 +48,20 @@ struct ComponentServiceResponse {
 };
 
 /**
- * @brief TODO
- * @tparam NodeT
+ * @class ComponentInterfacePublicInterface
+ * @brief Friend class to the ComponentInterface to allow test fixtures to access protected and private members.
+ * @tparam NodeT The rclcpp Node type
  */
 template<class NodeT>
 class ComponentInterfacePublicInterface;
 
 /**
- * @brief TODO
- * @tparam NodeT
+ * @class ComponentInterface
+ * @brief Base interface class for modulo components to wrap a ROS Node with custom behaviour.
+ * @details This class is not intended for direct inheritance and usage by end-users. Instead, it defines the common
+ * interfaces for the derived classes modulo_components::Component and modulo_components::LifecycleComponent.
+ * @see Component, LifecycleComponent
+ * @tparam NodeT The rclcpp Node type
  */
 template<class NodeT>
 class ComponentInterface : public NodeT {

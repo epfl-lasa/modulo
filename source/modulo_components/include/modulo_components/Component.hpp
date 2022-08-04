@@ -12,7 +12,15 @@
 namespace modulo_components {
 
 /**
- * @brief TODO
+ * @class Component
+ * @brief A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.
+ * @details This class is intended for direct inheritance to implement custom components that perform one-shot or
+ * externally triggered operations. Examples of triggered behavior include providing a service, processing signals
+ * or publishing outputs on a periodic timer. One-shot behaviors may include interacting with the filesystem or
+ * publishing a predefined sequence of outputs.
+ * Developers should override validate_parameter() if any parameters are added and on_execute_callback() to implement
+ * any one-shot behavior. In the latter case, execute() should be invoked at the end of the derived constructor.
+ * @see LifecycleComponent for a state-based composition alternative
  */
 class Component : public ComponentInterface<rclcpp::Node> {
 public:
