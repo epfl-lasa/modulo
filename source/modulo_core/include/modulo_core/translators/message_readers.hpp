@@ -165,7 +165,7 @@ inline void read_message(T& state, const EncodedState& message) {
 }
 
 /**
- * @brief
+ * @brief TODO
  * @tparam T
  * @param state
  * @return
@@ -180,7 +180,7 @@ inline std::shared_ptr<T> safe_dynamic_pointer_cast(std::shared_ptr<state_repres
 }
 
 /**
- * @brief
+ * @brief TODO
  * @tparam T
  * @param state
  * @param new_state
