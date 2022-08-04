@@ -31,34 +31,8 @@ void test_joint_dist(
   }
 }
 
-class EncodedCommunicationTest : public ::testing::Test {
+class EncodedCommunicationTest : public CommunicationTest {
 protected:
-  void SetUp() override {
-    rclcpp::init(0, nullptr);
-
-    exec_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
-    clock_ = std::make_shared<rclcpp::Clock>();
-  }
-
-  void TearDown() override {
-    rclcpp::shutdown();
-  }
-
-  void add_nodes(
-      const std::string& topic_name, const std::shared_ptr<MessagePairInterface>& pub_message,
-      const std::shared_ptr<MessagePairInterface>& sub_message
-  ) {
-    pub_node_ = std::make_shared<MinimalPublisher<modulo_core::EncodedState>>(topic_name, pub_message);
-    sub_node_ = std::make_shared<MinimalSubscriber<modulo_core::EncodedState>>(topic_name, sub_message);
-    exec_->add_node(pub_node_);
-    exec_->add_node(sub_node_);
-  }
-
-  void clear_nodes() {
-    pub_node_.reset();
-    sub_node_.reset();
-  }
-
   template<typename PubT, typename RecvT>
   void communicate(
       PubT publish_state, RecvT receive_state, bool expect_translation = true,
@@ -71,9 +45,9 @@ protected:
     auto recv_state = std::make_shared<RecvT>(receive_state);
     auto pub_message = make_shared_message_pair(pub_state, this->clock_);
     auto recv_message = make_shared_message_pair(recv_state, this->clock_);
-    this->add_nodes("/test_topic", pub_message, recv_message);
+    this->add_nodes<modulo_core::EncodedState>("/test_topic", pub_message, recv_message);
     this->exec_->template spin_until_future_complete(
-        this->sub_node_->received_future, 500ms
+        std::dynamic_pointer_cast<MinimalSubscriber<modulo_core::EncodedState>>(this->sub_node_)->received_future, 500ms
     );
     EXPECT_EQ(recv_state->get_type(), expected_type);
     EXPECT_EQ(recv_state->is_empty(), expected_empty);
@@ -119,11 +93,6 @@ protected:
         }
     );
   }
-
-  std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> exec_;
-  std::shared_ptr<MinimalPublisher<modulo_core::EncodedState>> pub_node_;
-  std::shared_ptr<MinimalSubscriber<modulo_core::EncodedState>> sub_node_;
-  std::shared_ptr<rclcpp::Clock> clock_;
 };
 
 TEST_F(EncodedCommunicationTest, SameType) {

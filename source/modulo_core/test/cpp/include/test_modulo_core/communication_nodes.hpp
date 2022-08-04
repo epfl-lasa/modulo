@@ -50,4 +50,40 @@ private:
   std::promise<void> received_;
   std::shared_ptr<SubscriptionInterface> subscription_interface_;
 };
+
+class CommunicationTest : public ::testing::Test {
+protected:
+  void SetUp() override {
+    rclcpp::init(0, nullptr);
+
+    exec_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
+    clock_ = std::make_shared<rclcpp::Clock>();
+  }
+
+  void TearDown() override {
+    rclcpp::shutdown();
+  }
+
+  template<typename MsgT>
+  void add_nodes(
+      const std::string& topic_name, const std::shared_ptr<MessagePairInterface>& pub_message,
+      const std::shared_ptr<MessagePairInterface>& sub_message
+  ) {
+    pub_node_ = std::make_shared<MinimalPublisher<MsgT>>(topic_name, pub_message);
+    sub_node_ = std::make_shared<MinimalSubscriber<MsgT>>(topic_name, sub_message);
+    exec_->add_node(pub_node_);
+    exec_->add_node(sub_node_);
+  }
+
+  void clear_nodes() {
+    pub_node_.reset();
+    sub_node_.reset();
+  }
+
+  std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> exec_;
+  std::shared_ptr<rclcpp::Node> pub_node_;
+  std::shared_ptr<rclcpp::Node> sub_node_;
+  std::shared_ptr<rclcpp::Clock> clock_;
+};
+
 }// namespace modulo_core::communication
