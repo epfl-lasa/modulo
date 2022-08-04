@@ -167,25 +167,34 @@ inline void read_message(T& state, const EncodedState& message) {
 }
 
 /**
- * @brief
- * @tparam T
- * @param state
- * @return
+ * @brief Safely downcast a base state pointer to a derived state pointer
+ * @details This utility function asserts that result of the dynamic pointer cast is not null,
+ * and throws an exception otherwise. This helps to prevent uncaught segmentation faults from
+ * a null pointer dynamic cast result being passed to subsequent execution steps.
+ * @tparam T The derived state type
+ * @param state A base state pointer referencing a state-derived instance
+ * @throws MessageTranslationException if the dynamic cast results in a null pointer
+ * @return The derived pointer of type T
  */
 template<typename T>
 inline std::shared_ptr<T> safe_dynamic_pointer_cast(std::shared_ptr<state_representation::State>& state) {
   auto derived_state_ptr = std::dynamic_pointer_cast<T>(state);
   if (derived_state_ptr == nullptr) {
-    throw modulo_core::exceptions::MessageTranslationException("Dynamic casting of state failed.");
+    throw modulo_core::exceptions::MessageTranslationException(
+        "Dynamic casting of state " + state->get_name() + " failed.");
   }
   return derived_state_ptr;
 }
 
 /**
- * @brief
- * @tparam T
- * @param state
- * @param new_state
+ * @brief Update the value referenced by a state pointer from a new_state pointer
+ * @details The base state and new_state pointers must reference state-derived instances of type T.
+ * This function dynamically downcasts each pointer to a pointer of the derived type and assigns
+ * the de-referenced value from the new_state parameter to the address of the state pointer.
+ * @tparam T The derived state type
+ * @param state A base state pointer referencing a state-derived instance to be modified
+ * @param new_state A base state pointer referencing a state-derived instance to be copied into the state parameter
+ * @throws MessageTranslationException if either parameter cannot be cast to state type T
  */
 template<typename T>
 inline void safe_dynamic_cast(
