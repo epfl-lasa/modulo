@@ -200,33 +200,55 @@ inline void read_message(std::shared_ptr<state_representation::State>& state, co
   std::string tmp(message.data.begin(), message.data.end());
   auto new_state = clproto::decode<std::shared_ptr<State>>(tmp);
   switch (state->get_type()) {
-    case StateType::STATE:
-      *state = *new_state;
+    case StateType::STATE: {
+      if (new_state->get_type() == StateType::STATE) {
+        *state = *new_state;
+      } else {
+        *state = State(StateType::STATE, new_state->get_name(), new_state->is_empty());
+      }
       break;
-    case StateType::SPATIAL_STATE:
-      safe_dynamic_cast<SpatialState>(state, new_state);
+    }
+    case StateType::SPATIAL_STATE: {
+      if (new_state->get_type() >= StateType::CARTESIAN_STATE && new_state->get_type() <= StateType::CARTESIAN_WRENCH) {
+        auto derived_state = safe_dynamic_pointer_cast<SpatialState>(state);
+        auto derived_new_state = safe_dynamic_pointer_cast<SpatialState>(new_state);
+        *derived_state = SpatialState(
+            StateType::SPATIAL_STATE, derived_new_state->get_name(), derived_new_state->get_reference_frame(),
+            derived_new_state->is_empty());
+      } else {
+        safe_dynamic_cast<SpatialState>(state, new_state);
+      }
       break;
+    }
     case StateType::CARTESIAN_STATE: {
       auto derived_state = safe_dynamic_pointer_cast<CartesianState>(state);
       if (new_state->get_type() == StateType::CARTESIAN_POSE) {
         auto derived_new_state = safe_dynamic_pointer_cast<CartesianPose>(new_state);
         auto tmp_new_state = CartesianState(derived_new_state->get_name(), derived_new_state->get_reference_frame());
-        tmp_new_state.set_pose(derived_new_state->get_pose());
+        if (*derived_new_state) {
+          tmp_new_state.set_pose(derived_new_state->get_pose());
+        }
         *derived_state = tmp_new_state;
       } else if (new_state->get_type() == StateType::CARTESIAN_TWIST) {
         auto derived_new_state = safe_dynamic_pointer_cast<CartesianTwist>(new_state);
         auto tmp_new_state = CartesianState(derived_new_state->get_name(), derived_new_state->get_reference_frame());
-        tmp_new_state.set_twist(derived_new_state->get_twist());
+        if (*derived_new_state) {
+          tmp_new_state.set_twist(derived_new_state->get_twist());
+        }
         *derived_state = tmp_new_state;
       } else if (new_state->get_type() == StateType::CARTESIAN_ACCELERATION) {
         auto derived_new_state = safe_dynamic_pointer_cast<CartesianAcceleration>(new_state);
         auto tmp_new_state = CartesianState(derived_new_state->get_name(), derived_new_state->get_reference_frame());
-        tmp_new_state.set_acceleration(derived_new_state->get_acceleration());
+        if (*derived_new_state) {
+          tmp_new_state.set_acceleration(derived_new_state->get_acceleration());
+        }
         *derived_state = tmp_new_state;
       } else if (new_state->get_type() == StateType::CARTESIAN_WRENCH) {
         auto derived_new_state = safe_dynamic_pointer_cast<CartesianWrench>(new_state);
         auto tmp_new_state = CartesianState(derived_new_state->get_name(), derived_new_state->get_reference_frame());
-        tmp_new_state.set_wrench(derived_new_state->get_wrench());
+        if (*derived_new_state) {
+          tmp_new_state.set_wrench(derived_new_state->get_wrench());
+        }
         *derived_state = tmp_new_state;
       } else {
         safe_dynamic_cast<CartesianState>(state, new_state);
@@ -237,9 +259,10 @@ inline void read_message(std::shared_ptr<state_representation::State>& state, co
       if (new_state->get_type() == StateType::CARTESIAN_STATE) {
         auto derived_state = safe_dynamic_pointer_cast<CartesianPose>(state);
         auto derived_new_state = safe_dynamic_pointer_cast<CartesianState>(new_state);
-        auto tmp_new_state = CartesianPose(
-            derived_new_state->get_name(), derived_new_state->get_position(), derived_new_state->get_orientation(),
-            derived_new_state->get_reference_frame());
+        auto tmp_new_state = CartesianPose(derived_new_state->get_name(), derived_new_state->get_reference_frame());
+        if (*derived_new_state) {
+          tmp_new_state.set_pose(derived_new_state->get_pose());
+        }
         *derived_state = tmp_new_state;
       } else {
         safe_dynamic_cast<CartesianPose>(state, new_state);
@@ -250,8 +273,10 @@ inline void read_message(std::shared_ptr<state_representation::State>& state, co
       if (new_state->get_type() == StateType::CARTESIAN_STATE) {
         auto derived_state = safe_dynamic_pointer_cast<CartesianTwist>(state);
         auto derived_new_state = safe_dynamic_pointer_cast<CartesianState>(new_state);
-        auto tmp_new_state = CartesianTwist(
-            derived_new_state->get_name(), derived_new_state->get_twist(), derived_new_state->get_reference_frame());
+        auto tmp_new_state = CartesianTwist(derived_new_state->get_name(), derived_new_state->get_reference_frame());
+        if (*derived_new_state) {
+          tmp_new_state.set_twist(derived_new_state->get_twist());
+        }
         *derived_state = tmp_new_state;
       } else {
         safe_dynamic_cast<CartesianTwist>(state, new_state);
@@ -262,9 +287,11 @@ inline void read_message(std::shared_ptr<state_representation::State>& state, co
       if (new_state->get_type() == StateType::CARTESIAN_STATE) {
         auto derived_state = safe_dynamic_pointer_cast<CartesianAcceleration>(state);
         auto derived_new_state = safe_dynamic_pointer_cast<CartesianState>(new_state);
-        auto tmp_new_state = CartesianAcceleration(
-            derived_new_state->get_name(), derived_new_state->get_acceleration(),
-            derived_new_state->get_reference_frame());
+        auto tmp_new_state =
+            CartesianAcceleration(derived_new_state->get_name(), derived_new_state->get_reference_frame());
+        if (*derived_new_state) {
+          tmp_new_state.set_acceleration(derived_new_state->get_acceleration());
+        }
         *derived_state = tmp_new_state;
       } else {
         safe_dynamic_cast<CartesianAcceleration>(state, new_state);
@@ -275,38 +302,45 @@ inline void read_message(std::shared_ptr<state_representation::State>& state, co
       if (new_state->get_type() == StateType::CARTESIAN_STATE) {
         auto derived_state = safe_dynamic_pointer_cast<CartesianWrench>(state);
         auto derived_new_state = safe_dynamic_pointer_cast<CartesianState>(new_state);
-        auto tmp_new_state = CartesianWrench(
-            derived_new_state->get_name(), derived_new_state->get_wrench(), derived_new_state->get_reference_frame());
+        auto tmp_new_state = CartesianWrench(derived_new_state->get_name(), derived_new_state->get_reference_frame());
+        if (*derived_new_state) {
+          tmp_new_state.set_wrench(derived_new_state->get_wrench());
+        }
         *derived_state = tmp_new_state;
       } else {
         safe_dynamic_cast<CartesianWrench>(state, new_state);
       }
       break;
     }
-    case StateType::JACOBIAN:
-      safe_dynamic_cast<Jacobian>(state, new_state);
-      break;
     case StateType::JOINT_STATE: {
       auto derived_state = safe_dynamic_pointer_cast<JointState>(state);
       if (new_state->get_type() == StateType::JOINT_POSITIONS) {
         auto derived_new_state = safe_dynamic_pointer_cast<JointPositions>(new_state);
         auto tmp_new_state = JointState(derived_new_state->get_name(), derived_new_state->get_names());
-        tmp_new_state.set_positions(derived_new_state->get_positions());
+        if (*derived_new_state) {
+          tmp_new_state.set_positions(derived_new_state->get_positions());
+        }
         *derived_state = tmp_new_state;
       } else if (new_state->get_type() == StateType::JOINT_VELOCITIES) {
         auto derived_new_state = safe_dynamic_pointer_cast<JointVelocities>(new_state);
         auto tmp_new_state = JointState(derived_new_state->get_name(), derived_new_state->get_names());
-        tmp_new_state.set_velocities(derived_new_state->get_velocities());
+        if (*derived_new_state) {
+          tmp_new_state.set_velocities(derived_new_state->get_velocities());
+        }
         *derived_state = tmp_new_state;
       } else if (new_state->get_type() == StateType::JOINT_ACCELERATIONS) {
         auto derived_new_state = safe_dynamic_pointer_cast<JointAccelerations>(new_state);
         auto tmp_new_state = JointState(derived_new_state->get_name(), derived_new_state->get_names());
-        tmp_new_state.set_accelerations(derived_new_state->get_accelerations());
+        if (*derived_new_state) {
+          tmp_new_state.set_accelerations(derived_new_state->get_accelerations());
+        }
         *derived_state = tmp_new_state;
       } else if (new_state->get_type() == StateType::JOINT_TORQUES) {
         auto derived_new_state = safe_dynamic_pointer_cast<JointTorques>(new_state);
         auto tmp_new_state = JointState(derived_new_state->get_name(), derived_new_state->get_names());
-        tmp_new_state.set_torques(derived_new_state->get_torques());
+        if (*derived_new_state) {
+          tmp_new_state.set_torques(derived_new_state->get_torques());
+        }
         *derived_state = tmp_new_state;
       } else {
         safe_dynamic_cast<JointState>(state, new_state);
@@ -317,8 +351,10 @@ inline void read_message(std::shared_ptr<state_representation::State>& state, co
       if (new_state->get_type() == StateType::JOINT_STATE) {
         auto derived_state = safe_dynamic_pointer_cast<JointPositions>(state);
         auto derived_new_state = safe_dynamic_pointer_cast<JointState>(new_state);
-        auto tmp_new_state = JointPositions(
-            derived_new_state->get_name(), derived_new_state->get_names(), derived_new_state->get_positions());
+        auto tmp_new_state = JointPositions(derived_new_state->get_name(), derived_new_state->get_names());
+        if (*derived_new_state) {
+          tmp_new_state.set_positions(derived_new_state->get_positions());
+        }
         *derived_state = tmp_new_state;
       } else {
         safe_dynamic_cast<JointPositions>(state, new_state);
@@ -329,8 +365,10 @@ inline void read_message(std::shared_ptr<state_representation::State>& state, co
       if (new_state->get_type() == StateType::JOINT_STATE) {
         auto derived_state = safe_dynamic_pointer_cast<JointVelocities>(state);
         auto derived_new_state = safe_dynamic_pointer_cast<JointState>(new_state);
-        auto tmp_new_state = JointVelocities(
-            derived_new_state->get_name(), derived_new_state->get_names(), derived_new_state->get_velocities());
+        auto tmp_new_state = JointVelocities(derived_new_state->get_name(), derived_new_state->get_names());
+        if (*derived_new_state) {
+          tmp_new_state.set_velocities(derived_new_state->get_velocities());
+        }
         *derived_state = tmp_new_state;
       } else {
         safe_dynamic_cast<JointVelocities>(state, new_state);
@@ -341,8 +379,10 @@ inline void read_message(std::shared_ptr<state_representation::State>& state, co
       if (new_state->get_type() == StateType::JOINT_STATE) {
         auto derived_state = safe_dynamic_pointer_cast<JointAccelerations>(state);
         auto derived_new_state = safe_dynamic_pointer_cast<JointState>(new_state);
-        auto tmp_new_state = JointAccelerations(
-            derived_new_state->get_name(), derived_new_state->get_names(), derived_new_state->get_accelerations());
+        auto tmp_new_state = JointAccelerations(derived_new_state->get_name(), derived_new_state->get_names());
+        if (*derived_new_state) {
+          tmp_new_state.set_accelerations(derived_new_state->get_accelerations());
+        }
         *derived_state = tmp_new_state;
       } else {
         safe_dynamic_cast<JointAccelerations>(state, new_state);
@@ -354,13 +394,19 @@ inline void read_message(std::shared_ptr<state_representation::State>& state, co
         auto derived_state = safe_dynamic_pointer_cast<JointTorques>(state);
         auto derived_new_state = safe_dynamic_pointer_cast<JointState>(new_state);
         auto tmp_new_state = JointTorques(
-            derived_new_state->get_name(), derived_new_state->get_names(), derived_new_state->get_torques());
+            derived_new_state->get_name(), derived_new_state->get_names());
+        if (*derived_new_state) {
+          tmp_new_state.set_torques(derived_new_state->get_torques());
+        }
         *derived_state = tmp_new_state;
       } else {
         safe_dynamic_cast<JointTorques>(state, new_state);
       }
       break;
     }
+    case StateType::JACOBIAN:
+      safe_dynamic_cast<Jacobian>(state, new_state);
+      break;
     case StateType::PARAMETER: {
       auto param_ptr = std::dynamic_pointer_cast<ParameterInterface>(state);
       switch (param_ptr->get_parameter_type()) {
