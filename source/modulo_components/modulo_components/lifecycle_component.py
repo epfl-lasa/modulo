@@ -14,9 +14,6 @@ class LifecycleComponent(ComponentInterface):
     """
     Class to represent a LifecycleComponent in python, following the same logic pattern
     as the c++ modulo_component::LifecycleComponent class.
-    ...
-    Attributes:
-    # TODO
     """
 
     def __init__(self, node_name: str, *kargs, **kwargs):

@@ -11,7 +11,7 @@ namespace modulo_core::exceptions {
  */
 class InvalidPointerException : public CoreException {
 public:
-  explicit InvalidPointerException(const std::string& msg) : CoreException(msg) {};
+  explicit InvalidPointerException(const std::string& msg) : CoreException("InvalidPointerException", msg) {}
 };
 }// namespace modulo_core::exceptions
 

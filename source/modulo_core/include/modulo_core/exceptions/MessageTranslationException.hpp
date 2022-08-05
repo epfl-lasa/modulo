@@ -10,7 +10,7 @@ namespace modulo_core::exceptions {
  */
 class MessageTranslationException : public CoreException {
 public:
-  explicit MessageTranslationException(const std::string& msg) : CoreException(msg) {};
+  explicit MessageTranslationException(const std::string& msg) : CoreException("MessageTranslationException", msg) {}
 };
 }// namespace modulo_core::exceptions
 

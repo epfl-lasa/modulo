@@ -269,8 +269,7 @@ inline void LifecycleComponent::add_output(
   }
   try {
     this->create_output(signal_name, data, default_topic, fixed_topic);
-  } catch (const std::exception& ex) {
-    // TODO if modulo::communication had a base exception, could catch that
+  } catch (const exceptions::AddSignalException& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add output '" << signal_name << "': " << ex.what());
   }
 }

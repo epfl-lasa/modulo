@@ -105,7 +105,7 @@ def test_validate_empty_parameter(component_test):
     assert Node.get_parameter(component_test, "name").type_ == Parameter.Type.STRING
     assert Node.get_parameter(component_test, "name").value == "again"
 
-    # TODO
+    # TODO clarify that behavior somewhere
     # Setting a parameter with type NOT_SET undeclares that parameter
     Node.set_parameters(component_test, [Parameter("name", type_=Parameter.Type.NOT_SET)])
     with pytest.raises(ParameterNotDeclaredException):

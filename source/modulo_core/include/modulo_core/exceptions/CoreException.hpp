@@ -16,6 +16,8 @@ namespace modulo_core::exceptions {
  */
 class CoreException : public std::runtime_error {
 public:
-  explicit CoreException(const std::string& msg) : std::runtime_error(msg) {};
+  explicit CoreException(const std::string& msg) : CoreException("CoreException", msg) {};
+protected:
+  CoreException(const std::string& prefix, const std::string& msg) : std::runtime_error(prefix + ": " + msg) {}
 };
 }// namespace modulo_core::exceptions
