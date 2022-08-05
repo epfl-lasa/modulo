@@ -1,11 +1,26 @@
 # CHANGELOG
 
 Release Versions:
+- [2.0.0](#200)
 - [1.1.0](#110)
 - [1.0.0](#100)
 - [Pre-release versions](#pre-release-versions)
 
-## Upcoming changes (in development)
+## 2.0.0
+### August 05, 2022
+
+Version 2.0.0 constitutes a major refactor of the Modulo project. It now provides stand-alone classes and helpers
+for handling and translating messages and parameters in modulo_core, with new and improved component classes
+for dynamic application composition in modulo_components.
+
+The old concepts of Cell and Component have been fully redeveloped into modulo_components::Component and
+modulo_components::LifecycleComponent, which provide a simple framework for creating stateless (unmanaged) or
+state-based (managed) custom components.
+
+For more information, see the new description of each package in the respective README.md files and view
+the full generated documentation on [epfl-lasa.github.io/modulo](epfl-lasa.github.io/modulo).
+
+### Changes
 
 - Fix develop after control libraries StateType refactor (#55)
 - Fix examples after DS factory refactor (#56)
@@ -74,7 +89,7 @@ Release Versions:
 - Improve State message reading (#108)
 - Catch core and component exceptions (#111)
 - Modulo components documentation (#112)
-- Versioning (#113)
+- Better versioning and changelog (#113)
 - Fix const reading of State parameters (#114)
 
 ## 1.1.0
