@@ -1,4 +1,99 @@
-## 1.1.0 (February 18, 2022)
+# CHANGELOG
+
+Release Versions:
+- [2.0.0](#200)
+- [1.1.0](#110)
+- [1.0.0](#100)
+- [Pre-release versions](#pre-release-versions)
+
+## 2.0.0
+### August 05, 2022
+
+Version 2.0.0 constitutes a major refactor of the Modulo project. It now provides stand-alone classes and helpers
+for handling and translating messages and parameters in modulo_core, with new and improved component classes
+for dynamic application composition in modulo_components.
+
+The old concepts of Cell and Component have been fully redeveloped into modulo_components::Component and
+modulo_components::LifecycleComponent, which provide a simple framework for creating stateless (unmanaged) or
+state-based (managed) custom components.
+
+For more information, see the new description of each package in the respective README.md files and view
+the full generated documentation on [epfl-lasa.github.io/modulo](epfl-lasa.github.io/modulo).
+
+### Changes
+
+- Fix develop after control libraries StateType refactor (#55)
+- Fix examples after DS factory refactor (#56)
+- Create modulo_components package (#42)
+- Modulo translators (#41)
+- Add MessagePairInterface and MessagePair including tests (#43)
+- Use translators in MessagePair (#44)
+- Add EncodedState support (#45)
+- Add basic methods and attributes to component interface (#46)
+- Add tests for the predicate interface (#48)
+- Add publisher interface and handler (#47)
+- Fix modulo_core after StateType refactor (#49)
+- Add the base ComponentInterface class in python (#51)
+- Specialize all available MessagePairs and add read capability (#52)
+- Implementation of publisher interface (#53)
+- Add parameter translators (#54)
+- Use galactic-devel base tag (#59)
+- Parameter translation improvements (#57)
+- Support write/read for MessagePair<EncodedState, State> (#60)
+- Component Parameters (#58)
+- Component parameter description and improvements (#61)
+- Update predicate logic in ComponentInterface (#50)
+- Add methods to add output/publishers (#62)
+- Add docstrings and QoS getter/setter (#63)
+- Parameter translators in python (#65)
+- Subscription handler/interface and add_input (#64)
+- Implement execution thread for component (#68)
+- Improve test coverage in modulo new core (#66)
+- Add option to add deamon and update step function (#67)
+- Clean up python message translators (#69)
+- Add python component with execution thread (#70)
+- Minor improvements (#72)
+- Improve components tests (#71)
+- Parameters in python ComponentInterface (#73)
+- Handle logging and exceptions consistently (#74)
+- Build and test packages in CI (#76)
+- TF improvements (#77)
+- Lifecycle transitions for LifecycleComponent (#75)
+- Refactor 'msg' to 'message' for readability (#79)
+- Extend documentation and consistent formatting (#80)
+- Fix MessagePair to enable creating from any SR type (#82)
+- Add QoS and periodic callbacks to Python ComponentInterface (#81)
+- Make sure predicate is a bool (#85)
+- Inherit from NodeT with public keyword (#84)
+- Add inputs and outputs to python component interface (#83)
+- Translation of empty parameters (#86)
+- Add fallback name to constructors (#87)
+- Add lifecycle component in Python (#89)
+- Rename transition handlers and callbacks (#90)
+- Remove old modulo_core and rename modulo_new_core (#91)
+- Improve exception handling in modulo_core (#94)
+- Don't run image build on push on develop (#95)
+- Improve parameter translators for NOT_SET cases (#96)
+- Don't start execute thread on construction (#98)
+- Execute user transition callback first (#100)
+- Handle empty parameters in ComponentInterface (#97)
+- Minor improvements (#101)
+- Improved exception handling (#99)
+- Add trigger and send predicate on set (#102)
+- Component services (#103)
+- Create service under local namespace (#104)
+- Add service improvements (#105)
+- Generate documentation (#106)
+- Rename test directories (#107)
+- Modulo Core documentation (#109)
+- Improve State message reading (#108)
+- Catch core and component exceptions (#111)
+- Modulo components documentation (#112)
+- Better versioning and changelog (#113)
+- Fix const reading of State parameters (#114)
+
+## 1.1.0
+### February 18, 2022
 
 This version contains some general improvements and fixes, including support
 for the breaking changes introduced by control libraries 5.0
@@ -12,10 +107,15 @@ for the breaking changes introduced by control libraries 5.0
 - Fix the examples due to breaking changes in DS (#36)
 - Correct the include due to changes in control-libraries (#38)
 
-## 1.0.0 (September 22, 2021)
+## 1.0.0
+### September 22, 2021
 
 Modulo core library to provide ROS2 Cell and Component classes built
 around state_representation and clproto libraries.
+
+---
+
+# Pre-release versions
 
 ## 0.3.0 (November 18, 2020)
 

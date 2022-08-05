@@ -4,3 +4,5 @@
 
 .idea
 cmake-build-*
+
+doxygen/docs/html
