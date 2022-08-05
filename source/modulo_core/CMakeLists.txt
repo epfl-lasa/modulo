@@ -21,8 +21,8 @@ find_package(ament_cmake_python REQUIRED)
 
 ament_auto_find_build_dependencies()
 
-find_package(control_libraries 6.0.7 REQUIRED COMPONENTS state_representation)
-find_package(clproto 6.0.0 REQUIRED)
+find_package(control_libraries 6.0.8 REQUIRED COMPONENTS state_representation)
+find_package(clproto 6.0.8 REQUIRED)
 
 include_directories(include)
 
