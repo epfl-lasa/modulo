@@ -34,6 +34,9 @@
 #include "modulo_components/utilities/utilities.hpp"
 #include "modulo_components/utilities/predicate_variant.hpp"
 
+/**
+ * @namespace modulo_components
+ */
 namespace modulo_components {
 
 /**

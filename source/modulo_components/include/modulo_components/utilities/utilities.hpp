@@ -4,6 +4,10 @@
 
 #include <rclcpp/rclcpp.hpp>
 
+/**
+ * @namespace modulo_components::utilities
+ * @brief Modulo component utilities
+ */
 namespace modulo_components::utilities {
 
 /**
