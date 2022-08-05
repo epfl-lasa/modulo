@@ -11,7 +11,7 @@ namespace modulo_core::exceptions {
  */
 class InvalidPointerCastException : public CoreException {
 public:
-  explicit InvalidPointerCastException(const std::string& msg) : CoreException(msg) {};
+  explicit InvalidPointerCastException(const std::string& msg) : CoreException("InvalidPointerCastException", msg) {}
 };
 }// namespace modulo_core::exceptions
 

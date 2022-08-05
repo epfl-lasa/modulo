@@ -277,8 +277,13 @@ template<>
 inline void read_message(std::shared_ptr<state_representation::State>& state, const EncodedState& message) {
   using namespace state_representation;
   std::string tmp(message.data.begin(), message.data.end());
+  std::shared_ptr<State> new_state;
   try {
-    auto new_state = clproto::decode<std::shared_ptr<State>>(tmp);
+    new_state = clproto::decode<std::shared_ptr<State>>(tmp);
+  } catch (const std::exception& ex) {
+    throw exceptions::MessageTranslationException(ex.what());
+  }
+  try {
     switch (state->get_type()) {
       case StateType::STATE: {
         if (new_state->get_type() == StateType::STATE) {
@@ -487,8 +492,8 @@ inline void read_message(std::shared_ptr<state_representation::State>& state, co
         throw exceptions::MessageTranslationException(
             "The StateType contained by state " + new_state->get_name() + " is unsupported.");
     }
-  } catch (const std::exception& ex) {
-    throw exceptions::MessageTranslationException(ex.what());
+  } catch (const exceptions::MessageTranslationException& ex) {
+    throw;
   }
 }
 }// namespace modulo_core::translators

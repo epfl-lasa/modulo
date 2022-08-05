@@ -12,7 +12,8 @@ namespace modulo_core::exceptions {
  */
 class ParameterTranslationException : public CoreException {
 public:
-  explicit ParameterTranslationException(const std::string& msg) : CoreException(msg) {};
+  explicit ParameterTranslationException(const std::string& msg) :
+      CoreException("ParameterTranslationException", msg) {}
 };
 }// namespace modulo_core::exceptions
 

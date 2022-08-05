@@ -106,12 +106,13 @@ template<typename PubT, typename MsgT>
 std::shared_ptr<PublisherInterface> PublisherHandler<PubT, MsgT>::create_publisher_interface(
     const std::shared_ptr<MessagePairInterface>& message_pair
 ) {
+  std::shared_ptr<PublisherInterface> publisher_interface;
   try {
-    std::shared_ptr<PublisherInterface> publisher_interface(this->shared_from_this());
-    publisher_interface->set_message_pair(message_pair);
-    return publisher_interface;
+    publisher_interface = std::shared_ptr<PublisherInterface>(this->shared_from_this());
   } catch (const std::exception& ex) {
     throw exceptions::CoreException(ex.what());
   }
+  publisher_interface->set_message_pair(message_pair);
+  return publisher_interface;
 }
 }// namespace modulo_core::communication

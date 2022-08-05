@@ -11,7 +11,7 @@ namespace modulo_core::exceptions {
  */
 class NullPointerException : public CoreException {
 public:
-  explicit NullPointerException(const std::string& msg) : CoreException(msg) {};
+  explicit NullPointerException(const std::string& msg) : CoreException("NullPointerException", msg) {}
 };
 }// namespace modulo_core::exceptions
 
