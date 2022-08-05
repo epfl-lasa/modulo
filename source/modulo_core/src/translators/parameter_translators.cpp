@@ -202,6 +202,12 @@ std::shared_ptr<ParameterInterface> read_parameter_const(
   }
   auto new_parameter = read_parameter(ros_parameter);
   if (new_parameter->get_parameter_type() == parameter->get_parameter_type()) {
+    if (new_parameter->get_parameter_state_type() != parameter->get_parameter_state_type()) {
+      throw exceptions::ParameterTranslationException(
+          "The received state parameter " + ros_parameter.get_name()
+              + " does not have the same state type as the reference parameter"
+      );
+    }
     return new_parameter;
   }
   switch (new_parameter->get_parameter_type()) {

@@ -150,3 +150,12 @@ def test_matrix_parameter_read_write():
     assert new_param.get_parameter_type() == sr.ParameterType.MATRIX
     assert_np_array_equal(new_param.get_value(), mat)
     assert new_param.get_value().shape == mat.shape
+
+
+def test_state_parameter_const_read_invalid():
+    param = sr.Parameter("test", sr.CartesianState("test"), sr.ParameterType.STATE, sr.StateType.CARTESIAN_STATE)
+    ros_param = write_parameter(param)
+
+    expected_param = sr.Parameter("test", sr.ParameterType.STATE, sr.StateType.JOINT_STATE)
+    with pytest.raises(ParameterTranslationError):
+        read_parameter_const(ros_param, expected_param)
