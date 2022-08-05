@@ -6,6 +6,10 @@ Release Versions:
 - [1.0.0](#100)
 - [Pre-release versions](#pre-release-versions)
 
+## Upcoming changes (in development)
+
+- Support multiple build test actions (#117)
+
 ## 2.0.0
 ### August 05, 2022
 
