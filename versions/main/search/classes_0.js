@@ -1,8 +1,5 @@
 var searchData=
 [
-  ['cell',['Cell',['../classmodulo_1_1core_1_1_cell.html',1,'modulo::core']]],
-  ['clienthandler',['ClientHandler',['../classmodulo_1_1core_1_1communication_1_1_client_handler.html',1,'modulo::core::communication']]],
-  ['communicationhandler',['CommunicationHandler',['../classmodulo_1_1core_1_1communication_1_1_communication_handler.html',1,'modulo::core::communication']]],
-  ['communicationtimeoutexception',['CommunicationTimeoutException',['../classmodulo_1_1core_1_1exceptions_1_1_communication_timeout_exception.html',1,'modulo::core::exceptions']]],
-  ['component',['Component',['../classmodulo_1_1core_1_1_component.html',1,'modulo::core']]]
+  ['addserviceexception_0',['AddServiceException',['../classmodulo__components_1_1exceptions_1_1_add_service_exception.html',1,'modulo_components::exceptions']]],
+  ['addsignalexception_1',['AddSignalException',['../classmodulo__components_1_1exceptions_1_1_add_signal_exception.html',1,'modulo_components::exceptions']]]
 ];

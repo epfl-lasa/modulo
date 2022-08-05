@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['wait_5ffor_5fresult',['wait_for_result',['../classmodulo_1_1core_1_1communication_1_1_client_handler.html#aae44e6f3607e179854e0fbf681e29c9b',1,'modulo::core::communication::ClientHandler']]]
+  ['validate_5fparameter_0',['validate_parameter',['../classmodulo__components_1_1_component_interface.html#adea7ca848c77aa5054e79e1e5719c0a1',1,'modulo_components::ComponentInterface']]]
 ];
