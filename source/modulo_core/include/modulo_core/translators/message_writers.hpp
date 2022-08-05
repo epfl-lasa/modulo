@@ -29,7 +29,7 @@ namespace modulo_core::translators {
  * @param message The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
- * @throws MessageTranslationException if the provided state is empty.
+ * @throws modulo_core::exceptions::MessageTranslationException if the provided state is empty.
  */
 void write_message(
     geometry_msgs::msg::Accel& message, const state_representation::CartesianState& state, const rclcpp::Time& time
@@ -40,7 +40,7 @@ void write_message(
  * @param message The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
- * @throws MessageTranslationException if the provided state is empty.
+ * @throws modulo_core::exceptions::MessageTranslationException if the provided state is empty.
  */
 void write_message(
     geometry_msgs::msg::AccelStamped& message, const state_representation::CartesianState& state,
@@ -52,7 +52,7 @@ void write_message(
  * @param message The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
- * @throws MessageTranslationException if the provided state is empty.
+ * @throws modulo_core::exceptions::MessageTranslationException if the provided state is empty.
  */
 void write_message(
     geometry_msgs::msg::Pose& message, const state_representation::CartesianState& state, const rclcpp::Time& time
@@ -63,7 +63,7 @@ void write_message(
  * @param message The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
- * @throws MessageTranslationException if the provided state is empty.
+ * @throws modulo_core::exceptions::MessageTranslationException if the provided state is empty.
  */
 void write_message(
     geometry_msgs::msg::PoseStamped& message, const state_representation::CartesianState& state,
@@ -75,7 +75,7 @@ void write_message(
  * @param message The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
- * @throws MessageTranslationException if the provided state is empty.
+ * @throws modulo_core::exceptions::MessageTranslationException if the provided state is empty.
  */
 void write_message(
     geometry_msgs::msg::Transform& message, const state_representation::CartesianState& state, const rclcpp::Time& time
@@ -86,7 +86,7 @@ void write_message(
  * @param message The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
- * @throws MessageTranslationException if the provided state is empty.
+ * @throws modulo_core::exceptions::MessageTranslationException if the provided state is empty.
  */
 void write_message(
     geometry_msgs::msg::TransformStamped& message, const state_representation::CartesianState& state,
@@ -98,7 +98,7 @@ void write_message(
  * @param message The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
- * @throws MessageTranslationException if the provided state is empty.
+ * @throws modulo_core::exceptions::MessageTranslationException if the provided state is empty.
  */
 void write_message(
     geometry_msgs::msg::Twist& message, const state_representation::CartesianState& state, const rclcpp::Time& time
@@ -109,7 +109,7 @@ void write_message(
  * @param message The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
- * @throws MessageTranslationException if the provided state is empty.
+ * @throws modulo_core::exceptions::MessageTranslationException if the provided state is empty.
  */
 void write_message(
     geometry_msgs::msg::TwistStamped& message, const state_representation::CartesianState& state,
@@ -121,7 +121,7 @@ void write_message(
  * @param message The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
- * @throws MessageTranslationException if the provided state is empty.
+ * @throws modulo_core::exceptions::MessageTranslationException if the provided state is empty.
  */
 void write_message(
     geometry_msgs::msg::Wrench& message, const state_representation::CartesianState& state, const rclcpp::Time& time
@@ -132,7 +132,7 @@ void write_message(
  * @param message The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
- * @throws MessageTranslationException if the provided state is empty.
+ * @throws modulo_core::exceptions::MessageTranslationException if the provided state is empty.
  */
 void write_message(
     geometry_msgs::msg::WrenchStamped& message, const state_representation::CartesianState& state,
@@ -144,7 +144,7 @@ void write_message(
  * @param message The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
- * @throws MessageTranslationException if the provided state is empty.
+ * @throws modulo_core::exceptions::MessageTranslationException if the provided state is empty.
  */
 void write_message(
     sensor_msgs::msg::JointState& message, const state_representation::JointState& state, const rclcpp::Time& time
@@ -155,7 +155,7 @@ void write_message(
  * @param message The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
- * @throws MessageTranslationException if the provided state is empty.
+ * @throws modulo_core::exceptions::MessageTranslationException if the provided state is empty.
  */
 void write_message(
     tf2_msgs::msg::TFMessage& message, const state_representation::CartesianState& state, const rclcpp::Time& time
@@ -168,7 +168,7 @@ void write_message(
  * @param message The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
- * @throws MessageTranslationException if the provided state is empty.
+ * @throws modulo_core::exceptions::MessageTranslationException if the provided state is empty.
  */
 template<typename U, typename T>
 void write_message(U& message, const state_representation::Parameter<T>& state, const rclcpp::Time&);
@@ -220,7 +220,7 @@ void write_message(std_msgs::msg::String& message, const std::string& state, con
  * @param message The ROS message to populate
  * @param state The state to read from
  * @param time The time of the message
- * @throws MessageTranslationException if the translation failed or is not supported.
+ * @throws modulo_core::exceptions::MessageTranslationException if the translation failed or is not supported.
  */
 template<typename T>
 inline void write_message(EncodedState& message, const T& state, const rclcpp::Time&) {

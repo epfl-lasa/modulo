@@ -34,6 +34,9 @@
 #include "modulo_components/utilities/utilities.hpp"
 #include "modulo_components/utilities/predicate_variant.hpp"
 
+/**
+ * @namespace modulo_components
+ */
 namespace modulo_components {
 
 /**
@@ -48,15 +51,20 @@ struct ComponentServiceResponse {
 };
 
 /**
- * @brief TODO
- * @tparam NodeT
+ * @class ComponentInterfacePublicInterface
+ * @brief Friend class to the ComponentInterface to allow test fixtures to access protected and private members.
+ * @tparam NodeT The rclcpp Node type
  */
 template<class NodeT>
 class ComponentInterfacePublicInterface;
 
 /**
- * @brief TODO
- * @tparam NodeT
+ * @class ComponentInterface
+ * @brief Base interface class for modulo components to wrap a ROS Node with custom behaviour.
+ * @details This class is not intended for direct inheritance and usage by end-users. Instead, it defines the common
+ * interfaces for the derived classes modulo_components::Component and modulo_components::LifecycleComponent.
+ * @see Component, LifecycleComponent
+ * @tparam NodeT The rclcpp Node type
  */
 template<class NodeT>
 class ComponentInterface : public NodeT {
@@ -119,7 +127,7 @@ protected:
   /**
    * @brief Get a parameter by name.
    * @param name The name of the parameter
-   * @throws ComponentParameterException if the parameter could not be found
+   * @throws modulo_components::exceptions::ComponentParameterException if the parameter could not be found
    * @return The ParameterInterface pointer to a Parameter instance
    */
   [[nodiscard]] std::shared_ptr<state_representation::ParameterInterface> get_parameter(const std::string& name) const;
@@ -128,7 +136,7 @@ protected:
    * @brief Get a parameter value by name.
    * @tparam T The type of the parameter
    * @param name The name of the parameter
-   * @throws ComponentParameterException if the parameter value could not be accessed
+   * @throws modulo_components::exceptions::ComponentParameterException if the parameter value could not be accessed
    * @return The value of the parameter
    */
   template<typename T>
@@ -285,7 +293,8 @@ protected:
    * @param data Data to transmit on the output signal
    * @param default_topic If set, the default value for the topic name to use
    * @param fixed_topic If true, the topic name of the output signal is fixed
-   * @throws AddSignalException if the output could not be created (empty name, already registered)
+   * @throws modulo_components::exceptions::AddSignalException if the output could not be created
+   * (empty name, already registered)
    * @return The parsed signal name
    */
   template<typename DataT>
@@ -318,7 +327,8 @@ protected:
    * @param reference_frame_name The desired reference frame of the transform
    * @param time_point The time at which the value of the transform is desired (default: 0, will get the latest)
    * @param duration How long to block the lookup call before failing
-   * @throws LookupTransformException if TF buffer/listener are unconfigured or if the lookupTransform call failed
+   * @throws modulo_components::exceptions::LookupTransformException if TF buffer/listener are unconfigured or
+   * if the lookupTransform call failed
    * @return If it exists, the requested transform
    */
   [[nodiscard]] state_representation::CartesianPose lookup_transform(
@@ -382,7 +392,8 @@ private:
   /**
    * @brief Validate an add_input request by parsing the signal name and checking the map of registered inputs.
    * @param signal_name The name of the input signal
-   * @throws AddSignalException if the input could not be created (empty name or already registered)
+   * @throws modulo_components::exceptions::AddSignalException if the input could not be created
+   * (empty name or already registered)
    * @return The parsed signal name
    */
   std::string validate_input_signal_name(const std::string& signal_name);
@@ -390,7 +401,8 @@ private:
   /**
    * @brief Validate an add_service request by parsing the service name and checking the maps of registered services.
    * @param service_name The name of the service
-   * @throws AddServiceException if the service could not be created (empty name or already registered)
+   * @throws modulo_components::exceptions::AddServiceException if the service could not be created
+   * (empty name or already registered)
    * @return The parsed service name
    */
   std::string validate_service_name(const std::string& service_name);

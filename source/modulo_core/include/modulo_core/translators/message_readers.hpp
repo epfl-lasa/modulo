@@ -154,7 +154,7 @@ void read_message(std::string& state, const std_msgs::msg::String& message);
  * @tparam T A state_representation::State type
  * @param state The state to populate
  * @param message The ROS message to read from
- * @throws MessageTranslationException if the translation failed or is not supported.
+ * @throws modulo_core::exceptions::MessageTranslationException if the translation failed or is not supported.
  */
 template<typename T>
 inline void read_message(T& state, const EncodedState& message) {
@@ -173,7 +173,7 @@ inline void read_message(T& state, const EncodedState& message) {
  * a null pointer dynamic cast result being passed to subsequent execution steps.
  * @tparam T The derived state type
  * @param state A base state pointer referencing a state-derived instance
- * @throws MessageTranslationException if the dynamic cast results in a null pointer
+ * @throws modulo_core::exceptions::MessageTranslationException if the dynamic cast results in a null pointer
  * @return The derived pointer of type T
  */
 template<typename T>
@@ -194,7 +194,7 @@ inline std::shared_ptr<T> safe_dynamic_pointer_cast(std::shared_ptr<state_repres
  * @tparam T The derived state type
  * @param state A base state pointer referencing a state-derived instance to be modified
  * @param new_state A base state pointer referencing a state-derived instance to be copied into the state parameter
- * @throws MessageTranslationException if either parameter cannot be cast to state type T
+ * @throws modulo_core::exceptions::MessageTranslationException if either parameter cannot be cast to state type T
  */
 template<typename T>
 inline void safe_dynamic_cast(

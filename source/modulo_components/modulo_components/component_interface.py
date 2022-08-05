@@ -31,8 +31,8 @@ T = TypeVar('T')
 
 class ComponentInterface(Node):
     """
-    Abstract class to represent a Component in python, following the same logic pattern  as the C++
-    modulo_component::ComponentInterface class.
+    Base interface class for modulo components to wrap a ROS Node with custom behaviour,
+    following the same logic pattern as the C++ modulo_components::ComponentInterface class.
     """
 
     def __init__(self, node_name: str, *kargs, **kwargs):

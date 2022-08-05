@@ -9,7 +9,23 @@
 namespace modulo_components {
 
 /**
- * @brief TODO
+ * @class LifecycleComponent
+ * @brief A wrapper for rclcpp_lifecycle::LifecycleNode to simplify application composition through unified component
+ * interfaces while supporting lifecycle states and transitions.
+ * @details This class is intended for direct inheritance to implement custom state-based components that perform
+ * different behaviors based on their state and on state transitions. An example of state-based behaviour is a
+ * signal component that requires configuration steps to determine which inputs to register and subsequently should
+ * publish outputs only when the component is activated.
+ * Developers should override validate_parameter() if any parameters are added. In addition, the following state
+ * transition callbacks should be overridden whenever custom transition behavior is needed:
+ * - on_configure_callback()
+ * - on_activate_callback()
+ * - on_deactivate_callback()
+ * - on_cleanup_callback()
+ * - on_shutdown_callback()
+ * - on_error_callback()
+ * - on_step_callback()
+ * @see Component for a stateless composition alternative
  */
 class LifecycleComponent : public ComponentInterface<rclcpp_lifecycle::LifecycleNode> {
 public:
