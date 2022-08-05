@@ -277,214 +277,218 @@ template<>
 inline void read_message(std::shared_ptr<state_representation::State>& state, const EncodedState& message) {
   using namespace state_representation;
   std::string tmp(message.data.begin(), message.data.end());
-  auto new_state = clproto::decode<std::shared_ptr<State>>(tmp);
-  switch (state->get_type()) {
-    case StateType::STATE: {
-      if (new_state->get_type() == StateType::STATE) {
-        *state = *new_state;
-      } else {
-        *state = State(StateType::STATE, new_state->get_name(), new_state->is_empty());
+  try {
+    auto new_state = clproto::decode<std::shared_ptr<State>>(tmp);
+    switch (state->get_type()) {
+      case StateType::STATE: {
+        if (new_state->get_type() == StateType::STATE) {
+          *state = *new_state;
+        } else {
+          *state = State(StateType::STATE, new_state->get_name(), new_state->is_empty());
+        }
+        break;
       }
-      break;
-    }
-    case StateType::SPATIAL_STATE: {
-      std::set<StateType> spatial_state_types = {
-          StateType::SPATIAL_STATE, StateType::CARTESIAN_STATE, StateType::CARTESIAN_POSE, StateType::CARTESIAN_TWIST,
-          StateType::CARTESIAN_ACCELERATION, StateType::CARTESIAN_WRENCH
-      };
-      if (spatial_state_types.find(new_state->get_type()) != spatial_state_types.cend()) {
-        safe_spatial_state_conversion<SpatialState, SpatialState>(state, new_state);
-      } else {
-        safe_dynamic_cast<SpatialState>(state, new_state);
+      case StateType::SPATIAL_STATE: {
+        std::set<StateType> spatial_state_types = {
+            StateType::SPATIAL_STATE, StateType::CARTESIAN_STATE, StateType::CARTESIAN_POSE, StateType::CARTESIAN_TWIST,
+            StateType::CARTESIAN_ACCELERATION, StateType::CARTESIAN_WRENCH
+        };
+        if (spatial_state_types.find(new_state->get_type()) != spatial_state_types.cend()) {
+          safe_spatial_state_conversion<SpatialState, SpatialState>(state, new_state);
+        } else {
+          safe_dynamic_cast<SpatialState>(state, new_state);
+        }
+        break;
       }
-      break;
-    }
-    case StateType::CARTESIAN_STATE: {
-      if (new_state->get_type() == StateType::CARTESIAN_POSE) {
-        safe_spatial_state_conversion<CartesianState, CartesianPose>(
-            state, new_state, [](CartesianState& a, const CartesianPose& b) {
-              a.set_pose(b.get_pose());
-            });
-      } else if (new_state->get_type() == StateType::CARTESIAN_TWIST) {
-        safe_spatial_state_conversion<CartesianState, CartesianTwist>(
-            state, new_state, [](CartesianState& a, const CartesianTwist& b) {
-              a.set_twist(b.get_twist());
-            });
-      } else if (new_state->get_type() == StateType::CARTESIAN_ACCELERATION) {
-        safe_spatial_state_conversion<CartesianState, CartesianAcceleration>(
-            state, new_state, [](CartesianState& a, const CartesianAcceleration& b) {
-              a.set_acceleration(b.get_acceleration());
-            });
-      } else if (new_state->get_type() == StateType::CARTESIAN_WRENCH) {
-        safe_spatial_state_conversion<CartesianState, CartesianWrench>(
-            state, new_state, [](CartesianState& a, const CartesianWrench& b) {
-              a.set_wrench(b.get_wrench());
-            });
-      } else {
-        safe_dynamic_cast<CartesianState>(state, new_state);
+      case StateType::CARTESIAN_STATE: {
+        if (new_state->get_type() == StateType::CARTESIAN_POSE) {
+          safe_spatial_state_conversion<CartesianState, CartesianPose>(
+              state, new_state, [](CartesianState& a, const CartesianPose& b) {
+                a.set_pose(b.get_pose());
+              });
+        } else if (new_state->get_type() == StateType::CARTESIAN_TWIST) {
+          safe_spatial_state_conversion<CartesianState, CartesianTwist>(
+              state, new_state, [](CartesianState& a, const CartesianTwist& b) {
+                a.set_twist(b.get_twist());
+              });
+        } else if (new_state->get_type() == StateType::CARTESIAN_ACCELERATION) {
+          safe_spatial_state_conversion<CartesianState, CartesianAcceleration>(
+              state, new_state, [](CartesianState& a, const CartesianAcceleration& b) {
+                a.set_acceleration(b.get_acceleration());
+              });
+        } else if (new_state->get_type() == StateType::CARTESIAN_WRENCH) {
+          safe_spatial_state_conversion<CartesianState, CartesianWrench>(
+              state, new_state, [](CartesianState& a, const CartesianWrench& b) {
+                a.set_wrench(b.get_wrench());
+              });
+        } else {
+          safe_dynamic_cast<CartesianState>(state, new_state);
+        }
+        break;
       }
-      break;
-    }
-    case StateType::CARTESIAN_POSE: {
-      if (new_state->get_type() == StateType::CARTESIAN_STATE) {
-        safe_spatial_state_conversion<CartesianPose, CartesianState>(
-            state, new_state, [](CartesianPose& a, const CartesianState& b) {
-              a.set_pose(b.get_pose());
-            });
-      } else {
-        safe_dynamic_cast<CartesianPose>(state, new_state);
+      case StateType::CARTESIAN_POSE: {
+        if (new_state->get_type() == StateType::CARTESIAN_STATE) {
+          safe_spatial_state_conversion<CartesianPose, CartesianState>(
+              state, new_state, [](CartesianPose& a, const CartesianState& b) {
+                a.set_pose(b.get_pose());
+              });
+        } else {
+          safe_dynamic_cast<CartesianPose>(state, new_state);
+        }
+        break;
       }
-      break;
-    }
-    case StateType::CARTESIAN_TWIST: {
-      if (new_state->get_type() == StateType::CARTESIAN_STATE) {
-        safe_spatial_state_conversion<CartesianTwist, CartesianState>(
-            state, new_state, [](CartesianTwist& a, const CartesianState& b) {
-              a.set_twist(b.get_twist());
-            });
-      } else {
-        safe_dynamic_cast<CartesianTwist>(state, new_state);
+      case StateType::CARTESIAN_TWIST: {
+        if (new_state->get_type() == StateType::CARTESIAN_STATE) {
+          safe_spatial_state_conversion<CartesianTwist, CartesianState>(
+              state, new_state, [](CartesianTwist& a, const CartesianState& b) {
+                a.set_twist(b.get_twist());
+              });
+        } else {
+          safe_dynamic_cast<CartesianTwist>(state, new_state);
+        }
+        break;
       }
-      break;
-    }
-    case StateType::CARTESIAN_ACCELERATION: {
-      if (new_state->get_type() == StateType::CARTESIAN_STATE) {
-        safe_spatial_state_conversion<CartesianAcceleration, CartesianState>(
-            state, new_state, [](CartesianAcceleration& a, const CartesianState& b) {
-              a.set_acceleration(b.get_acceleration());
-            });
-      } else {
-        safe_dynamic_cast<CartesianAcceleration>(state, new_state);
+      case StateType::CARTESIAN_ACCELERATION: {
+        if (new_state->get_type() == StateType::CARTESIAN_STATE) {
+          safe_spatial_state_conversion<CartesianAcceleration, CartesianState>(
+              state, new_state, [](CartesianAcceleration& a, const CartesianState& b) {
+                a.set_acceleration(b.get_acceleration());
+              });
+        } else {
+          safe_dynamic_cast<CartesianAcceleration>(state, new_state);
+        }
+        break;
       }
-      break;
-    }
-    case StateType::CARTESIAN_WRENCH: {
-      if (new_state->get_type() == StateType::CARTESIAN_STATE) {
-        safe_spatial_state_conversion<CartesianWrench, CartesianState>(
-            state, new_state, [](CartesianWrench& a, const CartesianState& b) {
-              a.set_wrench(b.get_wrench());
-            });
-      } else {
-        safe_dynamic_cast<CartesianWrench>(state, new_state);
+      case StateType::CARTESIAN_WRENCH: {
+        if (new_state->get_type() == StateType::CARTESIAN_STATE) {
+          safe_spatial_state_conversion<CartesianWrench, CartesianState>(
+              state, new_state, [](CartesianWrench& a, const CartesianState& b) {
+                a.set_wrench(b.get_wrench());
+              });
+        } else {
+          safe_dynamic_cast<CartesianWrench>(state, new_state);
+        }
+        break;
       }
-      break;
-    }
-    case StateType::JOINT_STATE: {
-      auto derived_state = safe_dynamic_pointer_cast<JointState>(state);
-      if (new_state->get_type() == StateType::JOINT_POSITIONS) {
-        safe_joint_state_conversion<JointState, JointPositions>(
-            state, new_state, [](JointState& a, const JointPositions& b) {
-              a.set_positions(b.get_positions());
-            });
-      } else if (new_state->get_type() == StateType::JOINT_VELOCITIES) {
-        safe_joint_state_conversion<JointState, JointVelocities>(
-            state, new_state, [](JointState& a, const JointVelocities& b) {
-              a.set_velocities(b.get_velocities());
-            });
-      } else if (new_state->get_type() == StateType::JOINT_ACCELERATIONS) {
-        safe_joint_state_conversion<JointState, JointAccelerations>(
-            state, new_state, [](JointState& a, const JointAccelerations& b) {
-              a.set_accelerations(b.get_accelerations());
-            });
-      } else if (new_state->get_type() == StateType::JOINT_TORQUES) {
-        safe_joint_state_conversion<JointState, JointTorques>(
-            state, new_state, [](JointState& a, const JointTorques& b) {
-              a.set_torques(b.get_torques());
-            });
-      } else {
-        safe_dynamic_cast<JointState>(state, new_state);
+      case StateType::JOINT_STATE: {
+        auto derived_state = safe_dynamic_pointer_cast<JointState>(state);
+        if (new_state->get_type() == StateType::JOINT_POSITIONS) {
+          safe_joint_state_conversion<JointState, JointPositions>(
+              state, new_state, [](JointState& a, const JointPositions& b) {
+                a.set_positions(b.get_positions());
+              });
+        } else if (new_state->get_type() == StateType::JOINT_VELOCITIES) {
+          safe_joint_state_conversion<JointState, JointVelocities>(
+              state, new_state, [](JointState& a, const JointVelocities& b) {
+                a.set_velocities(b.get_velocities());
+              });
+        } else if (new_state->get_type() == StateType::JOINT_ACCELERATIONS) {
+          safe_joint_state_conversion<JointState, JointAccelerations>(
+              state, new_state, [](JointState& a, const JointAccelerations& b) {
+                a.set_accelerations(b.get_accelerations());
+              });
+        } else if (new_state->get_type() == StateType::JOINT_TORQUES) {
+          safe_joint_state_conversion<JointState, JointTorques>(
+              state, new_state, [](JointState& a, const JointTorques& b) {
+                a.set_torques(b.get_torques());
+              });
+        } else {
+          safe_dynamic_cast<JointState>(state, new_state);
+        }
+        break;
       }
-      break;
-    }
-    case StateType::JOINT_POSITIONS: {
-      if (new_state->get_type() == StateType::JOINT_STATE) {
-        safe_joint_state_conversion<JointPositions, JointState>(
-            state, new_state, [](JointPositions& a, const JointState& b) {
-              a.set_positions(b.get_positions());
-            });
-      } else {
-        safe_dynamic_cast<JointPositions>(state, new_state);
+      case StateType::JOINT_POSITIONS: {
+        if (new_state->get_type() == StateType::JOINT_STATE) {
+          safe_joint_state_conversion<JointPositions, JointState>(
+              state, new_state, [](JointPositions& a, const JointState& b) {
+                a.set_positions(b.get_positions());
+              });
+        } else {
+          safe_dynamic_cast<JointPositions>(state, new_state);
+        }
+        break;
       }
-      break;
-    }
-    case StateType::JOINT_VELOCITIES: {
-      if (new_state->get_type() == StateType::JOINT_STATE) {
-        safe_joint_state_conversion<JointVelocities, JointState>(
-            state, new_state, [](JointVelocities& a, const JointState& b) {
-              a.set_velocities(b.get_velocities());
-            });
-      } else {
-        safe_dynamic_cast<JointVelocities>(state, new_state);
+      case StateType::JOINT_VELOCITIES: {
+        if (new_state->get_type() == StateType::JOINT_STATE) {
+          safe_joint_state_conversion<JointVelocities, JointState>(
+              state, new_state, [](JointVelocities& a, const JointState& b) {
+                a.set_velocities(b.get_velocities());
+              });
+        } else {
+          safe_dynamic_cast<JointVelocities>(state, new_state);
+        }
+        break;
       }
-      break;
-    }
-    case StateType::JOINT_ACCELERATIONS: {
-      if (new_state->get_type() == StateType::JOINT_STATE) {
-        safe_joint_state_conversion<JointAccelerations, JointState>(
-            state, new_state, [](JointAccelerations& a, const JointState& b) {
-              a.set_accelerations(b.get_accelerations());
-            });
-      } else {
-        safe_dynamic_cast<JointAccelerations>(state, new_state);
+      case StateType::JOINT_ACCELERATIONS: {
+        if (new_state->get_type() == StateType::JOINT_STATE) {
+          safe_joint_state_conversion<JointAccelerations, JointState>(
+              state, new_state, [](JointAccelerations& a, const JointState& b) {
+                a.set_accelerations(b.get_accelerations());
+              });
+        } else {
+          safe_dynamic_cast<JointAccelerations>(state, new_state);
+        }
+        break;
       }
-      break;
-    }
-    case StateType::JOINT_TORQUES: {
-      if (new_state->get_type() == StateType::JOINT_STATE) {
-        safe_joint_state_conversion<JointTorques, JointState>(
-            state, new_state, [](JointTorques& a, const JointState& b) {
-              a.set_torques(b.get_torques());
-            });
-      } else {
-        safe_dynamic_cast<JointTorques>(state, new_state);
+      case StateType::JOINT_TORQUES: {
+        if (new_state->get_type() == StateType::JOINT_STATE) {
+          safe_joint_state_conversion<JointTorques, JointState>(
+              state, new_state, [](JointTorques& a, const JointState& b) {
+                a.set_torques(b.get_torques());
+              });
+        } else {
+          safe_dynamic_cast<JointTorques>(state, new_state);
+        }
+        break;
       }
-      break;
-    }
-    case StateType::JACOBIAN:
-      safe_dynamic_cast<Jacobian>(state, new_state);
-      break;
-    case StateType::PARAMETER: {
-      auto param_ptr = std::dynamic_pointer_cast<ParameterInterface>(state);
-      switch (param_ptr->get_parameter_type()) {
-        case ParameterType::BOOL:
-          safe_dynamic_cast<Parameter<bool>>(state, new_state);
-          break;
-        case ParameterType::BOOL_ARRAY:
-          safe_dynamic_cast<Parameter<std::vector<bool>>>(state, new_state);
-          break;
-        case ParameterType::INT:
-          safe_dynamic_cast<Parameter<int>>(state, new_state);
-          break;
-        case ParameterType::INT_ARRAY:
-          safe_dynamic_cast<Parameter<std::vector<int>>>(state, new_state);
-          break;
-        case ParameterType::DOUBLE:
-          safe_dynamic_cast<Parameter<double>>(state, new_state);
-          break;
-        case ParameterType::DOUBLE_ARRAY:
-          safe_dynamic_cast<Parameter<std::vector<double>>>(state, new_state);
-          break;
-        case ParameterType::STRING:
-          safe_dynamic_cast<Parameter<std::string>>(state, new_state);
-          break;
-        case ParameterType::STRING_ARRAY:
-          safe_dynamic_cast<Parameter<std::vector<std::string>>>(state, new_state);
-          break;
-        case ParameterType::VECTOR:
-          safe_dynamic_cast<Parameter<Eigen::VectorXd>>(state, new_state);
-          break;
-        case ParameterType::MATRIX:
-          safe_dynamic_cast<Parameter<Eigen::MatrixXd>>(state, new_state);
-          break;
-        default:
-          throw exceptions::MessageTranslationException(
-              "The ParameterType contained by parameter " + param_ptr->get_name() + " is unsupported.");
+      case StateType::JACOBIAN:
+        safe_dynamic_cast<Jacobian>(state, new_state);
+        break;
+      case StateType::PARAMETER: {
+        auto param_ptr = std::dynamic_pointer_cast<ParameterInterface>(state);
+        switch (param_ptr->get_parameter_type()) {
+          case ParameterType::BOOL:
+            safe_dynamic_cast<Parameter<bool>>(state, new_state);
+            break;
+          case ParameterType::BOOL_ARRAY:
+            safe_dynamic_cast<Parameter<std::vector<bool>>>(state, new_state);
+            break;
+          case ParameterType::INT:
+            safe_dynamic_cast<Parameter<int>>(state, new_state);
+            break;
+          case ParameterType::INT_ARRAY:
+            safe_dynamic_cast<Parameter<std::vector<int>>>(state, new_state);
+            break;
+          case ParameterType::DOUBLE:
+            safe_dynamic_cast<Parameter<double>>(state, new_state);
+            break;
+          case ParameterType::DOUBLE_ARRAY:
+            safe_dynamic_cast<Parameter<std::vector<double>>>(state, new_state);
+            break;
+          case ParameterType::STRING:
+            safe_dynamic_cast<Parameter<std::string>>(state, new_state);
+            break;
+          case ParameterType::STRING_ARRAY:
+            safe_dynamic_cast<Parameter<std::vector<std::string>>>(state, new_state);
+            break;
+          case ParameterType::VECTOR:
+            safe_dynamic_cast<Parameter<Eigen::VectorXd>>(state, new_state);
+            break;
+          case ParameterType::MATRIX:
+            safe_dynamic_cast<Parameter<Eigen::MatrixXd>>(state, new_state);
+            break;
+          default:
+            throw exceptions::MessageTranslationException(
+                "The ParameterType contained by parameter " + param_ptr->get_name() + " is unsupported.");
+        }
+        break;
       }
-      break;
+      default:
+        throw exceptions::MessageTranslationException(
+            "The StateType contained by state " + new_state->get_name() + " is unsupported.");
     }
-    default:
-      throw exceptions::MessageTranslationException(
-          "The StateType contained by state " + new_state->get_name() + " is unsupported.");
+  } catch (const std::exception& ex) {
+    throw exceptions::MessageTranslationException(ex.what());
   }
 }
 }// namespace modulo_core::translators
