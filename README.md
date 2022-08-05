@@ -30,7 +30,7 @@ See the package documentation for more information.
 
 ## Modulo Component Interfaces
 
-This package describes 
+This package defines custom standard interfaces for modulo components.
 
 ---
 
@@ -54,6 +54,7 @@ root@docker-desktop:/# ros2 run ros1_bridge dynamic_bridge --bridge-all-topics
 
 - [epfl-lasa/control-libraries](https://github.com/epfl-lasa/control-libraries)
 - [aica-technology/docker-images](https://github.com/aica-technology/docker-images)
+- [aica-technology/component-sdk](https://github.com/aica-technology/component-sdk)
 - [ROS2 Composition](https://github.com/aica-technology/docker-images)
 - [ROS2 Managed Nodes](https://design.ros2.org/articles/node_lifecycle.html)
 
