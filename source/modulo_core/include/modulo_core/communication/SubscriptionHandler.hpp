@@ -26,7 +26,7 @@ public:
 
   /**
    * @brief Setter of the ROS subscription.
-   * @throws NullPointerException if the provided subscription pointer is null
+   * @throws modulo_core::exceptions::NullPointerException if the provided subscription pointer is null
    */
   void set_subscription(const std::shared_ptr<rclcpp::Subscription<MsgT>>& subscription);
 

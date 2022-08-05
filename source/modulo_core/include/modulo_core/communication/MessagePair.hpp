@@ -29,16 +29,16 @@ public:
   /**
    * @brief Write the value of the data pointer to a ROS message.
    * @return The value of the data pointer as a ROS message
-   * @throws NullPointerException if the data pointer is null
-   * @throws MessageTranslationException if the data could not be written to message
+   * @throws modulo_core::exceptions::NullPointerException if the data pointer is null
+   * @throws modulo_core::exceptions::MessageTranslationException if the data could not be written to message
    */
   [[nodiscard]] MsgT write_message() const;
 
   /**
    * @brief Read a ROS message and store the value in the data pointer.
    * @param message The ROS message to read
-   * @throws NullPointerException if the data pointer is null
-   * @throws MessageTranslationException if the message could not be read
+   * @throws modulo_core::exceptions::NullPointerException if the data pointer is null
+   * @throws modulo_core::exceptions::MessageTranslationException if the message could not be read
    */
   void read_message(const MsgT& message);
 
@@ -49,7 +49,7 @@ public:
 
   /**
    * @brief Set the data pointer.
-   * @throws NullPointerException if the provided data pointer is null
+   * @throws modulo_core::exceptions::NullPointerException if the provided data pointer is null
    */
   void set_data(const std::shared_ptr<DataT>& data);
 

@@ -26,20 +26,20 @@ public:
 
   /**
    * @brief Activate the ROS publisher if applicable.
-   * @throws NullPointerException if the publisher pointer is null
+   * @throws modulo_core::exceptions::NullPointerException if the publisher pointer is null
    */
   void on_activate();
 
   /**
    * @brief Deactivate the ROS publisher if applicable.
-   * @throws NullPointerException if the publisher pointer is null
+   * @throws modulo_core::exceptions::NullPointerException if the publisher pointer is null
    */
   void on_deactivate();
 
   /**
    * @brief Publish the ROS message through the ROS publisher.
    * @param message The ROS message to publish
-   * @throws NullPointerException if the publisher pointer is null
+   * @throws modulo_core::exceptions::NullPointerException if the publisher pointer is null
    */
   void publish(const MsgT& message) const;
 

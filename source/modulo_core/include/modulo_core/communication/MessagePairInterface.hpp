@@ -46,10 +46,10 @@ public:
    * @tparam MsgT The ROS message type of the MessagePair
    * @tparam DataT The data type of the MessagePair
    * @param validate_pointer If true, throw an exception when down-casting fails
-   * @throws InvalidPointerException if the base MessagePairInterface object has no reference count and validate_pointer
-   * is set to true
-   * @throws InvalidPointerCastException if the derived object from the dynamic down-casting is not a correctly typed
-   * instance of a MessagePair
+   * @throws modulo_core::exceptions::InvalidPointerException if the base MessagePairInterface object has no reference
+   * count and validate_pointer is set to true
+   * @throws modulo_core::exceptions::InvalidPointerCastException if the derived object from the dynamic down-casting
+   * is not a correctly typed instance of a MessagePair
    * @return A pointer to a derived MessagePair instance of the desired type, or a null pointer
    * if down-casting failed and validate_pointer was set to false.
    */

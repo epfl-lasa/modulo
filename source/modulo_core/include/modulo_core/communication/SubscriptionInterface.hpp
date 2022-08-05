@@ -45,10 +45,10 @@ public:
    * will not throw an exception and instead return a null pointer.
    * @tparam PubT The ROS publisher type
    * @tparam MsgT The ROS message type
-   * @throws InvalidPointerException if the base SubscriptionInterface object has no reference count and
-   * validate_pointer is set to true
-   * @throws InvalidPointerCastException if the derived object from the dynamic down-casting is not a correctly typed
-   * instance of a SubscriptionHandler
+   * @throws modulo_core::exceptions::InvalidPointerException if the base SubscriptionInterface object has no reference
+   * count and validate_pointer is set to true
+   * @throws modulo_core::exceptions::InvalidPointerCastException if the derived object from the dynamic down-casting
+   * is not a correctly typed instance of a SubscriptionHandler
    * @param validate_pointer If true, throw an exception when down-casting fails
    * @return A pointer to a derived SubscriptionHandler instance of the desired type, or a null pointer
    * if down-casting failed and validate_pointer was set to false.
@@ -63,7 +63,7 @@ public:
 
   /**
    * @brief Set the pointer to the message pair of the SubscriptionInterface.
-   * @throws NullPointerException if the provided message pair pointer is null
+   * @throws modulo_core::exceptions::NullPointerException if the provided message pair pointer is null
    */
   void set_message_pair(const std::shared_ptr<MessagePairInterface>& message_pair);
 
