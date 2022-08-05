@@ -1031,9 +1031,7 @@ inline std::string ComponentInterface<NodeT>::create_output(
       );
     }
     return parsed_signal_name;
-  } catch (const modulo_core::exceptions::CoreException& ex) {
-    throw exceptions::AddSignalException(ex.what());
-  } catch (const exceptions::ComponentException& ex) {
+  } catch (const std::exception& ex) {
     throw exceptions::AddSignalException(ex.what());
   }
 }

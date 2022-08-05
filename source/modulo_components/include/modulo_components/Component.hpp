@@ -144,9 +144,7 @@ inline void Component::add_output(
         break;
       }
     }
-  } catch (const modulo_core::exceptions::CoreException& ex) {
-    RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add output '" << signal_name << "': " << ex.what());
-  } catch (const exceptions::ComponentException& ex) {
+  } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM(this->get_logger(), "Failed to add output '" << signal_name << "': " << ex.what());
   }
 }
