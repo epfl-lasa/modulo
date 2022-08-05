@@ -94,6 +94,63 @@ def test_state_parameter_read_write(state_parameters):
         assert param.get_parameter_type() == sr.ParameterType.STATE
         assert param.get_parameter_state_type() == value_types[1]
 
+        assert_np_array_equal(param.get_value().data(), value_types[0].data())
+        assert param.get_value().get_name() == value_types[0].get_name()
+
+        new_ros_param = write_parameter(param)
+        assert ros_param.name == new_ros_param.name
+        assert ros_param.type_ == new_ros_param.type_
+        assert_np_array_equal(
+            clproto.decode(clproto.from_json(new_ros_param.get_parameter_value().string_value)).data(),
+            value_types[0].data())
+
+
+def test_vector_parameter_read_write():
+    vec = np.random.rand(3)
+    param = sr.Parameter("vector", sr.ParameterType.VECTOR)
+    ros_param = write_parameter(param)
+    assert ros_param.type_ == Parameter.Type.NOT_SET
+    param = sr.Parameter("vector", vec, sr.ParameterType.VECTOR)
+    ros_param = write_parameter(param)
+    assert ros_param.type_ == Parameter.Type.DOUBLE_ARRAY
+    assert ros_param.name == param.get_name()
+    ros_vec = ros_param.get_parameter_value().double_array_value
+    assert vec.tolist() == ros_vec.tolist()
+
+    new_param = read_parameter(ros_param)
+    assert new_param.get_name() == ros_param.name
+    assert new_param.get_parameter_type() == sr.ParameterType.DOUBLE_ARRAY
+    assert new_param.get_value() == ros_vec.tolist()
+
+    new_param = read_parameter_const(ros_param, param)
+    assert new_param.get_name() == ros_param.name
+    assert new_param.get_parameter_type() == sr.ParameterType.VECTOR
+    assert_np_array_equal(new_param.get_value(), vec)
+
+
+def test_matrix_parameter_read_write():
+    mat = np.random.rand(3, 4)
+    param = sr.Parameter("vector", sr.ParameterType.MATRIX)
+    ros_param = write_parameter(param)
+    assert ros_param.type_ == Parameter.Type.NOT_SET
+    param = sr.Parameter("matrix", mat, sr.ParameterType.MATRIX)
+    ros_param = write_parameter(param)
+    assert ros_param.type_ == Parameter.Type.DOUBLE_ARRAY
+    assert ros_param.name == param.get_name()
+    ros_mat = ros_param.get_parameter_value().double_array_value
+    assert mat.flatten().tolist() == ros_mat.tolist()
+
+    new_param = read_parameter(ros_param)
+    assert new_param.get_name() == ros_param.name
+    assert new_param.get_parameter_type() == sr.ParameterType.DOUBLE_ARRAY
+    assert new_param.get_value() == ros_mat.tolist()
+
+    new_param = read_parameter_const(ros_param, param)
+    assert new_param.get_name() == ros_param.name
+    assert new_param.get_parameter_type() == sr.ParameterType.MATRIX
+    assert_np_array_equal(new_param.get_value(), mat)
+    assert new_param.get_value().shape == mat.shape
+
 
 def test_state_parameter_const_read_invalid():
     param = sr.Parameter("test", sr.CartesianState("test"), sr.ParameterType.STATE, sr.StateType.CARTESIAN_STATE)

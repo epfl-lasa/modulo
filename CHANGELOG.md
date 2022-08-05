@@ -75,7 +75,7 @@ Release Versions:
 - Catch core and component exceptions (#111)
 - Modulo components documentation (#112)
 - Versioning (#113)
--  Fix const reading of State parameters (#114)
+- Fix const reading of State parameters (#114)
 
 ## 1.1.0
 ### February 18, 2022
