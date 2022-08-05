@@ -13,14 +13,14 @@ MsgT = TypeVar('MsgT')
 class LifecycleComponent(ComponentInterface):
     """
     Class to represent a LifecycleComponent in python, following the same logic pattern
-    as the c++ modulo_component::LifecycleComponent class.
+    as the C++ modulo_components::LifecycleComponent class.
     """
 
     def __init__(self, node_name: str, *kargs, **kwargs):
         """
         Constructs all the necessary attributes and declare all the parameters.
-            Parameters:
-                node_name (str): name of the component to be passed to the base Node class
+
+        :param node_name: The name of the node to be passed to the base Node class
         """
         super().__init__(node_name, *kargs, **kwargs)
         self.__state = State.PRIMARY_STATE_UNCONFIGURED
