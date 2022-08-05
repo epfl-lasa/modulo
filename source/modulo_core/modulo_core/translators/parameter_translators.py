@@ -186,6 +186,9 @@ def read_parameter_const(ros_parameter: Parameter, parameter: sr.Parameter) -> s
         return copy(parameter)
     new_parameter = read_parameter(ros_parameter)
     if new_parameter.get_parameter_type() == parameter.get_parameter_type():
+        if new_parameter.get_parameter_state_type() != parameter.get_parameter_state_type():
+            raise ParameterTranslationError(f"The received state parameter {ros_parameter.name} does not have "
+                                            f"the same state type as the reference parameter")
         return new_parameter
     elif new_parameter.get_parameter_type() == sr.ParameterType.DOUBLE_ARRAY:
         value = new_parameter.get_value()

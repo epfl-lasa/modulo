@@ -6,6 +6,7 @@
 #include <state_representation/space/joint/JointState.hpp>
 #include <state_representation/space/joint/JointPositions.hpp>
 
+#include "modulo_core/exceptions/ParameterTranslationException.hpp"
 #include "modulo_core/translators/parameter_translators.hpp"
 
 using namespace modulo_core::translators;
@@ -19,8 +20,7 @@ static std::tuple<state_representation::CartesianState,
                   state_representation::JointPositions> parameter_state_test_cases{
     state_representation::CartesianState::Random("frame", "reference"),
     state_representation::CartesianPose::Random("frame", "reference"),
-    state_representation::JointState::Random("robot", 3), state_representation::JointPositions::Random("robot", 3),
-};
+    state_representation::JointState::Random("robot", 3), state_representation::JointPositions::Random("robot", 3),};
 
 template<typename T>
 class ParameterStateTranslationTest : public testing::Test {
@@ -37,6 +37,17 @@ protected:
   T test_state_;
 };
 TYPED_TEST_SUITE_P(ParameterStateTranslationTest);
+
+TEST(ParameterStateTranslationTest, ConstReadInvalid) {
+  using namespace state_representation;
+  auto param = make_shared_parameter("test", CartesianState("test"));
+  auto ros_param = write_parameter(param);
+
+  auto expected_param = make_shared_parameter("test", JointState("test", 3));
+
+  EXPECT_THROW(auto new_param = read_parameter_const(ros_param, expected_param),
+               modulo_core::exceptions::ParameterTranslationException);
+}
 
 TYPED_TEST_P(ParameterStateTranslationTest, Write) {
   // ROS parameter of a state parameter
