@@ -36,6 +36,7 @@
 
 /**
  * @namespace modulo_components
+ * @brief Modulo components
  */
 namespace modulo_components {
 
