@@ -195,7 +195,7 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~PublisherInterfac
 <p >This throws an InvalidPointerCastException if the <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_interface.html" title="Interface class to enable non-templated activating/deactivating/publishing of ROS publishers from der...">PublisherInterface</a> does not point to a valid <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_handler.html" title="The PublisherHandler handles different types of ROS publishers to activate, deactivate and publish da...">PublisherHandler</a> instance or if the type of the message pair does not match the type of the <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_handler.html" title="The PublisherHandler handles different types of ROS publishers to activate, deactivate and publish da...">PublisherHandler</a> instance. </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="classmodulo__core_1_1communication_1_1_publisher_interface.html#a725e0facd73564ae7ab9c75396e401b0" title="Get a pointer to a derived PublisherHandler instance from a PublisherInterface pointer.">PublisherInterface::get_handler</a> </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname">NullPointerException</td><td>if the message pair pointer is null </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmodulo__core_1_1exceptions_1_1_null_pointer_exception.html" title="An exception class to notify that a certain pointer is null.">modulo_core::exceptions::NullPointerException</a></td><td>if the message pair pointer is null </td></tr>
   </table>
   </dd>
 </dl>
@@ -223,7 +223,7 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~PublisherInterfac
 <p >This throws an InvalidPointerCastException if the <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_interface.html" title="Interface class to enable non-templated activating/deactivating/publishing of ROS publishers from der...">PublisherInterface</a> does not point to a valid <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_handler.html" title="The PublisherHandler handles different types of ROS publishers to activate, deactivate and publish da...">PublisherHandler</a> instance or if the type of the message pair does not match the type of the <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_handler.html" title="The PublisherHandler handles different types of ROS publishers to activate, deactivate and publish da...">PublisherHandler</a> instance. </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="classmodulo__core_1_1communication_1_1_publisher_interface.html#a725e0facd73564ae7ab9c75396e401b0" title="Get a pointer to a derived PublisherHandler instance from a PublisherInterface pointer.">PublisherInterface::get_handler</a> </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname">NullPointerException</td><td>if the message pair pointer is null </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmodulo__core_1_1exceptions_1_1_null_pointer_exception.html" title="An exception class to notify that a certain pointer is null.">modulo_core::exceptions::NullPointerException</a></td><td>if the message pair pointer is null </td></tr>
   </table>
   </dd>
 </dl>
@@ -268,8 +268,8 @@ template&lt;typename PubT , typename MsgT &gt; </div>
 </dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname">InvalidPointerException</td><td>if the base <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_interface.html" title="Interface class to enable non-templated activating/deactivating/publishing of ROS publishers from der...">PublisherInterface</a> object has no reference count and validate_pointer is set to true </td></tr>
-    <tr><td class="paramname">InvalidPointerCastException</td><td>if the derived object from the dynamic down-casting is not a correctly typed instance of a <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_handler.html" title="The PublisherHandler handles different types of ROS publishers to activate, deactivate and publish da...">PublisherHandler</a> </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmodulo__core_1_1exceptions_1_1_invalid_pointer_exception.html" title="An exception class to notify if an object has no reference count (if the object is not owned by any p...">modulo_core::exceptions::InvalidPointerException</a></td><td>if the base <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_interface.html" title="Interface class to enable non-templated activating/deactivating/publishing of ROS publishers from der...">PublisherInterface</a> object has no reference count and validate_pointer is set to true </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmodulo__core_1_1exceptions_1_1_invalid_pointer_cast_exception.html" title="An exception class to notify if the result of getting an instance of a derived class through dynamic ...">modulo_core::exceptions::InvalidPointerCastException</a></td><td>if the derived object from the dynamic down-casting is not a correctly typed instance of a <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_handler.html" title="The PublisherHandler handles different types of ROS publishers to activate, deactivate and publish da...">PublisherHandler</a> </td></tr>
   </table>
   </dd>
 </dl>
@@ -281,7 +281,7 @@ template&lt;typename PubT , typename MsgT &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A pointer to a derived <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_handler.html" title="The PublisherHandler handles different types of ROS publishers to activate, deactivate and publish da...">PublisherHandler</a> instance of the desired type, or a null pointer if down-casting failed and validate_pointer was set to false. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_publisher_interface_8hpp_source.html#l00128">128</a> of file <a class="el" href="_publisher_interface_8hpp_source.html">PublisherInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_publisher_interface_8hpp_source.html#l00129">129</a> of file <a class="el" href="_publisher_interface_8hpp_source.html">PublisherInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -347,7 +347,7 @@ template&lt;typename PubT , typename MsgT &gt; </div>
 <p >This throws an InvalidPointerCastException if the <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_interface.html" title="Interface class to enable non-templated activating/deactivating/publishing of ROS publishers from der...">PublisherInterface</a> does not point to a valid <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_handler.html" title="The PublisherHandler handles different types of ROS publishers to activate, deactivate and publish da...">PublisherHandler</a> instance or if the type of the message pair does not match the type of the <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_handler.html" title="The PublisherHandler handles different types of ROS publishers to activate, deactivate and publish da...">PublisherHandler</a> instance. </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="classmodulo__core_1_1communication_1_1_publisher_interface.html#a725e0facd73564ae7ab9c75396e401b0" title="Get a pointer to a derived PublisherHandler instance from a PublisherInterface pointer.">PublisherInterface::get_handler</a> </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname">CoreException</td><td>if the publishing failed for some reason (translation, null pointer, pointer cast, ...) </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmodulo__core_1_1exceptions_1_1_core_exception.html" title="A base class for all core exceptions.">modulo_core::exceptions::CoreException</a></td><td>if the publishing failed for some reason (translation, null pointer, pointer cast, ...) </td></tr>
   </table>
   </dd>
 </dl>
@@ -375,7 +375,7 @@ template&lt;typename PubT , typename MsgT &gt; </div>
 <p>Set the pointer to the message pair of the <a class="el" href="classmodulo__core_1_1communication_1_1_publisher_interface.html" title="Interface class to enable non-templated activating/deactivating/publishing of ROS publishers from der...">PublisherInterface</a>. </p>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname">NullPointerException</td><td>if the provided message pair pointer is null </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmodulo__core_1_1exceptions_1_1_null_pointer_exception.html" title="An exception class to notify that a certain pointer is null.">modulo_core::exceptions::NullPointerException</a></td><td>if the provided message pair pointer is null </td></tr>
   </table>
   </dd>
 </dl>

@@ -189,8 +189,8 @@ template&lt;typename MsgT &gt; </div>
 </dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname">InvalidPointerException</td><td>if the base <a class="el" href="classmodulo__core_1_1communication_1_1_subscription_interface.html" title="Interface class to enable non-templated subscriptions with ROS subscriptions from derived Subscriptio...">SubscriptionInterface</a> object has no reference count and validate_pointer is set to true </td></tr>
-    <tr><td class="paramname">InvalidPointerCastException</td><td>if the derived object from the dynamic down-casting is not a correctly typed instance of a <a class="el" href="classmodulo__core_1_1communication_1_1_subscription_handler.html" title="The SubscriptionHandler handles different types of ROS subscriptions to receive data from those subsc...">SubscriptionHandler</a> </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmodulo__core_1_1exceptions_1_1_invalid_pointer_exception.html" title="An exception class to notify if an object has no reference count (if the object is not owned by any p...">modulo_core::exceptions::InvalidPointerException</a></td><td>if the base <a class="el" href="classmodulo__core_1_1communication_1_1_subscription_interface.html" title="Interface class to enable non-templated subscriptions with ROS subscriptions from derived Subscriptio...">SubscriptionInterface</a> object has no reference count and validate_pointer is set to true </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmodulo__core_1_1exceptions_1_1_invalid_pointer_cast_exception.html" title="An exception class to notify if the result of getting an instance of a derived class through dynamic ...">modulo_core::exceptions::InvalidPointerCastException</a></td><td>if the derived object from the dynamic down-casting is not a correctly typed instance of a <a class="el" href="classmodulo__core_1_1communication_1_1_subscription_handler.html" title="The SubscriptionHandler handles different types of ROS subscriptions to receive data from those subsc...">SubscriptionHandler</a> </td></tr>
   </table>
   </dd>
 </dl>
@@ -246,7 +246,7 @@ template&lt;typename MsgT &gt; </div>
 <p>Set the pointer to the message pair of the <a class="el" href="classmodulo__core_1_1communication_1_1_subscription_interface.html" title="Interface class to enable non-templated subscriptions with ROS subscriptions from derived Subscriptio...">SubscriptionInterface</a>. </p>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname">NullPointerException</td><td>if the provided message pair pointer is null </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmodulo__core_1_1exceptions_1_1_null_pointer_exception.html" title="An exception class to notify that a certain pointer is null.">modulo_core::exceptions::NullPointerException</a></td><td>if the provided message pair pointer is null </td></tr>
   </table>
   </dd>
 </dl>

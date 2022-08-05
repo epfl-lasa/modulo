@@ -75,7 +75,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>TODO.  
+<p>A wrapper for rclcpp_lifecycle::LifecycleNode to simplify application composition through unified component interfaces while supporting lifecycle states and transitions.  
  <a href="classmodulo__components_1_1_lifecycle_component.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="_lifecycle_component_8hpp_source.html">LifecycleComponent.hpp</a>&gt;</code></p>
@@ -128,7 +128,7 @@ Protected Member Functions</h2></td></tr>
 <tr class="memdesc:aa06d7c56d3cd549f20e550958eeac6c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Steps to execute when handling errors.  <a href="classmodulo__components_1_1_lifecycle_component.html#aa06d7c56d3cd549f20e550958eeac6c6">More...</a><br /></td></tr>
 <tr class="separator:aa06d7c56d3cd549f20e550958eeac6c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a97b12c65867fd38310c86974722af49a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_lifecycle_component.html#a97b12c65867fd38310c86974722af49a">on_step_callback</a> ()</td></tr>
-<tr class="memdesc:a97b12c65867fd38310c86974722af49a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Steps to execute periodically. To be redefined by derived <a class="el" href="classmodulo__components_1_1_component.html" title="TODO.">Component</a> classes.  <a href="classmodulo__components_1_1_lifecycle_component.html#a97b12c65867fd38310c86974722af49a">More...</a><br /></td></tr>
+<tr class="memdesc:a97b12c65867fd38310c86974722af49a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Steps to execute periodically. To be redefined by derived <a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">Component</a> classes.  <a href="classmodulo__components_1_1_lifecycle_component.html#a97b12c65867fd38310c86974722af49a">More...</a><br /></td></tr>
 <tr class="separator:a97b12c65867fd38310c86974722af49a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50e9f3b88e4865743648b89dfdc621ee"><td class="memTemplParams" colspan="2">template&lt;typename DataT &gt; </td></tr>
 <tr class="memitem:a50e9f3b88e4865743648b89dfdc621ee"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_lifecycle_component.html#a50e9f3b88e4865743648b89dfdc621ee">add_output</a> (const std::string &amp;signal_name, const std::shared_ptr&lt; DataT &gt; &amp;data, const std::string &amp;default_topic=&quot;&quot;, bool fixed_topic=false)</td></tr>
@@ -248,9 +248,19 @@ Additional Inherited Members</h2></td></tr>
 <tr class="separator:a6d4c3baf25cb63597f5e2565d47120cd inherit pro_attribs_classmodulo__components_1_1_component_interface"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p >TODO. </p>
+<div class="textblock"><p >A wrapper for rclcpp_lifecycle::LifecycleNode to simplify application composition through unified component interfaces while supporting lifecycle states and transitions. </p>
+<p >This class is intended for direct inheritance to implement custom state-based components that perform different behaviors based on their state and on state transitions. An example of state-based behaviour is a signal component that requires configuration steps to determine which inputs to register and subsequently should publish outputs only when the component is activated. Developers should override <a class="el" href="classmodulo__components_1_1_component_interface.html#adea7ca848c77aa5054e79e1e5719c0a1" title="Parameter validation function to be redefined by derived Component classes.">validate_parameter()</a> if any parameters are added. In addition, the following state transition callbacks should be overridden whenever custom transition behavior is needed:</p><ul>
+<li><a class="el" href="classmodulo__components_1_1_lifecycle_component.html#ae2750d56c97758b231c5a41c81e94787" title="Steps to execute when configuring the component.">on_configure_callback()</a></li>
+<li><a class="el" href="classmodulo__components_1_1_lifecycle_component.html#a45e7a84d2ff32d6538b065e7d5d59db4" title="Steps to execute when activating the component.">on_activate_callback()</a></li>
+<li><a class="el" href="classmodulo__components_1_1_lifecycle_component.html#a22b81a549cb93798e4c7801541125b70" title="Steps to execute when deactivating the component.">on_deactivate_callback()</a></li>
+<li><a class="el" href="classmodulo__components_1_1_lifecycle_component.html#a4dba41e6a556184546ae3244077d3eab" title="Steps to execute when cleaning up the component.">on_cleanup_callback()</a></li>
+<li><a class="el" href="classmodulo__components_1_1_lifecycle_component.html#a05b5dfdf28ebf0d2a9f69cdad9d29eb3" title="Steps to execute when shutting down the component.">on_shutdown_callback()</a></li>
+<li><a class="el" href="classmodulo__components_1_1_lifecycle_component.html#aa06d7c56d3cd549f20e550958eeac6c6" title="Steps to execute when handling errors.">on_error_callback()</a></li>
+<li><a class="el" href="classmodulo__components_1_1_lifecycle_component.html#a97b12c65867fd38310c86974722af49a" title="Steps to execute periodically. To be redefined by derived Component classes.">on_step_callback()</a> <dl class="section see"><dt>See also</dt><dd><a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">Component</a> for a stateless composition alternative </dd></dl>
+</li>
+</ul>
 
-<p class="definition">Definition at line <a class="el" href="_lifecycle_component_8hpp_source.html#l00014">14</a> of file <a class="el" href="_lifecycle_component_8hpp_source.html">LifecycleComponent.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_lifecycle_component_8hpp_source.html#l00030">30</a> of file <a class="el" href="_lifecycle_component_8hpp_source.html">LifecycleComponent.hpp</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a81908c5428fea4a36262ffd82168dd06" name="a81908c5428fea4a36262ffd82168dd06"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a81908c5428fea4a36262ffd82168dd06">&#9670;&nbsp;</a></span>LifecycleComponent()</h2>
@@ -365,7 +375,7 @@ template&lt;typename DataT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_lifecycle_component_8hpp_source.html#l00260">260</a> of file <a class="el" href="_lifecycle_component_8hpp_source.html">LifecycleComponent.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_lifecycle_component_8hpp_source.html#l00276">276</a> of file <a class="el" href="_lifecycle_component_8hpp_source.html">LifecycleComponent.hpp</a>.</p>
 
 </div>
 </div>
@@ -393,7 +403,7 @@ template&lt;typename DataT &gt; </div>
 </div><div class="memdoc">
 
 <p>Steps to execute when activating the component. </p>
-<p >This method can be overridden by derived <a class="el" href="classmodulo__components_1_1_component.html" title="TODO.">Component</a> classes. Activation generally involves final setup steps before the on_step callback is periodically evaluated. </p><dl class="section return"><dt>Returns</dt><dd>True if activation is successful, false otherwise </dd></dl>
+<p >This method can be overridden by derived <a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">Component</a> classes. Activation generally involves final setup steps before the on_step callback is periodically evaluated. </p><dl class="section return"><dt>Returns</dt><dd>True if activation is successful, false otherwise </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="_lifecycle_component_8cpp_source.html#l00129">129</a> of file <a class="el" href="_lifecycle_component_8cpp_source.html">LifecycleComponent.cpp</a>.</p>
 
@@ -423,7 +433,7 @@ template&lt;typename DataT &gt; </div>
 </div><div class="memdoc">
 
 <p>Steps to execute when cleaning up the component. </p>
-<p >This method can be overridden by derived <a class="el" href="classmodulo__components_1_1_component.html" title="TODO.">Component</a> classes. Cleanup generally involves resetting the properties and states to initial conditions. </p><dl class="section return"><dt>Returns</dt><dd>True if cleanup is successful, false otherwise </dd></dl>
+<p >This method can be overridden by derived <a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">Component</a> classes. Cleanup generally involves resetting the properties and states to initial conditions. </p><dl class="section return"><dt>Returns</dt><dd>True if cleanup is successful, false otherwise </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="_lifecycle_component_8cpp_source.html#l00099">99</a> of file <a class="el" href="_lifecycle_component_8cpp_source.html">LifecycleComponent.cpp</a>.</p>
 
@@ -453,7 +463,7 @@ template&lt;typename DataT &gt; </div>
 </div><div class="memdoc">
 
 <p>Steps to execute when configuring the component. </p>
-<p >This method can be overridden by derived <a class="el" href="classmodulo__components_1_1_component.html" title="TODO.">Component</a> classes. Configuration generally involves reading parameters and adding inputs and outputs. </p><dl class="section return"><dt>Returns</dt><dd>True if configuration is successful, false otherwise </dd></dl>
+<p >This method can be overridden by derived <a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">Component</a> classes. Configuration generally involves reading parameters and adding inputs and outputs. </p><dl class="section return"><dt>Returns</dt><dd>True if configuration is successful, false otherwise </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="_lifecycle_component_8cpp_source.html#l00076">76</a> of file <a class="el" href="_lifecycle_component_8cpp_source.html">LifecycleComponent.cpp</a>.</p>
 
@@ -483,7 +493,7 @@ template&lt;typename DataT &gt; </div>
 </div><div class="memdoc">
 
 <p>Steps to execute when deactivating the component. </p>
-<p >This method can be overridden by derived <a class="el" href="classmodulo__components_1_1_component.html" title="TODO.">Component</a> classes. Deactivation generally involves any steps to reset the component to an inactive state. </p><dl class="section return"><dt>Returns</dt><dd>True if deactivation is successful, false otherwise </dd></dl>
+<p >This method can be overridden by derived <a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">Component</a> classes. Deactivation generally involves any steps to reset the component to an inactive state. </p><dl class="section return"><dt>Returns</dt><dd>True if deactivation is successful, false otherwise </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="_lifecycle_component_8cpp_source.html#l00152">152</a> of file <a class="el" href="_lifecycle_component_8cpp_source.html">LifecycleComponent.cpp</a>.</p>
 
@@ -513,7 +523,7 @@ template&lt;typename DataT &gt; </div>
 </div><div class="memdoc">
 
 <p>Steps to execute when handling errors. </p>
-<p >This method can be overridden by derived <a class="el" href="classmodulo__components_1_1_component.html" title="TODO.">Component</a> classes. Error handling generally involves recovering and resetting the component to an unconfigured state. </p><dl class="section return"><dt>Returns</dt><dd>True if error handling is successful, false otherwise </dd></dl>
+<p >This method can be overridden by derived <a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">Component</a> classes. Error handling generally involves recovering and resetting the component to an unconfigured state. </p><dl class="section return"><dt>Returns</dt><dd>True if error handling is successful, false otherwise </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="_lifecycle_component_8cpp_source.html#l00224">224</a> of file <a class="el" href="_lifecycle_component_8cpp_source.html">LifecycleComponent.cpp</a>.</p>
 
@@ -543,7 +553,7 @@ template&lt;typename DataT &gt; </div>
 </div><div class="memdoc">
 
 <p>Steps to execute when shutting down the component. </p>
-<p >This method can be overridden by derived <a class="el" href="classmodulo__components_1_1_component.html" title="TODO.">Component</a> classes. Shutdown generally involves the destruction of any threads or properties not handled by the base class. </p><dl class="section return"><dt>Returns</dt><dd>True if shutdown is successful, false otherwise </dd></dl>
+<p >This method can be overridden by derived <a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">Component</a> classes. Shutdown generally involves the destruction of any threads or properties not handled by the base class. </p><dl class="section return"><dt>Returns</dt><dd>True if shutdown is successful, false otherwise </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="_lifecycle_component_8cpp_source.html#l00196">196</a> of file <a class="el" href="_lifecycle_component_8cpp_source.html">LifecycleComponent.cpp</a>.</p>
 
@@ -572,9 +582,9 @@ template&lt;typename DataT &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Steps to execute periodically. To be redefined by derived <a class="el" href="classmodulo__components_1_1_component.html" title="TODO.">Component</a> classes. </p>
+<p>Steps to execute periodically. To be redefined by derived <a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">Component</a> classes. </p>
 
-<p class="definition">Definition at line <a class="el" href="_lifecycle_component_8hpp_source.html#l00257">257</a> of file <a class="el" href="_lifecycle_component_8hpp_source.html">LifecycleComponent.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_lifecycle_component_8hpp_source.html#l00273">273</a> of file <a class="el" href="_lifecycle_component_8hpp_source.html">LifecycleComponent.hpp</a>.</p>
 
 </div>
 </div>
@@ -599,7 +609,7 @@ template&lt;typename DataT &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_lifecycle_component_8hpp_source.html#l00016">16</a> of file <a class="el" href="_lifecycle_component_8hpp_source.html">LifecycleComponent.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_lifecycle_component_8hpp_source.html#l00032">32</a> of file <a class="el" href="_lifecycle_component_8hpp_source.html">LifecycleComponent.hpp</a>.</p>
 
 </div>
 </div>

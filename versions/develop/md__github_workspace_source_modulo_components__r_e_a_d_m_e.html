@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.4"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Modulo: modulo_components</title>
+<title>Modulo: Modulo Components</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -62,10 +62,29 @@ $(function() {
 
 </div><!-- top -->
 <div><div class="header">
-  <div class="headertitle"><div class="title">modulo_components </div></div>
+  <div class="headertitle"><div class="title">Modulo Components </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"></div></div><!-- contents -->
+<div class="textblock"><p >This package provides base component classes as wrappers for ROS2 Nodes for convenience and consistency when developing modules for a dynamically composed application.</p>
+<h1>Component</h1>
+<p >The <code><a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">modulo_components::Component</a></code> (C++) and <code><a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">modulo_components.Component</a></code> (Python) classes are wrappers for the standard ROS Node that simplify application composition through unified component interfaces.</p>
+<p >This class is intended for direct inheritance to implement custom components that perform one-shot or externally triggered operations. Examples of triggered behavior include providing a service, processing signals or publishing outputs on a periodic timer. One-shot behaviors may include interacting with the filesystem or publishing a predefined sequence of outputs.</p>
+<p >Developers should override <code>validate_parameter()</code> if any parameters are added and <code>on_execute_callback()</code> to implement any one-shot behavior. In the latter case, <code>execute()</code> should be invoked at the end of the derived constructor.</p>
+<h1>LifecycleComponent</h1>
+<p >The <code><a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">modulo_components::Component</a></code> (C++) and <code><a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">modulo_components.Component</a></code> (Python) classes are state-based alternatives that follow the <a href="https://design.ros2.org/articles/node_lifecycle.html">lifecycle pattern for managed nodes</a>.</p>
+<p >This class is intended for direct inheritance to implement custom state-based components that perform different behaviors based on their state and on state transitions. An example of state-based behaviour is a signal component that requires configuration steps to determine which inputs to register and subsequently should publish outputs only when the component is activated.</p>
+<p >Developers should override <code>validate_parameter()</code> if any parameters are added. In addition, the following state transition callbacks should be overridden whenever custom transition behavior is needed:</p><ul>
+<li><code>on_configure_callback()</code></li>
+<li><code>on_activate_callback()</code></li>
+<li><code>on_deactivate_callback()</code></li>
+<li><code>on_cleanup_callback()</code></li>
+<li><code>on_shutdown_callback()</code></li>
+<li><code>on_error_callback()</code></li>
+<li><code>on_step_callback()</code></li>
+</ul>
+<h1>Further reading</h1>
+<p >See the <a href="https://epfl-lasa.github.io/modulo">generated C++ documentation</a> for more details. Refer to the <a href="https://github.com/aica-technology/component-sdk">AICA Component SDK</a> for usage examples and templates for creating custom components. </p>
+</div></div><!-- contents -->
 </div><!-- PageDoc -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
