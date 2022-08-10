@@ -83,6 +83,7 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_dependencies(
+  modulo_component_interfaces
   modulo_core
   rclcpp_lifecycle
   tf2_ros
