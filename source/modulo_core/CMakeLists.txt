@@ -39,8 +39,7 @@ add_library(${PROJECT_NAME} SHARED
     ${PROJECT_SOURCE_DIR}/src/translators/message_writers.cpp)
 
 target_include_directories(
-  ${PROJECT_NAME}
-  PRIVATE
+  ${PROJECT_NAME} PRIVATE
   include
 )
 
@@ -53,6 +52,7 @@ ament_target_dependencies(
 install(DIRECTORY include/
   DESTINATION include
 )
+
 install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -95,12 +95,15 @@ ament_export_dependencies(
   rclcpp
   tf2_msgs
 )
+
 ament_export_include_directories(
   include
 )
+
 ament_export_libraries(
   ${PROJECT_NAME}
   state_representation
   clproto
 )
+
 ament_package()

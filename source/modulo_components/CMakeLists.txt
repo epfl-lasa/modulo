@@ -27,11 +27,11 @@ find_package(tf2_ros REQUIRED)
 add_library(${PROJECT_NAME} SHARED
     ${PROJECT_SOURCE_DIR}/src/ComponentInterface.cpp
     ${PROJECT_SOURCE_DIR}/src/Component.cpp
-    ${PROJECT_SOURCE_DIR}/src/LifecycleComponent.cpp)
+    ${PROJECT_SOURCE_DIR}/src/LifecycleComponent.cpp
+)
 
 target_include_directories(
-  ${PROJECT_NAME}
-  PRIVATE
+  ${PROJECT_NAME} PRIVATE
   include
 )
 
@@ -46,6 +46,7 @@ ament_target_dependencies(
 install(DIRECTORY include/
   DESTINATION include
 )
+
 install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -88,10 +89,13 @@ ament_export_dependencies(
   rclcpp_lifecycle
   tf2_ros
 )
+
 ament_export_include_directories(
   include
 )
+
 ament_export_libraries(
   ${PROJECT_NAME}
 )
+
 ament_package()
