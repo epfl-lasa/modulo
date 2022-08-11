@@ -9,6 +9,7 @@ Release Versions:
 ## Upcoming changes (in development)
 
 - Support multiple build test actions (#117)
+- Manually export modulo_core dependencies (#118)
 
 ## 2.0.0
 ### August 05, 2022
