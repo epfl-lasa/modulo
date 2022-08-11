@@ -1,5 +1,5 @@
 #!/bin/bash
-BASE_TAG=humble
+BASE_TAG=galactic
 
 IMAGE_NAME=epfl-lasa/modulo
 IMAGE_TAG=latest
