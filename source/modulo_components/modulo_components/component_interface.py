@@ -36,8 +36,8 @@ class ComponentInterface(Node):
     following the same logic pattern as the C++ modulo_components::ComponentInterface class.
     """
 
-    def __init__(self, node_name: str, *kargs, **kwargs):
-        super().__init__(node_name, *kargs, **kwargs)
+    def __init__(self, node_name: str, *args, **kwargs):
+        super().__init__(node_name, *args, **kwargs)
         self._parameter_dict: Dict[str, Union[str, sr.Parameter]] = {}
         self._predicates: Dict[str, Union[bool, Callable[[], bool]]] = {}
         self._predicate_publishers: Dict[str, Publisher] = {}
