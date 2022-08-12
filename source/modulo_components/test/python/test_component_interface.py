@@ -97,15 +97,23 @@ def test_add_service(component_interface):
 
 def test_tf(component_interface):
     component_interface.add_tf_broadcaster()
+    component_interface.add_static_tf_broadcaster()
     component_interface.add_tf_listener()
     send_tf = sr.CartesianPose().Random("test", "world")
+    send_static_tf = sr.CartesianPose().Random("static_test", "world")
     component_interface.send_transform(send_tf)
+    component_interface.send_static_transform(send_static_tf)
     for i in range(10):
         rclpy.spin_once(component_interface)
     with pytest.raises(LookupTransformError):
         component_interface.lookup_transform("dummy", "world")
     lookup_tf = component_interface.lookup_transform("test", "world")
     identity = send_tf * lookup_tf.inverse()
+    assert np.linalg.norm(identity.data()) - 1 < 1e-3
+    assert abs(identity.get_orientation().w) - 1 < 1e-3
+
+    lookup_tf = component_interface.lookup_transform("static_test", "world")
+    identity = send_static_tf * lookup_tf.inverse()
     assert np.linalg.norm(identity.data()) - 1 < 1e-3
     assert abs(identity.get_orientation().w) - 1 < 1e-3
 

@@ -24,7 +24,7 @@ from rclpy.service import Service
 from rclpy.time import Time
 from std_msgs.msg import Bool, Int32, Float64, Float64MultiArray, String
 from tf2_py import TransformException
-from tf2_ros import Buffer, TransformBroadcaster, TransformListener
+from tf2_ros import Buffer, StaticTransformBroadcaster, TransformBroadcaster, TransformListener
 
 MsgT = TypeVar('MsgT')
 T = TypeVar('T')
@@ -49,6 +49,7 @@ class ComponentInterface(Node):
         self.__tf_buffer: Optional[Buffer] = None
         self.__tf_listener: Optional[TransformListener] = None
         self.__tf_broadcaster: Optional[TransformBroadcaster] = None
+        self.__static_tf_broadcaster: Optional[StaticTransformBroadcaster] = None
 
         self._qos = QoSProfile(depth=10)
 
@@ -490,6 +491,16 @@ class ComponentInterface(Node):
         else:
             self.get_logger().error("TF broadcaster already exists.")
 
+    def add_static_tf_broadcaster(self):
+        """
+        Configure a static transform broadcaster.
+        """
+        if not self.__static_tf_broadcaster:
+            self.get_logger().debug("Adding static TF broadcaster.")
+            self.__static_tf_broadcaster = StaticTransformBroadcaster(self)
+        else:
+            self.get_logger().error("TF broadcaster already exists.")
+
     def add_tf_listener(self):
         """
         Configure a transform buffer and listener.
@@ -507,16 +518,15 @@ class ComponentInterface(Node):
 
         :param transform: The transform to send
         """
-        if not self.__tf_broadcaster:
-            self.get_logger().error("Failed to send transform: No TF broadcaster configured.",
-                                    throttle_duration_sec=1.0)
-            return
-        try:
-            transform_message = TransformStamped()
-            modulo_writers.write_stamped_message(transform_message, transform, self.get_clock().now())
-            self.__tf_broadcaster.sendTransform(transform_message)
-        except (MessageTranslationError, TransformException) as e:
-            self.get_logger().error(f"Failed to send transform: {e}", throttle_duration_sec=1.0)
+        self.__publish_transform(transform)
+
+    def send_static_transform(self, transform: sr.CartesianPose):
+        """
+        Send a static transform to TF.
+
+        :param transform: The transform to send
+        """
+        self.__publish_transform(transform, static=True)
 
     def lookup_transform(self, frame_name: str, reference_frame_name="world", time_point=Time(),
                          duration=Duration(nanoseconds=1e4)) -> sr.CartesianPose:
@@ -617,6 +627,26 @@ class ComponentInterface(Node):
             except Exception as e:
                 self.get_logger().error(f"Failed to evaluate periodic function callback '{name}': {e}",
                                         throttle_duration_sec=1.0)
+
+    def __publish_transform(self, transform: sr.CartesianPose, static: Bool=False):
+        """
+        Send a transform to TF using the normal or static tf broadcaster
+
+        :param transform: The transform to send
+        :param static: If true, use the static tf broadcaster instead of the normal one
+        """
+        tf_broadcaster = self.__static_tf_broadcaster if static else self.__tf_broadcaster
+        modifier = 'static ' if static else ''
+        if not tf_broadcaster:
+            self.get_logger().error(f"Failed to send {modifier}transform: No {modifier}TF broadcaster configured.",
+                                    throttle_duration_sec=1.0)
+            return
+        try:
+            transform_message = TransformStamped()
+            modulo_writers.write_stamped_message(transform_message, transform, self.get_clock().now())
+            tf_broadcaster.sendTransform(transform_message)
+        except (MessageTranslationError, TransformException) as e:
+            self.get_logger().error(f"Failed to send {modifier}transform: {e}", throttle_duration_sec=1.0)
 
     def raise_error(self):
         """
