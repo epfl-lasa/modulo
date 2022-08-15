@@ -1,5 +1,5 @@
-import sys
 import inspect
+import sys
 from functools import partial
 from typing import Callable, Dict, List, Optional, TypeVar, Union
 
@@ -20,6 +20,7 @@ from rclpy.node import Node
 from rclpy.parameter import Parameter
 from rclpy.publisher import Publisher
 from rclpy.qos import QoSProfile
+from rclpy.service import Service
 from rclpy.time import Time
 from std_msgs.msg import Bool, Int32, Float64, Float64MultiArray, String
 from tf2_py import TransformException
@@ -35,8 +36,8 @@ class ComponentInterface(Node):
     following the same logic pattern as the C++ modulo_components::ComponentInterface class.
     """
 
-    def __init__(self, node_name: str, *kargs, **kwargs):
-        super().__init__(node_name, *kargs, **kwargs)
+    def __init__(self, node_name: str, *args, **kwargs):
+        super().__init__(node_name, *args, **kwargs)
         self._parameter_dict: Dict[str, Union[str, sr.Parameter]] = {}
         self._predicates: Dict[str, Union[bool, Callable[[], bool]]] = {}
         self._predicate_publishers: Dict[str, Publisher] = {}
@@ -44,7 +45,7 @@ class ComponentInterface(Node):
         self._periodic_callbacks: Dict[str, Callable[[], None]] = {}
         self._inputs = {}
         self._outputs = {}
-        self._services = {}
+        self._services_dict: Dict[str, Service] = {}
         self.__tf_buffer: Optional[Buffer] = None
         self.__tf_listener: Optional[TransformListener] = None
         self.__tf_broadcaster: Optional[TransformBroadcaster] = None
@@ -370,7 +371,7 @@ class ComponentInterface(Node):
             self.__setattr__(attribute_name, reader(message))
         except (AttributeError, MessageTranslationError) as e:
             self.get_logger().warn(f"Failed to read message for attribute {attribute_name}: {e}",
-                                    throttle_duration_sec=1.0)
+                                   throttle_duration_sec=1.0)
 
     def add_input(self, signal_name: str, subscription: Union[str, Callable], message_type: MsgT, default_topic="",
                   fixed_topic=False):
@@ -437,6 +438,7 @@ class ComponentInterface(Node):
         :return: A dict with the outcome of the service call, containing "success" and "message" fields in the format
             {"success": [True | False], "message": "..."}
         """
+
         def callback_wrapper(request, response, cb):
             try:
                 if hasattr(request, "payload"):
@@ -463,16 +465,16 @@ class ComponentInterface(Node):
             parsed_service_name = parse_topic_name(service_name)
             if not parsed_service_name:
                 raise AddServiceError(f"Failed to add service '{service_name}': Parsed service name is empty.")
-            if parsed_service_name in self._services.keys():
+            if parsed_service_name in self._services_dict.keys():
                 raise AddServiceError(f"Failed to add service '{service_name}': Service already exists")
             signature = inspect.signature(callback)
             if len(signature.parameters) == 0:
-                self.get_logger().debug(f"Adding empty service '{parsed_service_name}'")
+                self.get_logger().error(f"Adding empty service '{parsed_service_name}'")
                 service_type = EmptyTrigger
             else:
                 self.get_logger().debug(f"Adding string service '{parsed_service_name}'")
                 service_type = StringTrigger
-            self._services[parsed_service_name] = \
+            self._services_dict[parsed_service_name] = \
                 self.create_service(service_type, "~/" + parsed_service_name,
                                     lambda request, response: callback_wrapper(request, response, callback))
         except Exception as e:

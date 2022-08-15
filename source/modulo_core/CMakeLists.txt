@@ -23,6 +23,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
 find_package(tf2_msgs REQUIRED)
 
 find_package(control_libraries 6.1.0 REQUIRED COMPONENTS state_representation)
@@ -47,6 +48,11 @@ ament_target_dependencies(
   ${PROJECT_NAME}
   clproto
   rclcpp
+  rclcpp_lifecycle
+  geometry_msgs
+  sensor_msgs
+  std_msgs
+  tf2_msgs
 )
 
 install(DIRECTORY include/
@@ -73,7 +79,7 @@ if(BUILD_TESTING)
   ament_add_gtest(test_modulo_core ${TEST_CPP_SOURCES})
   target_include_directories(test_modulo_core PRIVATE include)
   target_link_libraries(test_modulo_core ${PROJECT_NAME} clproto state_representation)
-  ament_target_dependencies(test_modulo_core geometry_msgs sensor_msgs std_msgs rclcpp tf2_msgs)
+  ament_target_dependencies(test_modulo_core geometry_msgs sensor_msgs std_msgs rclcpp rclcpp_lifecycle tf2_msgs)
 
   # prevent pluginlib from using boost
   target_compile_definitions(test_modulo_core PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
@@ -93,6 +99,7 @@ ament_export_dependencies(
   sensor_msgs
   std_msgs
   rclcpp
+  rclcpp_lifecycle
   tf2_msgs
 )
 
