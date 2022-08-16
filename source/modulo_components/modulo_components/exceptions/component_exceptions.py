@@ -3,8 +3,8 @@ class ComponentError(Exception):
     A base class for all component exceptions.
     """
 
-    def __init__(self, message: str):
-        super().__init__(message)
+    def __init__(self, message: str, prefix="ComponentError"):
+        super().__init__(f"{prefix}: {message}")
 
 
 class AddServiceError(ComponentError):
@@ -14,7 +14,7 @@ class AddServiceError(ComponentError):
     """
 
     def __init__(self, message: str):
-        super().__init__(message)
+        super().__init__(message, "AddServiceError")
 
 
 class AddSignalError(ComponentError):
@@ -24,7 +24,7 @@ class AddSignalError(ComponentError):
     """
 
     def __init__(self, message: str):
-        super().__init__(message)
+        super().__init__(message, "AddSignalError")
 
 
 class ComponentParameterError(ComponentError):
@@ -34,7 +34,7 @@ class ComponentParameterError(ComponentError):
     """
 
     def __init__(self, message: str):
-        super().__init__(message)
+        super().__init__(message, "ComponentParameterError")
 
 
 class LookupTransformError(ComponentError):
@@ -44,4 +44,4 @@ class LookupTransformError(ComponentError):
     """
 
     def __init__(self, message: str):
-        super().__init__(message)
+        super().__init__(message, "LookupTransformError")

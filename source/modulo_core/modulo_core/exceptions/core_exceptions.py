@@ -3,8 +3,8 @@ class CoreError(Exception):
     A base class for all core exceptions.
     """
 
-    def __init__(self, message: str):
-        super().__init__(message)
+    def __init__(self, message: str, prefix="CoreError"):
+        super().__init__(f"{prefix}: {message}")
 
 
 class MessageTranslationError(CoreError):
@@ -13,7 +13,7 @@ class MessageTranslationError(CoreError):
     """
 
     def __init__(self, message: str):
-        super().__init__(message)
+        super().__init__(message, "MessageTranslationError")
 
 
 class ParameterTranslationError(CoreError):
@@ -24,4 +24,4 @@ class ParameterTranslationError(CoreError):
     """
 
     def __init__(self, message: str):
-        super().__init__(message)
+        super().__init__(message, "ParameterTranslationError")
