@@ -161,13 +161,22 @@ TYPED_TEST(ComponentInterfaceTest, CreateOutput) {
 
 TYPED_TEST(ComponentInterfaceTest, TF) {
   this->component_->add_tf_broadcaster();
+  this->component_->add_static_tf_broadcaster();
   this->component_->add_tf_listener();
   auto send_tf = state_representation::CartesianPose::Random("test", "world");
   EXPECT_NO_THROW(this->component_->send_transform(send_tf));
+  auto send_static_tf = state_representation::CartesianPose::Random("static_test", "world");
+  EXPECT_NO_THROW(this->component_->send_static_transform(send_static_tf));
   EXPECT_THROW(auto throw_tf = this->component_->lookup_transform("dummy", "world"),
                exceptions::LookupTransformException);
-  auto lookup_tf = this->component_->lookup_transform("test", "world");
+  state_representation::CartesianPose lookup_tf;
+  EXPECT_NO_THROW(lookup_tf = this->component_->lookup_transform("test", "world"));
   auto identity = send_tf * lookup_tf.inverse();
+  EXPECT_FLOAT_EQ(identity.data().norm(), 1.);
+  EXPECT_FLOAT_EQ(abs(identity.get_orientation().w()), 1.);
+
+  EXPECT_NO_THROW(lookup_tf = this->component_->lookup_transform("static_test", "world"));
+  identity = send_static_tf * lookup_tf.inverse();
   EXPECT_FLOAT_EQ(identity.data().norm(), 1.);
   EXPECT_FLOAT_EQ(abs(identity.get_orientation().w()), 1.);
 }

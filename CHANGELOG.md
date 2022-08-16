@@ -11,6 +11,7 @@ Release Versions:
 - Support multiple build test actions (#117)
 - Manually export modulo_core dependencies (#118)
 - Ensure compatibility with humble (#119)
+- Add static tf broadcaster (#120)
 
 ## 2.0.0
 ### August 05, 2022
