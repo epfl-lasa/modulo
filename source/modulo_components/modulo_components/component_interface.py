@@ -353,10 +353,12 @@ class ComponentInterface(Node):
                 translator = partial(modulo_writers.write_clproto_message,
                                      clproto_message_type=clproto_message_type)
             else:
-                raise AddSignalError("The provided message type is not supported to create a component output")
+                raise AddSignalError("The provided message type is not supported to create a component output.")
             self._outputs[parsed_signal_name] = {"attribute": data, "message_type": message_type,
                                                  "translator": translator}
             return parsed_signal_name
+        except AddSignalError:
+            raise
         except Exception as e:
             raise AddSignalError(f"{e}")
 
@@ -390,9 +392,9 @@ class ComponentInterface(Node):
         try:
             parsed_signal_name = parse_topic_name(signal_name)
             if not parsed_signal_name:
-                raise AddSignalError(f"Failed to add input '{signal_name}': Parsed signal name is empty.")
+                raise AddSignalError(f"Parsed signal name is empty.")
             if parsed_signal_name in self._inputs.keys():
-                raise AddSignalError(f"Failed to add input '{parsed_signal_name}': Input already exists")
+                raise AddSignalError(f"Input already exists.")
             topic_name = default_topic if default_topic else "~/" + parsed_signal_name
             parameter_name = parsed_signal_name + "_topic"
             if self.has_parameter(parameter_name) and self.get_parameter(parameter_name).is_empty():
@@ -420,7 +422,7 @@ class ComponentInterface(Node):
                                                                                         reader=modulo_readers.read_clproto_message),
                                                                                 self._qos)
                 else:
-                    raise TypeError("The provided message type is not supported to create a component input")
+                    raise TypeError("The provided message type is not supported to create a component input.")
             else:
                 raise TypeError("Provide either a string containing the name of an attribute or a callable.")
         except Exception as e:
@@ -465,9 +467,9 @@ class ComponentInterface(Node):
         try:
             parsed_service_name = parse_topic_name(service_name)
             if not parsed_service_name:
-                raise AddServiceError(f"Failed to add service '{service_name}': Parsed service name is empty.")
+                raise AddServiceError(f"Parsed service name is empty.")
             if parsed_service_name in self._services_dict.keys():
-                raise AddServiceError(f"Failed to add service '{service_name}': Service already exists")
+                raise AddServiceError(f"Service already exists.")
             signature = inspect.signature(callback)
             if len(signature.parameters) == 0:
                 self.get_logger().error(f"Adding empty service '{parsed_service_name}'")

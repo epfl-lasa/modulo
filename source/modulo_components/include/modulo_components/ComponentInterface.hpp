@@ -681,8 +681,8 @@ inline bool ComponentInterface<NodeT>::get_predicate(const std::string& predicat
     value = (callback_function)();
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                 "Failed to evaluate callback of predicate'" << predicate_name << "', returning false:"
-                                                                             << ex.what());
+                                 "Failed to evaluate callback of predicate '" << predicate_name
+                                                                              << "', returning false: " << ex.what());
   }
   return value;
 }
@@ -750,12 +750,10 @@ template<class NodeT>
 inline std::string ComponentInterface<NodeT>::validate_input_signal_name(const std::string& signal_name) {
   std::string parsed_signal_name = utilities::parse_topic_name(signal_name);
   if (parsed_signal_name.empty()) {
-    throw exceptions::AddSignalException(
-        "Failed to add input '" + signal_name + "': Parsed signal name is empty."
-    );
+    throw exceptions::AddSignalException("Parsed signal name is empty.");
   }
   if (this->inputs_.find(parsed_signal_name) != this->inputs_.cend()) {
-    throw exceptions::AddSignalException("Failed to add input '" + signal_name + "': Input already exists");
+    throw exceptions::AddSignalException("Input already exists");
   }
   return parsed_signal_name;
 }
@@ -864,13 +862,11 @@ template<class NodeT>
 inline std::string ComponentInterface<NodeT>::validate_service_name(const std::string& service_name) {
   std::string parsed_service_name = utilities::parse_topic_name(service_name);
   if (parsed_service_name.empty()) {
-    throw exceptions::AddServiceException(
-        "Failed to add service '" + service_name + "': Parsed service name is empty."
-    );
+    throw exceptions::AddServiceException("Parsed service name is empty.");
   }
   if (this->empty_services_.find(parsed_service_name) != this->empty_services_.cend()
       || this->string_services_.find(parsed_service_name) != this->string_services_.cend()) {
-    throw exceptions::AddServiceException("Failed to add service '" + service_name + "': Service already exists");
+    throw exceptions::AddServiceException("Service already exists");
   }
   return parsed_service_name;
 }
@@ -1127,6 +1123,8 @@ inline std::string ComponentInterface<NodeT>::create_output(
       );
     }
     return parsed_signal_name;
+  } catch (const exceptions::AddSignalException&) {
+    throw;
   } catch (const std::exception& ex) {
     throw exceptions::AddSignalException(ex.what());
   }

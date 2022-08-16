@@ -75,6 +75,8 @@ def read_message(state: StateT, message: MsgT) -> StateT:
                 raise MessageTranslationError(f"{e}")
         else:
             raise MessageTranslationError("The provided combination of state type and message type is not supported")
+    except MessageTranslationError:
+        raise
     except Exception as e:
         raise MessageTranslationError(f"{e}")
     return state
@@ -104,7 +106,7 @@ def read_stamped_message(state: StateT, message: MsgT) -> StateT:
         else:
             raise MessageTranslationError("The provided combination of state type and message type is not supported")
     except MessageTranslationError as e:
-        raise MessageTranslationError(f"{e}")
+        raise
     state.set_reference_frame(message.header.frame_id)
     return state
 
