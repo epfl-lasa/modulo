@@ -2,7 +2,6 @@ import inspect
 import sys
 from functools import partial
 from typing import Callable, Dict, List, Optional, TypeVar, Union, Iterable
-import collections
 
 import clproto
 import modulo_core.translators.message_readers as modulo_readers
@@ -519,7 +518,7 @@ class ComponentInterface(Node):
 
         :param transform: The transform or list of transforms to send
         """
-        list_transforms = transform if isinstance(transform, collections.Iterable) else [transform]
+        list_transforms = transform if isinstance(transform, Iterable) else [transform]
         self.__publish_transform(list_transforms)
 
     def send_static_transform(self, transform: Union[sr.CartesianPose, Iterable[sr.CartesianPose]]):
@@ -528,7 +527,7 @@ class ComponentInterface(Node):
 
         :param transform:  The transform or list of transforms to send
         """
-        list_transforms = transform if isinstance(transform, collections.Iterable) else [transform]
+        list_transforms = transform if isinstance(transform, Iterable) else [transform]
         self.__publish_transform(list_transforms, static=True)
 
     def lookup_transform(self, frame_name: str, reference_frame_name="world", time_point=Time(),
