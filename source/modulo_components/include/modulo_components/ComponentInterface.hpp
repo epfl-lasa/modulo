@@ -329,10 +329,22 @@ protected:
   void send_transform(const state_representation::CartesianPose& transform);
 
   /**
+   * @brief Send a vector of transforms to TF.
+   * @param transforms The vector of transform to send
+   */
+  void send_transform(const std::vector<state_representation::CartesianPose>& transforms);
+
+  /**
    * @brief Send a static transform to TF.
    * @param transform The transform to send
    */
   void send_static_transform(const state_representation::CartesianPose& transform);
+
+  /**
+   * @brief Send a vector of static transforms to TF.
+   * @param transforms The vector of transform to send
+   */
+  void send_static_transform(const std::vector<state_representation::CartesianPose>& transforms);
 
   /**
    * @brief Look up a transform from TF.
@@ -371,15 +383,15 @@ protected:
   void evaluate_periodic_callbacks();
 
   /**
-   * @brief Helper function to send a transform through a transform broadcaster
+   * @brief Helper function to send a vector of transform through a transform broadcaster
    * @tparam T The type of the broadcaster (tf2_ros::TransformBroadcaster or tf2_ros::StaticTransformBroadcaster)
-   * @param transform The transform to send
+   * @param transforms The transforms to send
    * @param tf_broadcaster A pointer to a configured transform broadcaster object
    * @param is_static If true, treat the broadcaster as a static frame broadcaster for the sake of log messages
    */
   template<typename T>
   void publish_transform(
-      const state_representation::CartesianPose& transform, const std::shared_ptr<T>& tf_broadcaster,
+      const std::vector<state_representation::CartesianPose>& transforms, const std::shared_ptr<T>& tf_broadcaster,
       bool is_static = false
   );
 
@@ -972,18 +984,35 @@ inline void ComponentInterface<NodeT>::add_tf_listener() {
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::send_transform(const state_representation::CartesianPose& transform) {
-  this->template publish_transform(transform, this->tf_broadcaster_);
+  this->template publish_transform(
+      std::vector<state_representation::CartesianPose>{transform}, this->tf_broadcaster_
+  );
+}
+
+template<class NodeT>
+inline void
+ComponentInterface<NodeT>::send_transform(const std::vector<state_representation::CartesianPose>& transforms) {
+  this->template publish_transform(transforms, this->tf_broadcaster_);
 }
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::send_static_transform(const state_representation::CartesianPose& transform) {
-  this->template publish_transform(transform, this->static_tf_broadcaster_);
+  this->template publish_transform(
+      std::vector<state_representation::CartesianPose>{transform}, this->static_tf_broadcaster_
+  );
+}
+
+template<class NodeT>
+inline void
+ComponentInterface<NodeT>::send_static_transform(const std::vector<state_representation::CartesianPose>& transforms) {
+  this->template publish_transform(transforms, this->static_tf_broadcaster_);
 }
 
 template<class NodeT>
 template<typename T>
 inline void ComponentInterface<NodeT>::publish_transform(
-    const state_representation::CartesianPose& transform, const std::shared_ptr<T>& tf_broadcaster, bool is_static
+    const std::vector<state_representation::CartesianPose>& transforms, const std::shared_ptr<T>& tf_broadcaster,
+    bool is_static
 ) {
   std::string modifier = is_static ? "static " : "";
   if (tf_broadcaster == nullptr) {
@@ -993,9 +1022,14 @@ inline void ComponentInterface<NodeT>::publish_transform(
     return;
   }
   try {
-    geometry_msgs::msg::TransformStamped transform_message;
-    modulo_core::translators::write_message(transform_message, transform, this->get_clock()->now());
-    tf_broadcaster->sendTransform(transform_message);
+    std::vector<geometry_msgs::msg::TransformStamped> transform_messages;
+    transform_messages.reserve(transforms.size());
+    for (const auto& tf: transforms) {
+      geometry_msgs::msg::TransformStamped transform_message;
+      modulo_core::translators::write_message(transform_message, tf, this->get_clock()->now());
+      transform_messages.emplace_back(transform_message);
+    }
+    tf_broadcaster->sendTransform(transform_messages);
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                                  "Failed to send " << modifier << "transform: " << ex.what());
