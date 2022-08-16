@@ -11,6 +11,6 @@ namespace modulo_components::exceptions {
  */
 class AddServiceException : public ComponentException {
 public:
-  explicit AddServiceException(const std::string& msg) : ComponentException(msg) {};
+  explicit AddServiceException(const std::string& msg) : ComponentException("AddServiceException", msg) {}
 };
 }// namespace modulo_components::exceptions

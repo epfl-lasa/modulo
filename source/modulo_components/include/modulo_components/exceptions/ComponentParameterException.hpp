@@ -12,6 +12,7 @@ namespace modulo_components::exceptions {
  */
 class ComponentParameterException : public ComponentException {
 public:
-  explicit ComponentParameterException(const std::string& msg) : ComponentException(msg) {};
+  explicit ComponentParameterException(const std::string& msg) :
+      ComponentException("ComponentParameterException", msg) {}
 };
 }// namespace modulo_components::exceptions

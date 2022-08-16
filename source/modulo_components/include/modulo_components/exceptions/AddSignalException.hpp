@@ -11,6 +11,6 @@ namespace modulo_components::exceptions {
  */
 class AddSignalException : public ComponentException {
 public:
-  explicit AddSignalException(const std::string& msg) : ComponentException(msg) {};
+  explicit AddSignalException(const std::string& msg) : ComponentException("AddSignalException", msg) {}
 };
 }// namespace modulo_components::exceptions

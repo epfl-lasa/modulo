@@ -12,6 +12,6 @@ namespace modulo_components::exceptions {
  */
 class LookupTransformException : public ComponentException {
 public:
-  explicit LookupTransformException(const std::string& msg) : ComponentException(msg) {};
+  explicit LookupTransformException(const std::string& msg) : ComponentException("LookupTransformException", msg) {}
 };
 }// namespace modulo_components::exceptions
