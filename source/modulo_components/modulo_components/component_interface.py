@@ -1,8 +1,8 @@
 import inspect
 import sys
 from functools import partial
-from typing import Callable, Dict, List, Optional, TypeVar, Union
-from collections import Iterable
+from typing import Callable, Dict, List, Optional, TypeVar, Union, Iterable
+import collections
 
 import clproto
 import modulo_core.translators.message_readers as modulo_readers
@@ -513,22 +513,22 @@ class ComponentInterface(Node):
         else:
             self.get_logger().error("TF buffer and listener already exist.")
 
-    def send_transform(self, transform: Union[sr.CartesianPose, List[sr.CartesianPose]]):
+    def send_transform(self, transform: Union[sr.CartesianPose, Iterable[sr.CartesianPose]]):
         """
         Send a transform or a list of transforms to TF.
 
         :param transform: The transform or list of transforms to send
         """
-        list_transforms = transform if isinstance(transform, Iterable) else [transform]
+        list_transforms = transform if isinstance(transform, collections.Iterable) else [transform]
         self.__publish_transform(list_transforms)
 
-    def send_static_transform(self, transform: Union[sr.CartesianPose, List[sr.CartesianPose]]):
+    def send_static_transform(self, transform: Union[sr.CartesianPose, Iterable[sr.CartesianPose]]):
         """
         Send a static transform or a list of static transforms to TF.
 
         :param transform:  The transform or list of transforms to send
         """
-        list_transforms = transform if isinstance(transform, Iterable) else [transform]
+        list_transforms = transform if isinstance(transform, collections.Iterable) else [transform]
         self.__publish_transform(list_transforms, static=True)
 
     def lookup_transform(self, frame_name: str, reference_frame_name="world", time_point=Time(),
@@ -631,7 +631,7 @@ class ComponentInterface(Node):
                 self.get_logger().error(f"Failed to evaluate periodic function callback '{name}': {e}",
                                         throttle_duration_sec=1.0)
 
-    def __publish_transform(self, transforms: List[sr.CartesianPose], static: Bool=False):
+    def __publish_transform(self, transforms: Iterable[sr.CartesianPose], static: Bool=False):
         """
         Send a list of transforms to TF using the normal or static tf broadcaster
 
