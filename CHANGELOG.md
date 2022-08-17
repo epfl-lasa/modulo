@@ -12,6 +12,7 @@ Release Versions:
 - Manually export modulo_core dependencies (#118)
 - Ensure compatibility with humble (#119)
 - Add static tf broadcaster (#120)
+- Accept list of transforms in send_transform (#122)
 
 ## 2.0.0
 ### August 05, 2022

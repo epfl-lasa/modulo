@@ -1,7 +1,7 @@
 import inspect
 import sys
 from functools import partial
-from typing import Callable, Dict, List, Optional, TypeVar, Union
+from typing import Callable, Dict, List, Optional, TypeVar, Union, Iterable
 
 import clproto
 import modulo_core.translators.message_readers as modulo_readers
@@ -512,13 +512,29 @@ class ComponentInterface(Node):
         else:
             self.get_logger().error("TF buffer and listener already exist.")
 
+    def send_transforms(self, transforms: Iterable[sr.CartesianPose]):
+        """
+        Send a list of transforms to TF.
+
+        :param transforms: The list of transforms to send
+        """
+        self.__publish_transforms(transforms)
+
     def send_transform(self, transform: sr.CartesianPose):
         """
         Send a transform to TF.
 
         :param transform: The transform to send
         """
-        self.__publish_transform(transform)
+        self.send_transforms([transform])
+
+    def send_static_transforms(self, transforms: Iterable[sr.CartesianPose]):
+        """
+        Send a list of static transforms to TF.
+
+        :param transforms: The list of transforms to send
+        """
+        self.__publish_transforms(transforms, static=True)
 
     def send_static_transform(self, transform: sr.CartesianPose):
         """
@@ -526,7 +542,7 @@ class ComponentInterface(Node):
 
         :param transform: The transform to send
         """
-        self.__publish_transform(transform, static=True)
+        self.send_static_transforms([transform])
 
     def lookup_transform(self, frame_name: str, reference_frame_name="world", time_point=Time(),
                          duration=Duration(nanoseconds=1e4)) -> sr.CartesianPose:
@@ -628,11 +644,11 @@ class ComponentInterface(Node):
                 self.get_logger().error(f"Failed to evaluate periodic function callback '{name}': {e}",
                                         throttle_duration_sec=1.0)
 
-    def __publish_transform(self, transform: sr.CartesianPose, static: Bool=False):
+    def __publish_transforms(self, transforms: Iterable[sr.CartesianPose], static: Bool=False):
         """
-        Send a transform to TF using the normal or static tf broadcaster
+        Send a list of transforms to TF using the normal or static tf broadcaster
 
-        :param transform: The transform to send
+        :param transforms: The list of transforms to send
         :param static: If true, use the static tf broadcaster instead of the normal one
         """
         tf_broadcaster = self.__static_tf_broadcaster if static else self.__tf_broadcaster
@@ -642,9 +658,12 @@ class ComponentInterface(Node):
                                     throttle_duration_sec=1.0)
             return
         try:
-            transform_message = TransformStamped()
-            modulo_writers.write_stamped_message(transform_message, transform, self.get_clock().now())
-            tf_broadcaster.sendTransform(transform_message)
+            transform_messages = []
+            for tf in transforms:
+                transform_message = TransformStamped()
+                modulo_writers.write_stamped_message(transform_message, tf, self.get_clock().now())
+                transform_messages.append(transform_message)
+            tf_broadcaster.sendTransform(transform_messages)
         except (MessageTranslationError, TransformException) as e:
             self.get_logger().error(f"Failed to send {modifier}transform: {e}", throttle_duration_sec=1.0)
 

@@ -117,6 +117,30 @@ def test_tf(component_interface):
     assert np.linalg.norm(identity.data()) - 1 < 1e-3
     assert abs(identity.get_orientation().w) - 1 < 1e-3
 
+    send_tfs = []
+    for idx in range(3):
+        send_tfs.append(sr.CartesianPose.Random("test_" + str(idx), "world"))
+    component_interface.send_transforms(send_tfs)
+    for i in range(10):
+        rclpy.spin_once(component_interface)
+    for tf in send_tfs:
+        lookup_tf = component_interface.lookup_transform(tf.get_name(), tf.get_reference_frame())
+        identity = tf * lookup_tf.inverse()
+        assert np.linalg.norm(identity.data()) - 1 < 1e-3
+        assert abs(identity.get_orientation().w) - 1 < 1e-3
+
+    send_static_tfs = []
+    for idx in range(3):
+        send_static_tfs.append(sr.CartesianPose.Random("test_static_" + str(idx), "world"))
+    component_interface.send_static_transforms(send_static_tfs)
+    for i in range(10):
+        rclpy.spin_once(component_interface)
+    for tf in send_static_tfs:
+        lookup_tf = component_interface.lookup_transform(tf.get_name(), tf.get_reference_frame())
+        identity = tf * lookup_tf.inverse()
+        assert np.linalg.norm(identity.data()) - 1 < 1e-3
+        assert abs(identity.get_orientation().w) - 1 < 1e-3
+
 
 def test_add_trigger(component_interface):
     component_interface.add_trigger("trigger")
