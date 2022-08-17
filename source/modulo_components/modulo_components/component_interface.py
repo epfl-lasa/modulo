@@ -519,7 +519,7 @@ class ComponentInterface(Node):
         :param transform: The transform or list of transforms to send
         """
         list_transforms = transform if isinstance(transform, Iterable) else [transform]
-        self.__publish_transform(list_transforms)
+        self.__publish_transforms(list_transforms)
 
     def send_static_transform(self, transform: Union[sr.CartesianPose, Iterable[sr.CartesianPose]]):
         """
@@ -528,7 +528,7 @@ class ComponentInterface(Node):
         :param transform:  The transform or list of transforms to send
         """
         list_transforms = transform if isinstance(transform, Iterable) else [transform]
-        self.__publish_transform(list_transforms, static=True)
+        self.__publish_transforms(list_transforms, static=True)
 
     def lookup_transform(self, frame_name: str, reference_frame_name="world", time_point=Time(),
                          duration=Duration(nanoseconds=1e4)) -> sr.CartesianPose:
@@ -630,7 +630,7 @@ class ComponentInterface(Node):
                 self.get_logger().error(f"Failed to evaluate periodic function callback '{name}': {e}",
                                         throttle_duration_sec=1.0)
 
-    def __publish_transform(self, transforms: Iterable[sr.CartesianPose], static: Bool=False):
+    def __publish_transforms(self, transforms: Iterable[sr.CartesianPose], static: Bool=False):
         """
         Send a list of transforms to TF using the normal or static tf broadcaster
 

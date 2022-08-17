@@ -390,7 +390,7 @@ protected:
    * @param is_static If true, treat the broadcaster as a static frame broadcaster for the sake of log messages
    */
   template<typename T>
-  void publish_transform(
+  void publish_transforms(
       const std::vector<state_representation::CartesianPose>& transforms, const std::shared_ptr<T>& tf_broadcaster,
       bool is_static = false
   );
@@ -984,7 +984,7 @@ inline void ComponentInterface<NodeT>::add_tf_listener() {
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::send_transform(const state_representation::CartesianPose& transform) {
-  this->template publish_transform(
+  this->template publish_transforms(
       std::vector<state_representation::CartesianPose>{transform}, this->tf_broadcaster_
   );
 }
@@ -992,12 +992,12 @@ inline void ComponentInterface<NodeT>::send_transform(const state_representation
 template<class NodeT>
 inline void
 ComponentInterface<NodeT>::send_transform(const std::vector<state_representation::CartesianPose>& transforms) {
-  this->template publish_transform(transforms, this->tf_broadcaster_);
+  this->template publish_transforms(transforms, this->tf_broadcaster_);
 }
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::send_static_transform(const state_representation::CartesianPose& transform) {
-  this->template publish_transform(
+  this->template publish_transforms(
       std::vector<state_representation::CartesianPose>{transform}, this->static_tf_broadcaster_
   );
 }
@@ -1005,12 +1005,12 @@ inline void ComponentInterface<NodeT>::send_static_transform(const state_represe
 template<class NodeT>
 inline void
 ComponentInterface<NodeT>::send_static_transform(const std::vector<state_representation::CartesianPose>& transforms) {
-  this->template publish_transform(transforms, this->static_tf_broadcaster_);
+  this->template publish_transforms(transforms, this->static_tf_broadcaster_);
 }
 
 template<class NodeT>
 template<typename T>
-inline void ComponentInterface<NodeT>::publish_transform(
+inline void ComponentInterface<NodeT>::publish_transforms(
     const std::vector<state_representation::CartesianPose>& transforms, const std::shared_ptr<T>& tf_broadcaster,
     bool is_static
 ) {
