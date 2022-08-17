@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Modulo<span id="projectnumber">&#160;2.0.4</span>
+   <div id="projectname">Modulo<span id="projectnumber">&#160;2.0.5</span>
    </div>
   </td>
  </tr>
@@ -183,9 +183,15 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a9365d3bcde8e5abf243606a7f532678d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_component_interface.html#a9365d3bcde8e5abf243606a7f532678d">send_transform</a> (const state_representation::CartesianPose &amp;transform)</td></tr>
 <tr class="memdesc:a9365d3bcde8e5abf243606a7f532678d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a transform to TF.  <a href="classmodulo__components_1_1_component_interface.html#a9365d3bcde8e5abf243606a7f532678d">More...</a><br /></td></tr>
 <tr class="separator:a9365d3bcde8e5abf243606a7f532678d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4ee34ba8755945f13c283790e76ca68"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_component_interface.html#aa4ee34ba8755945f13c283790e76ca68">send_transforms</a> (const std::vector&lt; state_representation::CartesianPose &gt; &amp;transforms)</td></tr>
+<tr class="memdesc:aa4ee34ba8755945f13c283790e76ca68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a vector of transforms to TF.  <a href="classmodulo__components_1_1_component_interface.html#aa4ee34ba8755945f13c283790e76ca68">More...</a><br /></td></tr>
+<tr class="separator:aa4ee34ba8755945f13c283790e76ca68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab78901d9ac3ef5882e8a149443ec50a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_component_interface.html#ab78901d9ac3ef5882e8a149443ec50a4">send_static_transform</a> (const state_representation::CartesianPose &amp;transform)</td></tr>
 <tr class="memdesc:ab78901d9ac3ef5882e8a149443ec50a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a static transform to TF.  <a href="classmodulo__components_1_1_component_interface.html#ab78901d9ac3ef5882e8a149443ec50a4">More...</a><br /></td></tr>
 <tr class="separator:ab78901d9ac3ef5882e8a149443ec50a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a361a6e5d39927d114fcb87704e8240b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_component_interface.html#a361a6e5d39927d114fcb87704e8240b6">send_static_transforms</a> (const std::vector&lt; state_representation::CartesianPose &gt; &amp;transforms)</td></tr>
+<tr class="memdesc:a361a6e5d39927d114fcb87704e8240b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a vector of static transforms to TF.  <a href="classmodulo__components_1_1_component_interface.html#a361a6e5d39927d114fcb87704e8240b6">More...</a><br /></td></tr>
+<tr class="separator:a361a6e5d39927d114fcb87704e8240b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad44099b23b592343967d13f954882e3f"><td class="memItemLeft" align="right" valign="top">state_representation::CartesianPose&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_component_interface.html#ad44099b23b592343967d13f954882e3f">lookup_transform</a> (const std::string &amp;frame_name, const std::string &amp;reference_frame_name=&quot;world&quot;, const tf2::TimePoint &amp;time_point=tf2::TimePoint(std::chrono::microseconds(0)), const tf2::Duration &amp;duration=tf2::Duration(std::chrono::microseconds(10)))</td></tr>
 <tr class="memdesc:ad44099b23b592343967d13f954882e3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Look up a transform from TF.  <a href="classmodulo__components_1_1_component_interface.html#ad44099b23b592343967d13f954882e3f">More...</a><br /></td></tr>
 <tr class="separator:ad44099b23b592343967d13f954882e3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -201,10 +207,10 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a790030f12e036d9b589b41710d3580a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_component_interface.html#a790030f12e036d9b589b41710d3580a4">evaluate_periodic_callbacks</a> ()</td></tr>
 <tr class="memdesc:a790030f12e036d9b589b41710d3580a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to evaluate all periodic function callbacks.  <a href="classmodulo__components_1_1_component_interface.html#a790030f12e036d9b589b41710d3580a4">More...</a><br /></td></tr>
 <tr class="separator:a790030f12e036d9b589b41710d3580a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a31fa152fdd4c72cc636b5db69deb5d1b"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a31fa152fdd4c72cc636b5db69deb5d1b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_component_interface.html#a31fa152fdd4c72cc636b5db69deb5d1b">publish_transform</a> (const state_representation::CartesianPose &amp;transform, const std::shared_ptr&lt; T &gt; &amp;tf_broadcaster, bool is_static=false)</td></tr>
-<tr class="memdesc:a31fa152fdd4c72cc636b5db69deb5d1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to send a transform through a transform broadcaster.  <a href="classmodulo__components_1_1_component_interface.html#a31fa152fdd4c72cc636b5db69deb5d1b">More...</a><br /></td></tr>
-<tr class="separator:a31fa152fdd4c72cc636b5db69deb5d1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad52d0a3413722ac49da32c421033efca"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ad52d0a3413722ac49da32c421033efca"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_component_interface.html#ad52d0a3413722ac49da32c421033efca">publish_transforms</a> (const std::vector&lt; state_representation::CartesianPose &gt; &amp;transforms, const std::shared_ptr&lt; T &gt; &amp;tf_broadcaster, bool is_static=false)</td></tr>
+<tr class="memdesc:ad52d0a3413722ac49da32c421033efca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to send a vector of transforms through a transform broadcaster.  <a href="classmodulo__components_1_1_component_interface.html#ad52d0a3413722ac49da32c421033efca">More...</a><br /></td></tr>
+<tr class="separator:ad52d0a3413722ac49da32c421033efca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1cbb885ce633cabd610b41020c70d535"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_component_interface.html#a1cbb885ce633cabd610b41020c70d535">raise_error</a> ()</td></tr>
 <tr class="memdesc:a1cbb885ce633cabd610b41020c70d535"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put the component in error state by setting the 'in_error_state' predicate to true.  <a href="classmodulo__components_1_1_component_interface.html#a1cbb885ce633cabd610b41020c70d535">More...</a><br /></td></tr>
 <tr class="separator:a1cbb885ce633cabd610b41020c70d535"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -293,7 +299,7 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00465">465</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00477">477</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -365,7 +371,7 @@ template&lt;typename MsgT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00827">827</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00839">839</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -436,7 +442,7 @@ template&lt;typename DataT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00753">753</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00765">765</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -492,7 +498,7 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00513">513</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00525">525</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -563,7 +569,7 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00491">491</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00503">503</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -612,7 +618,7 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00924">924</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00936">936</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -661,7 +667,7 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00619">619</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00631">631</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -710,7 +716,7 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00624">624</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00636">636</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -759,7 +765,7 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00895">895</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00907">907</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -808,7 +814,7 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00867">867</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00879">879</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -836,7 +842,7 @@ template&lt;class NodeT &gt; </div>
 
 <p>Configure a static transform broadcaster. </p>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00949">949</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00961">961</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -864,7 +870,7 @@ template&lt;class NodeT &gt; </div>
 
 <p>Configure a transform broadcaster. </p>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00938">938</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00950">950</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -892,7 +898,7 @@ template&lt;class NodeT &gt; </div>
 
 <p>Configure a transform buffer and listener. </p>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00962">962</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00974">974</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -930,7 +936,7 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00679">679</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00691">691</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1008,7 +1014,7 @@ template&lt;typename DataT &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The parsed signal name </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01068">1068</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01098">1098</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1036,7 +1042,7 @@ template&lt;class NodeT &gt; </div>
 
 <p>Helper function to evaluate all periodic function callbacks. </p>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01055">1055</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01085">1085</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1081,7 +1087,7 @@ template&lt;class NodeT &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The ParameterInterface pointer to a Parameter instance </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00556">556</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00568">568</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1134,7 +1140,7 @@ template&lt;typename T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The value of the parameter </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00503">503</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00515">515</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1173,7 +1179,7 @@ template&lt;class NodeT &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the value of the predicate as a boolean </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00651">651</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00663">663</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1202,7 +1208,7 @@ template&lt;class NodeT &gt; </div>
 <p>Getter of the Quality of Service attribute. </p>
 <dl class="section return"><dt>Returns</dt><dd>The Quality of Service attribute </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01112">1112</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01142">1142</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1272,7 +1278,7 @@ template&lt;class NodeT &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>If it exists, the requested transform </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01006">1006</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01036">1036</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1300,7 +1306,7 @@ template&lt;class NodeT &gt; </div>
 
 <p>Helper function to publish all output signals. </p>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01043">1043</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01073">1073</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1338,7 +1344,7 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01024">1024</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01054">1054</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1366,12 +1372,12 @@ template&lt;class NodeT &gt; </div>
 
 <p>Helper function to publish all predicates. </p>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01036">1036</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01066">1066</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
-<a id="a31fa152fdd4c72cc636b5db69deb5d1b" name="a31fa152fdd4c72cc636b5db69deb5d1b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a31fa152fdd4c72cc636b5db69deb5d1b">&#9670;&nbsp;</a></span>publish_transform()</h2>
+<a id="ad52d0a3413722ac49da32c421033efca" name="ad52d0a3413722ac49da32c421033efca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad52d0a3413722ac49da32c421033efca">&#9670;&nbsp;</a></span>publish_transforms()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1384,10 +1390,10 @@ template&lt;typename T &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classmodulo__components_1_1_component_interface.html">modulo_components::ComponentInterface</a>&lt; NodeT &gt;::publish_transform </td>
+          <td class="memname">void <a class="el" href="classmodulo__components_1_1_component_interface.html">modulo_components::ComponentInterface</a>&lt; NodeT &gt;::publish_transforms </td>
           <td>(</td>
-          <td class="paramtype">const state_representation::CartesianPose &amp;&#160;</td>
-          <td class="paramname"><em>transform</em>, </td>
+          <td class="paramtype">const std::vector&lt; state_representation::CartesianPose &gt; &amp;&#160;</td>
+          <td class="paramname"><em>transforms</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1414,7 +1420,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Helper function to send a transform through a transform broadcaster. </p>
+<p>Helper function to send a vector of transforms through a transform broadcaster. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>The type of the broadcaster (tf2_ros::TransformBroadcaster or tf2_ros::StaticTransformBroadcaster) </td></tr>
@@ -1423,14 +1429,14 @@ template&lt;typename T &gt; </div>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">transform</td><td>The transform to send </td></tr>
+    <tr><td class="paramname">transforms</td><td>The transforms to send </td></tr>
     <tr><td class="paramname">tf_broadcaster</td><td>A pointer to a configured transform broadcaster object </td></tr>
     <tr><td class="paramname">is_static</td><td>If true, treat the broadcaster as a static frame broadcaster for the sake of log messages </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00985">985</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01009">1009</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1458,7 +1464,7 @@ template&lt;class NodeT &gt; </div>
 
 <p>Put the component in error state by setting the 'in_error_state' predicate to true. </p>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01106">1106</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01136">1136</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1496,7 +1502,45 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00979">979</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00997">997</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a361a6e5d39927d114fcb87704e8240b6" name="a361a6e5d39927d114fcb87704e8240b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a361a6e5d39927d114fcb87704e8240b6">&#9670;&nbsp;</a></span>send_static_transforms()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class NodeT &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classmodulo__components_1_1_component_interface.html">modulo_components::ComponentInterface</a>&lt; NodeT &gt;::send_static_transforms </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; state_representation::CartesianPose &gt; &amp;&#160;</td>
+          <td class="paramname"><em>transforms</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send a vector of static transforms to TF. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">transforms</td><td>The vector of transforms to send </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01003">1003</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1534,7 +1578,45 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00974">974</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00986">986</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+
+</div>
+</div>
+<a id="aa4ee34ba8755945f13c283790e76ca68" name="aa4ee34ba8755945f13c283790e76ca68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa4ee34ba8755945f13c283790e76ca68">&#9670;&nbsp;</a></span>send_transforms()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class NodeT &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classmodulo__components_1_1_component_interface.html">modulo_components::ComponentInterface</a>&lt; NodeT &gt;::send_transforms </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; state_representation::CartesianPose &gt; &amp;&#160;</td>
+          <td class="paramname"><em>transforms</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send a vector of transforms to TF. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">transforms</td><td>The vector of transforms to send </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00992">992</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1591,7 +1673,7 @@ template&lt;typename T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The value of the parameter </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00566">566</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00578">578</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1640,7 +1722,7 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00726">726</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00738">738</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1689,7 +1771,7 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00731">731</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00743">743</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1727,7 +1809,7 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01117">1117</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l01147">1147</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1755,7 +1837,7 @@ template&lt;class NodeT &gt; </div>
 
 <p>Step function that is called periodically. </p>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00487">487</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00499">499</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1793,7 +1875,7 @@ template&lt;class NodeT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00701">701</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00713">713</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1832,7 +1914,7 @@ template&lt;class NodeT &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The validation result </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00581">581</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00593">593</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1914,7 +1996,7 @@ template&lt;class NodeT &gt; </div>
 
 <p>Map of inputs. </p>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00391">391</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00403">403</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1942,7 +2024,7 @@ template&lt;class NodeT &gt; </div>
 
 <p>Map of outputs. </p>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00392">392</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00404">404</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
@@ -1970,7 +2052,7 @@ template&lt;class NodeT &gt; </div>
 
 <p>Quality of Service for ROS publishers and subscribers. </p>
 
-<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00394">394</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_interface_8hpp_source.html#l00406">406</a> of file <a class="el" href="_component_interface_8hpp_source.html">ComponentInterface.hpp</a>.</p>
 
 </div>
 </div>
