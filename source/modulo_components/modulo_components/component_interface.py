@@ -634,7 +634,7 @@ class ComponentInterface(Node):
         """
         Send a list of transforms to TF using the normal or static tf broadcaster
 
-        :param transforms: The list of transform to send
+        :param transforms: The list of transforms to send
         :param static: If true, use the static tf broadcaster instead of the normal one
         """
         tf_broadcaster = self.__static_tf_broadcaster if static else self.__tf_broadcaster

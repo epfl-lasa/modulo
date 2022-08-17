@@ -330,7 +330,7 @@ protected:
 
   /**
    * @brief Send a vector of transforms to TF.
-   * @param transforms The vector of transform to send
+   * @param transforms The vector of transforms to send
    */
   void send_transform(const std::vector<state_representation::CartesianPose>& transforms);
 
@@ -342,7 +342,7 @@ protected:
 
   /**
    * @brief Send a vector of static transforms to TF.
-   * @param transforms The vector of transform to send
+   * @param transforms The vector of transforms to send
    */
   void send_static_transform(const std::vector<state_representation::CartesianPose>& transforms);
 
@@ -383,7 +383,7 @@ protected:
   void evaluate_periodic_callbacks();
 
   /**
-   * @brief Helper function to send a vector of transform through a transform broadcaster
+   * @brief Helper function to send a vector of transforms through a transform broadcaster
    * @tparam T The type of the broadcaster (tf2_ros::TransformBroadcaster or tf2_ros::StaticTransformBroadcaster)
    * @param transforms The transforms to send
    * @param tf_broadcaster A pointer to a configured transform broadcaster object
