@@ -332,7 +332,7 @@ protected:
    * @brief Send a vector of transforms to TF.
    * @param transforms The vector of transforms to send
    */
-  void send_transform(const std::vector<state_representation::CartesianPose>& transforms);
+  void send_transforms(const std::vector<state_representation::CartesianPose>& transforms);
 
   /**
    * @brief Send a static transform to TF.
@@ -344,7 +344,7 @@ protected:
    * @brief Send a vector of static transforms to TF.
    * @param transforms The vector of transforms to send
    */
-  void send_static_transform(const std::vector<state_representation::CartesianPose>& transforms);
+  void send_static_transforms(const std::vector<state_representation::CartesianPose>& transforms);
 
   /**
    * @brief Look up a transform from TF.
@@ -984,27 +984,23 @@ inline void ComponentInterface<NodeT>::add_tf_listener() {
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::send_transform(const state_representation::CartesianPose& transform) {
-  this->template publish_transforms(
-      std::vector<state_representation::CartesianPose>{transform}, this->tf_broadcaster_
-  );
+  this->send_transforms(std::vector<state_representation::CartesianPose>{transform});
 }
 
 template<class NodeT>
 inline void
-ComponentInterface<NodeT>::send_transform(const std::vector<state_representation::CartesianPose>& transforms) {
+ComponentInterface<NodeT>::send_transforms(const std::vector<state_representation::CartesianPose>& transforms) {
   this->template publish_transforms(transforms, this->tf_broadcaster_);
 }
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::send_static_transform(const state_representation::CartesianPose& transform) {
-  this->template publish_transforms(
-      std::vector<state_representation::CartesianPose>{transform}, this->static_tf_broadcaster_
-  );
+  this->send_static_transforms(std::vector<state_representation::CartesianPose>{transform});
 }
 
 template<class NodeT>
 inline void
-ComponentInterface<NodeT>::send_static_transform(const std::vector<state_representation::CartesianPose>& transforms) {
+ComponentInterface<NodeT>::send_static_transforms(const std::vector<state_representation::CartesianPose>& transforms) {
   this->template publish_transforms(transforms, this->static_tf_broadcaster_);
 }
 

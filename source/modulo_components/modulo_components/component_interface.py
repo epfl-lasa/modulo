@@ -512,23 +512,37 @@ class ComponentInterface(Node):
         else:
             self.get_logger().error("TF buffer and listener already exist.")
 
-    def send_transform(self, transform: Union[sr.CartesianPose, Iterable[sr.CartesianPose]]):
+    def send_transforms(self, transforms: Iterable[sr.CartesianPose]):
         """
-        Send a transform or a list of transforms to TF.
+        Send a list of transforms to TF.
 
-        :param transform: The transform or list of transforms to send
+        :param transforms: The list of transforms to send
         """
-        list_transforms = transform if isinstance(transform, Iterable) else [transform]
-        self.__publish_transforms(list_transforms)
+        self.__publish_transforms(transforms)
 
-    def send_static_transform(self, transform: Union[sr.CartesianPose, Iterable[sr.CartesianPose]]):
+    def send_transform(self, transform: sr.CartesianPose):
         """
-        Send a static transform or a list of static transforms to TF.
+        Send a transform to TF.
 
-        :param transform:  The transform or list of transforms to send
+        :param transform: The transform to send
         """
-        list_transforms = transform if isinstance(transform, Iterable) else [transform]
-        self.__publish_transforms(list_transforms, static=True)
+        self.send_transforms([transform])
+
+    def send_static_transforms(self, transforms: Iterable[sr.CartesianPose]):
+        """
+        Send a list of static transforms to TF.
+
+        :param transforms: The list of transforms to send
+        """
+        self.__publish_transforms(transforms, static=True)
+
+    def send_static_transform(self, transform: sr.CartesianPose):
+        """
+        Send a static transform to TF.
+
+        :param transform: The transform to send
+        """
+        self.send_static_transforms([transform])
 
     def lookup_transform(self, frame_name: str, reference_frame_name="world", time_point=Time(),
                          duration=Duration(nanoseconds=1e4)) -> sr.CartesianPose:

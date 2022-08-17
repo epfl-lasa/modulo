@@ -38,7 +38,9 @@ public:
   using ComponentInterface<NodeT>::add_static_tf_broadcaster;
   using ComponentInterface<NodeT>::add_tf_listener;
   using ComponentInterface<NodeT>::send_transform;
+  using ComponentInterface<NodeT>::send_transforms;
   using ComponentInterface<NodeT>::send_static_transform;
+  using ComponentInterface<NodeT>::send_static_transforms;
   using ComponentInterface<NodeT>::lookup_transform;
   using ComponentInterface<NodeT>::raise_error;
   using ComponentInterface<NodeT>::get_qos;

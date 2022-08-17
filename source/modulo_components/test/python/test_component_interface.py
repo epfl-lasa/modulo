@@ -120,7 +120,7 @@ def test_tf(component_interface):
     send_tfs = []
     for idx in range(3):
         send_tfs.append(sr.CartesianPose.Random("test_" + str(idx), "world"))
-    component_interface.send_transform(send_tfs)
+    component_interface.send_transforms(send_tfs)
     for i in range(10):
         rclpy.spin_once(component_interface)
     for tf in send_tfs:
@@ -132,7 +132,7 @@ def test_tf(component_interface):
     send_static_tfs = []
     for idx in range(3):
         send_static_tfs.append(sr.CartesianPose.Random("test_static_" + str(idx), "world"))
-    component_interface.send_static_transform(send_static_tfs)
+    component_interface.send_static_transforms(send_static_tfs)
     for i in range(10):
         rclpy.spin_once(component_interface)
     for tf in send_static_tfs:

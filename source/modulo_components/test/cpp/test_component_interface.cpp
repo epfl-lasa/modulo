@@ -185,7 +185,7 @@ TYPED_TEST(ComponentInterfaceTest, TF) {
   for (std::size_t idx = 0; idx < 3; ++idx) {
     send_tfs.emplace_back(state_representation::CartesianPose::Random("test_" + std::to_string(idx), "world"));
   }
-  EXPECT_NO_THROW(this->component_->send_transform(send_tfs));
+  EXPECT_NO_THROW(this->component_->send_transforms(send_tfs));
   for (const auto& tf: send_tfs) {
     lookup_tf = this->component_->lookup_transform(tf.get_name(), tf.get_reference_frame());
     identity = tf * lookup_tf.inverse();
@@ -199,7 +199,7 @@ TYPED_TEST(ComponentInterfaceTest, TF) {
     send_static_tfs.emplace_back(
         state_representation::CartesianPose::Random("test_static_" + std::to_string(idx), "world"));
   }
-  EXPECT_NO_THROW(this->component_->send_static_transform(send_static_tfs));
+  EXPECT_NO_THROW(this->component_->send_static_transforms(send_static_tfs));
   for (const auto& tf: send_static_tfs) {
     lookup_tf = this->component_->lookup_transform(tf.get_name(), tf.get_reference_frame());
     identity = tf * lookup_tf.inverse();
