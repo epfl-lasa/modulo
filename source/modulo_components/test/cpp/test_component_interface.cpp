@@ -179,6 +179,33 @@ TYPED_TEST(ComponentInterfaceTest, TF) {
   identity = send_static_tf * lookup_tf.inverse();
   EXPECT_FLOAT_EQ(identity.data().norm(), 1.);
   EXPECT_FLOAT_EQ(abs(identity.get_orientation().w()), 1.);
+
+  std::vector<state_representation::CartesianPose> send_tfs;
+  send_tfs.reserve(3);
+  for (std::size_t idx = 0; idx < 3; ++idx) {
+    send_tfs.emplace_back(state_representation::CartesianPose::Random("test_" + std::to_string(idx), "world"));
+  }
+  EXPECT_NO_THROW(this->component_->send_transform(send_tfs));
+  for (const auto& tf: send_tfs) {
+    lookup_tf = this->component_->lookup_transform(tf.get_name(), tf.get_reference_frame());
+    identity = tf * lookup_tf.inverse();
+    EXPECT_FLOAT_EQ(identity.data().norm(), 1.);
+    EXPECT_FLOAT_EQ(abs(identity.get_orientation().w()), 1.);
+  }
+
+  std::vector<state_representation::CartesianPose> send_static_tfs;
+  send_static_tfs.reserve(3);
+  for (std::size_t idx = 0; idx < 3; ++idx) {
+    send_static_tfs.emplace_back(
+        state_representation::CartesianPose::Random("test_static_" + std::to_string(idx), "world"));
+  }
+  EXPECT_NO_THROW(this->component_->send_static_transform(send_static_tfs));
+  for (const auto& tf: send_static_tfs) {
+    lookup_tf = this->component_->lookup_transform(tf.get_name(), tf.get_reference_frame());
+    identity = tf * lookup_tf.inverse();
+    EXPECT_FLOAT_EQ(identity.data().norm(), 1.);
+    EXPECT_FLOAT_EQ(abs(identity.get_orientation().w()), 1.);
+  }
 }
 
 TYPED_TEST(ComponentInterfaceTest, GetSetQoS) {
