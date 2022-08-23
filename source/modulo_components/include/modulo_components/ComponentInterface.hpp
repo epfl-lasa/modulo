@@ -348,8 +348,8 @@ protected:
 
   /**
    * @brief Look up a transform from TF.
-   * @param frame_name The desired frame of the transform
-   * @param reference_frame_name The desired reference frame of the transform
+   * @param frame The desired frame of the transform
+   * @param reference_frame The desired reference frame of the transform
    * @param time_point The time at which the value of the transform is desired (default: 0, will get the latest)
    * @param duration How long to block the lookup call before failing
    * @throws modulo_components::exceptions::LookupTransformException if TF buffer/listener are unconfigured or
@@ -357,7 +357,7 @@ protected:
    * @return If it exists, the requested transform
    */
   [[nodiscard]] state_representation::CartesianPose lookup_transform(
-      const std::string& frame_name, const std::string& reference_frame_name = "world",
+      const std::string& frame, const std::string& reference_frame = "world",
       const tf2::TimePoint& time_point = tf2::TimePoint(std::chrono::microseconds(0)),
       const tf2::Duration& duration = tf2::Duration(std::chrono::microseconds(10)));
 
@@ -1030,15 +1030,15 @@ inline void ComponentInterface<NodeT>::publish_transforms(
 
 template<class NodeT>
 inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_transform(
-    const std::string& frame_name, const std::string& reference_frame_name, const tf2::TimePoint& time_point,
+    const std::string& frame, const std::string& reference_frame, const tf2::TimePoint& time_point,
     const tf2::Duration& duration
 ) {
   if (this->tf_buffer_ == nullptr || this->tf_listener_ == nullptr) {
     throw exceptions::LookupTransformException("Failed to lookup transform: To TF buffer / listener configured.");
   }
   try {
-    state_representation::CartesianPose result(frame_name, reference_frame_name);
-    auto transform = this->tf_buffer_->lookupTransform(reference_frame_name, frame_name, time_point, duration);
+    state_representation::CartesianPose result(frame, reference_frame);
+    auto transform = this->tf_buffer_->lookupTransform(reference_frame, frame, time_point, duration);
     modulo_core::translators::read_message(result, transform);
     return result;
   } catch (const tf2::TransformException& ex) {

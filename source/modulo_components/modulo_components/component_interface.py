@@ -546,13 +546,13 @@ class ComponentInterface(Node):
         """
         self.send_static_transforms([transform])
 
-    def lookup_transform(self, frame_name: str, reference_frame_name="world", time_point=Time(),
+    def lookup_transform(self, frame: str, reference_frame="world", time_point=Time(),
                          duration=Duration(nanoseconds=1e4)) -> sr.CartesianPose:
         """
         Look up a transform from TF.
 
-        :param frame_name: The desired frame of the transform
-        :param reference_frame_name: The desired reference frame of the transform
+        :param frame: The desired frame of the transform
+        :param reference_frame: The desired reference frame of the transform
         :param time_point: The time at which the value of the transform is desired (default: 0, will get the latest)
         :param duration: How long to block the lookup call before failing
         :return: If it exists, the requested transform
@@ -560,8 +560,8 @@ class ComponentInterface(Node):
         if not self.__tf_buffer or not self.__tf_listener:
             raise LookupTransformError("Failed to lookup transform: To TF buffer / listener configured.")
         try:
-            result = sr.CartesianPose(frame_name, reference_frame_name)
-            transform = self.__tf_buffer.lookup_transform(reference_frame_name, frame_name, time_point, duration)
+            result = sr.CartesianPose(frame, reference_frame)
+            transform = self.__tf_buffer.lookup_transform(reference_frame, frame, time_point, duration)
             modulo_readers.read_stamped_message(result, transform)
             return result
         except TransformException as e:
