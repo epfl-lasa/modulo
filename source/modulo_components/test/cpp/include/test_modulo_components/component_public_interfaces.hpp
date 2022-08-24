@@ -45,6 +45,7 @@ public:
   using ComponentInterface<NodeT>::raise_error;
   using ComponentInterface<NodeT>::get_qos;
   using ComponentInterface<NodeT>::set_qos;
+  using ComponentInterface<NodeT>::get_clock;
 
   bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>&) override {
     validate_parameter_was_called = true;
