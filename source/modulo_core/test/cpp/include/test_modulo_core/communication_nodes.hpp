@@ -34,12 +34,9 @@ public:
       Node("minimal_subscriber") {
     this->received_future = this->received_.get_future();
     this->subscription_interface_ = std::make_shared<SubscriptionHandler<MsgT>>(message_pair);
-    auto subscription = this->create_subscription<MsgT>(
-        topic_name, 10, [this](const std::shared_ptr<MsgT> message) {
-          this->subscription_interface_->template get_handler<MsgT>()->get_callback()(message);
-          this->received_.set_value();
-        }
-    );
+    auto handler = this->subscription_interface_->template get_handler<MsgT>();
+    handler->set_user_callback([this] { this->received_.set_value(); });
+    auto subscription = this->create_subscription<MsgT>(topic_name, 10, handler->get_callback());
     this->subscription_interface_ =
         this->subscription_interface_->template get_handler<MsgT>()->create_subscription_interface(subscription);
   }
