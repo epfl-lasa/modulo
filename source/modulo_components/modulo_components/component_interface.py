@@ -322,7 +322,7 @@ class ComponentInterface(Node):
 
         :param trigger_name: The name of the trigger
         """
-        if not trigger_name in self._triggers.keys():
+        if trigger_name not in self._triggers.keys():
             self.get_logger().error(f"Failed to trigger: could not find trigger with name '{trigger_name}'.")
             return
         self._triggers[trigger_name] = True
@@ -659,7 +659,7 @@ class ComponentInterface(Node):
                 self.get_logger().error(f"Failed to evaluate periodic function callback '{name}': {e}",
                                         throttle_duration_sec=1.0)
 
-    def __publish_transforms(self, transforms: Iterable[sr.CartesianPose], static: Bool = False):
+    def __publish_transforms(self, transforms: Iterable[sr.CartesianPose], static=False):
         """
         Send a list of transforms to TF using the normal or static tf broadcaster
 
