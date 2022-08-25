@@ -129,11 +129,11 @@ class ComponentInterface(Node):
             if "rclpy" in co_filename:
                 return Node.get_parameter(self, name)
             else:
-                return self._get_component_parameter(name)
+                return self.__get_component_parameter(name)
         except Exception as e:
             raise ComponentParameterError(f"Failed to get parameter '{name}': {e}")
 
-    def _get_component_parameter(self, name: str) -> sr.Parameter:
+    def __get_component_parameter(self, name: str) -> sr.Parameter:
         """
         Get the parameter from the parameter dictionary by its name.
 
@@ -159,7 +159,7 @@ class ComponentInterface(Node):
         :raises ComponentParameterError if the parameter does not exist
         :return: The value of the parameter, if the parameter exists
         """
-        return self._get_component_parameter(name).get_value()
+        return self.__get_component_parameter(name).get_value()
 
     def set_parameter_value(self, name: str, value: T, parameter_type: sr.ParameterType) -> None:
         """
@@ -217,7 +217,7 @@ class ComponentInterface(Node):
         result = SetParametersResult(successful=True)
         for ros_param in ros_parameters:
             try:
-                parameter = self._get_component_parameter(ros_param.name)
+                parameter = self.__get_component_parameter(ros_param.name)
                 new_parameter = read_parameter_const(ros_param, parameter)
                 if not self.__validate_parameter(new_parameter):
                     result.successful = False
