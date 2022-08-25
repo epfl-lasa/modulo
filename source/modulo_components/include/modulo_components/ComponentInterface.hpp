@@ -750,10 +750,12 @@ template<class NodeT>
 inline std::string ComponentInterface<NodeT>::validate_input_signal_name(const std::string& signal_name) {
   std::string parsed_signal_name = utilities::parse_topic_name(signal_name);
   if (parsed_signal_name.empty()) {
-    throw exceptions::AddSignalException("Parsed signal name is empty.");
+    throw exceptions::AddSignalException(
+        "The parsed signal name for input '" + signal_name
+            + "' is empty. Provide a string with valid characters for the signal name ([a-zA-Z0-9_]).");
   }
   if (this->inputs_.find(parsed_signal_name) != this->inputs_.cend()) {
-    throw exceptions::AddSignalException("Input already exists");
+    throw exceptions::AddSignalException("Input with name '" + parsed_signal_name + "' already exists.");
   }
   return parsed_signal_name;
 }
@@ -767,18 +769,22 @@ inline void ComponentInterface<NodeT>::add_input(
   using namespace modulo_core::communication;
   try {
     std::string parsed_signal_name = this->validate_input_signal_name(signal_name);
+    if (data == nullptr) {
+      throw modulo_core::exceptions::NullPointerException(
+          "Invalid data pointer for input '" + parsed_signal_name + "'.");
+    }
     std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
     auto parameter_name = parsed_signal_name + "_topic";
     if (NodeT::has_parameter(parameter_name) && this->get_parameter(parameter_name)->is_empty()) {
       this->set_parameter_value<std::string>(parameter_name, topic_name);
     } else {
       this->add_parameter(
-          parameter_name, topic_name, "Input topic name of signal '" + parsed_signal_name + "'", fixed_topic
+          parameter_name, topic_name, "Signal topic name of input '" + parsed_signal_name + "'", fixed_topic
       );
     }
-    topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
+    topic_name = this->get_parameter_value<std::string>(parameter_name);
     RCLCPP_DEBUG_STREAM(this->get_logger(),
-                        "Adding input '" << signal_name << "' with topic name '" << topic_name << "'.");
+                        "Adding input '" << parsed_signal_name << "' with topic name '" << topic_name << "'.");
     auto message_pair = make_shared_message_pair(data, this->get_clock());
     std::shared_ptr<SubscriptionInterface> subscription_interface;
     switch (message_pair->get_type()) {
@@ -842,13 +848,17 @@ inline void ComponentInterface<NodeT>::add_input(
   try {
     std::string parsed_signal_name = this->validate_input_signal_name(signal_name);
     std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
-    this->add_parameter(
-        parsed_signal_name + "_topic", topic_name, "Output topic name of signal '" + parsed_signal_name + "'",
-        fixed_topic
-    );
-    topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
+    auto parameter_name = parsed_signal_name + "_topic";
+    if (NodeT::has_parameter(parameter_name) && this->get_parameter(parameter_name)->is_empty()) {
+      this->set_parameter_value<std::string>(parameter_name, topic_name);
+    } else {
+      this->add_parameter(
+          parameter_name, topic_name, "Signal topic name of input '" + parsed_signal_name + "'", fixed_topic
+      );
+    }
+    topic_name = this->get_parameter_value<std::string>(parameter_name);
     RCLCPP_DEBUG_STREAM(this->get_logger(),
-                        "Adding input '" << signal_name << "' with topic name '" << topic_name << "'.");
+                        "Adding input '" << parsed_signal_name << "' with topic name '" << topic_name << "'.");
     auto subscription = NodeT::template create_subscription<MsgT>(topic_name, this->qos_, callback);
     auto subscription_interface =
         std::make_shared<SubscriptionHandler<MsgT>>()->create_subscription_interface(subscription);
@@ -1100,26 +1110,31 @@ inline std::string ComponentInterface<NodeT>::create_output(
     auto parsed_signal_name = utilities::parse_topic_name(signal_name);
     if (parsed_signal_name.empty()) {
       throw exceptions::AddSignalException(
-          "The parsed signal name for signal '" + signal_name
+          "The parsed signal name for output '" + signal_name
               + "'is empty. Provide a string with valid characters for the signal name ([a-zA-Z0-9_])."
       );
     }
+    if (data == nullptr) {
+      throw modulo_core::exceptions::NullPointerException(
+          "Invalid data pointer for output '" + parsed_signal_name + "'.");
+    }
     RCLCPP_DEBUG_STREAM(this->get_logger(),
                         "Creating output '" << parsed_signal_name << "' (provided signal name was '" << signal_name
-                                            << "'.");
+                                            << "').");
     if (this->outputs_.find(parsed_signal_name) != this->outputs_.end()) {
-      throw exceptions::AddSignalException("Output with name '" + signal_name + "' already exists.");
+      throw exceptions::AddSignalException("Output with name '" + parsed_signal_name + "' already exists.");
     }
     auto message_pair = make_shared_message_pair(data, this->get_clock());
     this->outputs_.insert_or_assign(
         parsed_signal_name, std::make_shared<PublisherInterface>(this->publisher_type_, message_pair));
+
     std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
     auto parameter_name = parsed_signal_name + "_topic";
     if (NodeT::has_parameter(parameter_name) && this->get_parameter(parameter_name)->is_empty()) {
       this->set_parameter_value<std::string>(parameter_name, topic_name);
     } else {
       this->add_parameter(
-          parameter_name, topic_name, "Output topic name of signal '" + parsed_signal_name + "'", fixed_topic
+          parameter_name, topic_name, "Signal topic name of output '" + parsed_signal_name + "'", fixed_topic
       );
     }
     return parsed_signal_name;
