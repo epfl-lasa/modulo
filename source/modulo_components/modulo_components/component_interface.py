@@ -188,9 +188,11 @@ class ComponentInterface(Node):
         :param parameter: The parameter to be validated
         :return: The validation result
         """
-        if parameter.get_name() == "period" and parameter.get_value() < 1e-3:
-            self.get_logger().error("The value of parameter 'period' cannot be smaller than 1e-3.")
-            return False
+        if parameter.get_name() == "period":
+            value = parameter.get_value()
+            if value <= 0.0 or value > sys.float_info.max:
+                self.get_logger().error("Value for parameter 'period' has to be a positive finite number.")
+                return False
         return self.on_validate_parameter_callback(parameter)
 
     def on_validate_parameter_callback(self, parameter: sr.Parameter) -> bool:

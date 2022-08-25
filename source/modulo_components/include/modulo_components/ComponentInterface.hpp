@@ -603,9 +603,12 @@ template<class NodeT>
 inline bool ComponentInterface<NodeT>::validate_parameter(
     const std::shared_ptr<state_representation::ParameterInterface>& parameter
 ) {
-  if (parameter->get_name() == "period" && parameter->get_parameter_value<double>() < 1e-3) {
-    RCLCPP_ERROR(this->get_logger(), "Value for parameter 'period' cannot be smaller than 1e-3.");
-    return false;
+  if (parameter->get_name() == "period") {
+    auto value = parameter->get_parameter_value<double>();
+    if (value <= 0.0 || !std::isfinite(value)) {
+      RCLCPP_ERROR(this->get_logger(), "Value for parameter 'period' has to be a positive finite number.");
+      return false;
+    }
   }
   return this->on_validate_parameter_callback(parameter);
 }
