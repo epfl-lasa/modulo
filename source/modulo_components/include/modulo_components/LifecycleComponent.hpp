@@ -16,8 +16,8 @@ namespace modulo_components {
  * different behaviors based on their state and on state transitions. An example of state-based behaviour is a
  * signal component that requires configuration steps to determine which inputs to register and subsequently should
  * publish outputs only when the component is activated.
- * Developers should override validate_parameter() if any parameters are added. In addition, the following state
- * transition callbacks should be overridden whenever custom transition behavior is needed:
+ * Developers should override on_validate_parameter_callback() if any parameters are added. In addition, the following
+ * state transition callbacks should be overridden whenever custom transition behavior is needed:
  * - on_configure_callback()
  * - on_activate_callback()
  * - on_deactivate_callback()

@@ -165,7 +165,8 @@ protected:
    * @param parameter A ParameterInterface pointer to a Parameter instance
    * @return The validation result
    */
-  virtual bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
+  virtual bool
+  on_validate_parameter_callback(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
 
   /**
    * @brief Add a predicate to the map of predicates.
@@ -414,6 +415,15 @@ private:
   rcl_interfaces::msg::SetParametersResult on_set_parameters_callback(const std::vector<rclcpp::Parameter>& parameters);
 
   /**
+   * @brief Parameter validation function
+   * @details This validates the period and calls the on_validate_parameter_callback function of the derived Component
+   * classes.
+   * @param parameter A ParameterInterface pointer to a Parameter instance
+   * @return The validation result
+   */
+  bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
+
+  /**
    * @brief Add a predicate to the map of predicates.
    * @param name The name of the predicate
    * @param predicate The predicate variant
@@ -591,6 +601,20 @@ inline void ComponentInterface<NodeT>::set_parameter_value(const std::string& na
 
 template<class NodeT>
 inline bool ComponentInterface<NodeT>::validate_parameter(
+    const std::shared_ptr<state_representation::ParameterInterface>& parameter
+) {
+  if (parameter->get_name() == "period") {
+    auto value = parameter->get_parameter_value<double>();
+    if (value <= 0.0 || !std::isfinite(value)) {
+      RCLCPP_ERROR(this->get_logger(), "Value for parameter 'period' has to be a positive finite number.");
+      return false;
+    }
+  }
+  return this->on_validate_parameter_callback(parameter);
+}
+
+template<class NodeT>
+inline bool ComponentInterface<NodeT>::on_validate_parameter_callback(
     const std::shared_ptr<state_representation::ParameterInterface>&
 ) {
   return true;
