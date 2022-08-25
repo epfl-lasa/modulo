@@ -15,6 +15,7 @@ Release Versions:
 - Use prefix for all exceptions (#121)
 - Accept list of transforms in send_transform (#122)
 - Rename all frame_name parameters to frame (#123)
+- Parameter validation for component period (#126)
 
 ## 2.0.0
 ### August 05, 2022
