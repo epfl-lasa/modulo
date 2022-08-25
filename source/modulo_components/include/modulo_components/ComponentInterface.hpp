@@ -165,7 +165,8 @@ protected:
    * @param parameter A ParameterInterface pointer to a Parameter instance
    * @return The validation result
    */
-  virtual bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
+  virtual bool
+  on_validate_parameter_callback(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
 
   /**
    * @brief Add a predicate to the map of predicates.
@@ -414,12 +415,13 @@ private:
   rcl_interfaces::msg::SetParametersResult on_set_parameters_callback(const std::vector<rclcpp::Parameter>& parameters);
 
   /**
-   * @brief Parameter validation wrapper that validates the period and calls the validation function of the derived
-   * Component classes.
+   * @brief Parameter validation function
+   * @details This validates the period and calls the on_validate_parameter_callback function of the derived Component
+   * classes.
    * @param parameter A ParameterInterface pointer to a Parameter instance
    * @return The validation result
    */
-  virtual bool validate_parameter_wrapper(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
+  bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
 
   /**
    * @brief Add a predicate to the map of predicates.
@@ -598,18 +600,18 @@ inline void ComponentInterface<NodeT>::set_parameter_value(const std::string& na
 }
 
 template<class NodeT>
-inline bool ComponentInterface<NodeT>::validate_parameter_wrapper(
+inline bool ComponentInterface<NodeT>::validate_parameter(
     const std::shared_ptr<state_representation::ParameterInterface>& parameter
 ) {
   if (parameter->get_name() == "period" && parameter->get_parameter_value<double>() < 1e-3) {
     RCLCPP_ERROR(this->get_logger(), "Value for parameter 'period' cannot be smaller than 1e-3.");
     return false;
   }
-  return this->validate_parameter(parameter);
+  return this->on_validate_parameter_callback(parameter);
 }
 
 template<class NodeT>
-inline bool ComponentInterface<NodeT>::validate_parameter(
+inline bool ComponentInterface<NodeT>::on_validate_parameter_callback(
     const std::shared_ptr<state_representation::ParameterInterface>&
 ) {
   return true;
@@ -630,7 +632,7 @@ ComponentInterface<NodeT>::on_set_parameters_callback(const std::vector<rclcpp::
 
       // convert the ROS parameter into a ParameterInterface without modifying the original
       auto new_parameter = modulo_core::translators::read_parameter_const(ros_parameter, parameter);
-      if (!this->validate_parameter_wrapper(new_parameter)) {
+      if (!this->validate_parameter(new_parameter)) {
         result.successful = false;
         result.reason += "Validation of parameter '" + ros_parameter.get_name() + "' returned false!";
       } else if (!new_parameter->is_empty()) {

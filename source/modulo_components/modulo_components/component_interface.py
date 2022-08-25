@@ -180,10 +180,10 @@ class ComponentInterface(Node):
             self.get_logger().error(f"Failed to set parameter value of parameter '{name}': {e}",
                                     throttle_duration_sec=1.0)
 
-    def __validate_parameter_wrapper(self, parameter: sr.Parameter) -> bool:
+    def __validate_parameter(self, parameter: sr.Parameter) -> bool:
         """
-        Parameter validation wrapper that validates the period and calls the validation function of the derived
-        Component classes.
+        Parameter validation wrapper that validates the period and calls the on_validate_parameter_callback function of
+        the derived Component classes.
 
         :param parameter: The parameter to be validated
         :return: The validation result
@@ -191,9 +191,9 @@ class ComponentInterface(Node):
         if parameter.get_name() == "period" and parameter.get_value() < 1e-3:
             self.get_logger().error("The value of parameter 'period' cannot be smaller than 1e-3.")
             return False
-        return self._validate_parameter(parameter)
+        return self.on_validate_parameter_callback(parameter)
 
-    def _validate_parameter(self, parameter: sr.Parameter) -> bool:
+    def on_validate_parameter_callback(self, parameter: sr.Parameter) -> bool:
         """
         Parameter validation function to be redefined by derived Component classes. This method is automatically invoked
         whenever the ROS interface tried to modify a parameter. If the validation returns True, the updated parameter
@@ -217,7 +217,7 @@ class ComponentInterface(Node):
             try:
                 parameter = self._get_component_parameter(ros_param.name)
                 new_parameter = read_parameter_const(ros_param, parameter)
-                if not self.__validate_parameter_wrapper(new_parameter):
+                if not self.__validate_parameter(new_parameter):
                     result.successful = False
                     result.reason = f"Validation of parameter '{ros_param.name}' returned false!"
                 else:
