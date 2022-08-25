@@ -180,7 +180,22 @@ class ComponentInterface(Node):
             self.get_logger().error(f"Failed to set parameter value of parameter '{name}': {e}",
                                     throttle_duration_sec=1.0)
 
-    def _validate_parameter(self, parameter: sr.Parameter) -> bool:
+    def __validate_parameter(self, parameter: sr.Parameter) -> bool:
+        """
+        Parameter validation wrapper that validates the period and calls the on_validate_parameter_callback function of
+        the derived Component classes.
+
+        :param parameter: The parameter to be validated
+        :return: The validation result
+        """
+        if parameter.get_name() == "period":
+            value = parameter.get_value()
+            if value <= 0.0 or value > sys.float_info.max:
+                self.get_logger().error("Value for parameter 'period' has to be a positive finite number.")
+                return False
+        return self.on_validate_parameter_callback(parameter)
+
+    def on_validate_parameter_callback(self, parameter: sr.Parameter) -> bool:
         """
         Parameter validation function to be redefined by derived Component classes. This method is automatically invoked
         whenever the ROS interface tried to modify a parameter. If the validation returns True, the updated parameter
@@ -204,7 +219,7 @@ class ComponentInterface(Node):
             try:
                 parameter = self._get_component_parameter(ros_param.name)
                 new_parameter = read_parameter_const(ros_param, parameter)
-                if not self._validate_parameter(new_parameter):
+                if not self.__validate_parameter(new_parameter):
                     result.successful = False
                     result.reason = f"Validation of parameter '{ros_param.name}' returned false!"
                 else:
@@ -309,7 +324,7 @@ class ComponentInterface(Node):
 
         :param trigger_name: The name of the trigger
         """
-        if not trigger_name in self._triggers.keys():
+        if trigger_name not in self._triggers.keys():
             self.get_logger().error(f"Failed to trigger: could not find trigger with name '{trigger_name}'.")
             return
         self._triggers[trigger_name] = True
@@ -646,7 +661,7 @@ class ComponentInterface(Node):
                 self.get_logger().error(f"Failed to evaluate periodic function callback '{name}': {e}",
                                         throttle_duration_sec=1.0)
 
-    def __publish_transforms(self, transforms: Iterable[sr.CartesianPose], static: Bool=False):
+    def __publish_transforms(self, transforms: Iterable[sr.CartesianPose], static=False):
         """
         Send a list of transforms to TF using the normal or static tf broadcaster
 
