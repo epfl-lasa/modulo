@@ -25,7 +25,7 @@ class EmtpyParameterInterface(ComponentInterface):
     def set_ros_parameter(self, param: rclpy.Parameter) -> SetParametersResult:
         return rclpy.node.Node.set_parameters(self, [param])[0]
 
-    def _validate_parameter(self, parameter: sr.Parameter) -> bool:
+    def on_validate_parameter_callback(self, parameter: sr.Parameter) -> bool:
         if parameter.get_name() == "name":
             if parameter.is_empty():
                 return self._allow_empty

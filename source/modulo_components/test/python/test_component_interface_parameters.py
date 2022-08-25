@@ -20,7 +20,7 @@ class ComponentInterfaceTest(ComponentInterface):
     def set_ros_parameter(self, param: rclpy.Parameter) -> SetParametersResult:
         return rclpy.node.Node.set_parameters(self, [param])[0]
 
-    def _validate_parameter(self, parameter: sr.Parameter) -> bool:
+    def on_validate_parameter_callback(self, parameter: sr.Parameter) -> bool:
         self.validate_was_called = True
         return self.validation_return_value
 
