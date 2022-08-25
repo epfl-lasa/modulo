@@ -16,7 +16,7 @@ Release Versions:
 - Accept list of transforms in send_transform (#122)
 - Rename all frame_name parameters to frame (#123)
 - Rename validate parameter callback and validate period value (#126)
-- Remove underscore from validate parameter function (#127)
+- Add double underscore to private function (#127)
 
 ## 2.0.0
 ### August 05, 2022
