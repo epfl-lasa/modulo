@@ -723,8 +723,11 @@ class ComponentInterface(Node):
         for signal, output_dict in self._outputs.items():
             try:
                 message = output_dict["message_type"]()
-                output_dict["translator"](message, self.__getattribute__(output_dict["attribute"]))
-                output_dict["publisher"].publish(message)
+                data = self.__getattribute__(output_dict["attribute"])
+                # only publish if the data is not empty
+                if not getattr(data, "is_empty", lambda: False)():
+                    output_dict["translator"](message, data)
+                    output_dict["publisher"].publish(message)
             except Exception as e:
                 self.get_logger().error(f"{e}")
 
