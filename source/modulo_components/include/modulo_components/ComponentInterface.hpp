@@ -672,7 +672,7 @@ inline void ComponentInterface<NodeT>::add_variant_predicate(
     return;
   }
   if (this->predicates_.find(name) != this->predicates_.end()) {
-    RCLCPP_WARN_STREAM(this->get_logger(), "Predicate '" << name << "' already exists, overwriting.");
+    RCLCPP_WARN_STREAM(this->get_logger(), "Predicate with name '" << name << "' already exists, overwriting.");
   } else {
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding predicate '" << name << "'.");
     auto publisher = rclcpp::create_publisher<std_msgs::msg::Bool>(
@@ -896,11 +896,13 @@ template<class NodeT>
 inline std::string ComponentInterface<NodeT>::validate_service_name(const std::string& service_name) {
   std::string parsed_service_name = utilities::parse_topic_name(service_name);
   if (parsed_service_name.empty()) {
-    throw exceptions::AddServiceException("Parsed service name is empty.");
+    throw exceptions::AddServiceException(
+        "The parsed service name for service '" + service_name
+            + "' is empty. Provide a string with valid characters for the signal name ([a-zA-Z0-9_]).");
   }
   if (this->empty_services_.find(parsed_service_name) != this->empty_services_.cend()
       || this->string_services_.find(parsed_service_name) != this->string_services_.cend()) {
-    throw exceptions::AddServiceException("Service already exists");
+    throw exceptions::AddServiceException("Service with name '" + parsed_service_name + "' already exists.");
   }
   return parsed_service_name;
 }

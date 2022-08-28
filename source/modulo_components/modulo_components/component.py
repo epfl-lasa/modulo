@@ -90,4 +90,4 @@ class Component(ComponentInterface):
             publisher = self.create_publisher(message_type, topic_name, self._qos)
             self._outputs[parsed_signal_name]["publisher"] = publisher
         except Exception as e:
-            self.get_logger().error(f"Failed to add output '{signal_name}: {e}")
+            self.get_logger().error(f"Failed to add output '{signal_name}': {e}")
