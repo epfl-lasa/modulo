@@ -46,7 +46,7 @@ public:
   using ComponentInterface<NodeT>::get_qos;
   using ComponentInterface<NodeT>::set_qos;
 
-  bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>&) override {
+  bool on_validate_parameter_callback(const std::shared_ptr<state_representation::ParameterInterface>&) override {
     validate_parameter_was_called = true;
     return validate_parameter_return_value;
   }

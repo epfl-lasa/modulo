@@ -16,6 +16,8 @@ Release Versions:
 - Accept list of transforms in send_transform (#122)
 - Rename all frame_name parameters to frame (#123)
 - Check that the data pointer is not null when adding a signal (#128)
+- Rename validate parameter callback and validate period value (#126)
+- Add double underscore to private function (#127)
 
 ## 2.0.0
 ### August 05, 2022

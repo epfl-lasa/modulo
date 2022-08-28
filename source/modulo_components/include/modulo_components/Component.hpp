@@ -18,8 +18,9 @@ namespace modulo_components {
  * externally triggered operations. Examples of triggered behavior include providing a service, processing signals
  * or publishing outputs on a periodic timer. One-shot behaviors may include interacting with the filesystem or
  * publishing a predefined sequence of outputs.
- * Developers should override validate_parameter() if any parameters are added and on_execute_callback() to implement
- * any one-shot behavior. In the latter case, execute() should be invoked at the end of the derived constructor.
+ * Developers should override on_validate_parameter_callback() if any parameters are added and on_execute_callback()
+ * to implement any one-shot behavior. In the latter case, execute() should be invoked at the end of the derived
+ * constructor.
  * @see LifecycleComponent for a state-based composition alternative
  */
 class Component : public ComponentInterface<rclcpp::Node> {
