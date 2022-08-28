@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "modulo_core/EncodedState.hpp"
+#include "modulo_core/translators/message_writers.hpp"
 #include "test_modulo_components/component_public_interfaces.hpp"
 
 namespace modulo_components {
@@ -87,16 +88,40 @@ TYPED_TEST(ComponentInterfaceTest, AddInput) {
   EXPECT_EQ(this->component_->template get_parameter_value<std::string>("test_13_topic"), "~/test_13");
 
   EXPECT_NO_THROW(this->component_->template add_input<std_msgs::msg::Bool>(
-      "_tEsT_#1@5", [](const std::shared_ptr<std_msgs::msg::Bool>) {}, "/topic", true
-  ));
+      "_tEsT_#1@5", [](const std::shared_ptr<std_msgs::msg::Bool>) {}, "/topic", true));
   EXPECT_FALSE(this->component_->inputs_.find("test_15") == this->component_->inputs_.end());
   EXPECT_EQ(this->component_->template get_parameter_value<std::string>("test_15_topic"), "/topic");
 
+  // trying to add an input that already exists should fail
   this->component_->template add_input<std_msgs::msg::String>(
-      "test_13", [](const std::shared_ptr<std_msgs::msg::String>) {}
-  );
+      "test_13", [](const std::shared_ptr<std_msgs::msg::String>) {});
   EXPECT_EQ(this->component_->inputs_.at("test_13")->get_message_pair()->get_type(),
             modulo_core::communication::MessageType::BOOL);
+}
+
+TYPED_TEST(ComponentInterfaceTest, AddInputWithUserCallback) {
+  auto state_data = std::make_shared<state_representation::CartesianState>("A");
+  bool callback_triggered = false;
+  auto user_callback = [&callback_triggered] {
+    callback_triggered = true;
+  };
+
+  EXPECT_NO_THROW(this->component_->add_input("state", state_data, user_callback));
+  EXPECT_FALSE(this->component_->inputs_.find("state") == this->component_->inputs_.end());
+  auto callback = this->component_->inputs_.at("state")->template get_handler<modulo_core::EncodedState>()->get_callback();
+  state_representation::CartesianState new_state("B");
+  auto message = std::make_shared<modulo_core::EncodedState>();
+  modulo_core::translators::write_message(*message, new_state, this->component_->get_clock()->now());
+  EXPECT_STREQ(state_data->get_name().c_str(), "A");
+  EXPECT_NO_THROW(callback(message));
+  EXPECT_TRUE(callback_triggered);
+  EXPECT_STREQ(state_data->get_name().c_str(), "B");
+
+  // if the subscription callback fails (for example, the message is invalid), the user callback should be skipped
+  message->data.clear();
+  callback_triggered = false;
+  EXPECT_NO_THROW(callback(message));
+  EXPECT_FALSE(callback_triggered);
 }
 
 TYPED_TEST(ComponentInterfaceTest, AddService) {
