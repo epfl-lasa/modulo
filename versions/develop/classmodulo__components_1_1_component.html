@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Modulo<span id="projectnumber">&#160;2.0.8</span>
+   <div id="projectname">Modulo<span id="projectnumber">&#160;2.0.9</span>
    </div>
   </td>
  </tr>
@@ -138,9 +138,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:aca7af942b480f71ce57665aba6e206d7 inherit pro_methods_classmodulo__components_1_1_component_interface"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_component_interface.html#aca7af942b480f71ce57665aba6e206d7">set_parameter_value</a> (const std::string &amp;name, const T &amp;value)</td></tr>
 <tr class="memdesc:aca7af942b480f71ce57665aba6e206d7 inherit pro_methods_classmodulo__components_1_1_component_interface"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the value of a parameter.  <a href="classmodulo__components_1_1_component_interface.html#aca7af942b480f71ce57665aba6e206d7">More...</a><br /></td></tr>
 <tr class="separator:aca7af942b480f71ce57665aba6e206d7 inherit pro_methods_classmodulo__components_1_1_component_interface"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adea7ca848c77aa5054e79e1e5719c0a1 inherit pro_methods_classmodulo__components_1_1_component_interface"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_component_interface.html#adea7ca848c77aa5054e79e1e5719c0a1">validate_parameter</a> (const std::shared_ptr&lt; state_representation::ParameterInterface &gt; &amp;parameter)</td></tr>
-<tr class="memdesc:adea7ca848c77aa5054e79e1e5719c0a1 inherit pro_methods_classmodulo__components_1_1_component_interface"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parameter validation function to be redefined by derived Component classes.  <a href="classmodulo__components_1_1_component_interface.html#adea7ca848c77aa5054e79e1e5719c0a1">More...</a><br /></td></tr>
-<tr class="separator:adea7ca848c77aa5054e79e1e5719c0a1 inherit pro_methods_classmodulo__components_1_1_component_interface"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4248c319c66c7fed112bd46e9506d23 inherit pro_methods_classmodulo__components_1_1_component_interface"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_component_interface.html#af4248c319c66c7fed112bd46e9506d23">on_validate_parameter_callback</a> (const std::shared_ptr&lt; state_representation::ParameterInterface &gt; &amp;parameter)</td></tr>
+<tr class="memdesc:af4248c319c66c7fed112bd46e9506d23 inherit pro_methods_classmodulo__components_1_1_component_interface"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parameter validation function to be redefined by derived Component classes.  <a href="classmodulo__components_1_1_component_interface.html#af4248c319c66c7fed112bd46e9506d23">More...</a><br /></td></tr>
+<tr class="separator:af4248c319c66c7fed112bd46e9506d23 inherit pro_methods_classmodulo__components_1_1_component_interface"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e481802803014a22f7e2dd5c85a07f1 inherit pro_methods_classmodulo__components_1_1_component_interface"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__components_1_1_component_interface.html#a1e481802803014a22f7e2dd5c85a07f1">add_predicate</a> (const std::string &amp;predicate_name, bool predicate_value)</td></tr>
 <tr class="memdesc:a1e481802803014a22f7e2dd5c85a07f1 inherit pro_methods_classmodulo__components_1_1_component_interface"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a predicate to the map of predicates.  <a href="classmodulo__components_1_1_component_interface.html#a1e481802803014a22f7e2dd5c85a07f1">More...</a><br /></td></tr>
 <tr class="separator:a1e481802803014a22f7e2dd5c85a07f1 inherit pro_methods_classmodulo__components_1_1_component_interface"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -249,9 +249,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >A wrapper for rclcpp::Node to simplify application composition through unified component interfaces. </p>
-<p >This class is intended for direct inheritance to implement custom components that perform one-shot or externally triggered operations. Examples of triggered behavior include providing a service, processing signals or publishing outputs on a periodic timer. One-shot behaviors may include interacting with the filesystem or publishing a predefined sequence of outputs. Developers should override <a class="el" href="classmodulo__components_1_1_component_interface.html#adea7ca848c77aa5054e79e1e5719c0a1" title="Parameter validation function to be redefined by derived Component classes.">validate_parameter()</a> if any parameters are added and <a class="el" href="classmodulo__components_1_1_component.html#aa91321e421f2f71a9c86f694996baeb1" title="Execute the component logic. To be redefined in derived classes.">on_execute_callback()</a> to implement any one-shot behavior. In the latter case, <a class="el" href="classmodulo__components_1_1_component.html#aeb496916cb46a1e8369412f06c440910" title="Start the execution thread.">execute()</a> should be invoked at the end of the derived constructor. </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="classmodulo__components_1_1_lifecycle_component.html" title="A wrapper for rclcpp_lifecycle::LifecycleNode to simplify application composition through unified com...">LifecycleComponent</a> for a state-based composition alternative </dd></dl>
+<p >This class is intended for direct inheritance to implement custom components that perform one-shot or externally triggered operations. Examples of triggered behavior include providing a service, processing signals or publishing outputs on a periodic timer. One-shot behaviors may include interacting with the filesystem or publishing a predefined sequence of outputs. Developers should override <a class="el" href="classmodulo__components_1_1_component_interface.html#af4248c319c66c7fed112bd46e9506d23" title="Parameter validation function to be redefined by derived Component classes.">on_validate_parameter_callback()</a> if any parameters are added and <a class="el" href="classmodulo__components_1_1_component.html#aa91321e421f2f71a9c86f694996baeb1" title="Execute the component logic. To be redefined in derived classes.">on_execute_callback()</a> to implement any one-shot behavior. In the latter case, <a class="el" href="classmodulo__components_1_1_component.html#aeb496916cb46a1e8369412f06c440910" title="Start the execution thread.">execute()</a> should be invoked at the end of the derived constructor. </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="classmodulo__components_1_1_lifecycle_component.html" title="A wrapper for rclcpp_lifecycle::LifecycleNode to simplify application composition through unified com...">LifecycleComponent</a> for a state-based composition alternative </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_8hpp_source.html#l00025">25</a> of file <a class="el" href="_component_8hpp_source.html">Component.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_8hpp_source.html#l00026">26</a> of file <a class="el" href="_component_8hpp_source.html">Component.hpp</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ae19b0377e0b7fa7f43efff7adfae143b" name="ae19b0377e0b7fa7f43efff7adfae143b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae19b0377e0b7fa7f43efff7adfae143b">&#9670;&nbsp;</a></span>Component()</h2>
@@ -366,7 +366,7 @@ template&lt;typename DataT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_component_8hpp_source.html#l00093">93</a> of file <a class="el" href="_component_8hpp_source.html">Component.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_8hpp_source.html#l00094">94</a> of file <a class="el" href="_component_8hpp_source.html">Component.hpp</a>.</p>
 
 </div>
 </div>
@@ -450,7 +450,7 @@ template&lt;typename DataT &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_component_8hpp_source.html#l00027">27</a> of file <a class="el" href="_component_8hpp_source.html">Component.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_component_8hpp_source.html#l00028">28</a> of file <a class="el" href="_component_8hpp_source.html">Component.hpp</a>.</p>
 
 </div>
 </div>
