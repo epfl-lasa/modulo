@@ -229,12 +229,25 @@ protected:
    * @param default_topic If set, the default value for the topic name to use
    * @param fixed_topic If true, the topic name of the input signal is fixed
    */
-  // TODO could be nice to add an optional callback here that would be executed from within the subscription callback
-  // in order to manipulate the data pointer upon reception of a message
   template<typename DataT>
   void add_input(
       const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::string& default_topic = "",
       bool fixed_topic = false
+  );
+
+  /**
+   * @brief Add and configure an input signal of the component.
+   * @tparam DataT Type of the data pointer
+   * @param signal_name Name of the input signal
+   * @param data Data to receive on the input signal
+   * @param callback Callback function to trigger after receiving the input signal
+   * @param default_topic If set, the default value for the topic name to use
+   * @param fixed_topic If true, the topic name of the input signal is fixed
+   */
+  template<typename DataT>
+  void add_input(
+      const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::function<void()>& callback,
+      const std::string& default_topic = "", bool fixed_topic = false
   );
 
   /**
@@ -790,6 +803,15 @@ inline void ComponentInterface<NodeT>::add_input(
     const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::string& default_topic,
     bool fixed_topic
 ) {
+  this->add_input(signal_name, data, []{}, default_topic, fixed_topic);
+}
+
+template<class NodeT>
+template<typename DataT>
+inline void ComponentInterface<NodeT>::add_input(
+    const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::function<void()>& user_callback,
+    const std::string& default_topic, bool fixed_topic
+) {
   using namespace modulo_core::communication;
   try {
     std::string parsed_signal_name = this->validate_input_signal_name(signal_name);
@@ -815,14 +837,14 @@ inline void ComponentInterface<NodeT>::add_input(
       case MessageType::BOOL: {
         auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::Bool>>(message_pair);
         auto subscription = NodeT::template create_subscription<std_msgs::msg::Bool>(
-            topic_name, this->qos_, subscription_handler->get_callback());
+            topic_name, this->qos_, subscription_handler->get_callback(user_callback));
         subscription_interface = subscription_handler->create_subscription_interface(subscription);
         break;
       }
       case MessageType::FLOAT64: {
         auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::Float64>>(message_pair);
         auto subscription = NodeT::template create_subscription<std_msgs::msg::Float64>(
-            topic_name, this->qos_, subscription_handler->get_callback());
+            topic_name, this->qos_, subscription_handler->get_callback(user_callback));
         subscription_interface = subscription_handler->create_subscription_interface(subscription);
         break;
       }
@@ -830,28 +852,28 @@ inline void ComponentInterface<NodeT>::add_input(
         auto subscription_handler =
             std::make_shared<SubscriptionHandler<std_msgs::msg::Float64MultiArray>>(message_pair);
         auto subscription = NodeT::template create_subscription<std_msgs::msg::Float64MultiArray>(
-            topic_name, this->qos_, subscription_handler->get_callback());
+            topic_name, this->qos_, subscription_handler->get_callback(user_callback));
         subscription_interface = subscription_handler->create_subscription_interface(subscription);
         break;
       }
       case MessageType::INT32: {
         auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::Int32>>(message_pair);
         auto subscription = NodeT::template create_subscription<std_msgs::msg::Int32>(
-            topic_name, this->qos_, subscription_handler->get_callback());
+            topic_name, this->qos_, subscription_handler->get_callback(user_callback));
         subscription_interface = subscription_handler->create_subscription_interface(subscription);
         break;
       }
       case MessageType::STRING: {
         auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::String>>(message_pair);
         auto subscription = NodeT::template create_subscription<std_msgs::msg::String>(
-            topic_name, this->qos_, subscription_handler->get_callback());
+            topic_name, this->qos_, subscription_handler->get_callback(user_callback));
         subscription_interface = subscription_handler->create_subscription_interface(subscription);
         break;
       }
       case MessageType::ENCODED_STATE: {
         auto subscription_handler = std::make_shared<SubscriptionHandler<modulo_core::EncodedState>>(message_pair);
         auto subscription = NodeT::template create_subscription<modulo_core::EncodedState>(
-            topic_name, this->qos_, subscription_handler->get_callback());
+            topic_name, this->qos_, subscription_handler->get_callback(user_callback));
         subscription_interface = subscription_handler->create_subscription_interface(subscription);
         break;
       }
