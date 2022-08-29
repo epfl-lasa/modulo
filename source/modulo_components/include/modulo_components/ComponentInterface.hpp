@@ -569,7 +569,7 @@ inline void ComponentInterface<NodeT>::add_parameter(
       throw exceptions::ComponentParameterException("Failed to add parameter: " + std::string(ex.what()));
     }
   } else {
-    RCLCPP_WARN_STREAM(this->get_logger(), "Parameter '" << parameter->get_name() << "' already exists.");
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Parameter '" << parameter->get_name() << "' already exists.");
   }
 }
 

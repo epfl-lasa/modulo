@@ -111,7 +111,7 @@ class ComponentInterface(Node):
                 del self._parameter_dict[sr_parameter.get_name()]
                 raise ComponentParameterError(f"Failed to add parameter: {e}")
         else:
-            self.get_logger().warn(f"Parameter '{sr_parameter.get_name()}' already exists.")
+            self.get_logger().debug(f"Parameter '{sr_parameter.get_name()}' already exists.")
 
     def get_parameter(self, name: str) -> Union[sr.Parameter, Parameter]:
         """
