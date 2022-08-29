@@ -111,7 +111,7 @@ class ComponentInterface(Node):
                 del self._parameter_dict[sr_parameter.get_name()]
                 raise ComponentParameterError(f"Failed to add parameter: {e}")
         else:
-            self.get_logger().warn(f"Parameter '{sr_parameter.get_name()}' already exists.")
+            self.get_logger().debug(f"Parameter '{sr_parameter.get_name()}' already exists.")
 
     def get_parameter(self, name: str) -> Union[sr.Parameter, Parameter]:
         """
@@ -242,7 +242,7 @@ class ComponentInterface(Node):
         if not name:
             self.get_logger().error("Failed to add predicate: Provide a non empty string as a name.")
         if name in self._predicates.keys():
-            self.get_logger().warn(f"Predicate {name} already exists, overwriting.")
+            self.get_logger().warn(f"Predicate with name '{name}' already exists, overwriting.")
         else:
             self.get_logger().debug(f"Adding predicate '{name}'.")
             self._predicate_publishers[name] = self.create_publisher(Bool,
@@ -349,8 +349,8 @@ class ComponentInterface(Node):
                 raise AddSignalError(f"Provide a valid clproto message type for outputs of type EncodedState.")
             parsed_signal_name = parse_topic_name(signal_name)
             if not parsed_signal_name:
-                raise AddSignalError("The parsed signal name is empty. Provide a string with valid "
-                                     "characters for the signal name ([a-zA-Z0-9_]).")
+                raise AddSignalError(f"The parsed signal name for output '{signal_name}' is empty. Provide a "
+                                     f"string with valid characters for the signal name ([a-zA-Z0-9_]).")
             if parsed_signal_name in self._outputs.keys():
                 raise AddSignalError(f"Output with parsed name '{parsed_signal_name}' already exists.")
             topic_name = default_topic if default_topic else "~/" + parsed_signal_name
@@ -359,7 +359,7 @@ class ComponentInterface(Node):
                 self.set_parameter_value(parameter_name, topic_name)
             else:
                 self.add_parameter(sr.Parameter(parameter_name, topic_name, sr.ParameterType.STRING),
-                                   f"Output topic name of signal '{parsed_signal_name}'", fixed_topic)
+                                   f"Signal topic name of output '{parsed_signal_name}'", fixed_topic)
             translator = None
             if message_type == Bool or message_type == Float64 or \
                     message_type == Float64MultiArray or message_type == Int32 or message_type == String:
@@ -407,16 +407,17 @@ class ComponentInterface(Node):
         try:
             parsed_signal_name = parse_topic_name(signal_name)
             if not parsed_signal_name:
-                raise AddSignalError(f"Parsed signal name is empty.")
+                raise AddSignalError(f"The parsed signal name for input '{signal_name}' is empty. Provide a "
+                                     f"string with valid characters for the signal name ([a-zA-Z0-9_]).")
             if parsed_signal_name in self._inputs.keys():
-                raise AddSignalError(f"Input already exists.")
+                raise AddSignalError(f"Input with name '{parsed_signal_name}' already exists.")
             topic_name = default_topic if default_topic else "~/" + parsed_signal_name
             parameter_name = parsed_signal_name + "_topic"
             if self.has_parameter(parameter_name) and self.get_parameter(parameter_name).is_empty():
                 self.set_parameter_value(parameter_name, topic_name)
             else:
                 self.add_parameter(sr.Parameter(parameter_name, topic_name, sr.ParameterType.STRING),
-                                   f"Input topic name of signal '{parsed_signal_name}'", fixed_topic)
+                                   f"Signal topic name of input '{parsed_signal_name}'", fixed_topic)
             topic_name = self.get_parameter_value(parsed_signal_name + "_topic")
             self.get_logger().debug(f"Adding input '{parsed_signal_name}' with topic name '{topic_name}'.")
             if isinstance(subscription, Callable):
@@ -482,15 +483,16 @@ class ComponentInterface(Node):
         try:
             parsed_service_name = parse_topic_name(service_name)
             if not parsed_service_name:
-                raise AddServiceError(f"Parsed service name is empty.")
+                raise AddServiceError(f"The parsed signal name for service {service_name} is empty. Provide a "
+                                     f"string with valid characters for the service name ([a-zA-Z0-9_]).")
             if parsed_service_name in self._services_dict.keys():
-                raise AddServiceError(f"Service already exists.")
+                raise AddServiceError(f"Service with name '{parsed_service_name}' already exists.")
             signature = inspect.signature(callback)
             if len(signature.parameters) == 0:
-                self.get_logger().error(f"Adding empty service '{parsed_service_name}'")
+                self.get_logger().error(f"Adding empty service '{parsed_service_name}'.")
                 service_type = EmptyTrigger
             else:
-                self.get_logger().debug(f"Adding string service '{parsed_service_name}'")
+                self.get_logger().debug(f"Adding string service '{parsed_service_name}'.")
                 service_type = StringTrigger
             self._services_dict[parsed_service_name] = \
                 self.create_service(service_type, "~/" + parsed_service_name,
