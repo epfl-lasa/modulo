@@ -21,10 +21,10 @@ protected:
 
 TEST_F(LifecycleComponentCommunicationTest, InputOutput) {
   auto cartesian_state = state_representation::CartesianState::Random("test");
-  auto input_node = std::make_shared<MinimalInput<LifecycleComponent>>(
+  auto input_node = std::make_shared<MinimalCartesianInput<LifecycleComponent>>(
       rclcpp::NodeOptions().parameter_overrides({rclcpp::Parameter("period", 0.1)}), "/topic"
   );
-  auto output_node = std::make_shared<MinimalOutput<LifecycleComponent>>(
+  auto output_node = std::make_shared<MinimalCartesianOutput<LifecycleComponent>>(
       rclcpp::NodeOptions().parameter_overrides({rclcpp::Parameter("period", 0.1)}), "/topic", cartesian_state
   );
   add_configure_activate(this->exec_, input_node);

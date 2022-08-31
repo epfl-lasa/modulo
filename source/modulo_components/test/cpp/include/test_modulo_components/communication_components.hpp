@@ -20,11 +20,11 @@ inline void add_configure_activate(
 }
 
 template<class ComponentT>
-class MinimalOutput : public ComponentT {
+class MinimalCartesianOutput : public ComponentT {
 public:
-  MinimalOutput(
+  MinimalCartesianOutput(
       const rclcpp::NodeOptions& node_options, const std::string& topic, const CartesianState& cartesian_state
-  ) : ComponentT(node_options, "minimal_output"), output_(std::make_shared<CartesianState>(cartesian_state)) {
+  ) : ComponentT(node_options, "minimal_cartesian_output"), output_(std::make_shared<CartesianState>(cartesian_state)) {
     this->add_output("cartesian_state", this->output_, topic);
   }
 
@@ -33,10 +33,10 @@ private:
 };
 
 template<class ComponentT>
-class MinimalInput : public ComponentT {
+class MinimalCartesianInput : public ComponentT {
 public:
-  MinimalInput(const rclcpp::NodeOptions& node_options, const std::string& topic) :
-      ComponentT(node_options, "minimal_input"), input(std::make_shared<CartesianState>()) {
+  MinimalCartesianInput(const rclcpp::NodeOptions& node_options, const std::string& topic) :
+      ComponentT(node_options, "minimal_cartesian_input"), input(std::make_shared<CartesianState>()) {
     this->received_future = this->received_.get_future();
     this->add_input("cartesian_state", this->input, [this]() { this->received_.set_value(); }, topic);
   }
