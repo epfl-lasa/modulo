@@ -8,7 +8,6 @@ from lifecycle_msgs.msg import Transition
 from lifecycle_msgs.srv import ChangeState
 from modulo_core import EncodedState
 from rclpy.node import Node
-from rclpy.parameter import Parameter
 
 
 @pytest.fixture
@@ -34,7 +33,7 @@ def ros_exec():
 @pytest.fixture
 def minimal_cartesian_output(request, random_state):
     def _make_minimal_cartesian_output(component_type, topic):
-        component = component_type("minimal_cartesian_output", parameter_overrides=[Parameter("period", value=0.1)])
+        component = component_type("minimal_cartesian_output")
         component._output = random_state
         component.add_output("cartesian_state", "_output", EncodedState, clproto.MessageType.CARTESIAN_STATE_MESSAGE,
                              topic)
@@ -46,7 +45,7 @@ def minimal_cartesian_output(request, random_state):
 @pytest.fixture
 def minimal_cartesian_input(request):
     def _make_minimal_cartesian_input(component_type, topic):
-        component = component_type("minimal_cartesian_input", parameter_overrides=[Parameter("period", value=0.1)])
+        component = component_type("minimal_cartesian_input")
         component.received_future = Future()
         component.input = sr.CartesianState()
         component.add_input("cartesian_state", "input", EncodedState, topic,
