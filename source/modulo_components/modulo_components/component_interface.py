@@ -390,6 +390,7 @@ class ComponentInterface(Node):
         except (AttributeError, MessageTranslationError) as e:
             self.get_logger().warn(f"Failed to read message for attribute {attribute_name}: {e}",
                                    throttle_duration_sec=1.0)
+            return
         try:
             user_callback()
         except Exception as e:
