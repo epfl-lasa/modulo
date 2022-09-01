@@ -503,7 +503,7 @@ class ComponentInterface(Node):
                 raise AddServiceError(f"Service with name '{parsed_service_name}' already exists.")
             signature = inspect.signature(callback)
             if len(signature.parameters) == 0:
-                self.get_logger().error(f"Adding empty service '{parsed_service_name}'.")
+                self.get_logger().debug(f"Adding empty service '{parsed_service_name}'.")
                 service_type = EmptyTrigger
             else:
                 self.get_logger().debug(f"Adding string service '{parsed_service_name}'.")
