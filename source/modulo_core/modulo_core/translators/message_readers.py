@@ -61,7 +61,8 @@ def read_message(state: StateT, message: MsgT) -> StateT:
                 state.set_force(read_xyz(message.force))
                 state.set_torque(read_xyz(message.torque))
             else:
-                raise MessageTranslationError("The provided combination of state type and message type is not supported")
+                raise MessageTranslationError(
+                    "The provided combination of state type and message type is not supported")
         elif isinstance(message, JointState) and isinstance(state, sr.JointState):
             try:
                 state.set_names(message.name)
@@ -130,6 +131,9 @@ def read_clproto_message(message: EncodedState) -> StateT:
     :return: The decoded clproto message
     """
     try:
-        return clproto.decode(message.data.tobytes())
+        decoded_message = clproto.decode(message.data.tobytes())
+        if not decoded_message:
+            raise RuntimeError("The decoded message is None.")
+        return decoded_message
     except Exception as e:
-        MessageTranslationError(f"{e}")
+        raise MessageTranslationError(f"{e}")

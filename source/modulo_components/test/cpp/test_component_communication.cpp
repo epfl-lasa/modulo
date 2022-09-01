@@ -21,12 +21,9 @@ protected:
 
 TEST_F(ComponentCommunicationTest, InputOutput) {
   auto cartesian_state = state_representation::CartesianState::Random("test");
-  auto input_node = std::make_shared<MinimalInput<Component>>(
-      rclcpp::NodeOptions().parameter_overrides({rclcpp::Parameter("period", 0.1)}), "/topic"
-  );
-  auto output_node = std::make_shared<MinimalOutput<Component>>(
-      rclcpp::NodeOptions().parameter_overrides({rclcpp::Parameter("period", 0.1)}), "/topic", cartesian_state
-  );
+  auto input_node = std::make_shared<MinimalCartesianInput<Component>>(rclcpp::NodeOptions(), "/topic");
+  auto output_node =
+      std::make_shared<MinimalCartesianOutput<Component>>(rclcpp::NodeOptions(), "/topic", cartesian_state);
   this->exec_->add_node(input_node);
   this->exec_->add_node(output_node);
   this->exec_->template spin_until_future_complete(input_node->received_future, 500ms);
