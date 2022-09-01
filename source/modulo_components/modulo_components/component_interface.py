@@ -377,7 +377,7 @@ class ComponentInterface(Node):
         except Exception as e:
             raise AddSignalError(f"{e}")
 
-    def __subscription_callback(self, message: MsgT, attribute_name: str, reader: Callable):
+    def __subscription_callback(self, message: MsgT, attribute_name: str, reader: Callable, user_callback: Callable):
         """
         Subscription callback for the ROS subscriptions.
 
@@ -390,11 +390,15 @@ class ComponentInterface(Node):
         except (AttributeError, MessageTranslationError) as e:
             self.get_logger().warn(f"Failed to read message for attribute {attribute_name}: {e}",
                                    throttle_duration_sec=1.0)
+            return
+        try:
+            user_callback()
+        except Exception as e:
+            self.get_logger().error(f"Failed to execute user callback in subscription for attribute"
+                                    f" '{attribute_name}': {e}", throttle_duration_sec=1.0)
 
     def add_input(self, signal_name: str, subscription: Union[str, Callable], message_type: MsgT, default_topic="",
-                  fixed_topic=False):
-        # TODO could be nice to add an optional callback here that would be executed from within the subscription
-        #  callback in order to manipulate the data pointer upon reception of a message
+                  fixed_topic=False, user_callback=lambda: None):
         """
         Add and configure an input signal of the component.
 
@@ -403,6 +407,7 @@ class ComponentInterface(Node):
         :param message_type: ROS message type of the subscription
         :param default_topic: If set, the default value for the topic name to use
         :param fixed_topic: If true, the topic name of the output signal is fixed
+        :param user_callback: Callback function to trigger after receiving the input signal
         """
         try:
             parsed_signal_name = parse_topic_name(signal_name)
@@ -421,21 +426,30 @@ class ComponentInterface(Node):
             topic_name = self.get_parameter_value(parsed_signal_name + "_topic")
             self.get_logger().debug(f"Adding input '{parsed_signal_name}' with topic name '{topic_name}'.")
             if isinstance(subscription, Callable):
+                if user_callback:
+                    self.get_logger().warn("Providing a callable for arguments 'subscription' and 'user_callback' is"
+                                           "not supported. The user callback will be ignored.")
                 self._inputs[parsed_signal_name] = self.create_subscription(message_type, topic_name, subscription,
                                                                             self._qos)
             elif isinstance(subscription, str):
+                if user_callback:
+                    signature = inspect.signature(user_callback)
+                    if len(signature.parameters) != 0:
+                        raise AddSignalError("Provide a user callback that has no input arguments.")
                 if message_type == Bool or message_type == Float64 or \
                         message_type == Float64MultiArray or message_type == Int32 or message_type == String:
                     self._inputs[parsed_signal_name] = self.create_subscription(message_type, topic_name,
                                                                                 partial(self.__subscription_callback,
                                                                                         attribute_name=subscription,
-                                                                                        reader=modulo_readers.read_std_message),
+                                                                                        reader=modulo_readers.read_std_message,
+                                                                                        user_callback=user_callback),
                                                                                 self._qos)
                 elif message_type == EncodedState:
                     self._inputs[parsed_signal_name] = self.create_subscription(message_type, topic_name,
                                                                                 partial(self.__subscription_callback,
                                                                                         attribute_name=subscription,
-                                                                                        reader=modulo_readers.read_clproto_message),
+                                                                                        reader=modulo_readers.read_clproto_message,
+                                                                                        user_callback=user_callback),
                                                                                 self._qos)
                 else:
                     raise TypeError("The provided message type is not supported to create a component input.")
@@ -489,7 +503,7 @@ class ComponentInterface(Node):
                 raise AddServiceError(f"Service with name '{parsed_service_name}' already exists.")
             signature = inspect.signature(callback)
             if len(signature.parameters) == 0:
-                self.get_logger().error(f"Adding empty service '{parsed_service_name}'.")
+                self.get_logger().debug(f"Adding empty service '{parsed_service_name}'.")
                 service_type = EmptyTrigger
             else:
                 self.get_logger().debug(f"Adding string service '{parsed_service_name}'.")

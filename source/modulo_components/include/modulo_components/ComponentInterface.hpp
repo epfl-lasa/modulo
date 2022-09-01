@@ -508,7 +508,7 @@ ComponentInterface<NodeT>::ComponentInterface(
         return this->on_set_parameters_callback(parameters);
       }
   );
-  this->add_parameter("period", 1.0, "The time interval in seconds for all periodic callbacks", true);
+  this->add_parameter("period", 0.1, "The time interval in seconds for all periodic callbacks", true);
 
   this->add_predicate("in_error_state", false);
 
