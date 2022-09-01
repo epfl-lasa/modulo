@@ -20,3 +20,17 @@ def test_input_output(ros_exec, make_lifecycle_service_client, helpers, random_s
     assert minimal_cartesian_input.received_future.result()
     assert random_state.get_name() == minimal_cartesian_input.input.get_name()
     assert random_state.dist(minimal_cartesian_input.input) < 1e-3
+
+
+@pytest.mark.parametrize("minimal_cartesian_input", [[LifecycleComponent, "/topic"]], indirect=True)
+def test_input_output_invalid(ros_exec, make_lifecycle_service_client, helpers,
+                              make_minimal_invalid_encoded_state_publisher, minimal_cartesian_input):
+    input_client = make_lifecycle_service_client("minimal_cartesian_input")
+    invalid_publisher = make_minimal_invalid_encoded_state_publisher("/topic")
+    ros_exec.add_node(input_client)
+    ros_exec.add_node(minimal_cartesian_input)
+    ros_exec.add_node(invalid_publisher)
+    helpers.configure(ros_exec, input_client)
+    helpers.activate(ros_exec, input_client)
+    ros_exec.spin_until_future_complete(minimal_cartesian_input.received_future, timeout_sec=0.5)
+    assert not minimal_cartesian_input.received_future.result()

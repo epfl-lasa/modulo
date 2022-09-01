@@ -1,13 +1,13 @@
-from concurrent.futures import Future
-
 import clproto
 import pytest
 import rclpy
 import state_representation as sr
 from lifecycle_msgs.msg import Transition
 from lifecycle_msgs.srv import ChangeState
+from modulo_components.component import Component
 from modulo_core import EncodedState
 from rclpy.node import Node
+from rclpy.task import Future
 
 
 @pytest.fixture
@@ -40,6 +40,27 @@ def minimal_cartesian_output(request, random_state):
         return component
 
     yield _make_minimal_cartesian_output(request.param[0], request.param[1])
+
+
+class MinimalInvalidEncodedStatePublisher(Component):
+    def __init__(self, topic, *args, **kwargs):
+        super().__init__("minimal_invalid_encoded_state_publisher", *args, **kwargs)
+        self.publisher = self.create_publisher(EncodedState, topic, self.get_qos())
+        self.add_periodic_callback("publish", self.__publish)
+
+    def __publish(self):
+        msg = EncodedState()
+        data = "hello"
+        msg.data = bytes(data.encode())
+        self.publisher.publish(msg)
+
+
+@pytest.fixture
+def make_minimal_invalid_encoded_state_publisher():
+    def _make_minimal_invalid_encoded_state_publisher(topic):
+        return MinimalInvalidEncodedStatePublisher(topic)
+
+    yield _make_minimal_invalid_encoded_state_publisher
 
 
 @pytest.fixture
@@ -91,4 +112,4 @@ def make_lifecycle_service_client():
     def _make_lifecycle_service_client(namespace):
         return LifecycleServiceClient(namespace)
 
-    return _make_lifecycle_service_client
+    yield _make_lifecycle_service_client
