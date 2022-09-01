@@ -19,6 +19,7 @@ Release Versions:
 - Rename validate parameter callback and validate period value (#126)
 - Add double underscore to private function (#127)
 - Improve error messages and logs further (#131)
+- User-defined callback for inputs (#124, #132, #133)
 
 ## 2.0.0
 ### August 05, 2022
