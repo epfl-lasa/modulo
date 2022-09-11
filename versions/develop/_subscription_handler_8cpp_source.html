@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Modulo<span id="projectnumber">&#160;2.0.10</span>
+   <div id="projectname">Modulo<span id="projectnumber">&#160;2.0.11</span>
    </div>
   </td>
  </tr>
@@ -106,9 +106,9 @@ $(function() {
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  <span class="keywordflow">return</span> [<span class="keyword">this</span>](<span class="keyword">const</span> std::shared_ptr&lt;std_msgs::msg::Bool&gt; message) {</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keywordflow">try</span> {</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>      this-&gt;get_message_pair()-&gt;template read&lt;std_msgs::msg::Bool, bool&gt;(*message);</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> exceptions::CoreException&amp; ex) {</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>      RCLCPP_WARN_STREAM_THROTTLE(rclcpp::get_logger(<span class="stringliteral">&quot;SubscriptionHandler&quot;</span>), *this-&gt;clock_, 1000,</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>                                  <span class="stringliteral">&quot;Exception in subscription callback: &quot;</span> &lt;&lt; ex.what());</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>      this-&gt;user_callback_();</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    } <span class="keywordflow">catch</span> (...) {</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>      this-&gt;handle_callback_exceptions();</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    }</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  };</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>}</div>
@@ -119,9 +119,9 @@ $(function() {
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="keywordflow">return</span> [<span class="keyword">this</span>](<span class="keyword">const</span> std::shared_ptr&lt;std_msgs::msg::Float64&gt; message) {</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordflow">try</span> {</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>      this-&gt;get_message_pair()-&gt;template read&lt;std_msgs::msg::Float64, double&gt;(*message);</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> exceptions::CoreException&amp; ex) {</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>      RCLCPP_WARN_STREAM_THROTTLE(rclcpp::get_logger(<span class="stringliteral">&quot;SubscriptionHandler&quot;</span>), *this-&gt;clock_, 1000,</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>                                  <span class="stringliteral">&quot;Exception in subscription callback: &quot;</span> &lt;&lt; ex.what());</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>      this-&gt;user_callback_();</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    } <span class="keywordflow">catch</span> (...) {</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>      this-&gt;handle_callback_exceptions();</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    }</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  };</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}</div>
@@ -132,9 +132,9 @@ $(function() {
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <span class="keywordflow">return</span> [<span class="keyword">this</span>](<span class="keyword">const</span> std::shared_ptr&lt;std_msgs::msg::Float64MultiArray&gt; message) {</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keywordflow">try</span> {</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>      this-&gt;get_message_pair()-&gt;template read&lt;std_msgs::msg::Float64MultiArray, std::vector&lt;double&gt;&gt;(*message);</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> exceptions::CoreException&amp; ex) {</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>      RCLCPP_WARN_STREAM_THROTTLE(rclcpp::get_logger(<span class="stringliteral">&quot;SubscriptionHandler&quot;</span>), *this-&gt;clock_, 1000,</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>                                  <span class="stringliteral">&quot;Exception in subscription callback: &quot;</span> &lt;&lt; ex.what());</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>      this-&gt;user_callback_();</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    } <span class="keywordflow">catch</span> (...) {</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>      this-&gt;handle_callback_exceptions();</div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    }</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>  };</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>}</div>
@@ -145,9 +145,9 @@ $(function() {
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  <span class="keywordflow">return</span> [<span class="keyword">this</span>](<span class="keyword">const</span> std::shared_ptr&lt;std_msgs::msg::Int32&gt; message) {</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keywordflow">try</span> {</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>      this-&gt;get_message_pair()-&gt;template read&lt;std_msgs::msg::Int32, int&gt;(*message);</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> exceptions::CoreException&amp; ex) {</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>      RCLCPP_WARN_STREAM_THROTTLE(rclcpp::get_logger(<span class="stringliteral">&quot;SubscriptionHandler&quot;</span>), *this-&gt;clock_, 1000,</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>                                  <span class="stringliteral">&quot;Exception in subscription callback: &quot;</span> &lt;&lt; ex.what());</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>      this-&gt;user_callback_();</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    } <span class="keywordflow">catch</span> (...) {</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>      this-&gt;handle_callback_exceptions();</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    }</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  };</div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>}</div>
@@ -158,9 +158,9 @@ $(function() {
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <span class="keywordflow">return</span> [<span class="keyword">this</span>](<span class="keyword">const</span> std::shared_ptr&lt;std_msgs::msg::String&gt; message) {</div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordflow">try</span> {</div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>      this-&gt;get_message_pair()-&gt;template read&lt;std_msgs::msg::String, std::string&gt;(*message);</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> exceptions::CoreException&amp; ex) {</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>      RCLCPP_WARN_STREAM_THROTTLE(rclcpp::get_logger(<span class="stringliteral">&quot;SubscriptionHandler&quot;</span>), *this-&gt;clock_, 1000,</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>                                  <span class="stringliteral">&quot;Exception in subscription callback: &quot;</span> &lt;&lt; ex.what());</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>      this-&gt;user_callback_();</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    } <span class="keywordflow">catch</span> (...) {</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>      this-&gt;handle_callback_exceptions();</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    }</div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  };</div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>}</div>
@@ -170,9 +170,9 @@ $(function() {
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  <span class="keywordflow">return</span> [<span class="keyword">this</span>](<span class="keyword">const</span> std::shared_ptr&lt;EncodedState&gt; message) {</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="keywordflow">try</span> {</div>
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>      this-&gt;get_message_pair()-&gt;template read&lt;EncodedState, state_representation::State&gt;(*message);</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> exceptions::CoreException&amp; ex) {</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>      RCLCPP_WARN_STREAM_THROTTLE(rclcpp::get_logger(<span class="stringliteral">&quot;SubscriptionHandler&quot;</span>), *this-&gt;clock_, 1000,</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>                                  <span class="stringliteral">&quot;Exception in subscription callback: &quot;</span> &lt;&lt; ex.what());</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>      this-&gt;user_callback_();</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    } <span class="keywordflow">catch</span> (...) {</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>      this-&gt;handle_callback_exceptions();</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    }</div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  };</div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>}</div>
