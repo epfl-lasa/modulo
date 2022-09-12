@@ -151,7 +151,8 @@ class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
 
         :return: True if activation is successful, false otherwise
         """
-        return self.on_activate_callback()
+        result = self.on_activate_callback()
+        return result and self.__activate_outputs()
 
     def on_activate_callback(self) -> bool:
         """
@@ -188,7 +189,8 @@ class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
 
         :return: True if deactivation is successful, false otherwise
         """
-        return self.on_deactivate_callback()
+        result = self.on_deactivate_callback()
+        return result and self.__deactivate_outputs()
 
     def on_deactivate_callback(self) -> bool:
         """
@@ -321,7 +323,8 @@ class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
             try:
                 topic_name = self.get_parameter_value(signal_name + "_topic")
                 self.get_logger().error(f"Configuring output '{signal_name}' with topic name '{topic_name}'.")
-                publisher = self.create_publisher(output_dict["message_type"], topic_name, self._qos)
+                publisher = self.create_lifecycle_publisher(msg_type=output_dict["message_type"], topic=topic_name,
+                                                            qos_profile=self._qos)
                 self._outputs[signal_name]["publisher"] = publisher
             except Exception as e:
                 success = False
@@ -351,3 +354,27 @@ class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
             self.get_logger().debug(f"Adding output '{parsed_signal_name}' with topic name '{topic_name}'.")
         except AddSignalError as e:
             self.get_logger().error(f"Failed to add output '{signal_name}': {e}")
+
+    def __activate_outputs(self):
+        success = True
+        state = self.get_state().state_id
+        for signal_name, output_dict in self._outputs.items():
+            try:
+                output_dict["publisher"].on_activate(state)
+            except Exception as e:
+                success = False
+                self.get_logger().error(f"Failed to activate output '{signal_name}': {e}")
+        self.get_logger().debug("All outputs activated.")
+        return success
+
+    def __deactivate_outputs(self):
+        success = True
+        state = self.get_state().state_id
+        for signal_name, output_dict in self._outputs.items():
+            try:
+                output_dict["publisher"].on_deactivate(state)
+            except Exception as e:
+                success = False
+                self.get_logger().error(f"Failed to deactivate output '{signal_name}': {e}")
+        self.get_logger().debug("All outputs deactivated.")
+        return success
