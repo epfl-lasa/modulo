@@ -51,7 +51,7 @@ class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
         TRANSITION_CALLBACK_FAILURE transitions to 'Unconfigured'
         TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'
         """
-        self.get_logger().error(f"on_configure called from previous state {previous_state.label}.")
+        self.get_logger().debug(f"on_configure called from previous state {previous_state.label}.")
         if previous_state.state_id != State.PRIMARY_STATE_UNCONFIGURED:
             self.get_logger().warn(f"Invalid transition 'configure' from state {previous_state.label}")
             return TransitionCallbackReturn.FAILURE
@@ -69,15 +69,16 @@ class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
         """
         Handle the configure transition by related transition steps and invoking the user callback.
 
-        :return: True if the transition was successful
+        :return: True if configuration is successful, false otherwise
         """
         return self.on_configure_callback() and self.__configure_outputs()
 
     def on_configure_callback(self) -> bool:
         """
-        Function called from the configure transition service callback. To be redefined in derived classes.
+        Steps to execute when configuring the component. This method can be overridden by derived Component classes.
+        Configuration generally involves reading parameters and adding inputs and outputs.
 
-        :return: True if the component configured successfully
+        :return: True if configuration is successful, false otherwise
         """
         return True
 
@@ -104,15 +105,16 @@ class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
         """
         Handle the cleanup transition by related transition steps and invoking the user callback.
 
-        :return: True if the transition was successful
+        :return: True if cleanup is successful, false otherwise
         """
         return self.on_cleanup_callback()
 
     def on_cleanup_callback(self) -> bool:
         """
-        Function called from the cleanup transition service callback. To be redefined in derived classes.
+        Steps to execute when cleaning up the component. This method can be overridden by derived Component classes.
+        Cleanup generally involves resetting the properties and states to initial conditions.
 
-        :return: True if the component was cleaned up successfully
+        :return: True if cleanup is successful, false otherwise
         """
         return True
 
@@ -147,15 +149,16 @@ class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
         """
         Handle the activate transition by related transition steps and invoking the user callback.
 
-        :return: True if the transition was successful
+        :return: True if activation is successful, false otherwise
         """
         return self.on_activate_callback()
 
     def on_activate_callback(self) -> bool:
         """
-        Function called from the activate transition service callback. To be redefined in derived classes.
+        Steps to execute when activating the component. This method can be overridden by derived Component classes.
+        Activation generally involves final setup steps before the on_step callback is periodically evaluated.
 
-        :return: True if the component was activated successfully
+        :return: True if activation is successful, false otherwise
         """
         return True
 
@@ -183,19 +186,108 @@ class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
         """
         Handle the deactivate transition by related transition steps and invoking the user callback.
 
-        :return: True if the transition was successful
+        :return: True if deactivation is successful, false otherwise
         """
         return self.on_deactivate_callback()
 
     def on_deactivate_callback(self) -> bool:
         """
-        Function called from the deactivate transition service callback. To be redefined in derived classes.
+        Steps to execute when deactivating the component. This method can be overridden by derived Component classes.
+        Deactivation generally involves any steps to reset the component to an inactive state.
 
-        :return: True if the component was deactivated successfully
+        :return: True if deactivation is successful, false otherwise
         """
         return True
 
-    # TODO on shutdown and on error
+    def on_shutdown(self, previous_state: LifecycleState) -> TransitionCallbackReturn:
+        """
+        Transition callback for state 'ShuttingDown'.
+
+        on_shutdown callback is called when the lifecycle component enters the 'ShuttingDown' transition state.
+        The component must be in the 'Unconfigured', 'Inactive' and 'Active' states.
+        Depending on the return value of this function, the component may either transition to the 'Finalized' state
+        via the 'shutdown' transition or go to 'ErrorProcessing'.
+        TRANSITION_CALLBACK_SUCCESS transitions to 'Finalized'
+        TRANSITION_CALLBACK_FAILURE, TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'
+        """
+        self.get_logger().debug(f"on_shutdown called from previous state {previous_state.label}.")
+        if previous_state.state_id == State.PRIMARY_STATE_FINALIZED:
+            return TransitionCallbackReturn.SUCCESS
+        if previous_state.state_id == State.PRIMARY_STATE_ACTIVE:
+            if not self.__handle_deactivate():
+                self.get_logger().debug("Shutdown failed during intermediate deactivation!")
+        if previous_state.state_id == State.PRIMARY_STATE_INACTIVE:
+            if not self.__handle_cleanup():
+                self.get_logger().debug("Shutdown failed during intermediate cleanup!")
+        if previous_state.state_id == State.PRIMARY_STATE_UNCONFIGURED:
+            if not self.__handle_shutdown():
+                self.get_logger().error("Entering into the error processing transition state.")
+                return TransitionCallbackReturn.ERROR
+            # TODO reset and finalize all properties
+            return TransitionCallbackReturn.SUCCESS
+        self.get_logger().warn(f"Invalid transition 'shutdown' from state {previous_state.label}.")
+        return TransitionCallbackReturn.ERROR
+
+    def __handle_shutdown(self) -> bool:
+        """
+        Handle the shutdown transition by related transition steps and invoking the user callback.
+
+        :return: True if shutdown is successful, false otherwise
+        """
+        return self.on_shutdown_callback()
+
+    def on_shutdown_callback(self) -> bool:
+        """
+        Steps to execute when shutting down the component. This method can be overridden by derived Component classes.
+        Shutdown generally involves the destruction of any threads or properties not handled by the base class.
+
+        :return: True if shutdown is successful, false otherwise
+        """
+        return True
+
+    def on_error(self, previous_state: LifecycleState) -> TransitionCallbackReturn:
+        """
+        Transition callback for state 'ErrorProcessing'.
+
+        on_shutdown callback is called when the lifecycle component enters the 'ErrorProcessing' transition state.
+        This transition can originate from any step.
+        Depending on the return value of this function, the component may either transition to the 'Unconfigured' state
+        or go to 'Finalized'.
+        TRANSITION_CALLBACK_SUCCESS transitions to 'Unconfigured'
+        TRANSITION_CALLBACK_FAILURE transitions to 'Finalized'
+        TRANSITION_CALLBACK_ERROR should not be returned, and any exceptions should be caught and returned as a failure
+        """
+        self.get_logger().debug(f"on_error called from previous state {previous_state.label}.")
+        self.set_predicate("in_error_state", True)
+        error_handled = False
+        try:
+            error_handled = self.__handle_error()
+        except Exception as e:
+            self.get_logger().debug(f"Exception caught during on_error handling: {e}")
+            error_handled = False
+        if not error_handled:
+            self.get_logger().error("Error processing failed! Entering into the finalized state.")
+            # TODO reset and finalize all needed properties
+            return TransitionCallbackReturn.ERROR
+        self.set_predicate("in_error_state", False)
+        return TransitionCallbackReturn.SUCCESS
+
+    def __handle_error(self) -> bool:
+        """
+        Handle the error transition by related transition steps and invoking the user callback.
+
+        :return: True if error handling is successful, false otherwise
+        """
+        return self.on_error_callback()
+
+    def on_error_callback(self) -> bool:
+        """
+        Steps to execute when handling errors. This method can be overridden by derived Component classes.
+        Error handling generally involves recovering and resetting the component to an unconfigured state.
+
+        :return: True if error handling is successful, false otherwise
+        """
+        return True
 
     def _step(self):
         """
@@ -205,7 +297,6 @@ class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
         try:
             self._publish_predicates()
             if self.get_state().state_id == State.PRIMARY_STATE_ACTIVE:
-                self.get_logger().error("stepping")
                 self._publish_outputs()
                 self._evaluate_periodic_callbacks()
                 self.on_step_callback()
