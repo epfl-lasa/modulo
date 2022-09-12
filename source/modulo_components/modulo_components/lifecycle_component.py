@@ -302,6 +302,7 @@ class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
                 self.on_step_callback()
         except Exception as e:
             self.get_logger().error(f"Failed to execute step function: {e}", throttle_duration_sec=1.0)
+            # TODO handle error in lifecycle component
 
     def on_step_callback(self):
         """
