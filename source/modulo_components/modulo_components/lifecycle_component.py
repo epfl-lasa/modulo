@@ -1,77 +1,69 @@
 from typing import TypeVar
 
 import clproto
-from lifecycle_msgs.msg import Transition
-from lifecycle_msgs.srv import ChangeState
 from lifecycle_msgs.msg import State
 from modulo_components.component_interface import ComponentInterface
 from modulo_components.exceptions import AddSignalError
+from rclpy.lifecycle import LifecycleNodeMixin, LifecycleState
+from rclpy.lifecycle.node import TransitionCallbackReturn
 
 MsgT = TypeVar('MsgT')
 
 
-class LifecycleComponent(ComponentInterface):
+class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
     """
     Class to represent a LifecycleComponent in python, following the same logic pattern
     as the C++ modulo_components::LifecycleComponent class.
     """
 
-    def __init__(self, node_name: str, *args, **kwargs):
+    def __init__(self, node_name: str, enable_communication_interface=True, *args, **kwargs):
         """
         Constructs all the necessary attributes and declare all the parameters.
 
         :param node_name: The name of the node to be passed to the base Node class
         """
-        super().__init__(node_name, *args, **kwargs)
-        self.__state = State.PRIMARY_STATE_UNCONFIGURED
+        ComponentInterface.__init__(self, node_name, *args, **kwargs)
+        LifecycleNodeMixin.__init__(self, enable_communication_interface=enable_communication_interface, *args,
+                                    **kwargs)
 
-        # add the service to mimic the lifecycle paradigm
-        self._change_state_srv = self.create_service(ChangeState, '~/change_state', self.__change_state)
+        self.add_predicate("is_unconfigured", lambda: self.get_state().state_id == State.PRIMARY_STATE_UNCONFIGURED)
+        self.add_predicate("is_inactive", lambda: self.get_state().state_id == State.PRIMARY_STATE_INACTIVE)
+        self.add_predicate("is_active", lambda: self.get_state().state_id == State.PRIMARY_STATE_ACTIVE)
+        self.add_predicate("is_finalized", lambda: self.get_state().state_id == State.PRIMARY_STATE_FINALIZED)
 
-        self.add_predicate("is_unconfigured", lambda: self.__state == State.PRIMARY_STATE_UNCONFIGURED)
-        self.add_predicate("is_inactive", lambda: self.__state == State.PRIMARY_STATE_INACTIVE)
-        self.add_predicate("is_active", lambda: self.__state == State.PRIMARY_STATE_ACTIVE)
-        self.add_predicate("is_finalized", lambda: self.__state == State.PRIMARY_STATE_FINALIZED)
-
-    def __change_state(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
+    def get_state(self) -> LifecycleState:
         """
-        Change state service callback which calls the requested transition method.
+        Get the current state of the component.
 
-        :param request: The lifecycle_msgs.msg.ChangeState.Request message
-        :param response: The lifecycle_msgs.msg.ChangeState.Response message
-        :return: The response message
+        :return: The current state
         """
-        self.get_logger().debug(f'Change state service called with request {request}')
-        if request.transition.id == Transition.TRANSITION_CONFIGURE:
-            response = self.__on_configure(request, response)
-        elif request.transition.id == Transition.TRANSITION_CLEANUP:
-            response = self.__on_cleanup(request, response)
-        elif request.transition.id == Transition.TRANSITION_ACTIVATE:
-            response = self.__on_activate(request, response)
-        elif request.transition.id == Transition.TRANSITION_DEACTIVATE:
-            response = self.__on_deactivate(request, response)
-        # TODO the other transitions
-        else:
-            self.get_logger().error(f'Unsupported state transition! {request}')
-            response.success = False
-        return response
+        return LifecycleState(self._state_machine.current_state[1], self._state_machine.current_state[0])
 
-    def __on_configure(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
+    def on_configure(self, previous_state: LifecycleState) -> TransitionCallbackReturn:
         """
-        Configure service callback. Simply call the handle_configure function.
+        Transition callback for state 'Configuring'.
 
-        :param request: Request to change the state to inactive
-        :param response: The response object from the service call
-        :return: True if the component configured successfully
+        on_configure callback is called when the lifecycle component enters the 'Configuring' transition state.
+        The component must be in the 'Unconfigured' state.
+        Depending on the return value of this function, the component may either transition to the 'Inactive' state
+        via the 'configure' transition, stay 'Unconfigured' or go to 'ErrorProcessing'.
+        TRANSITION_CALLBACK_SUCCESS transitions to 'Inactive'
+        TRANSITION_CALLBACK_FAILURE transitions to 'Unconfigured'
+        TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'
         """
-        if not self.__state == State.PRIMARY_STATE_UNCONFIGURED:
-            response.success = False
-            return response
-
-        response.success = self.__handle_configure()
-        if response.success:
-            self.__state = State.PRIMARY_STATE_INACTIVE
-        return response
+        self.get_logger().error(f"on_configure called from previous state {previous_state.label}.")
+        if previous_state.state_id != State.PRIMARY_STATE_UNCONFIGURED:
+            self.get_logger().warn(f"Invalid transition 'configure' from state {previous_state.label}")
+            return TransitionCallbackReturn.FAILURE
+        if not self.__handle_configure():
+            self.get_logger().warn("Configuration failed! Reverting to the unconfigured state.")
+            if self.__handle_cleanup():
+                return TransitionCallbackReturn.FAILURE
+            else:
+                self.get_logger().error(
+                    "Could not revert to the unconfigured state! Entering into the error processing transition state.")
+                return TransitionCallbackReturn.ERROR
+        return TransitionCallbackReturn.SUCCESS
 
     def __handle_configure(self) -> bool:
         """
@@ -89,22 +81,24 @@ class LifecycleComponent(ComponentInterface):
         """
         return True
 
-    def __on_cleanup(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
+    def on_cleanup(self, previous_state: LifecycleState) -> TransitionCallbackReturn:
         """
-        Cleanup service callback. Simply call the handle_cleanup function.
+        Transition callback for state 'CleaningUp'.
 
-        :param request: Request to change the state to unconfigured
-        :param response: The response object from the service call
-        :return: True if the component was cleaned up successfully
+        on_cleanup callback is called when the lifecycle component enters the 'CleaningUp' transition state.
+        The component must be in the 'Inactive' state.
+        Depending on the return value of this function, the component may either transition to the 'Unconfigured' state
+        via the 'cleanup' transition or go to 'ErrorProcessing'.
+        TRANSITION_CALLBACK_SUCCESS transitions to 'Unconfigured'
+        TRANSITION_CALLBACK_FAILURE, TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'
         """
-        if self.__state != State.PRIMARY_STATE_INACTIVE:
-            response.success = False
-            return response
-
-        response.success = self.__handle_cleanup()
-        if response.success:
-            self.__state = State.PRIMARY_STATE_UNCONFIGURED
-        return response
+        self.get_logger().debug(f"on_cleanup called from previous state {previous_state.label}.")
+        if previous_state.state_id != State.PRIMARY_STATE_INACTIVE:
+            self.get_logger().warn(f"Invalid transition 'cleanup' from state {previous_state.label}")
+        if not self.__handle_cleanup():
+            self.get_logger().warn("Cleanup failed! Entering into the error processing transition state.")
+            return TransitionCallbackReturn.ERROR
+        return TransitionCallbackReturn.SUCCESS
 
     def __handle_cleanup(self) -> bool:
         """
@@ -122,22 +116,32 @@ class LifecycleComponent(ComponentInterface):
         """
         return True
 
-    def __on_activate(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
+    def on_activate(self, previous_state: LifecycleState) -> TransitionCallbackReturn:
         """
-        Activate service callback. Simply call the handle_activate function.
+        Transition callback for state 'Activating'.
 
-        :param request: Request to change the state to active state
-        :param response: The response object from the service call
-        :return: True if the component is activated successfully
+        on_activate callback is called when the lifecycle component enters the 'Activating' transition state.
+        The component must be in the 'Inactive' state.
+        Depending on the return value of this function, the component may either transition to the 'Active' state
+        via the 'activate' transition, stay 'Inactive' or go to 'ErrorProcessing'.
+        TRANSITION_CALLBACK_SUCCESS transitions to 'Active'
+        TRANSITION_CALLBACK_FAILURE transitions to 'Inactive'
+        TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'
         """
-        if self.__state != State.PRIMARY_STATE_INACTIVE:
-            response.success = False
-            return response
-
-        response.success = self.__handle_activate()
-        if response.success:
-            self.__state = State.PRIMARY_STATE_ACTIVE
-        return response
+        self.get_logger().debug(f"on_activate called from previous state {previous_state.label}.")
+        if previous_state.state_id != State.PRIMARY_STATE_INACTIVE:
+            self.get_logger().warn(f"Invalid transition 'activate' from state {previous_state.label}")
+            return TransitionCallbackReturn.FAILURE
+        if not self.__handle_activate():
+            self.get_logger().warn("Activation failed! Reverting to the inactive state.")
+            # perform deactivation actions to ensure the component is inactive
+            if self.__handle_deactivate():
+                return TransitionCallbackReturn.FAILURE
+            else:
+                self.get_logger().error(
+                    "Could not revert to the inactive state! Entering into the error processing transition state.")
+                return TransitionCallbackReturn.ERROR
+        return TransitionCallbackReturn.SUCCESS
 
     def __handle_activate(self) -> bool:
         """
@@ -155,22 +159,25 @@ class LifecycleComponent(ComponentInterface):
         """
         return True
 
-    def __on_deactivate(self, request: ChangeState.Request, response: ChangeState.Response) -> ChangeState.Response:
+    def on_deactivate(self, previous_state: LifecycleState) -> TransitionCallbackReturn:
         """
-        Dectivate service callback. Simply call the handle_deactivate function.
+        Transition callback for state 'Deactivating'.
 
-        :param request: Request to change the state to inactive state
-        :param response: The response object from the service call
-        :return: True if the component is deactivated successfully
+        on_deactivate callback is called when the lifecycle component enters the 'Deactivating' transition state.
+        The component must be in the 'Active' state.
+        Depending on the return value of this function, the component may either transition to the 'Inactive' state
+        via the 'deactivate' transition or go to 'ErrorProcessing'.
+        TRANSITION_CALLBACK_SUCCESS transitions to 'Inactive'
+        TRANSITION_CALLBACK_FAILURE, TRANSITION_CALLBACK_ERROR or any uncaught exceptions to 'ErrorProcessing'
         """
-        if self.__state != State.PRIMARY_STATE_ACTIVE:
-            response.success = False
-            return response
-
-        response.success = self.__handle_deactivate()
-        if response.success:
-            self.__state = State.PRIMARY_STATE_INACTIVE
-        return response
+        self.get_logger().debug(f"on_deactivate called from previous state {previous_state.label}.")
+        if previous_state.state_id != State.PRIMARY_STATE_ACTIVE:
+            self.get_logger().warn(f"Invalid transition 'deactivate' from state {previous_state.label}")
+            return TransitionCallbackReturn.FAILURE
+        if not self.__handle_deactivate():
+            self.get_logger().warn("Deactivation failed! Reverting to the inactive state.")
+            return TransitionCallbackReturn.ERROR
+        return TransitionCallbackReturn.SUCCESS
 
     def __handle_deactivate(self) -> bool:
         """
@@ -197,7 +204,8 @@ class LifecycleComponent(ComponentInterface):
         """
         try:
             self._publish_predicates()
-            if self.__state == State.PRIMARY_STATE_ACTIVE:
+            if self.get_state().state_id == State.PRIMARY_STATE_ACTIVE:
+                self.get_logger().error("stepping")
                 self._publish_outputs()
                 self._evaluate_periodic_callbacks()
                 self.on_step_callback()
@@ -220,7 +228,7 @@ class LifecycleComponent(ComponentInterface):
         for signal_name, output_dict in self._outputs.items():
             try:
                 topic_name = self.get_parameter_value(signal_name + "_topic")
-                self.get_logger().debug(f"Configuring output '{signal_name}' with topic name '{topic_name}'.")
+                self.get_logger().error(f"Configuring output '{signal_name}' with topic name '{topic_name}'.")
                 publisher = self.create_publisher(output_dict["message_type"], topic_name, self._qos)
                 self._outputs[signal_name]["publisher"] = publisher
             except Exception as e:
@@ -240,8 +248,9 @@ class LifecycleComponent(ComponentInterface):
         :param default_topic: If set, the default value for the topic name to use
         :param fixed_topic: If true, the topic name of the output signal is fixed
         """
-        if self.__state not in [State.PRIMARY_STATE_UNCONFIGURED, State.PRIMARY_STATE_INACTIVE]:
-            self.get_logger().warn(f"Adding output in state {self.__state} is not allowed.", throttle_duration_sec=1.0)
+        if self.get_state().state_id not in [State.PRIMARY_STATE_UNCONFIGURED, State.PRIMARY_STATE_INACTIVE]:
+            self.get_logger().warn(f"Adding output in state {self.get_state().label} is not allowed.",
+                                   throttle_duration_sec=1.0)
             return
         try:
             parsed_signal_name = self._create_output(signal_name, data, message_type, clproto_message_type,
