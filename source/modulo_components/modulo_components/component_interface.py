@@ -28,6 +28,9 @@ from tf2_ros import Buffer, StaticTransformBroadcaster, TransformBroadcaster, Tr
 
 MsgT = TypeVar('MsgT')
 T = TypeVar('T')
+NODE_KWARGS = ["context", "cli_args", "namespace", "use_global_arguments", "enable_rosout",
+               "start_parameter_services", "parameter_overrides", "allow_undeclared_parameters",
+               "automatically_declare_parameters_from_overrides"]
 
 
 class ComponentInterface(Node):
@@ -37,7 +40,8 @@ class ComponentInterface(Node):
     """
 
     def __init__(self, node_name: str, *args, **kwargs):
-        super().__init__(node_name, *args, **kwargs)
+        node_kwargs = {key: value for key, value in kwargs.items() if key in NODE_KWARGS}
+        super().__init__(node_name, *args, **node_kwargs)
         self._parameter_dict: Dict[str, Union[str, sr.Parameter]] = {}
         self._predicates: Dict[str, Union[bool, Callable[[], bool]]] = {}
         self._predicate_publishers: Dict[str, Publisher] = {}
@@ -498,7 +502,7 @@ class ComponentInterface(Node):
             parsed_service_name = parse_topic_name(service_name)
             if not parsed_service_name:
                 raise AddServiceError(f"The parsed signal name for service {service_name} is empty. Provide a "
-                                     f"string with valid characters for the service name ([a-zA-Z0-9_]).")
+                                      f"string with valid characters for the service name ([a-zA-Z0-9_]).")
             if parsed_service_name in self._services_dict.keys():
                 raise AddServiceError(f"Service with name '{parsed_service_name}' already exists.")
             signature = inspect.signature(callback)

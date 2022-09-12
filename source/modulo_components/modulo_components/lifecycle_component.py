@@ -8,6 +8,7 @@ from rclpy.lifecycle import LifecycleNodeMixin, LifecycleState
 from rclpy.lifecycle.node import TransitionCallbackReturn
 
 MsgT = TypeVar('MsgT')
+LIFECYCLE_NODE_MIXIN_KWARGS = ["enable_communication_interface", "callback_group"]
 
 
 class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
@@ -16,15 +17,15 @@ class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
     as the C++ modulo_components::LifecycleComponent class.
     """
 
-    def __init__(self, node_name: str, enable_communication_interface=True, *args, **kwargs):
+    def __init__(self, node_name: str, *args, **kwargs):
         """
         Constructs all the necessary attributes and declare all the parameters.
 
         :param node_name: The name of the node to be passed to the base Node class
         """
+        lifecycle_node_kwargs = {key: value for key, value in kwargs.items() if key in LIFECYCLE_NODE_MIXIN_KWARGS}
         ComponentInterface.__init__(self, node_name, *args, **kwargs)
-        LifecycleNodeMixin.__init__(self, enable_communication_interface=enable_communication_interface, *args,
-                                    **kwargs)
+        LifecycleNodeMixin.__init__(self, *args, **lifecycle_node_kwargs)
 
         self.add_predicate("is_unconfigured", lambda: self.get_state().state_id == State.PRIMARY_STATE_UNCONFIGURED)
         self.add_predicate("is_inactive", lambda: self.get_state().state_id == State.PRIMARY_STATE_INACTIVE)
