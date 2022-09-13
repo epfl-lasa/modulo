@@ -78,7 +78,7 @@ class ComponentInterface(Node):
         :param parameter: Either the name of the parameter attribute or the parameter itself
         :param description: The parameter description
         :param read_only: If True, the value of the parameter cannot be changed after declaration
-        :raises ComponentParameterError if the parameter could not be added
+        :raises ComponentParameterError: if the parameter could not be added
         """
         try:
             if isinstance(parameter, sr.Parameter):
@@ -120,7 +120,7 @@ class ComponentInterface(Node):
         dictionary.
 
         :param name: The name of the parameter
-        :raises ComponentParameterError if the parameter does not exist
+        :raises ComponentParameterError: if the parameter does not exist
         :return: The requested parameter
         """
         try:
@@ -138,7 +138,7 @@ class ComponentInterface(Node):
         Get the parameter from the parameter dictionary by its name.
 
         :param name: The name of the parameter
-        :raises ComponentParameterError if the parameter does not exist
+        :raises ComponentParameterError: if the parameter does not exist
         :return: The parameter, if it exists
         """
         if name not in self._parameter_dict.keys():
@@ -156,7 +156,7 @@ class ComponentInterface(Node):
         Get the parameter value from the parameter dictionary by its name.
 
         :param name: The name of the parameter
-        :raises ComponentParameterError if the parameter does not exist
+        :raises ComponentParameterError: if the parameter does not exist
         :return: The value of the parameter, if the parameter exists
         """
         return self.__get_component_parameter(name).get_value()
@@ -341,7 +341,7 @@ class ComponentInterface(Node):
         :param clproto_message_type: The clproto message type, if applicable
         :param default_topic: If set, the default value for the topic name to use
         :param fixed_topic: If true, the topic name of the output signal is fixed
-        :raises AddSignalError if there is a problem adding the output
+        :raises AddSignalError: if there is a problem adding the output
         :return: The parsed signal name
         """
         try:
@@ -447,6 +447,7 @@ class ComponentInterface(Node):
         :param default_topic: If set, the default value for the topic name to use
         :param fixed_topic: If true, the topic name of the output signal is fixed
         :param user_callback: Callback function to trigger after receiving the input signal
+        :raises AddSignalError: if there is a problem adding the input
         """
         try:
             parsed_signal_name = parse_topic_name(signal_name)
@@ -526,7 +527,7 @@ class ComponentInterface(Node):
             parsed_service_name = parse_topic_name(service_name)
             if not parsed_service_name:
                 raise AddServiceError(f"The parsed signal name for service {service_name} is empty. Provide a "
-                                     f"string with valid characters for the service name ([a-zA-Z0-9_]).")
+                                      f"string with valid characters for the service name ([a-zA-Z0-9_]).")
             if parsed_service_name in self._services_dict.keys():
                 raise AddServiceError(f"Service with name '{parsed_service_name}' already exists.")
             signature = inspect.signature(callback)

@@ -814,7 +814,7 @@ inline void ComponentInterface<NodeT>::declare_signal(
   std::string parsed_signal_name = utilities::parse_topic_name(signal_name);
   if (parsed_signal_name.empty()) {
     throw exceptions::AddSignalException(
-        "The parsed signal name for input '" + signal_name
+        "The parsed signal name for " + type + " '" + signal_name
             + "' is empty. Provide a string with valid characters for the signal name ([a-zA-Z0-9_]).");
   }
   if (this->inputs_.find(parsed_signal_name) != this->inputs_.cend()) {
@@ -1201,7 +1201,6 @@ inline std::string ComponentInterface<NodeT>::create_output(
           "Invalid data pointer for output '" + parsed_signal_name + "'.");
     }
     this->declare_output(parsed_signal_name, default_topic, fixed_topic);
-    auto topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
     RCLCPP_DEBUG_STREAM(this->get_logger(),
                         "Creating output '" << parsed_signal_name << "' (provided signal name was '" << signal_name
                                             << "').");
