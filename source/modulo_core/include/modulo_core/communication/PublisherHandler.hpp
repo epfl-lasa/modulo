@@ -25,6 +25,11 @@ public:
   PublisherHandler(PublisherType type, std::shared_ptr<PubT> publisher);
 
   /**
+   * @brief Destructor to explicitly reset the publisher pointer.
+   */
+  ~PublisherHandler() override;
+
+  /**
    * @brief Activate the ROS publisher if applicable.
    * @throws modulo_core::exceptions::NullPointerException if the publisher pointer is null
    */
@@ -57,6 +62,11 @@ private:
 template<typename PubT, typename MsgT>
 PublisherHandler<PubT, MsgT>::PublisherHandler(PublisherType type, std::shared_ptr<PubT> publisher) :
     PublisherInterface(type), publisher_(std::move(publisher)) {}
+
+template<typename PubT, typename MsgT>
+PublisherHandler<PubT, MsgT>::~PublisherHandler() {
+  this->publisher_.reset();
+}
 
 template<typename PubT, typename MsgT>
 void PublisherHandler<PubT, MsgT>::on_activate() {
