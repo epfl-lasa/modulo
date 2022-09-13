@@ -348,19 +348,7 @@ class ComponentInterface(Node):
             if message_type == EncodedState and clproto_message_type == clproto.MessageType.UNKNOWN_MESSAGE:
                 raise AddSignalError(f"Provide a valid clproto message type for outputs of type EncodedState.")
             parsed_signal_name = parse_topic_name(signal_name)
-            if not parsed_signal_name:
-                raise AddSignalError(f"The parsed signal name for output '{signal_name}' is empty. Provide a "
-                                     f"string with valid characters for the signal name ([a-zA-Z0-9_]).")
-            if parsed_signal_name in self._outputs.keys():
-                raise AddSignalError(f"Output with parsed name '{parsed_signal_name}' already exists.")
-            topic_name = default_topic if default_topic else "~/" + parsed_signal_name
-            parameter_name = parsed_signal_name + "_topic"
-            if self.has_parameter(parameter_name) and self.get_parameter(parameter_name).is_empty():
-                self.set_parameter_value(parameter_name, topic_name)
-            else:
-                self.add_parameter(sr.Parameter(parameter_name, topic_name, sr.ParameterType.STRING),
-                                   f"Signal topic name of output '{parsed_signal_name}'", fixed_topic)
-            translator = None
+            self.declare_output(parsed_signal_name, default_topic, fixed_topic)
             if message_type == Bool or message_type == Float64 or \
                     message_type == Float64MultiArray or message_type == Int32 or message_type == String:
                 translator = modulo_writers.write_std_message
@@ -397,6 +385,57 @@ class ComponentInterface(Node):
             self.get_logger().error(f"Failed to execute user callback in subscription for attribute"
                                     f" '{attribute_name}': {e}", throttle_duration_sec=1.0)
 
+    def declare_signal(self, signal_name: str, signal_type: str, default_topic="", fixed_topic=False):
+        """
+        Declare an input to create the topic parameter without adding it to the map of inputs yet.
+
+        :param signal_name: The signal name of the input
+        :param signal_type: The type of the signal (input or output)
+        :param default_topic: If set, the default value for the topic name to use
+        :param fixed_topic: If true, the topic name of the signal is fixed
+        :raises AddSignalError: if the signal could not be declared (empty name or already created)
+        """
+        parsed_signal_name = parse_topic_name(signal_name)
+        if not parsed_signal_name:
+            raise AddSignalError(f"The parsed signal name for {signal_type} '{signal_name}' is empty. Provide a "
+                                 f"string with valid characters for the signal name ([a-zA-Z0-9_]).")
+        if parsed_signal_name in self._inputs.keys():
+            raise AddSignalError(f"Signal with name '{parsed_signal_name}' already exists as input.")
+        if parsed_signal_name in self._outputs.keys():
+            raise AddSignalError(f"Signal with name '{parsed_signal_name}' already exists as output.")
+        topic_name = default_topic if default_topic else "~/" + parsed_signal_name
+        parameter_name = parsed_signal_name + "_topic"
+        # TODO is the is_empty condition still valid?
+        if self.has_parameter(parameter_name) and self.get_parameter(parameter_name).is_empty():
+            self.set_parameter_value(parameter_name, topic_name)
+        else:
+            self.add_parameter(sr.Parameter(parameter_name, topic_name, sr.ParameterType.STRING),
+                               f"Signal topic name of {signal_type} '{parsed_signal_name}'", fixed_topic)
+        self.get_logger().debug(
+            f"Declared signal '{parsed_signal_name}' and parameter '{parameter_name}' with value '{topic_name}'.")
+
+    def declare_input(self, signal_name: str, default_topic="", fixed_topic=False):
+        """
+        Declare an input to create the topic parameter without adding it to the map of inputs yet.
+
+        :param signal_name: The signal name of the input
+        :param default_topic: If set, the default value for the topic name to use
+        :param fixed_topic: If true, the topic name of the signal is fixed
+        :raises AddSignalError: if the input could not be declared (empty name or already created)
+        """
+        self.declare_signal(signal_name, "input", default_topic, fixed_topic)
+
+    def declare_output(self, signal_name: str, default_topic="", fixed_topic=False):
+        """
+        Declare an output to create the topic parameter without adding it to the map of outputs yet.
+
+        :param signal_name: The signal name of the output
+        :param default_topic: If set, the default value for the topic name to use
+        :param fixed_topic: If true, the topic name of the signal is fixed
+        :raises AddSignalError: if the output could not be declared (empty name or already created)
+        """
+        self.declare_signal(signal_name, "output", default_topic, fixed_topic)
+
     def add_input(self, signal_name: str, subscription: Union[str, Callable], message_type: MsgT, default_topic="",
                   fixed_topic=False, user_callback=lambda: None):
         """
@@ -411,18 +450,7 @@ class ComponentInterface(Node):
         """
         try:
             parsed_signal_name = parse_topic_name(signal_name)
-            if not parsed_signal_name:
-                raise AddSignalError(f"The parsed signal name for input '{signal_name}' is empty. Provide a "
-                                     f"string with valid characters for the signal name ([a-zA-Z0-9_]).")
-            if parsed_signal_name in self._inputs.keys():
-                raise AddSignalError(f"Input with name '{parsed_signal_name}' already exists.")
-            topic_name = default_topic if default_topic else "~/" + parsed_signal_name
-            parameter_name = parsed_signal_name + "_topic"
-            if self.has_parameter(parameter_name) and self.get_parameter(parameter_name).is_empty():
-                self.set_parameter_value(parameter_name, topic_name)
-            else:
-                self.add_parameter(sr.Parameter(parameter_name, topic_name, sr.ParameterType.STRING),
-                                   f"Signal topic name of input '{parsed_signal_name}'", fixed_topic)
+            self.declare_input(parsed_signal_name, default_topic, fixed_topic)
             topic_name = self.get_parameter_value(parsed_signal_name + "_topic")
             self.get_logger().debug(f"Adding input '{parsed_signal_name}' with topic name '{topic_name}'.")
             if isinstance(subscription, Callable):
