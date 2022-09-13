@@ -21,6 +21,7 @@ Release Versions:
 - Improve error messages and logs further (#131)
 - User-defined callback for inputs (#124, #132, #133)
 - Add humble-devel build and test workflow (#135)
+- Use rclpy lifecycle node for lifecycle component (#134)
 
 ## 2.0.0
 ### August 05, 2022
