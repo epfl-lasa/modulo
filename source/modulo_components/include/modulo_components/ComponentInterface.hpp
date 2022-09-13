@@ -222,6 +222,26 @@ protected:
   void trigger(const std::string& trigger_name);
 
   /**
+   * @brief Declare an input to create the topic parameter without adding it to the map of inputs yet.
+   * @param signal_name The signal name of the input
+   * @param default_topic If set, the default value for the topic name to use
+   * @param fixed_topic If true, the topic name of the signal is fixed
+   * @throws modulo_components::exceptions::AddSignalException if the input could not be declared
+   * (empty name or already created)
+   */
+  void declare_input(const std::string& signal_name, const std::string& default_topic = "", bool fixed_topic = false);
+
+  /**
+   * @brief Declare an output to create the topic parameter without adding it to the map of outputs yet.
+   * @param signal_name The signal name of the output
+   * @param default_topic If set, the default value for the topic name to use
+   * @param fixed_topic If true, the topic name of the signal is fixed
+   * @throws modulo_components::exceptions::AddSignalException if the output could not be declared
+   * (empty name or already created)
+   */
+  void declare_output(const std::string& signal_name, const std::string& default_topic = "", bool fixed_topic = false);
+
+  /**
    * @brief Add and configure an input signal of the component.
    * @tparam DataT Type of the data pointer
    * @param signal_name Name of the input signal
@@ -451,13 +471,17 @@ private:
   void set_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
   /**
-   * @brief Validate an add_input request by parsing the signal name and checking the map of registered inputs.
-   * @param signal_name The name of the input signal
-   * @throws modulo_components::exceptions::AddSignalException if the input could not be created
-   * (empty name or already registered)
-   * @return The parsed signal name
+   * @brief Declare a signal to create the topic parameter without adding it to the map of signals.
+   * @param signal_name The name of the signal
+   * @param type The type of the signal (input or output)
+   * @param default_topic If set, the default value for the topic name to use
+   * @param fixed_topic If true, the topic name of the signal is fixed
+   * @throws modulo_components::exceptions::AddSignalException if the signal could not be declared
+   * (empty name or already created)
    */
-  std::string validate_input_signal_name(const std::string& signal_name);
+  void declare_signal(
+      const std::string& signal_name, const std::string& type, const std::string& default_topic, bool fixed_topic
+  );
 
   /**
    * @brief Validate an add_service request by parsing the service name and checking the maps of registered services.
@@ -784,7 +808,9 @@ inline void ComponentInterface<NodeT>::set_predicate(
 }
 
 template<class NodeT>
-inline std::string ComponentInterface<NodeT>::validate_input_signal_name(const std::string& signal_name) {
+inline void ComponentInterface<NodeT>::declare_signal(
+    const std::string& signal_name, const std::string& type, const std::string& default_topic, bool fixed_topic
+) {
   std::string parsed_signal_name = utilities::parse_topic_name(signal_name);
   if (parsed_signal_name.empty()) {
     throw exceptions::AddSignalException(
@@ -792,9 +818,38 @@ inline std::string ComponentInterface<NodeT>::validate_input_signal_name(const s
             + "' is empty. Provide a string with valid characters for the signal name ([a-zA-Z0-9_]).");
   }
   if (this->inputs_.find(parsed_signal_name) != this->inputs_.cend()) {
-    throw exceptions::AddSignalException("Input with name '" + parsed_signal_name + "' already exists.");
+    throw exceptions::AddSignalException("Signal with name '" + parsed_signal_name + "' already exists as input.");
   }
-  return parsed_signal_name;
+  if (this->outputs_.find(parsed_signal_name) != this->outputs_.cend()) {
+    throw exceptions::AddSignalException("Signal with name '" + parsed_signal_name + "' already exists as output.");
+  }
+  std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
+  auto parameter_name = parsed_signal_name + "_topic";
+  // TODO is the is_empty condition still valid?
+  if (NodeT::has_parameter(parameter_name) && this->get_parameter(parameter_name)->is_empty()) {
+    this->set_parameter_value<std::string>(parameter_name, topic_name);
+  } else {
+    this->add_parameter(
+        parameter_name, topic_name, "Signal topic name of " + type + " '" + parsed_signal_name + "'", fixed_topic
+    );
+  }
+  RCLCPP_DEBUG_STREAM(this->get_logger(),
+                      "Declared signal '" << parsed_signal_name << "' and parameter '" << parameter_name
+                                          << "' with value '" << topic_name << "'.");
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::declare_input(
+    const std::string& signal_name, const std::string& default_topic, bool fixed_topic
+) {
+  this->declare_signal(signal_name, "input", default_topic, fixed_topic);
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::declare_output(
+    const std::string& signal_name, const std::string& default_topic, bool fixed_topic
+) {
+  this->declare_signal(signal_name, "output", default_topic, fixed_topic);
 }
 
 template<class NodeT>
@@ -814,21 +869,14 @@ inline void ComponentInterface<NodeT>::add_input(
 ) {
   using namespace modulo_core::communication;
   try {
-    std::string parsed_signal_name = this->validate_input_signal_name(signal_name);
+    std::string parsed_signal_name = utilities::parse_topic_name(signal_name);
     if (data == nullptr) {
       throw modulo_core::exceptions::NullPointerException(
-          "Invalid data pointer for input '" + parsed_signal_name + "'.");
-    }
-    std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
-    auto parameter_name = parsed_signal_name + "_topic";
-    if (NodeT::has_parameter(parameter_name) && this->get_parameter(parameter_name)->is_empty()) {
-      this->set_parameter_value<std::string>(parameter_name, topic_name);
-    } else {
-      this->add_parameter(
-          parameter_name, topic_name, "Signal topic name of input '" + parsed_signal_name + "'", fixed_topic
+          "Invalid data pointer for input '" + parsed_signal_name + "'."
       );
     }
-    topic_name = this->get_parameter_value<std::string>(parameter_name);
+    this->declare_input(parsed_signal_name, default_topic, fixed_topic);
+    auto topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
     RCLCPP_DEBUG_STREAM(this->get_logger(),
                         "Adding input '" << parsed_signal_name << "' with topic name '" << topic_name << "'.");
     auto message_pair = make_shared_message_pair(data, this->get_clock());
@@ -892,17 +940,9 @@ inline void ComponentInterface<NodeT>::add_input(
 ) {
   using namespace modulo_core::communication;
   try {
-    std::string parsed_signal_name = this->validate_input_signal_name(signal_name);
-    std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
-    auto parameter_name = parsed_signal_name + "_topic";
-    if (NodeT::has_parameter(parameter_name) && this->get_parameter(parameter_name)->is_empty()) {
-      this->set_parameter_value<std::string>(parameter_name, topic_name);
-    } else {
-      this->add_parameter(
-          parameter_name, topic_name, "Signal topic name of input '" + parsed_signal_name + "'", fixed_topic
-      );
-    }
-    topic_name = this->get_parameter_value<std::string>(parameter_name);
+    std::string parsed_signal_name = utilities::parse_topic_name(signal_name);
+    this->declare_input(parsed_signal_name, default_topic, fixed_topic);
+    auto topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
     RCLCPP_DEBUG_STREAM(this->get_logger(),
                         "Adding input '" << parsed_signal_name << "' with topic name '" << topic_name << "'.");
     auto subscription = NodeT::template create_subscription<MsgT>(topic_name, this->qos_, callback);
@@ -934,7 +974,7 @@ inline void ComponentInterface<NodeT>::add_service(
     const std::string& service_name, const std::function<ComponentServiceResponse(void)>& callback
 ) {
   try {
-    std::string parsed_service_name = validate_service_name(service_name);
+    std::string parsed_service_name = this->validate_service_name(service_name);
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding empty service '" << parsed_service_name << "'.");
     auto service = NodeT::template create_service<modulo_component_interfaces::srv::EmptyTrigger>(
         "~/" + parsed_service_name, [callback](
@@ -962,7 +1002,7 @@ inline void ComponentInterface<NodeT>::add_service(
     const std::string& service_name, const std::function<ComponentServiceResponse(const std::string& string)>& callback
 ) {
   try {
-    std::string parsed_service_name = validate_service_name(service_name);
+    std::string parsed_service_name = this->validate_service_name(service_name);
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding string service '" << parsed_service_name << "'.");
     auto service = NodeT::template create_service<modulo_component_interfaces::srv::StringTrigger>(
         "~/" + parsed_service_name, [callback](
@@ -1156,35 +1196,18 @@ inline std::string ComponentInterface<NodeT>::create_output(
   using namespace modulo_core::communication;
   try {
     auto parsed_signal_name = utilities::parse_topic_name(signal_name);
-    if (parsed_signal_name.empty()) {
-      throw exceptions::AddSignalException(
-          "The parsed signal name for output '" + signal_name
-              + "'is empty. Provide a string with valid characters for the signal name ([a-zA-Z0-9_])."
-      );
-    }
     if (data == nullptr) {
       throw modulo_core::exceptions::NullPointerException(
           "Invalid data pointer for output '" + parsed_signal_name + "'.");
     }
+    this->declare_output(parsed_signal_name, default_topic, fixed_topic);
+    auto topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
     RCLCPP_DEBUG_STREAM(this->get_logger(),
                         "Creating output '" << parsed_signal_name << "' (provided signal name was '" << signal_name
                                             << "').");
-    if (this->outputs_.find(parsed_signal_name) != this->outputs_.end()) {
-      throw exceptions::AddSignalException("Output with name '" + parsed_signal_name + "' already exists.");
-    }
     auto message_pair = make_shared_message_pair(data, this->get_clock());
     this->outputs_.insert_or_assign(
         parsed_signal_name, std::make_shared<PublisherInterface>(this->publisher_type_, message_pair));
-
-    std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
-    auto parameter_name = parsed_signal_name + "_topic";
-    if (NodeT::has_parameter(parameter_name) && this->get_parameter(parameter_name)->is_empty()) {
-      this->set_parameter_value<std::string>(parameter_name, topic_name);
-    } else {
-      this->add_parameter(
-          parameter_name, topic_name, "Signal topic name of output '" + parsed_signal_name + "'", fixed_topic
-      );
-    }
     return parsed_signal_name;
   } catch (const exceptions::AddSignalException&) {
     throw;
