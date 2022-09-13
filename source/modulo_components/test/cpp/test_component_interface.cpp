@@ -81,6 +81,15 @@ TYPED_TEST(ComponentInterfaceTest, SetPredicateValue) {
   EXPECT_FALSE(this->component_->get_predicate("bar"));
 }
 
+TYPED_TEST(ComponentInterfaceTest, DeclareSignal) {
+  this->component_->declare_input("input", "test");
+  EXPECT_EQ(this->component_->template get_parameter_value<std::string>("input_topic"), "test");
+  EXPECT_TRUE(this->component_->inputs_.find("input") == this->component_->inputs_.end());
+  this->component_->declare_output("output", "test_again");
+  EXPECT_EQ(this->component_->template get_parameter_value<std::string>("output_topic"), "test_again");
+  EXPECT_TRUE(this->component_->outputs_.find("output") == this->component_->outputs_.end());
+}
+
 TYPED_TEST(ComponentInterfaceTest, AddInput) {
   auto data = std::make_shared<bool>(true);
   EXPECT_NO_THROW(this->component_->add_input("_tEsT_#1@3", data));
