@@ -25,6 +25,7 @@ Release Versions:
 - Add option to declare signals (#136)
 - Correct default value for user callback on add_input (#138)
 - Add option to remove signals (#139)
+- Use rclpy lifecycle node for lifecycle component (#134)
 
 ## 2.0.0
 ### August 05, 2022
