@@ -405,7 +405,6 @@ class ComponentInterface(Node):
             raise AddSignalError(f"Signal with name '{parsed_signal_name}' already exists as output.")
         topic_name = default_topic if default_topic else "~/" + parsed_signal_name
         parameter_name = parsed_signal_name + "_topic"
-        # TODO is the is_empty condition still valid?
         if self.has_parameter(parameter_name) and self.get_parameter(parameter_name).is_empty():
             self.set_parameter_value(parameter_name, topic_name)
         else:

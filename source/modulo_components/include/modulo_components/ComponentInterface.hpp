@@ -825,7 +825,6 @@ inline void ComponentInterface<NodeT>::declare_signal(
   }
   std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
   auto parameter_name = parsed_signal_name + "_topic";
-  // TODO is the is_empty condition still valid?
   if (NodeT::has_parameter(parameter_name) && this->get_parameter(parameter_name)->is_empty()) {
     this->set_parameter_value<std::string>(parameter_name, topic_name);
   } else {
