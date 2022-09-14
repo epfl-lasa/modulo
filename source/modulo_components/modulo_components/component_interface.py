@@ -330,6 +330,18 @@ class ComponentInterface(Node):
         self._triggers[trigger_name] = True
         self._publish_predicate(trigger_name)
 
+    def remove_output(self, signal_name):
+        if signal_name not in self._outputs.keys():
+            parsed_signal_name = parse_topic_name(signal_name)
+            if parsed_signal_name not in self._outputs.keys():
+                self.get_logger().debug(f"Unknown output '{signal_name}' (parsed name was '{parsed_signal_name}').")
+                return
+            signal_name = parsed_signal_name
+        if "publisher" in self._outputs[signal_name]:
+            self.destroy_publisher(self._outputs[signal_name]["publisher"])
+        self._outputs.pop(signal_name)
+        self.get_logger().debug(f"Removing signal '{signal_name}'.")
+
     def _create_output(self, signal_name: str, data: str, message_type: MsgT, clproto_message_type: clproto.MessageType,
                        default_topic: str, fixed_topic: bool) -> str:
         """
@@ -364,6 +376,16 @@ class ComponentInterface(Node):
             raise
         except Exception as e:
             raise AddSignalError(f"{e}")
+
+    def remove_input(self, signal_name: str):
+        if not self.destroy_subscription(self._inputs.pop(signal_name, None)):
+            parsed_signal_name = parse_topic_name(signal_name)
+            if not self.destroy_subscription(self._inputs.pop(parsed_signal_name, None)):
+                self.get_logger().debug(f"Unknown input '{signal_name}' (parsed name was '{parsed_signal_name}').")
+                return
+            self.get_logger().debug(f"Removing signal '{parsed_signal_name}'.")
+            return
+        self.get_logger().debug(f"Removing signal '{signal_name}'.")
 
     def __subscription_callback(self, message: MsgT, attribute_name: str, reader: Callable, user_callback: Callable):
         """
