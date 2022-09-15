@@ -23,6 +23,7 @@ Release Versions:
 - Add humble-devel build and test workflow (#135)
 - Correctly list rclcpp_components as build dependency (#137)
 - Add option to declare signals (#136)
+- Correct default value for user callback on add_input (#138)
 
 ## 2.0.0
 ### August 05, 2022
