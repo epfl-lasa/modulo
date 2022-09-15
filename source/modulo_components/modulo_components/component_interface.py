@@ -436,7 +436,7 @@ class ComponentInterface(Node):
         self.declare_signal(signal_name, "output", default_topic, fixed_topic)
 
     def add_input(self, signal_name: str, subscription: Union[str, Callable], message_type: MsgT, default_topic="",
-                  fixed_topic=False, user_callback=lambda: None):
+                  fixed_topic=False, user_callback: Callable = None):
         """
         Add and configure an input signal of the component.
 
@@ -460,10 +460,14 @@ class ComponentInterface(Node):
                 self._inputs[parsed_signal_name] = self.create_subscription(message_type, topic_name, subscription,
                                                                             self._qos)
             elif isinstance(subscription, str):
-                if user_callback:
+                if callable(user_callback):
                     signature = inspect.signature(user_callback)
                     if len(signature.parameters) != 0:
                         raise AddSignalError("Provide a user callback that has no input arguments.")
+                else:
+                    if user_callback:
+                        self.get_logger().debug("Provided user callback is not a callable.")
+                    user_callback = lambda: None
                 if message_type == Bool or message_type == Float64 or \
                         message_type == Float64MultiArray or message_type == Int32 or message_type == String:
                     self._inputs[parsed_signal_name] = self.create_subscription(message_type, topic_name,
