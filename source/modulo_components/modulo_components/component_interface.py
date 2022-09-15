@@ -466,7 +466,7 @@ class ComponentInterface(Node):
                         raise AddSignalError("Provide a user callback that has no input arguments.")
                 else:
                     if user_callback:
-                        self.get_logger().debug("Provided user callback is not a callable.")
+                        self.get_logger().warn("Provided user callback is not a callable, ignoring it.")
                     user_callback = lambda: None
                 if message_type == Bool or message_type == Float64 or \
                         message_type == Float64MultiArray or message_type == Int32 or message_type == String:
