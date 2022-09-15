@@ -52,6 +52,15 @@ def test_set_predicate(component_interface):
     assert not component_interface.get_predicate('bar')
 
 
+def test_declare_signal(component_interface):
+    component_interface.declare_input("input", "test")
+    assert component_interface.get_parameter_value("input_topic") == "test"
+    assert "input" not in component_interface._inputs.keys()
+    component_interface.declare_output("output", "test_again")
+    assert component_interface.get_parameter_value("output_topic") == "test_again"
+    assert "test_again" not in component_interface._outputs.keys()
+
+
 def test_add_input(component_interface):
     component_interface.add_input("_tEsT_#1@3", "test", Bool)
     assert "test_13" in component_interface._inputs.keys()
