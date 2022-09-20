@@ -406,7 +406,7 @@ class ComponentInterface(Node):
         topic_name = default_topic if default_topic else "~/" + parsed_signal_name
         parameter_name = parsed_signal_name + "_topic"
         if self.has_parameter(parameter_name) and self.get_parameter(parameter_name).is_empty():
-            self.set_parameter_value(parameter_name, topic_name)
+            self.set_parameter_value(parameter_name, topic_name, sr.ParameterType.STRING)
         else:
             self.add_parameter(sr.Parameter(parameter_name, topic_name, sr.ParameterType.STRING),
                                f"Signal topic name of {signal_type} '{parsed_signal_name}'", fixed_topic)
@@ -436,7 +436,7 @@ class ComponentInterface(Node):
         self.declare_signal(signal_name, "output", default_topic, fixed_topic)
 
     def add_input(self, signal_name: str, subscription: Union[str, Callable], message_type: MsgT, default_topic="",
-                  fixed_topic=False, user_callback=lambda: None):
+                  fixed_topic=False, user_callback: Callable = None):
         """
         Add and configure an input signal of the component.
 
@@ -460,25 +460,33 @@ class ComponentInterface(Node):
                 self._inputs[parsed_signal_name] = self.create_subscription(message_type, topic_name, subscription,
                                                                             self._qos)
             elif isinstance(subscription, str):
-                if user_callback:
+                if callable(user_callback):
                     signature = inspect.signature(user_callback)
                     if len(signature.parameters) != 0:
                         raise AddSignalError("Provide a user callback that has no input arguments.")
+                else:
+                    if user_callback:
+                        self.get_logger().warn("Provided user callback is not a callable, ignoring it.")
+                    def default_callback():
+                        return None
+                    user_callback = default_callback
                 if message_type == Bool or message_type == Float64 or \
                         message_type == Float64MultiArray or message_type == Int32 or message_type == String:
-                    self._inputs[parsed_signal_name] = self.create_subscription(message_type, topic_name,
-                                                                                partial(self.__subscription_callback,
-                                                                                        attribute_name=subscription,
-                                                                                        reader=modulo_readers.read_std_message,
-                                                                                        user_callback=user_callback),
-                                                                                self._qos)
+                    self._inputs[parsed_signal_name] = \
+                        self.create_subscription(message_type, topic_name,
+                                                 partial(self.__subscription_callback,
+                                                         attribute_name=subscription,
+                                                         reader=modulo_readers.read_std_message,
+                                                         user_callback=user_callback),
+                                                 self._qos)
                 elif message_type == EncodedState:
-                    self._inputs[parsed_signal_name] = self.create_subscription(message_type, topic_name,
-                                                                                partial(self.__subscription_callback,
-                                                                                        attribute_name=subscription,
-                                                                                        reader=modulo_readers.read_clproto_message,
-                                                                                        user_callback=user_callback),
-                                                                                self._qos)
+                    self._inputs[parsed_signal_name] = \
+                        self.create_subscription(message_type, topic_name,
+                                                 partial(self.__subscription_callback,
+                                                         attribute_name=subscription,
+                                                         reader=modulo_readers.read_clproto_message,
+                                                         user_callback=user_callback),
+                                                 self._qos)
                 else:
                     raise TypeError("The provided message type is not supported to create a component input.")
             else:
