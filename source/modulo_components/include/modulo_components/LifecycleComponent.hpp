@@ -258,7 +258,7 @@ private:
   /**
    * @brief Cleanup all inputs and outputs.
    */
-  bool cleanup_signals();
+  bool clear_signals();
 
   // TODO hide ROS methods
   using ComponentInterface<rclcpp_lifecycle::LifecycleNode>::create_output;
