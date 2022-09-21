@@ -337,7 +337,7 @@ class ComponentInterface(Node):
                 self.get_logger().debug(f"Unknown output '{signal_name}' (parsed name was '{parsed_signal_name}').")
                 return
             signal_name = parsed_signal_name
-        if "publisher" in self._outputs[signal_name]:
+        if "publisher" in self._outputs[signal_name].keys():
             self.destroy_publisher(self._outputs[signal_name]["publisher"])
         self._outputs.pop(signal_name)
         self.get_logger().debug(f"Removing signal '{signal_name}'.")
