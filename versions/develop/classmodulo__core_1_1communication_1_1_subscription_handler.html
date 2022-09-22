@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Modulo<span id="projectnumber">&#160;2.0.15</span>
+   <div id="projectname">Modulo<span id="projectnumber">&#160;2.0.16</span>
    </div>
   </td>
  </tr>
@@ -92,6 +92,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1e8e5d41669f1c0f952b93a2b86dadae"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__core_1_1communication_1_1_subscription_handler.html#a1e8e5d41669f1c0f952b93a2b86dadae">SubscriptionHandler</a> (std::shared_ptr&lt; <a class="el" href="classmodulo__core_1_1communication_1_1_message_pair_interface.html">MessagePairInterface</a> &gt; message_pair=nullptr)</td></tr>
 <tr class="memdesc:a1e8e5d41669f1c0f952b93a2b86dadae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor with the message pair.  <a href="classmodulo__core_1_1communication_1_1_subscription_handler.html#a1e8e5d41669f1c0f952b93a2b86dadae">More...</a><br /></td></tr>
 <tr class="separator:a1e8e5d41669f1c0f952b93a2b86dadae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3de45dc5da0ca5ae1de4a819851f4979"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__core_1_1communication_1_1_subscription_handler.html#a3de45dc5da0ca5ae1de4a819851f4979">~SubscriptionHandler</a> () override</td></tr>
+<tr class="memdesc:a3de45dc5da0ca5ae1de4a819851f4979"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor to explicitly reset the subscription pointer.  <a href="classmodulo__core_1_1communication_1_1_subscription_handler.html#a3de45dc5da0ca5ae1de4a819851f4979">More...</a><br /></td></tr>
+<tr class="separator:a3de45dc5da0ca5ae1de4a819851f4979"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa9c9421c48dbbbc87dfd0d370f452b44"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; rclcpp::Subscription&lt; MsgT &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodulo__core_1_1communication_1_1_subscription_handler.html#aa9c9421c48dbbbc87dfd0d370f452b44">get_subscription</a> () const</td></tr>
 <tr class="memdesc:aa9c9421c48dbbbc87dfd0d370f452b44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Getter of the ROS subscription.  <a href="classmodulo__core_1_1communication_1_1_subscription_handler.html#aa9c9421c48dbbbc87dfd0d370f452b44">More...</a><br /></td></tr>
 <tr class="separator:aa9c9421c48dbbbc87dfd0d370f452b44"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -203,6 +206,34 @@ template&lt;typename MsgT &gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a3de45dc5da0ca5ae1de4a819851f4979" name="a3de45dc5da0ca5ae1de4a819851f4979"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3de45dc5da0ca5ae1de4a819851f4979">&#9670;&nbsp;</a></span>~SubscriptionHandler()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename MsgT &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmodulo__core_1_1communication_1_1_subscription_handler.html">modulo_core::communication::SubscriptionHandler</a>&lt; MsgT &gt;::~<a class="el" href="classmodulo__core_1_1communication_1_1_subscription_handler.html">SubscriptionHandler</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Destructor to explicitly reset the subscription pointer. </p>
+
+<p class="definition">Definition at line <a class="el" href="_subscription_handler_8hpp_source.html#l00080">80</a> of file <a class="el" href="_subscription_handler_8hpp_source.html">SubscriptionHandler.hpp</a>.</p>
 
 </div>
 </div>
@@ -355,7 +386,7 @@ template&lt;typename MsgT &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The resulting <a class="el" href="classmodulo__core_1_1communication_1_1_subscription_interface.html" title="Interface class to enable non-templated subscriptions with ROS subscriptions from derived Subscriptio...">SubscriptionInterface</a> pointer </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_subscription_handler_8hpp_source.html#l00100">100</a> of file <a class="el" href="_subscription_handler_8hpp_source.html">SubscriptionHandler.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_subscription_handler_8hpp_source.html#l00110">110</a> of file <a class="el" href="_subscription_handler_8hpp_source.html">SubscriptionHandler.hpp</a>.</p>
 
 </div>
 </div>
@@ -499,7 +530,7 @@ template&lt;typename MsgT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_subscription_handler_8hpp_source.html#l00094">94</a> of file <a class="el" href="_subscription_handler_8hpp_source.html">SubscriptionHandler.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_subscription_handler_8hpp_source.html#l00104">104</a> of file <a class="el" href="_subscription_handler_8hpp_source.html">SubscriptionHandler.hpp</a>.</p>
 
 </div>
 </div>
@@ -519,7 +550,7 @@ template&lt;typename MsgT &gt; </div>
 
 <p>Getter of the ROS subscription. </p>
 
-<p class="definition">Definition at line <a class="el" href="_subscription_handler_8hpp_source.html#l00075">75</a> of file <a class="el" href="_subscription_handler_8hpp_source.html">SubscriptionHandler.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_subscription_handler_8hpp_source.html#l00085">85</a> of file <a class="el" href="_subscription_handler_8hpp_source.html">SubscriptionHandler.hpp</a>.</p>
 
 </div>
 </div>
@@ -555,7 +586,7 @@ template&lt;typename MsgT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_subscription_handler_8hpp_source.html#l00080">80</a> of file <a class="el" href="_subscription_handler_8hpp_source.html">SubscriptionHandler.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_subscription_handler_8hpp_source.html#l00090">90</a> of file <a class="el" href="_subscription_handler_8hpp_source.html">SubscriptionHandler.hpp</a>.</p>
 
 </div>
 </div>
@@ -585,7 +616,7 @@ template&lt;typename MsgT &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_subscription_handler_8hpp_source.html#l00088">88</a> of file <a class="el" href="_subscription_handler_8hpp_source.html">SubscriptionHandler.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_subscription_handler_8hpp_source.html#l00098">98</a> of file <a class="el" href="_subscription_handler_8hpp_source.html">SubscriptionHandler.hpp</a>.</p>
 
 </div>
 </div>
