@@ -242,6 +242,18 @@ protected:
   void declare_output(const std::string& signal_name, const std::string& default_topic = "", bool fixed_topic = false);
 
   /**
+   * @brief Remove an input from the map of inputs.
+   * @param signal_name The name of the input
+   */
+  void remove_input(const std::string& signal_name);
+
+  /**
+   * @brief Remove an output from the map of outputs.
+   * @param signal_name The name of the output
+   */
+  void remove_output(const std::string& signal_name);
+
+  /**
    * @brief Add and configure an input signal of the component.
    * @tparam DataT Type of the data pointer
    * @param signal_name Name of the input signal
@@ -469,6 +481,19 @@ private:
    * @param predicate The predicate variant
    */
   void set_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
+
+  /**
+   * @brief Remove a signal from the map of inputs or outputs.
+   * @tparam T The type of the map entry (SubscriptionInterface or PublisherInterface)
+   * @param signal_name The name of the signal to remove
+   * @param signal_map The map of signals (either inputs or outputs)
+   * @param skip_check If true, skip the check if the signal exists in the map and return false otherwise
+   * @return True if the signal was removed, false if it didn't exist
+   */
+  template<typename T>
+  bool remove_signal(
+      const std::string& signal_name, std::map<std::string, std::shared_ptr<T>>& signal_map, bool skip_check = false
+  );
 
   /**
    * @brief Declare a signal to create the topic parameter without adding it to the map of signals.
@@ -805,6 +830,42 @@ inline void ComponentInterface<NodeT>::set_predicate(
     const std::string& name, const std::function<bool(void)>& predicate
 ) {
   this->set_variant_predicate(name, utilities::PredicateVariant(predicate));
+}
+
+template<class NodeT>
+template<typename T>
+inline bool ComponentInterface<NodeT>::remove_signal(
+    const std::string& signal_name, std::map<std::string, std::shared_ptr<T>>& signal_map, bool skip_check
+) {
+  if (!skip_check && signal_map.find(signal_name) == signal_map.cend()) {
+    return false;
+  } else {
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Removing signal '" << signal_name << "'.");
+    signal_map.at(signal_name).reset();
+    return signal_map.erase(signal_name);
+  }
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::remove_input(const std::string& signal_name) {
+  if (!this->template remove_signal(signal_name, this->inputs_)) {
+    auto parsed_signal_name = utilities::parse_topic_name(signal_name);
+    if(!this->template remove_signal(parsed_signal_name, this->inputs_)) {
+      RCLCPP_DEBUG_STREAM(this->get_logger(),
+                          "Unknown input '" << signal_name << "' (parsed name was '" << parsed_signal_name << "').");
+    }
+  }
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::remove_output(const std::string& signal_name) {
+  if (!this->template remove_signal(signal_name, this->outputs_)) {
+    auto parsed_signal_name = utilities::parse_topic_name(signal_name);
+    if(!this->template remove_signal(parsed_signal_name, this->outputs_)) {
+      RCLCPP_DEBUG_STREAM(this->get_logger(),
+                          "Unknown output '" << signal_name << "' (parsed name was '" << parsed_signal_name << "').");
+    }
+  }
 }
 
 template<class NodeT>

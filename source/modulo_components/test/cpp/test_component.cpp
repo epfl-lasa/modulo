@@ -26,7 +26,7 @@ protected:
   std::shared_ptr<ComponentPublicInterface> component_;
 };
 
-TEST_F(ComponentTest, AddOutput) {
+TEST_F(ComponentTest, AddRemoveOutput) {
   std::shared_ptr<State> data = make_shared_state(CartesianState::Random("test"));
   component_->add_output("_tEsT_#1@3", data);
   EXPECT_TRUE(component_->outputs_.find("test_13") != component_->outputs_.end());
@@ -36,5 +36,8 @@ TEST_F(ComponentTest, AddOutput) {
   component_->add_output("test_13", new_data);
   EXPECT_EQ(component_->outputs_.at("test_13")->get_message_pair()->get_type(),
             modulo_core::communication::MessageType::ENCODED_STATE);
+
+  component_->remove_output("test_13");
+  EXPECT_TRUE(component_->outputs_.find("test_13") == component_->outputs_.end());
 }
 } // namespace modulo_components

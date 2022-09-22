@@ -90,7 +90,7 @@ TYPED_TEST(ComponentInterfaceTest, DeclareSignal) {
   EXPECT_TRUE(this->component_->outputs_.find("output") == this->component_->outputs_.end());
 }
 
-TYPED_TEST(ComponentInterfaceTest, AddInput) {
+TYPED_TEST(ComponentInterfaceTest, AddRemoveInput) {
   auto data = std::make_shared<bool>(true);
   EXPECT_NO_THROW(this->component_->add_input("_tEsT_#1@3", data));
   EXPECT_FALSE(this->component_->inputs_.find("test_13") == this->component_->inputs_.end());
@@ -106,6 +106,10 @@ TYPED_TEST(ComponentInterfaceTest, AddInput) {
       "test_13", [](const std::shared_ptr<std_msgs::msg::String>) {});
   EXPECT_EQ(this->component_->inputs_.at("test_13")->get_message_pair()->get_type(),
             modulo_core::communication::MessageType::BOOL);
+
+  // remove input
+  this->component_->remove_input("test_13");
+  EXPECT_TRUE(this->component_->inputs_.find("test_13") == this->component_->inputs_.end());
 }
 
 TYPED_TEST(ComponentInterfaceTest, AddInputWithUserCallback) {

@@ -61,7 +61,7 @@ def test_declare_signal(component_interface):
     assert "test_again" not in component_interface._outputs.keys()
 
 
-def test_add_input(component_interface):
+def test_add_remove_input(component_interface):
     component_interface.add_input("_tEsT_#1@3", "test", Bool)
     assert "test_13" in component_interface._inputs.keys()
     assert component_interface.get_parameter_value("test_13_topic") == "~/test_13"
@@ -72,6 +72,9 @@ def test_add_input(component_interface):
 
     component_interface.add_input("test_13", "test", String)
     assert component_interface._inputs["test_13"].msg_type == Bool
+
+    component_interface.remove_input("test_13")
+    assert "test_13" not in component_interface._inputs.keys()
 
 
 def test_add_service(component_interface):

@@ -29,6 +29,7 @@ public:
   using ComponentInterface<NodeT>::triggers_;
   using ComponentInterface<NodeT>::declare_input;
   using ComponentInterface<NodeT>::declare_output;
+  using ComponentInterface<NodeT>::remove_input;
   using ComponentInterface<NodeT>::add_input;
   using ComponentInterface<NodeT>::add_service;
   using ComponentInterface<NodeT>::inputs_;
@@ -77,6 +78,7 @@ public:
   ) : Component(node_options, fallback_name) {}
   using Component::add_output;
   using Component::outputs_;
+  using Component::remove_output;
 };
 
 class LifecycleComponentPublicInterface : public LifecycleComponent {
@@ -87,5 +89,6 @@ public:
   using LifecycleComponent::configure_outputs;
   using LifecycleComponent::activate_outputs;
   using LifecycleComponent::outputs_;
+  using LifecycleComponent::remove_output;
 };
 }// namespace modulo_components

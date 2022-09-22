@@ -20,6 +20,11 @@ public:
   explicit SubscriptionHandler(std::shared_ptr<MessagePairInterface> message_pair = nullptr);
 
   /**
+   * @brief Destructor to explicitly reset the subscription pointer.
+   */
+  ~SubscriptionHandler() override;
+
+  /**
    * @brief Getter of the ROS subscription.
    */
   [[nodiscard]] std::shared_ptr<rclcpp::Subscription<MsgT>> get_subscription() const;
@@ -70,6 +75,11 @@ private:
   std::shared_ptr<rclcpp::Clock> clock_; ///< ROS clock for throttling log
   std::function<void()> user_callback_ = []{}; ///< User callback to be executed after the subscription callback
 };
+
+template<typename MsgT>
+SubscriptionHandler<MsgT>::~SubscriptionHandler() {
+  this->subscription_.reset();
+}
 
 template<typename MsgT>
 std::shared_ptr<rclcpp::Subscription<MsgT>> SubscriptionHandler<MsgT>::get_subscription() const {
