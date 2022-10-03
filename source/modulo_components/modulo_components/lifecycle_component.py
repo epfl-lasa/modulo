@@ -323,7 +323,7 @@ class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
         for signal_name, output_dict in self._outputs.items():
             try:
                 topic_name = self.get_parameter_value(signal_name + "_topic")
-                self.get_logger().error(f"Configuring output '{signal_name}' with topic name '{topic_name}'.")
+                self.get_logger().debug(f"Configuring output '{signal_name}' with topic name '{topic_name}'.")
                 publisher = self.create_lifecycle_publisher(msg_type=output_dict["message_type"], topic=topic_name,
                                                             qos_profile=self._qos)
                 self._outputs[signal_name]["publisher"] = publisher
