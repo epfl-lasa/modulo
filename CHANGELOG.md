@@ -1,12 +1,22 @@
 # CHANGELOG
 
 Release Versions:
+- [2.1.0](#210)
 - [2.0.0](#200)
 - [1.1.0](#110)
 - [1.0.0](#100)
 - [Pre-release versions](#pre-release-versions)
 
-## Upcoming changes (in development)
+## 2.1.0
+### October 21, 2022
+
+Version 2.1.0 contains several smaller improvements to the Modulo project, such as more consistency with parameter
+naming, declaring and removing of signals, and cleaner exception handling and logging. Another new feature is the
+ability to provide a user-defined callback for input signals.
+
+There have also been some changes to support both galactic and humble releases of ROS.
+
+### Changes
 
 - Support multiple build test actions (#117)
 - Manually export modulo_core dependencies (#118)
