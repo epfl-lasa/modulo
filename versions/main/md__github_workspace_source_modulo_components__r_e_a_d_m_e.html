@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Modulo<span id="projectnumber">&#160;2.0.0</span>
+   <div id="projectname">Modulo<span id="projectnumber">&#160;2.1.0</span>
    </div>
   </td>
  </tr>
@@ -69,11 +69,11 @@ $(function() {
 <h1>Component</h1>
 <p >The <code><a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">modulo_components::Component</a></code> (C++) and <code><a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">modulo_components.Component</a></code> (Python) classes are wrappers for the standard ROS Node that simplify application composition through unified component interfaces.</p>
 <p >This class is intended for direct inheritance to implement custom components that perform one-shot or externally triggered operations. Examples of triggered behavior include providing a service, processing signals or publishing outputs on a periodic timer. One-shot behaviors may include interacting with the filesystem or publishing a predefined sequence of outputs.</p>
-<p >Developers should override <code>validate_parameter()</code> if any parameters are added and <code>on_execute_callback()</code> to implement any one-shot behavior. In the latter case, <code>execute()</code> should be invoked at the end of the derived constructor.</p>
+<p >Developers should override <code>on_validate_parameter_callback()</code> if any parameters are added and <code>on_execute_callback()</code> to implement any one-shot behavior. In the latter case, <code>execute()</code> should be invoked at the end of the derived constructor.</p>
 <h1>LifecycleComponent</h1>
 <p >The <code><a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">modulo_components::Component</a></code> (C++) and <code><a class="el" href="classmodulo__components_1_1_component.html" title="A wrapper for rclcpp::Node to simplify application composition through unified component interfaces.">modulo_components.Component</a></code> (Python) classes are state-based alternatives that follow the <a href="https://design.ros2.org/articles/node_lifecycle.html">lifecycle pattern for managed nodes</a>.</p>
 <p >This class is intended for direct inheritance to implement custom state-based components that perform different behaviors based on their state and on state transitions. An example of state-based behaviour is a signal component that requires configuration steps to determine which inputs to register and subsequently should publish outputs only when the component is activated.</p>
-<p >Developers should override <code>validate_parameter()</code> if any parameters are added. In addition, the following state transition callbacks should be overridden whenever custom transition behavior is needed:</p><ul>
+<p >Developers should override <code>on_validate_parameter_callback()</code> if any parameters are added. In addition, the following state transition callbacks should be overridden whenever custom transition behavior is needed:</p><ul>
 <li><code>on_configure_callback()</code></li>
 <li><code>on_activate_callback()</code></li>
 <li><code>on_deactivate_callback()</code></li>
