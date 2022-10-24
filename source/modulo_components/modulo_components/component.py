@@ -13,13 +13,13 @@ class Component(ComponentInterface):
     as the C++ modulo_components::Component class.
     """
 
-    def __init__(self, node_name: str, *kargs, **kwargs):
+    def __init__(self, node_name: str, *args, **kwargs):
         """
         Constructs all the necessary attributes and declare all the parameters.
 
         :param node_name: The name of the node to be passed to the base Node class
         """
-        super().__init__(node_name, *kargs, **kwargs)
+        super().__init__(node_name, *args, **kwargs)
         self.__started = False
         self.__execute_thread = None
         self.add_predicate("is_finished", False)
@@ -90,4 +90,4 @@ class Component(ComponentInterface):
             publisher = self.create_publisher(message_type, topic_name, self._qos)
             self._outputs[parsed_signal_name]["publisher"] = publisher
         except Exception as e:
-            self.get_logger().error(f"Failed to add output '{signal_name}: {e}")
+            self.get_logger().error(f"Failed to add output '{signal_name}': {e}")

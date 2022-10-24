@@ -1,10 +1,40 @@
 # CHANGELOG
 
 Release Versions:
+- [2.1.0](#210)
 - [2.0.0](#200)
 - [1.1.0](#110)
 - [1.0.0](#100)
 - [Pre-release versions](#pre-release-versions)
+
+## 2.1.0
+### October 21, 2022
+
+Version 2.1.0 contains several smaller improvements to the Modulo project, such as more consistency with parameter
+naming, declaring and removing of signals, and cleaner exception handling and logging. Another new feature is the
+ability to provide a user-defined callback for input signals.
+
+There have also been some changes to support both galactic and humble releases of ROS.
+
+### Changes
+
+- Support multiple build test actions (#117)
+- Manually export modulo_core dependencies (#118)
+- Ensure compatibility with humble (#119)
+- Add static tf broadcaster (#120)
+- Use prefix for all exceptions (#121)
+- Accept list of transforms in send_transform (#122)
+- Rename all frame_name parameters to frame (#123)
+- Check that the data pointer is not null when adding a signal (#128)
+- Rename validate parameter callback and validate period value (#126)
+- Add double underscore to private function (#127)
+- Improve error messages and logs further (#131)
+- User-defined callback for inputs (#124, #132, #133)
+- Add humble-devel build and test workflow (#135)
+- Correctly list rclcpp_components as build dependency (#137)
+- Add option to declare signals (#136)
+- Correct default value for user callback on add_input (#138)
+- Add option to remove signals (#139)
 
 ## 2.0.0
 ### August 05, 2022

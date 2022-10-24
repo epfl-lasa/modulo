@@ -9,6 +9,7 @@
 #include <console_bridge/console.h>
 #include <tf2_msgs/msg/tf_message.hpp>
 #include <tf2_ros/transform_broadcaster.h>
+#include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 
@@ -164,7 +165,8 @@ protected:
    * @param parameter A ParameterInterface pointer to a Parameter instance
    * @return The validation result
    */
-  virtual bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
+  virtual bool
+  on_validate_parameter_callback(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
 
   /**
    * @brief Add a predicate to the map of predicates.
@@ -220,6 +222,38 @@ protected:
   void trigger(const std::string& trigger_name);
 
   /**
+   * @brief Declare an input to create the topic parameter without adding it to the map of inputs yet.
+   * @param signal_name The signal name of the input
+   * @param default_topic If set, the default value for the topic name to use
+   * @param fixed_topic If true, the topic name of the signal is fixed
+   * @throws modulo_components::exceptions::AddSignalException if the input could not be declared
+   * (empty name or already created)
+   */
+  void declare_input(const std::string& signal_name, const std::string& default_topic = "", bool fixed_topic = false);
+
+  /**
+   * @brief Declare an output to create the topic parameter without adding it to the map of outputs yet.
+   * @param signal_name The signal name of the output
+   * @param default_topic If set, the default value for the topic name to use
+   * @param fixed_topic If true, the topic name of the signal is fixed
+   * @throws modulo_components::exceptions::AddSignalException if the output could not be declared
+   * (empty name or already created)
+   */
+  void declare_output(const std::string& signal_name, const std::string& default_topic = "", bool fixed_topic = false);
+
+  /**
+   * @brief Remove an input from the map of inputs.
+   * @param signal_name The name of the input
+   */
+  void remove_input(const std::string& signal_name);
+
+  /**
+   * @brief Remove an output from the map of outputs.
+   * @param signal_name The name of the output
+   */
+  void remove_output(const std::string& signal_name);
+
+  /**
    * @brief Add and configure an input signal of the component.
    * @tparam DataT Type of the data pointer
    * @param signal_name Name of the input signal
@@ -227,12 +261,25 @@ protected:
    * @param default_topic If set, the default value for the topic name to use
    * @param fixed_topic If true, the topic name of the input signal is fixed
    */
-  // TODO could be nice to add an optional callback here that would be executed from within the subscription callback
-  // in order to manipulate the data pointer upon reception of a message
   template<typename DataT>
   void add_input(
       const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::string& default_topic = "",
       bool fixed_topic = false
+  );
+
+  /**
+   * @brief Add and configure an input signal of the component.
+   * @tparam DataT Type of the data pointer
+   * @param signal_name Name of the input signal
+   * @param data Data to receive on the input signal
+   * @param callback Callback function to trigger after receiving the input signal
+   * @param default_topic If set, the default value for the topic name to use
+   * @param fixed_topic If true, the topic name of the input signal is fixed
+   */
+  template<typename DataT>
+  void add_input(
+      const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::function<void()>& callback,
+      const std::string& default_topic = "", bool fixed_topic = false
   );
 
   /**
@@ -283,6 +330,11 @@ protected:
   void add_tf_broadcaster();
 
   /**
+   * @brief Configure a static transform broadcaster.
+   */
+  void add_static_tf_broadcaster();
+
+  /**
    * @brief Configure a transform buffer and listener.
    */
   void add_tf_listener();
@@ -323,9 +375,27 @@ protected:
   void send_transform(const state_representation::CartesianPose& transform);
 
   /**
+   * @brief Send a vector of transforms to TF.
+   * @param transforms The vector of transforms to send
+   */
+  void send_transforms(const std::vector<state_representation::CartesianPose>& transforms);
+
+  /**
+   * @brief Send a static transform to TF.
+   * @param transform The transform to send
+   */
+  void send_static_transform(const state_representation::CartesianPose& transform);
+
+  /**
+   * @brief Send a vector of static transforms to TF.
+   * @param transforms The vector of transforms to send
+   */
+  void send_static_transforms(const std::vector<state_representation::CartesianPose>& transforms);
+
+  /**
    * @brief Look up a transform from TF.
-   * @param frame_name The desired frame of the transform
-   * @param reference_frame_name The desired reference frame of the transform
+   * @param frame The desired frame of the transform
+   * @param reference_frame The desired reference frame of the transform
    * @param time_point The time at which the value of the transform is desired (default: 0, will get the latest)
    * @param duration How long to block the lookup call before failing
    * @throws modulo_components::exceptions::LookupTransformException if TF buffer/listener are unconfigured or
@@ -333,7 +403,7 @@ protected:
    * @return If it exists, the requested transform
    */
   [[nodiscard]] state_representation::CartesianPose lookup_transform(
-      const std::string& frame_name, const std::string& reference_frame_name = "world",
+      const std::string& frame, const std::string& reference_frame = "world",
       const tf2::TimePoint& time_point = tf2::TimePoint(std::chrono::microseconds(0)),
       const tf2::Duration& duration = tf2::Duration(std::chrono::microseconds(10)));
 
@@ -359,6 +429,19 @@ protected:
   void evaluate_periodic_callbacks();
 
   /**
+   * @brief Helper function to send a vector of transforms through a transform broadcaster
+   * @tparam T The type of the broadcaster (tf2_ros::TransformBroadcaster or tf2_ros::StaticTransformBroadcaster)
+   * @param transforms The transforms to send
+   * @param tf_broadcaster A pointer to a configured transform broadcaster object
+   * @param is_static If true, treat the broadcaster as a static frame broadcaster for the sake of log messages
+   */
+  template<typename T>
+  void publish_transforms(
+      const std::vector<state_representation::CartesianPose>& transforms, const std::shared_ptr<T>& tf_broadcaster,
+      bool is_static = false
+  );
+
+  /**
    * @brief Put the component in error state by setting the 'in_error_state' predicate to true.
    */
   virtual void raise_error();
@@ -377,6 +460,15 @@ private:
   rcl_interfaces::msg::SetParametersResult on_set_parameters_callback(const std::vector<rclcpp::Parameter>& parameters);
 
   /**
+   * @brief Parameter validation function
+   * @details This validates the period and calls the on_validate_parameter_callback function of the derived Component
+   * classes.
+   * @param parameter A ParameterInterface pointer to a Parameter instance
+   * @return The validation result
+   */
+  bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>& parameter);
+
+  /**
    * @brief Add a predicate to the map of predicates.
    * @param name The name of the predicate
    * @param predicate The predicate variant
@@ -391,13 +483,30 @@ private:
   void set_variant_predicate(const std::string& name, const utilities::PredicateVariant& predicate);
 
   /**
-   * @brief Validate an add_input request by parsing the signal name and checking the map of registered inputs.
-   * @param signal_name The name of the input signal
-   * @throws modulo_components::exceptions::AddSignalException if the input could not be created
-   * (empty name or already registered)
-   * @return The parsed signal name
+   * @brief Remove a signal from the map of inputs or outputs.
+   * @tparam T The type of the map entry (SubscriptionInterface or PublisherInterface)
+   * @param signal_name The name of the signal to remove
+   * @param signal_map The map of signals (either inputs or outputs)
+   * @param skip_check If true, skip the check if the signal exists in the map and return false otherwise
+   * @return True if the signal was removed, false if it didn't exist
    */
-  std::string validate_input_signal_name(const std::string& signal_name);
+  template<typename T>
+  bool remove_signal(
+      const std::string& signal_name, std::map<std::string, std::shared_ptr<T>>& signal_map, bool skip_check = false
+  );
+
+  /**
+   * @brief Declare a signal to create the topic parameter without adding it to the map of signals.
+   * @param signal_name The name of the signal
+   * @param type The type of the signal (input or output)
+   * @param default_topic If set, the default value for the topic name to use
+   * @param fixed_topic If true, the topic name of the signal is fixed
+   * @throws modulo_components::exceptions::AddSignalException if the signal could not be declared
+   * (empty name or already created)
+   */
+  void declare_signal(
+      const std::string& signal_name, const std::string& type, const std::string& default_topic, bool fixed_topic
+  );
 
   /**
    * @brief Validate an add_service request by parsing the service name and checking the maps of registered services.
@@ -431,7 +540,7 @@ private:
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_; ///< TF buffer
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_; ///< TF listener
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_; ///< TF broadcaster
-  // TODO maybe add a static tf broadcaster
+  std::shared_ptr<tf2_ros::StaticTransformBroadcaster> static_tf_broadcaster_; ///< TF static broadcaster
 
   bool set_parameter_callback_called_ = false; ///< Flag to indicate if on_set_parameter_callback was called
 };
@@ -448,7 +557,7 @@ ComponentInterface<NodeT>::ComponentInterface(
         return this->on_set_parameters_callback(parameters);
       }
   );
-  this->add_parameter("period", 1.0, "The time interval in seconds for all periodic callbacks", true);
+  this->add_parameter("period", 0.1, "The time interval in seconds for all periodic callbacks", true);
 
   this->add_predicate("in_error_state", false);
 
@@ -522,7 +631,7 @@ inline void ComponentInterface<NodeT>::add_parameter(
       throw exceptions::ComponentParameterException("Failed to add parameter: " + std::string(ex.what()));
     }
   } else {
-    RCLCPP_WARN_STREAM(this->get_logger(), "Parameter '" << parameter->get_name() << "' already exists.");
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Parameter '" << parameter->get_name() << "' already exists.");
   }
 }
 
@@ -554,6 +663,20 @@ inline void ComponentInterface<NodeT>::set_parameter_value(const std::string& na
 
 template<class NodeT>
 inline bool ComponentInterface<NodeT>::validate_parameter(
+    const std::shared_ptr<state_representation::ParameterInterface>& parameter
+) {
+  if (parameter->get_name() == "period") {
+    auto value = parameter->get_parameter_value<double>();
+    if (value <= 0.0 || !std::isfinite(value)) {
+      RCLCPP_ERROR(this->get_logger(), "Value for parameter 'period' has to be a positive finite number.");
+      return false;
+    }
+  }
+  return this->on_validate_parameter_callback(parameter);
+}
+
+template<class NodeT>
+inline bool ComponentInterface<NodeT>::on_validate_parameter_callback(
     const std::shared_ptr<state_representation::ParameterInterface>&
 ) {
   return true;
@@ -611,7 +734,7 @@ inline void ComponentInterface<NodeT>::add_variant_predicate(
     return;
   }
   if (this->predicates_.find(name) != this->predicates_.end()) {
-    RCLCPP_WARN_STREAM(this->get_logger(), "Predicate '" << name << "' already exists, overwriting.");
+    RCLCPP_WARN_STREAM(this->get_logger(), "Predicate with name '" << name << "' already exists, overwriting.");
   } else {
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding predicate '" << name << "'.");
     auto publisher = rclcpp::create_publisher<std_msgs::msg::Bool>(
@@ -644,8 +767,8 @@ inline bool ComponentInterface<NodeT>::get_predicate(const std::string& predicat
     value = (callback_function)();
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                 "Failed to evaluate callback of predicate'" << predicate_name << "', returning false:"
-                                                                             << ex.what());
+                                 "Failed to evaluate callback of predicate '" << predicate_name
+                                                                              << "', returning false: " << ex.what());
   }
   return value;
 }
@@ -710,17 +833,83 @@ inline void ComponentInterface<NodeT>::set_predicate(
 }
 
 template<class NodeT>
-inline std::string ComponentInterface<NodeT>::validate_input_signal_name(const std::string& signal_name) {
+template<typename T>
+inline bool ComponentInterface<NodeT>::remove_signal(
+    const std::string& signal_name, std::map<std::string, std::shared_ptr<T>>& signal_map, bool skip_check
+) {
+  if (!skip_check && signal_map.find(signal_name) == signal_map.cend()) {
+    return false;
+  } else {
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Removing signal '" << signal_name << "'.");
+    signal_map.at(signal_name).reset();
+    return signal_map.erase(signal_name);
+  }
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::remove_input(const std::string& signal_name) {
+  if (!this->template remove_signal(signal_name, this->inputs_)) {
+    auto parsed_signal_name = utilities::parse_topic_name(signal_name);
+    if(!this->template remove_signal(parsed_signal_name, this->inputs_)) {
+      RCLCPP_DEBUG_STREAM(this->get_logger(),
+                          "Unknown input '" << signal_name << "' (parsed name was '" << parsed_signal_name << "').");
+    }
+  }
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::remove_output(const std::string& signal_name) {
+  if (!this->template remove_signal(signal_name, this->outputs_)) {
+    auto parsed_signal_name = utilities::parse_topic_name(signal_name);
+    if(!this->template remove_signal(parsed_signal_name, this->outputs_)) {
+      RCLCPP_DEBUG_STREAM(this->get_logger(),
+                          "Unknown output '" << signal_name << "' (parsed name was '" << parsed_signal_name << "').");
+    }
+  }
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::declare_signal(
+    const std::string& signal_name, const std::string& type, const std::string& default_topic, bool fixed_topic
+) {
   std::string parsed_signal_name = utilities::parse_topic_name(signal_name);
   if (parsed_signal_name.empty()) {
     throw exceptions::AddSignalException(
-        "Failed to add input '" + signal_name + "': Parsed signal name is empty."
-    );
+        "The parsed signal name for " + type + " '" + signal_name
+            + "' is empty. Provide a string with valid characters for the signal name ([a-zA-Z0-9_]).");
   }
   if (this->inputs_.find(parsed_signal_name) != this->inputs_.cend()) {
-    throw exceptions::AddSignalException("Failed to add input '" + signal_name + "': Input already exists");
+    throw exceptions::AddSignalException("Signal with name '" + parsed_signal_name + "' already exists as input.");
   }
-  return parsed_signal_name;
+  if (this->outputs_.find(parsed_signal_name) != this->outputs_.cend()) {
+    throw exceptions::AddSignalException("Signal with name '" + parsed_signal_name + "' already exists as output.");
+  }
+  std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
+  auto parameter_name = parsed_signal_name + "_topic";
+  if (NodeT::has_parameter(parameter_name) && this->get_parameter(parameter_name)->is_empty()) {
+    this->set_parameter_value<std::string>(parameter_name, topic_name);
+  } else {
+    this->add_parameter(
+        parameter_name, topic_name, "Signal topic name of " + type + " '" + parsed_signal_name + "'", fixed_topic
+    );
+  }
+  RCLCPP_DEBUG_STREAM(this->get_logger(),
+                      "Declared signal '" << parsed_signal_name << "' and parameter '" << parameter_name
+                                          << "' with value '" << topic_name << "'.");
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::declare_input(
+    const std::string& signal_name, const std::string& default_topic, bool fixed_topic
+) {
+  this->declare_signal(signal_name, "input", default_topic, fixed_topic);
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::declare_output(
+    const std::string& signal_name, const std::string& default_topic, bool fixed_topic
+) {
+  this->declare_signal(signal_name, "output", default_topic, fixed_topic);
 }
 
 template<class NodeT>
@@ -729,35 +918,41 @@ inline void ComponentInterface<NodeT>::add_input(
     const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::string& default_topic,
     bool fixed_topic
 ) {
+  this->add_input(signal_name, data, []{}, default_topic, fixed_topic);
+}
+
+template<class NodeT>
+template<typename DataT>
+inline void ComponentInterface<NodeT>::add_input(
+    const std::string& signal_name, const std::shared_ptr<DataT>& data, const std::function<void()>& user_callback,
+    const std::string& default_topic, bool fixed_topic
+) {
   using namespace modulo_core::communication;
   try {
-    std::string parsed_signal_name = this->validate_input_signal_name(signal_name);
-    std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
-    auto parameter_name = parsed_signal_name + "_topic";
-    if (NodeT::has_parameter(parameter_name) && this->get_parameter(parameter_name)->is_empty()) {
-      this->set_parameter_value<std::string>(parameter_name, topic_name);
-    } else {
-      this->add_parameter(
-          parameter_name, topic_name, "Input topic name of signal '" + parsed_signal_name + "'", fixed_topic
+    std::string parsed_signal_name = utilities::parse_topic_name(signal_name);
+    if (data == nullptr) {
+      throw modulo_core::exceptions::NullPointerException(
+          "Invalid data pointer for input '" + parsed_signal_name + "'."
       );
     }
-    topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
+    this->declare_input(parsed_signal_name, default_topic, fixed_topic);
+    auto topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
     RCLCPP_DEBUG_STREAM(this->get_logger(),
-                        "Adding input '" << signal_name << "' with topic name '" << topic_name << "'.");
+                        "Adding input '" << parsed_signal_name << "' with topic name '" << topic_name << "'.");
     auto message_pair = make_shared_message_pair(data, this->get_clock());
     std::shared_ptr<SubscriptionInterface> subscription_interface;
     switch (message_pair->get_type()) {
       case MessageType::BOOL: {
         auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::Bool>>(message_pair);
         auto subscription = NodeT::template create_subscription<std_msgs::msg::Bool>(
-            topic_name, this->qos_, subscription_handler->get_callback());
+            topic_name, this->qos_, subscription_handler->get_callback(user_callback));
         subscription_interface = subscription_handler->create_subscription_interface(subscription);
         break;
       }
       case MessageType::FLOAT64: {
         auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::Float64>>(message_pair);
         auto subscription = NodeT::template create_subscription<std_msgs::msg::Float64>(
-            topic_name, this->qos_, subscription_handler->get_callback());
+            topic_name, this->qos_, subscription_handler->get_callback(user_callback));
         subscription_interface = subscription_handler->create_subscription_interface(subscription);
         break;
       }
@@ -765,28 +960,28 @@ inline void ComponentInterface<NodeT>::add_input(
         auto subscription_handler =
             std::make_shared<SubscriptionHandler<std_msgs::msg::Float64MultiArray>>(message_pair);
         auto subscription = NodeT::template create_subscription<std_msgs::msg::Float64MultiArray>(
-            topic_name, this->qos_, subscription_handler->get_callback());
+            topic_name, this->qos_, subscription_handler->get_callback(user_callback));
         subscription_interface = subscription_handler->create_subscription_interface(subscription);
         break;
       }
       case MessageType::INT32: {
         auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::Int32>>(message_pair);
         auto subscription = NodeT::template create_subscription<std_msgs::msg::Int32>(
-            topic_name, this->qos_, subscription_handler->get_callback());
+            topic_name, this->qos_, subscription_handler->get_callback(user_callback));
         subscription_interface = subscription_handler->create_subscription_interface(subscription);
         break;
       }
       case MessageType::STRING: {
         auto subscription_handler = std::make_shared<SubscriptionHandler<std_msgs::msg::String>>(message_pair);
         auto subscription = NodeT::template create_subscription<std_msgs::msg::String>(
-            topic_name, this->qos_, subscription_handler->get_callback());
+            topic_name, this->qos_, subscription_handler->get_callback(user_callback));
         subscription_interface = subscription_handler->create_subscription_interface(subscription);
         break;
       }
       case MessageType::ENCODED_STATE: {
         auto subscription_handler = std::make_shared<SubscriptionHandler<modulo_core::EncodedState>>(message_pair);
         auto subscription = NodeT::template create_subscription<modulo_core::EncodedState>(
-            topic_name, this->qos_, subscription_handler->get_callback());
+            topic_name, this->qos_, subscription_handler->get_callback(user_callback));
         subscription_interface = subscription_handler->create_subscription_interface(subscription);
         break;
       }
@@ -805,15 +1000,11 @@ inline void ComponentInterface<NodeT>::add_input(
 ) {
   using namespace modulo_core::communication;
   try {
-    std::string parsed_signal_name = this->validate_input_signal_name(signal_name);
-    std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
-    this->add_parameter(
-        parsed_signal_name + "_topic", topic_name, "Output topic name of signal '" + parsed_signal_name + "'",
-        fixed_topic
-    );
-    topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
+    std::string parsed_signal_name = utilities::parse_topic_name(signal_name);
+    this->declare_input(parsed_signal_name, default_topic, fixed_topic);
+    auto topic_name = this->get_parameter_value<std::string>(parsed_signal_name + "_topic");
     RCLCPP_DEBUG_STREAM(this->get_logger(),
-                        "Adding input '" << signal_name << "' with topic name '" << topic_name << "'.");
+                        "Adding input '" << parsed_signal_name << "' with topic name '" << topic_name << "'.");
     auto subscription = NodeT::template create_subscription<MsgT>(topic_name, this->qos_, callback);
     auto subscription_interface =
         std::make_shared<SubscriptionHandler<MsgT>>()->create_subscription_interface(subscription);
@@ -828,12 +1019,12 @@ inline std::string ComponentInterface<NodeT>::validate_service_name(const std::s
   std::string parsed_service_name = utilities::parse_topic_name(service_name);
   if (parsed_service_name.empty()) {
     throw exceptions::AddServiceException(
-        "Failed to add service '" + service_name + "': Parsed service name is empty."
-    );
+        "The parsed service name for service '" + service_name
+            + "' is empty. Provide a string with valid characters for the signal name ([a-zA-Z0-9_]).");
   }
   if (this->empty_services_.find(parsed_service_name) != this->empty_services_.cend()
       || this->string_services_.find(parsed_service_name) != this->string_services_.cend()) {
-    throw exceptions::AddServiceException("Failed to add service '" + service_name + "': Service already exists");
+    throw exceptions::AddServiceException("Service with name '" + parsed_service_name + "' already exists.");
   }
   return parsed_service_name;
 }
@@ -843,7 +1034,7 @@ inline void ComponentInterface<NodeT>::add_service(
     const std::string& service_name, const std::function<ComponentServiceResponse(void)>& callback
 ) {
   try {
-    std::string parsed_service_name = validate_service_name(service_name);
+    std::string parsed_service_name = this->validate_service_name(service_name);
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding empty service '" << parsed_service_name << "'.");
     auto service = NodeT::template create_service<modulo_component_interfaces::srv::EmptyTrigger>(
         "~/" + parsed_service_name, [callback](
@@ -871,7 +1062,7 @@ inline void ComponentInterface<NodeT>::add_service(
     const std::string& service_name, const std::function<ComponentServiceResponse(const std::string& string)>& callback
 ) {
   try {
-    std::string parsed_service_name = validate_service_name(service_name);
+    std::string parsed_service_name = this->validate_service_name(service_name);
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Adding string service '" << parsed_service_name << "'.");
     auto service = NodeT::template create_service<modulo_component_interfaces::srv::StringTrigger>(
         "~/" + parsed_service_name, [callback](
@@ -921,6 +1112,19 @@ inline void ComponentInterface<NodeT>::add_tf_broadcaster() {
 }
 
 template<class NodeT>
+inline void ComponentInterface<NodeT>::add_static_tf_broadcaster() {
+  if (this->static_tf_broadcaster_ == nullptr) {
+    RCLCPP_DEBUG(this->get_logger(), "Adding static TF broadcaster.");
+    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_NONE);
+    tf2_ros::StaticBroadcasterQoS qos;
+    rclcpp::PublisherOptionsWithAllocator<std::allocator<void>> options;
+    this->static_tf_broadcaster_ = std::make_shared<tf2_ros::StaticTransformBroadcaster>(*this, qos, options);
+  } else {
+    RCLCPP_DEBUG(this->get_logger(), "Static TF broadcaster already exists.");
+  }
+}
+
+template<class NodeT>
 inline void ComponentInterface<NodeT>::add_tf_listener() {
   if (this->tf_buffer_ == nullptr || this->tf_listener_ == nullptr) {
     RCLCPP_DEBUG(this->get_logger(), "Adding TF buffer and listener.");
@@ -934,32 +1138,65 @@ inline void ComponentInterface<NodeT>::add_tf_listener() {
 
 template<class NodeT>
 inline void ComponentInterface<NodeT>::send_transform(const state_representation::CartesianPose& transform) {
-  if (this->tf_broadcaster_ == nullptr) {
-    RCLCPP_ERROR_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                          "Failed to send transform: No TF broadcaster configured.");
+  this->send_transforms(std::vector<state_representation::CartesianPose>{transform});
+}
+
+template<class NodeT>
+inline void
+ComponentInterface<NodeT>::send_transforms(const std::vector<state_representation::CartesianPose>& transforms) {
+  this->template publish_transforms(transforms, this->tf_broadcaster_);
+}
+
+template<class NodeT>
+inline void ComponentInterface<NodeT>::send_static_transform(const state_representation::CartesianPose& transform) {
+  this->send_static_transforms(std::vector<state_representation::CartesianPose>{transform});
+}
+
+template<class NodeT>
+inline void
+ComponentInterface<NodeT>::send_static_transforms(const std::vector<state_representation::CartesianPose>& transforms) {
+  this->template publish_transforms(transforms, this->static_tf_broadcaster_);
+}
+
+template<class NodeT>
+template<typename T>
+inline void ComponentInterface<NodeT>::publish_transforms(
+    const std::vector<state_representation::CartesianPose>& transforms, const std::shared_ptr<T>& tf_broadcaster,
+    bool is_static
+) {
+  std::string modifier = is_static ? "static " : "";
+  if (tf_broadcaster == nullptr) {
+    RCLCPP_ERROR_STREAM_THROTTLE(
+        this->get_logger(), *this->get_clock(), 1000,
+        "Failed to send " << modifier << "transform: No " << modifier << "TF broadcaster configured.");
     return;
   }
   try {
-    geometry_msgs::msg::TransformStamped transform_message;
-    modulo_core::translators::write_message(transform_message, transform, this->get_clock()->now());
-    this->tf_broadcaster_->sendTransform(transform_message);
+    std::vector<geometry_msgs::msg::TransformStamped> transform_messages;
+    transform_messages.reserve(transforms.size());
+    for (const auto& tf: transforms) {
+      geometry_msgs::msg::TransformStamped transform_message;
+      modulo_core::translators::write_message(transform_message, tf, this->get_clock()->now());
+      transform_messages.emplace_back(transform_message);
+    }
+    tf_broadcaster->sendTransform(transform_messages);
   } catch (const std::exception& ex) {
     RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                                 "Failed to send transform: " << ex.what());
+                                 "Failed to send " << modifier << "transform: " << ex.what());
   }
 }
 
 template<class NodeT>
 inline state_representation::CartesianPose ComponentInterface<NodeT>::lookup_transform(
-    const std::string& frame_name, const std::string& reference_frame_name, const tf2::TimePoint& time_point,
+    const std::string& frame, const std::string& reference_frame, const tf2::TimePoint& time_point,
     const tf2::Duration& duration
 ) {
   if (this->tf_buffer_ == nullptr || this->tf_listener_ == nullptr) {
     throw exceptions::LookupTransformException("Failed to lookup transform: To TF buffer / listener configured.");
   }
   try {
-    state_representation::CartesianPose result(frame_name, reference_frame_name);
-    auto transform = this->tf_buffer_->lookupTransform(reference_frame_name, frame_name, time_point, duration);
+    state_representation::CartesianPose result(frame, reference_frame);
+    auto transform = this->tf_buffer_->lookupTransform(reference_frame, frame, time_point, duration);
     modulo_core::translators::read_message(result, transform);
     return result;
   } catch (const tf2::TransformException& ex) {
@@ -1019,31 +1256,20 @@ inline std::string ComponentInterface<NodeT>::create_output(
   using namespace modulo_core::communication;
   try {
     auto parsed_signal_name = utilities::parse_topic_name(signal_name);
-    if (parsed_signal_name.empty()) {
-      throw exceptions::AddSignalException(
-          "The parsed signal name for signal '" + signal_name
-              + "'is empty. Provide a string with valid characters for the signal name ([a-zA-Z0-9_])."
-      );
+    if (data == nullptr) {
+      throw modulo_core::exceptions::NullPointerException(
+          "Invalid data pointer for output '" + parsed_signal_name + "'.");
     }
+    this->declare_output(parsed_signal_name, default_topic, fixed_topic);
     RCLCPP_DEBUG_STREAM(this->get_logger(),
                         "Creating output '" << parsed_signal_name << "' (provided signal name was '" << signal_name
-                                            << "'.");
-    if (this->outputs_.find(parsed_signal_name) != this->outputs_.end()) {
-      throw exceptions::AddSignalException("Output with name '" + signal_name + "' already exists.");
-    }
+                                            << "').");
     auto message_pair = make_shared_message_pair(data, this->get_clock());
     this->outputs_.insert_or_assign(
         parsed_signal_name, std::make_shared<PublisherInterface>(this->publisher_type_, message_pair));
-    std::string topic_name = default_topic.empty() ? "~/" + parsed_signal_name : default_topic;
-    auto parameter_name = parsed_signal_name + "_topic";
-    if (NodeT::has_parameter(parameter_name) && this->get_parameter(parameter_name)->is_empty()) {
-      this->set_parameter_value<std::string>(parameter_name, topic_name);
-    } else {
-      this->add_parameter(
-          parameter_name, topic_name, "Output topic name of signal '" + parsed_signal_name + "'", fixed_topic
-      );
-    }
     return parsed_signal_name;
+  } catch (const exceptions::AddSignalException&) {
+    throw;
   } catch (const std::exception& ex) {
     throw exceptions::AddSignalException(ex.what());
   }

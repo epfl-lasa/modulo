@@ -2,17 +2,18 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>modulo_core</name>
-  <version>2.0.0</version>
+  <version>2.1.0</version>
   <description>Modulo Core communication and translation utilities for interoperability with EPFL Control Libraries</description>
   <maintainer email="baptiste@aica.tech">Baptiste Busch</maintainer>
   <maintainer email="enrico@aica.tech">Enrico Eberhard</maintainer>
   <maintainer email="dominic@aica.tech">Dominic Reber</maintainer>
   <license>TODO: License declaration</license>
 
-  <buildtool_depend>ament_cmake_auto</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 
   <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
   <depend>rclpy</depend>
   <depend>geometry_msgs</depend>
   <depend>sensor_msgs</depend>

@@ -83,6 +83,8 @@ def write_message(message: MsgT, state: StateT):
             message.effort = state.get_torques().tolist()
         else:
             raise MessageTranslationError("The provided combination of state type and message type is not supported")
+    except MessageTranslationError:
+        raise
     except Exception as e:
         raise MessageTranslationError(f"{e}")
 
@@ -112,6 +114,8 @@ def write_stamped_message(message: MsgT, state: StateT, time: rclpy.time.Time):
             raise MessageTranslationError("The provided combination of state type and message type is not supported")
         message.header.stamp = time.to_msg()
         message.header.frame_id = state.get_reference_frame()
+    except MessageTranslationError:
+        raise
     except Exception as e:
         raise MessageTranslationError(f"{e}")
 
@@ -139,5 +143,7 @@ def write_clproto_message(message: EncodedState, state: StateT, clproto_message_
         raise MessageTranslationError("This state type is not supported.")
     try:
         message.data = clproto.encode(state, clproto_message_type)
+    except MessageTranslationError:
+        raise
     except Exception as e:
         raise MessageTranslationError(f"{e}")

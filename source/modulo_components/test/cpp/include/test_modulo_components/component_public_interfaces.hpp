@@ -27,6 +27,9 @@ public:
   using ComponentInterface<NodeT>::add_trigger;
   using ComponentInterface<NodeT>::trigger;
   using ComponentInterface<NodeT>::triggers_;
+  using ComponentInterface<NodeT>::declare_input;
+  using ComponentInterface<NodeT>::declare_output;
+  using ComponentInterface<NodeT>::remove_input;
   using ComponentInterface<NodeT>::add_input;
   using ComponentInterface<NodeT>::add_service;
   using ComponentInterface<NodeT>::inputs_;
@@ -35,14 +38,19 @@ public:
   using ComponentInterface<NodeT>::empty_services_;
   using ComponentInterface<NodeT>::string_services_;
   using ComponentInterface<NodeT>::add_tf_broadcaster;
+  using ComponentInterface<NodeT>::add_static_tf_broadcaster;
   using ComponentInterface<NodeT>::add_tf_listener;
   using ComponentInterface<NodeT>::send_transform;
+  using ComponentInterface<NodeT>::send_transforms;
+  using ComponentInterface<NodeT>::send_static_transform;
+  using ComponentInterface<NodeT>::send_static_transforms;
   using ComponentInterface<NodeT>::lookup_transform;
   using ComponentInterface<NodeT>::raise_error;
   using ComponentInterface<NodeT>::get_qos;
   using ComponentInterface<NodeT>::set_qos;
+  using ComponentInterface<NodeT>::get_clock;
 
-  bool validate_parameter(const std::shared_ptr<state_representation::ParameterInterface>&) override {
+  bool on_validate_parameter_callback(const std::shared_ptr<state_representation::ParameterInterface>&) override {
     validate_parameter_was_called = true;
     return validate_parameter_return_value;
   }
@@ -70,6 +78,7 @@ public:
   ) : Component(node_options, fallback_name) {}
   using Component::add_output;
   using Component::outputs_;
+  using Component::remove_output;
 };
 
 class LifecycleComponentPublicInterface : public LifecycleComponent {
@@ -80,5 +89,6 @@ public:
   using LifecycleComponent::configure_outputs;
   using LifecycleComponent::activate_outputs;
   using LifecycleComponent::outputs_;
+  using LifecycleComponent::remove_output;
 };
 }// namespace modulo_components

@@ -1,6 +1,6 @@
-name: 'Build and Test (galactic)'
+name: 'Build and Test (galactic-devel)'
 description: 'Build the source packages and run all unit tests'
 runs:
   using: 'docker'
-  image: 'ghcr.io/aica-technology/ros2-control-libraries:galactic'
+  image: 'ghcr.io/aica-technology/ros2-control-libraries:galactic-devel'
   entrypoint: '/github/workspace/.github/common/entrypoint.sh'

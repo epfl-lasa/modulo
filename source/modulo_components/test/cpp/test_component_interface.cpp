@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "modulo_core/EncodedState.hpp"
+#include "modulo_core/translators/message_writers.hpp"
 #include "test_modulo_components/component_public_interfaces.hpp"
 
 namespace modulo_components {
@@ -80,23 +81,60 @@ TYPED_TEST(ComponentInterfaceTest, SetPredicateValue) {
   EXPECT_FALSE(this->component_->get_predicate("bar"));
 }
 
-TYPED_TEST(ComponentInterfaceTest, AddInput) {
+TYPED_TEST(ComponentInterfaceTest, DeclareSignal) {
+  this->component_->declare_input("input", "test");
+  EXPECT_EQ(this->component_->template get_parameter_value<std::string>("input_topic"), "test");
+  EXPECT_TRUE(this->component_->inputs_.find("input") == this->component_->inputs_.end());
+  this->component_->declare_output("output", "test_again");
+  EXPECT_EQ(this->component_->template get_parameter_value<std::string>("output_topic"), "test_again");
+  EXPECT_TRUE(this->component_->outputs_.find("output") == this->component_->outputs_.end());
+}
+
+TYPED_TEST(ComponentInterfaceTest, AddRemoveInput) {
   auto data = std::make_shared<bool>(true);
   EXPECT_NO_THROW(this->component_->add_input("_tEsT_#1@3", data));
   EXPECT_FALSE(this->component_->inputs_.find("test_13") == this->component_->inputs_.end());
   EXPECT_EQ(this->component_->template get_parameter_value<std::string>("test_13_topic"), "~/test_13");
 
   EXPECT_NO_THROW(this->component_->template add_input<std_msgs::msg::Bool>(
-      "_tEsT_#1@5", [](const std::shared_ptr<std_msgs::msg::Bool>) {}, "/topic", true
-  ));
+      "_tEsT_#1@5", [](const std::shared_ptr<std_msgs::msg::Bool>) {}, "/topic", true));
   EXPECT_FALSE(this->component_->inputs_.find("test_15") == this->component_->inputs_.end());
   EXPECT_EQ(this->component_->template get_parameter_value<std::string>("test_15_topic"), "/topic");
 
+  // trying to add an input that already exists should fail
   this->component_->template add_input<std_msgs::msg::String>(
-      "test_13", [](const std::shared_ptr<std_msgs::msg::String>) {}
-  );
+      "test_13", [](const std::shared_ptr<std_msgs::msg::String>) {});
   EXPECT_EQ(this->component_->inputs_.at("test_13")->get_message_pair()->get_type(),
             modulo_core::communication::MessageType::BOOL);
+
+  // remove input
+  this->component_->remove_input("test_13");
+  EXPECT_TRUE(this->component_->inputs_.find("test_13") == this->component_->inputs_.end());
+}
+
+TYPED_TEST(ComponentInterfaceTest, AddInputWithUserCallback) {
+  auto state_data = std::make_shared<state_representation::CartesianState>("A");
+  bool callback_triggered = false;
+  auto user_callback = [&callback_triggered] {
+    callback_triggered = true;
+  };
+
+  EXPECT_NO_THROW(this->component_->add_input("state", state_data, user_callback));
+  EXPECT_FALSE(this->component_->inputs_.find("state") == this->component_->inputs_.end());
+  auto callback = this->component_->inputs_.at("state")->template get_handler<modulo_core::EncodedState>()->get_callback();
+  state_representation::CartesianState new_state("B");
+  auto message = std::make_shared<modulo_core::EncodedState>();
+  modulo_core::translators::write_message(*message, new_state, this->component_->get_clock()->now());
+  EXPECT_STREQ(state_data->get_name().c_str(), "A");
+  EXPECT_NO_THROW(callback(message));
+  EXPECT_TRUE(callback_triggered);
+  EXPECT_STREQ(state_data->get_name().c_str(), "B");
+
+  // if the subscription callback fails (for example, the message is invalid), the user callback should be skipped
+  message->data.clear();
+  callback_triggered = false;
+  EXPECT_NO_THROW(callback(message));
+  EXPECT_FALSE(callback_triggered);
 }
 
 TYPED_TEST(ComponentInterfaceTest, AddService) {
@@ -161,15 +199,51 @@ TYPED_TEST(ComponentInterfaceTest, CreateOutput) {
 
 TYPED_TEST(ComponentInterfaceTest, TF) {
   this->component_->add_tf_broadcaster();
+  this->component_->add_static_tf_broadcaster();
   this->component_->add_tf_listener();
   auto send_tf = state_representation::CartesianPose::Random("test", "world");
   EXPECT_NO_THROW(this->component_->send_transform(send_tf));
+  auto send_static_tf = state_representation::CartesianPose::Random("static_test", "world");
+  EXPECT_NO_THROW(this->component_->send_static_transform(send_static_tf));
   EXPECT_THROW(auto throw_tf = this->component_->lookup_transform("dummy", "world"),
                exceptions::LookupTransformException);
-  auto lookup_tf = this->component_->lookup_transform("test", "world");
+  state_representation::CartesianPose lookup_tf;
+  EXPECT_NO_THROW(lookup_tf = this->component_->lookup_transform("test", "world"));
   auto identity = send_tf * lookup_tf.inverse();
   EXPECT_FLOAT_EQ(identity.data().norm(), 1.);
   EXPECT_FLOAT_EQ(abs(identity.get_orientation().w()), 1.);
+
+  EXPECT_NO_THROW(lookup_tf = this->component_->lookup_transform("static_test", "world"));
+  identity = send_static_tf * lookup_tf.inverse();
+  EXPECT_FLOAT_EQ(identity.data().norm(), 1.);
+  EXPECT_FLOAT_EQ(abs(identity.get_orientation().w()), 1.);
+
+  std::vector<state_representation::CartesianPose> send_tfs;
+  send_tfs.reserve(3);
+  for (std::size_t idx = 0; idx < 3; ++idx) {
+    send_tfs.emplace_back(state_representation::CartesianPose::Random("test_" + std::to_string(idx), "world"));
+  }
+  EXPECT_NO_THROW(this->component_->send_transforms(send_tfs));
+  for (const auto& tf: send_tfs) {
+    lookup_tf = this->component_->lookup_transform(tf.get_name(), tf.get_reference_frame());
+    identity = tf * lookup_tf.inverse();
+    EXPECT_FLOAT_EQ(identity.data().norm(), 1.);
+    EXPECT_FLOAT_EQ(abs(identity.get_orientation().w()), 1.);
+  }
+
+  std::vector<state_representation::CartesianPose> send_static_tfs;
+  send_static_tfs.reserve(3);
+  for (std::size_t idx = 0; idx < 3; ++idx) {
+    send_static_tfs.emplace_back(
+        state_representation::CartesianPose::Random("test_static_" + std::to_string(idx), "world"));
+  }
+  EXPECT_NO_THROW(this->component_->send_static_transforms(send_static_tfs));
+  for (const auto& tf: send_static_tfs) {
+    lookup_tf = this->component_->lookup_transform(tf.get_name(), tf.get_reference_frame());
+    identity = tf * lookup_tf.inverse();
+    EXPECT_FLOAT_EQ(identity.data().norm(), 1.);
+    EXPECT_FLOAT_EQ(abs(identity.get_orientation().w()), 1.);
+  }
 }
 
 TYPED_TEST(ComponentInterfaceTest, GetSetQoS) {

@@ -16,13 +16,13 @@ class LifecycleComponent(ComponentInterface):
     as the C++ modulo_components::LifecycleComponent class.
     """
 
-    def __init__(self, node_name: str, *kargs, **kwargs):
+    def __init__(self, node_name: str, *args, **kwargs):
         """
         Constructs all the necessary attributes and declare all the parameters.
 
         :param node_name: The name of the node to be passed to the base Node class
         """
-        super().__init__(node_name, *kargs, **kwargs)
+        super().__init__(node_name, *args, **kwargs)
         self.__state = State.PRIMARY_STATE_UNCONFIGURED
 
         # add the service to mimic the lifecycle paradigm
@@ -246,6 +246,7 @@ class LifecycleComponent(ComponentInterface):
         try:
             parsed_signal_name = self._create_output(signal_name, data, message_type, clproto_message_type,
                                                      default_topic, fixed_topic)
-            self.get_logger().debug(f"Adding output '{parsed_signal_name}.")
+            topic_name = self.get_parameter_value(parsed_signal_name + "_topic")
+            self.get_logger().debug(f"Adding output '{parsed_signal_name}' with topic name '{topic_name}'.")
         except AddSignalError as e:
             self.get_logger().error(f"Failed to add output '{signal_name}': {e}")

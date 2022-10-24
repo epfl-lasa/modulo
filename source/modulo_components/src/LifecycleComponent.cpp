@@ -92,8 +92,7 @@ LifecycleComponent::on_cleanup(const rclcpp_lifecycle::State& previous_state) {
 }
 
 bool LifecycleComponent::handle_cleanup() {
-  bool result = this->on_cleanup_callback();
-  return result && this->cleanup_signals();
+  return this->on_cleanup_callback();
 }
 
 bool LifecycleComponent::on_cleanup_callback() {
@@ -190,7 +189,8 @@ LifecycleComponent::on_shutdown(const rclcpp_lifecycle::State& previous_state) {
 }
 
 bool LifecycleComponent::handle_shutdown() {
-  return this->on_shutdown_callback();
+  bool result = this->on_shutdown_callback();
+  return result && this->clear_signals();
 }
 
 bool LifecycleComponent::on_shutdown_callback() {
@@ -294,7 +294,7 @@ bool LifecycleComponent::configure_outputs() {
   return success;
 }
 
-bool LifecycleComponent::cleanup_signals() {
+bool LifecycleComponent::clear_signals() {
   RCLCPP_DEBUG(this->get_logger(), "Clearing all inputs and outputs.");
   this->inputs_.clear();
   this->outputs_.clear();
