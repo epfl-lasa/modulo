@@ -7,6 +7,10 @@ Release Versions:
 - [1.0.0](#100)
 - [Pre-release versions](#pre-release-versions)
 
+## Upcoming changes (in development)
+
+- Change license to GPLv3 (#143)
+
 ## 2.1.0
 ### October 21, 2022
 
