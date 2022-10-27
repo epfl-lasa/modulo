@@ -1,13 +1,21 @@
 # CHANGELOG
 
 Release Versions:
+- [2.1.1](#211)
 - [2.1.0](#210)
 - [2.0.0](#200)
 - [1.1.0](#110)
 - [1.0.0](#100)
 - [Pre-release versions](#pre-release-versions)
 
-## Upcoming changes (in development)
+## 2.1.1
+### October 28, 2022
+
+Version 2.1.1 is a patch release to update the license of the Modulo project from MIT to GPLv3. A core dependency
+of modulo is [control libraries](https://github.com/epfl-lasa/control-libraries), making it a combined work.
+To be compliant with the GLPv3 license of control libraries, modulo must also be licensed under GPLv3.
+
+### Changes
 
 - Change license to GPLv3 (#143)
 
