@@ -11,8 +11,7 @@ Release Versions:
 ## Upcoming changes (in development)
 
 - Fix test actions and workflows (#147)
-- Use rclpy lifecycle node for lifecycle component (#134)
-- Fix log level on configure_outputs (#140)
+- Use rclpy lifecycle node as base class for lifecycle components (#134, #140, #146)
 
 ## 2.1.1
 ### October 28, 2022
