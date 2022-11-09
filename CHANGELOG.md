@@ -11,6 +11,8 @@ Release Versions:
 ## Upcoming changes (in development)
 
 - Fix test actions and workflows (#147)
+- Use rclpy lifecycle node for lifecycle component (#134)
+- Fix log level on configure_outputs (#140)
 
 ## 2.1.1
 ### October 28, 2022
@@ -51,8 +53,6 @@ There have also been some changes to support both galactic and humble releases o
 - Add option to declare signals (#136)
 - Correct default value for user callback on add_input (#138)
 - Add option to remove signals (#139)
-- Use rclpy lifecycle node for lifecycle component (#134)
-- Fix log level on configure_outputs (#140)
 
 ## 2.0.0
 ### August 05, 2022
