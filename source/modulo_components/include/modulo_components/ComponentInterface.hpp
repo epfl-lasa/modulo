@@ -787,7 +787,7 @@ inline void ComponentInterface<NodeT>::add_trigger(const std::string& trigger_na
   }
   this->triggers_.insert_or_assign(trigger_name, false);
   this->add_predicate(
-      trigger_name, [this, &trigger_name] {
+      trigger_name, [this, trigger_name] {
         auto value = this->triggers_.at(trigger_name);
         this->triggers_.at(trigger_name) = false;
         return value;
