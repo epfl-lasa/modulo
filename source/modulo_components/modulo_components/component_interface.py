@@ -28,6 +28,9 @@ from tf2_ros import Buffer, StaticTransformBroadcaster, TransformBroadcaster, Tr
 
 MsgT = TypeVar('MsgT')
 T = TypeVar('T')
+NODE_KWARGS = ["context", "cli_args", "namespace", "use_global_arguments", "enable_rosout",
+               "start_parameter_services", "parameter_overrides", "allow_undeclared_parameters",
+               "automatically_declare_parameters_from_overrides"]
 
 
 class ComponentInterface(Node):
@@ -37,7 +40,8 @@ class ComponentInterface(Node):
     """
 
     def __init__(self, node_name: str, *args, **kwargs):
-        super().__init__(node_name, *args, **kwargs)
+        node_kwargs = {key: value for key, value in kwargs.items() if key in NODE_KWARGS}
+        super().__init__(node_name, *args, **node_kwargs)
         self._parameter_dict: Dict[str, Union[str, sr.Parameter]] = {}
         self._predicates: Dict[str, Union[bool, Callable[[], bool]]] = {}
         self._predicate_publishers: Dict[str, Publisher] = {}
