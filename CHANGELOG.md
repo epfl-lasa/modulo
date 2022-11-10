@@ -10,7 +10,7 @@ Release Versions:
 
 ## Upcoming changes (in development)
 
-- Fix test actions and workflows (#147)
+- Fix test actions and workflows (#147, #148)
 - Use rclpy lifecycle node as base class for lifecycle components (#134, #140, #146)
 
 ## 2.1.1
