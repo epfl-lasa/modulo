@@ -49,19 +49,6 @@ jobs:
           paths_ignore: '["**.md"]'
           skip_after_successful_duplicate: 'true'
 
-  build-test-galactic:
-    needs: check-skippable-changes
-    if: ${{ needs.check-skippable-changes.outputs.skip != 'true' }}
-    runs-on: ubuntu-latest
-    name: Galactic build and test
-    steps:
-      # First check out the repository
-      - name: Checkout
-        uses: actions/checkout@v3
-      # Load the repository build-test action
-      - name: Build and Test
-        uses: ./.github/actions/build-test-galactic
-
   build-test-humble:
     needs: check-skippable-changes
     if: ${{ needs.check-skippable-changes.outputs.skip != 'true' }}
