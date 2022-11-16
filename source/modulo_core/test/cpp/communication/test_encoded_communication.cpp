@@ -87,12 +87,7 @@ protected:
   template<typename PubT, typename RecvT>
   void communicate_cartesian_state(CartesianStateVariable distance_variable) {
     // test with empty state
-    this->communicate<PubT, RecvT>(
-        PubT("this", "world"), RecvT::Identity("that", "base"), true,
-        [distance_variable](const std::shared_ptr<PubT>& pub_state, const std::shared_ptr<RecvT>& recv_state) {
-          test_cartesian_dist(pub_state, recv_state, distance_variable);
-        }
-    );
+    this->communicate<PubT, RecvT>(PubT("this", "world"), RecvT::Identity("that", "base"), false);
     // test with randomly filled state
     this->communicate<PubT, RecvT>(
         PubT::Random("this", "world"), RecvT::Identity("that", "base"), true,
@@ -105,12 +100,7 @@ protected:
   template<typename PubT, typename RecvT>
   void communicate_joint_state(JointStateVariable distance_variable) {
     // test with empty state
-    this->communicate<PubT, RecvT>(
-        PubT("this", 2), RecvT::Zero("that", 3), true,
-        [distance_variable](const std::shared_ptr<PubT>& pub_state, const std::shared_ptr<RecvT>& recv_state) {
-          test_joint_dist(pub_state, recv_state, distance_variable);
-        }
-    );
+    this->communicate<PubT, RecvT>(PubT("this", 2), RecvT::Zero("that", 3), false);
     // test with randomly filled state
     this->communicate<PubT, RecvT>(
         PubT::Random("this", 2), RecvT::Zero("that", 3), true,
@@ -127,11 +117,15 @@ protected:
 };
 
 TEST_F(EncodedCommunicationTest, SameType) {
-  this->communicate<State, State>(
-      State(StateType::STATE, "this"), State(StateType::STATE, "that"));
+  this->communicate<State, State>(State(StateType::STATE, "this"), State(StateType::STATE, "that"), false);
+  this->communicate<State, State>(State(StateType::STATE, "this", false), State(StateType::STATE, "that"));
   this->communicate<SpatialState, SpatialState>(
-      SpatialState(StateType::SPATIAL_STATE, "this", "world"), SpatialState(StateType::SPATIAL_STATE, "that", "base"),
-      true, [](const std::shared_ptr<SpatialState>& pub_state, const std::shared_ptr<SpatialState>& recv_state) {
+      SpatialState(StateType::SPATIAL_STATE, "this"), SpatialState(StateType::SPATIAL_STATE, "that"), false
+  );
+  this->communicate<SpatialState, SpatialState>(
+      SpatialState(StateType::SPATIAL_STATE, "this", "world", false),
+      SpatialState(StateType::SPATIAL_STATE, "that", "base"), true,
+      [](const std::shared_ptr<SpatialState>& pub_state, const std::shared_ptr<SpatialState>& recv_state) {
         EXPECT_EQ(pub_state->get_reference_frame(), recv_state->get_reference_frame());
       }
   );
@@ -158,16 +152,16 @@ TEST_F(EncodedCommunicationTest, SameType) {
 TEST_F(EncodedCommunicationTest, CompatibleType) {
   // State is compatible with everything
   this->communicate<SpatialState, State>(
-      SpatialState(StateType::SPATIAL_STATE, "this"), State(StateType::STATE, "that"));
-  this->communicate<CartesianState, State>(CartesianState("this"), State(StateType::STATE, "that"));
+      SpatialState(StateType::SPATIAL_STATE, "this", "world", false), State(StateType::STATE, "that"));
+  this->communicate<CartesianState, State>(CartesianState::Random("this"), State(StateType::STATE, "that"));
   this->communicate<CartesianPose, State>(CartesianPose::Random("this"), State(StateType::STATE, "that"));
-  this->communicate<JointState, State>(JointState("this", 3), State(StateType::STATE, "that"));
+  this->communicate<JointState, State>(JointState::Random("this", 3), State(StateType::STATE, "that"));
   this->communicate<JointPositions, State>(JointPositions::Random("this", 3), State(StateType::STATE, "that"));
-  this->communicate<Jacobian, State>(Jacobian("this", 3, "ee"), State(StateType::STATE, "that"));
+  this->communicate<Jacobian, State>(Jacobian::Random("this", 3, "ee"), State(StateType::STATE, "that"));
 
   // SpatialState is compatible with Cartesian types
   this->communicate<CartesianState, SpatialState>(
-      CartesianState("this"), SpatialState(StateType::SPATIAL_STATE, "that"));
+      CartesianState::Random("this"), SpatialState(StateType::SPATIAL_STATE, "that"));
   this->communicate<CartesianPose, SpatialState>(
       CartesianPose::Random("this"), SpatialState(StateType::SPATIAL_STATE, "that"));
 
