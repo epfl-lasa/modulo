@@ -298,11 +298,11 @@ class LifecycleComponent(ComponentInterface, LifecycleNodeMixin):
         calls the on_step function.
         """
         try:
-            self._publish_predicates()
             if self.get_state().state_id == State.PRIMARY_STATE_ACTIVE:
-                self._publish_outputs()
                 self._evaluate_periodic_callbacks()
                 self.on_step_callback()
+                self._publish_outputs()
+            self._publish_predicates()
         except Exception as e:
             self.get_logger().error(f"Failed to execute step function: {e}", throttle_duration_sec=1.0)
             # TODO handle error in lifecycle component
