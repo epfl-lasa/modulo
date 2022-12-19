@@ -43,6 +43,6 @@ done
 docker pull ghcr.io/aica-technology/ros2-control-libraries:"${BASE_TAG}"
 DOCKER_BUILDKIT=1 docker build -t "${IMAGE_NAME}:${IMAGE_TAG}" "${BUILD_FLAGS[@]}" . || exit 1
 
-if [ "${SERVE_REMOTE}" == true ]; then
+if [[ "${SERVE_REMOTE}" == true ]]; then
   aica-docker server "${IMAGE_NAME}:${IMAGE_TAG}" -u ros2 -p "${REMOTE_SSH_PORT}"
 fi
