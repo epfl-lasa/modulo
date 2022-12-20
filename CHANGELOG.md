@@ -14,6 +14,7 @@ Release Versions:
 - Use rclpy lifecycle node as base class for lifecycle components (#134, #140, #146)
 - Fix creation of triggers and improve tests (#149)
 - Do not publish empty states (#129)
+- Change order of execution in step callback (#150)
 
 ## 2.1.1
 ### October 28, 2022
